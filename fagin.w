@@ -1,4 +1,22 @@
-@**Introduction.
+\documentclass{cweb}
+\usepackage{rcs}
+\usepackage{enumerate}
+
+\def\fagin{{\tt Fagin\/}}
+
+\begin{document}
+
+
+\title{Fagin}
+\author{Zebulun Arendsee}
+\RCSdate $Date: 1995/08/29 17:27:57 $
+
+\maketitle
+
+% not very interesting, only one starred section
+% \tableofcontents
+
+@* Introduction to \fagin{}.
 
 Fagin is a tool designed to integrate sequence match, syntenic, and
 transcriptomic data to trace the history of genes having obscure or unknown
@@ -17,7 +35,6 @@ broadly applicable program.
 
 #include <stdio.h>
 #include <stdlib.h>
-
 
 @*Input.
 
@@ -68,21 +85,23 @@ direction/sense of the match (strand).
 
 They should have the following columns in exactly the following order:
 
-1. query id [string]
+\begin{enumerate}
+    \item  query id [string]
 
-2. query start [int]
+    \item  query start [int]
 
-3. query stop [int]
+    \item  query stop [int]
 
-4. tardet id [string]
+    \item  tardet id [string]
 
-5. target stop [int]
+    \item  target stop [int]
 
-6. target start [int]
+    \item  target start [int]
 
-7. percent identity [float]
+    \item  percent identity [float]
 
-8. strand [char], this can be '+', '-', or '.' (if unknown/irrelevant)
+    \item  strand [char], this can be '+', '-', or '.' (if unknown/irrelevant)
+\end{enumerate}
 
 @c
 
@@ -128,6 +147,8 @@ int count_lines(FILE *fp){
 
 @*Main Function.
 
+And the big boy.
+
 @c
 
 int main(int argc, char* argv[])
@@ -171,4 +192,17 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-@*Index.
+@
+
+\bibliographystyle{plain}
+\bibliography{fagin}
+
+@
+
+\cwebIndexIntro{%
+    Here is a list of the identifiers used, and where they appear.
+Underlined entries indicate the place of definition. Error messages
+are also shown.
+    }
+
+\end{document}
