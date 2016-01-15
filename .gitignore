@@ -1,0 +1,9 @@
+*.c
+*.tex
+*.dvi
+*.out
+*.log
+*.scn
+*.toc
+*.idx
+*.aux
