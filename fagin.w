@@ -1,22 +1,13 @@
 \documentclass{cweb}
-\usepackage{rcs}
 \usepackage{enumerate}
-
 \def\fagin{{\tt Fagin\/}}
 
 \begin{document}
-
-
 \title{Fagin}
 \author{Zebulun Arendsee}
-\RCSdate $Date: 1995/08/29 17:27:57 $
-
 \maketitle
 
-% not very interesting, only one starred section
-% \tableofcontents
-
-@* Introduction to \fagin{}.
+@*Introduction to \fagin{}. 
 
 Fagin is a tool designed to integrate sequence match, syntenic, and
 transcriptomic data to trace the history of genes having obscure or unknown
@@ -29,21 +20,23 @@ are not annotated as genes in other species. Some papers perform this task with
 a pipeline of tools mixed with manual review. My goal is to build a formal,
 broadly applicable program.
 
-@*Preamble.
+
+@*Preamble. 
 
 @c
 
 #include <stdio.h>
 #include <stdlib.h>
 
-@*Input.
 
-@*2 GFF Input.
+@*Input. 
+@*2 GFF Input. 
 
 A General Feature Format (GFF) file contains the locations of features relative
 to a string, usually a biological sequence.
 
-@c
+
+@c 
 
 #define SEQID_BUFFER_LENGTH 32
 #define ID_BUFFER_LENGTH 32
@@ -67,17 +60,18 @@ void load_gff(FILE *fp, GFFEntry * gff){
 
     int i = 0;
 
-    while ((read = getline(&line, &len, fp)) != -1) {
+    while ((read = getline(&line, &len, fp)) != EOF) {
         if(line[0] == '#')
             continue;
-        sscanf(line,
-               "%s %*s %s %d %d %*c %c %*c %s",
-               &gff[i].seqid, &gff[i].type, &gff[i].start, &gff[i].stop, &gff[i].strand, &gff[i].id);
+        printf(" - %d %d\n", i, sizeof(gff[i]));
+//        sscanf(line,
+//               "%s %*s %s %d %d %*c %c %*c %s",
+//               &gff[i].seqid, &gff[i].type, &gff[i].start, &gff[i].stop, &gff[i].strand, &gff[i].id);
         i++;
     }
 }
 
-@*2Synteny Input.
+@*2Synteny Input. 
 
 Synteny files match intervals in one string to intervals in another string.
 They also contain a score for the match (percent identity) and specifiy the
@@ -103,7 +97,8 @@ They should have the following columns in exactly the following order:
     \item  strand [char], this can be '+', '-', or '.' (if unknown/irrelevant)
 \end{enumerate}
 
-@c
+
+@c 
 
 typedef struct SynEntry
 {
@@ -117,15 +112,17 @@ typedef struct SynEntry
     char strand;
 } SynEntry;
 
-@*Utilities.
+
+@*Utilities. 
 
 These are a set of functions that do obvious things.
 
-@*2count\_lines.
+@*2count\_lines. 
 
 Count the lines in a file given a file handle.
 
-@c
+
+@c 
 int count_lines(FILE *fp){
     char * line = NULL;
     size_t len = 0;
@@ -145,9 +142,11 @@ int count_lines(FILE *fp){
     return nlines;
 }
 
+
 @*Main Function.
 
-And the big boy.
+Currently this is a test of input. I just load a GFF file and print it.
+
 
 @c
 
@@ -171,22 +170,24 @@ int main(int argc, char* argv[])
     synf = fopen(argv[1], "rb");
     qgfff = fopen(argv[2], "rb");
 
-    nsyn = count_lines(synf);
-    /* struct SynEntry syn[nsyn]; */
+//    nsyn = count_lines(synf);
+//    struct SynEntry syn[nsyn];
 
     ngff = count_lines(qgfff);
-    GFFEntry * gff = (GFFEntry *)malloc(ngff * sizeof(GFFEntry));
+    printf("%d\t%d\n", ngff, sizeof(GFFEntry*));
+
+    GFFEntry * gff = (GFFEntry *)malloc(ngff * sizeof(GFFEntry*));
 
     load_gff(qgfff, gff); 
-
-    for(i = 0; i < 10; i++){
-        printf("%s\t%s\t%d\t%d\t%c\t%s\n",
-               &gff[i].seqid, &gff[i].type, gff[i].start, gff[i].stop, gff[i].strand, &gff[i].id);
-    }
-
-    fclose(synf);
-    fclose(qgfff);
-
+//
+//    for(i = 0; i < 10; i++){
+//        printf("%s\t%s\t%d\t%d\t%c\t%s\n",
+//               &gff[i].seqid, &gff[i].type, gff[i].start, gff[i].stop, gff[i].strand, &gff[i].id);
+//    }
+//
+//    fclose(synf);
+//    fclose(qgfff);
+//
     free(gff);
 
     return 0;
@@ -200,9 +201,7 @@ int main(int argc, char* argv[])
 @
 
 \cwebIndexIntro{%
-    Here is a list of the identifiers used, and where they appear.
-Underlined entries indicate the place of definition. Error messages
-are also shown.
-    }
+Below is an index of identifiers. Location of declaration is underlined.
+}
 
 \end{document}
