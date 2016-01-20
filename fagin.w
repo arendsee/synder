@@ -39,9 +39,10 @@ Here is a stub main function
 % =============================================================================
 @*1Main function.
 
+Currently this system merely loads a tree and prints it.
+
 @<The main program@>=
 
-// Load a tree and print it
 int main(int argc, char* argv[]){
 
     if(argc < 2){
@@ -49,8 +50,13 @@ int main(int argc, char* argv[]){
         exit(EXIT_FAILURE);
     }
 
-    Node * root = readNodeFile(argv[1], NLEVELS);
+    // get doubly-linked list of nodes
+    Node * root = loadNodeList(argv[1]);
 
+    // raise this list into a tree
+    buildTree(root, NLEVELS);
+
+    // wire siblings
     wireGenomeTree(root);
 
     recursivePrintNode(root);
@@ -105,7 +111,6 @@ typedef struct Node {
 @<Data structure functions@>=
   @<Node print functions@>@/
   @<Node memory functions@>@/
-  @<Node internal doubly-linked listing@>@/
   @<Node build from file@>@/
 @
 
@@ -171,19 +176,31 @@ void freeList(Node * node){
 % -----------------------------------------------------------------------------
 @*1 Build a Genomic Christmas tree.
 
-This is a 3-pass algorithm, a little ugly, but it works.
-Pseudocode
- 1. create a doubly linked list of all Nodes, return final node
- 2. iterate backwards, counting the children of each node, return first node
- 3. iterate forwards, filling child arrays and trimming unnecessary links
-NOTE: it is necessary to free this memory
+This function builds a tree from a doubly-linked list of Node structures. The
+nodes are assumed to be in a depth-first recursive order.
+     
+The output data structure is a tree augmented with doubly-linked lists joining
+certain branches. It can be searched recursively from root (genome) to leaf
+(exon). Two levels, chromosome and gene, can also be iterated through with LAST
+and NEXT links. This allows direct access to siblings.  It also permits arrays
+of pointers to nodes to be easily copied for analysis, sorting, and whatnot
+outside the main data structure. Genes do not link across chromosomes, which
+prevents false inferences of adjacency.
+
+Building the tree requires three passes.
 
 @<Node build from file@>=
-Node * readNodeFile(char * filename, size_t nlevels){
+Node * buildTree(Node * root, size_t nlevels){
+    @<buildTree: local variables@>@/
+    @<buildTree: count children@>@/
+    @<buildTree: assign children to parent arrays@>@/
+    return(root);
+}
+@<Node internal doubly-linked listing@>@/
+@
 
-    Node * root = loadNodeList(filename);
+@<buildTree: local variables@>=
     Node * node = root->next;
-    size_t pid;
 
     size_t counts[nlevels];
     Node * parents[nlevels];
@@ -192,19 +209,33 @@ Node * readNodeFile(char * filename, size_t nlevels){
         parents[i] = NULL;
     }
     parents[0] = root;
+@
 
-    // 2. Iterate over list counting children
+@*2 First pass: count the children.
+
+The first pass over the list simply counts the number of children descending
+from each node.
+
+@<buildTree: count children@>=
     while(node != NULL){
         parents[node->type - 1]->size++;
         parents[node->type] = node;
         node = node->next; 
     }
+@
 
-    // 3. Makes houses for children and assign them places
+@*2 Second pass: allocate arrays and assign children.
+
+The second pass allocates a pointer array of the size calculated in the first
+pass to each node. It fills each array with pointers to each of the nodes
+children.
+
+@<buildTree: assign children to parent arrays@>=
     node = root;
+    size_t pid;
     while(node != NULL){
 
-        // This is the level of the parent (e.g. 0 is GENOME and 4 is EXON)
+        // Parent's level (e.g. 0 is GENOME and 4 is EXON)
         pid = node->type - 1;
 
         // make container for children
@@ -228,14 +259,12 @@ Node * readNodeFile(char * filename, size_t nlevels){
         // progress to next node (remember this is still a flat, doubly-linked list)
         node = node->next;
     }
-
-    return(root);
-}
 @
 
+@*2 Third pass: building stratified linked-lists within the tree.
 
-% -----------------------------------------------------------------------------
-@*2 Building stratified linked-lists within the tree.
+This final pass is optional. The method chosen will vary depending on the
+category of tree.
 
 Determine the last/next relationships for a tree of genome data
 
@@ -325,7 +354,7 @@ Node * loadNodeList(char * filename){
     // Define root node
     Node * root = newNode();
     strcpy(root->name, "root");
-    root->type = GENOME;
+    root->type = 0;
 
 
     // 1. create a flat, doubly-linked list of Node objects
@@ -376,7 +405,7 @@ void recursivePrintNode(Node * node);
 Node * newNode();
 void freeNode(Node * node);
 void freeList(Node * node);
-Node * readNodeFile(char * filename, size_t nlevels);
+Node * buildTree(Node * root, size_t nlevels);
 void wireGenomeTree(Node * node);
 Node * loadNodeList(char * filename);
 @
