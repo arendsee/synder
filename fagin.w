@@ -10,7 +10,7 @@
 
 @*Introduction to \fagin{}. 
 
-Fagin is a tool designed to integrate sequence match, syntenic, and
+\fagin{} is a tool designed to integrate sequence match, syntenic, and
 transcriptomic data to trace the history of genes having obscure or unknown
 lineage (ghouls).
 
@@ -20,6 +20,67 @@ genes; true de novo genes; small genes genes BLAST simply misses; genes that
 are not annotated as genes in other species. Some papers perform this task with
 a pipeline of tools mixed with manual review. My goal is to build a formal,
 broadly applicable program.
+
+Traditionally, in papers such as xxx de novo orphans have been identified by
+passing all genes through a series of filters. Usually something like this:
+
+\begin{enumerate}
+
+    \item All proteins are blasted against some protein database, those with no
+    extraspecies homologs are classified as "orphans".
+
+    \item The DNA coding sequence of each orphan is blasted against the full
+    genomes of several relatives of the focal species. Orphans with hits to
+    things that could be valid ORFs are discarded.
+
+    \item Other filters (skim lit for this) ...
+
+\end{enumerate}
+
+However there are several limitations of this approach.
+
+\begin{itemize}
+
+    \item The process is not encapsulated in a broadly applicable pipeline, so
+    it taxes researcher time.
+
+    \item It is reliant of DNA sequence similarity of (usually) very short
+    genes. Homologs may not be identified even if they do exist.
+
+    \item It identifies a small, conservative set of de novo orphans and
+    discards the rest as unknown.
+
+\end{itemize}
+
+\fagin{} is designed to sort all ghouls into distinct classes. Homologous
+genomic intervals can be identified in relatives by rooting the ghoul region to
+its context using genome wide synteny predictions (from Satsuma for example).
+
+<insert inkscape diagram showing mappings>
+
+Genes are classified into origin stories based on the following features:
+\begin{description}
+    \item[overlaps syntenic block] The gene is anchored to an exact position.
+    \item[context is defined] 
+    \item[context is missing] The gene matches a section of the genome that may not have been sequenced.
+    \item[syntenic match to a gene]
+    \item[syntenic match to a stranscript CDS]
+    \item[syntenic match to a genomic ORF]
+\end{description}
+
+<insert more inkscape diagrams>
+
+Here are a few possible origin stories:
+\begin{description}
+    \item[de novo orphan] The gene maps to a non-coding region
+    \item[fast evolver] The gene maps to a possible gene, but one that evolves so quickly similarity is lost.
+    \item[uncertain] The synteny is convoluted, classification failed
+    \item[missing data] Context includes unknown, can't infer
+    \item[false orphan] Annotationn missing in cousin
+\end{description}
+
+I will not always be able to infer class with certainty. Will need to develop a
+statistical model to estiate uncertainty in classification.
 
 @*1Program overview. 
 
@@ -298,7 +359,7 @@ void wireGenomeTree(Node * node){
 A General Feature Format (GFF) file contains the locations of features relative
 to a string, usually a biological sequence.
 
-Fagin does not directly read GFF files, however. It requires a very specific
+\fagin{} does not directly read GFF files, however. It requires a very specific
 input that exactly follows a specific order. It must have at least three space
 separated arguments: 
 
@@ -319,7 +380,7 @@ gene    2        g2  5928    8737
 
   \item TYPE This is actually ignored, but must be present.
 
-  \item LEVEL Fagin uses this number to determine hierarchy level. 0 is root,
+  \item LEVEL \fagin{} uses this number to determine hierarchy level. 0 is root,
   but mmust not be included.
 
   \item NAME A label with no spaces, it must be less than NAME\_LENGTH
@@ -335,7 +396,7 @@ The file may contain additional columns of data, but at present these will
 be ignored.
 
 The order is REQUIRED to be depth-first recursion order based on the TYPE
-filed. Currently Fagin performs NO checking on correctness of order. It
+filed. Currently \fagin{} performs NO checking on correctness of order. It
 is assumed that the input was created by an (as of yet unwritten) utility
 that parsed it from a GFF file and carefully validated it.
 
