@@ -56,7 +56,7 @@ However there are several limitations of this approach.
 genomic intervals can be identified in relatives by rooting the ghoul region to
 its context using genome wide synteny predictions (from Satsuma for example).
 
-<insert inkscape diagram showing mappings>
+insert inkscape diagram showing mappings
 
 Genes are classified into origin stories based on the following features:
 \begin{description}
@@ -68,7 +68,7 @@ Genes are classified into origin stories based on the following features:
     \item[syntenic match to a genomic ORF]
 \end{description}
 
-<insert more inkscape diagrams>
+insert more inkscape diagrams
 
 Here are a few possible origin stories:
 \begin{description}
@@ -140,7 +140,6 @@ output to |stdout| and |stderr|.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 @
 
 @<Global declarations@>=
@@ -162,6 +161,30 @@ typedef struct Node {
     struct Node * next;
     struct Node * last;
 } Node;
+
+typedef struct Block {
+    signed int beg;
+    signed int end;
+    char ** seqname;
+    struct Block * next;
+    struct Block * prev;
+    struct Block * over;
+} Block;
+
+typedef struct BlockSet {
+    char name[NAME_LENGTH];
+    size_t size;
+    struct Block ** blocks;
+    struct BlockSet * next;
+    struct BlockSet * last;
+} Node;
+
+typedef struct SyntenyPair {
+    size_t sizeA;
+    BlockSet ** a;
+    size_t sizeB;
+    BlockSet ** b;
+} SyntenyPair;
 @
 
 
@@ -354,6 +377,13 @@ void wireGenomeTree(Node * node){
 
 @*1 Program input functions.
 
+Fagin takes several types of input:
+
+@<Program input functions@>=
+@<Genome structure input@>
+@<Synteny block input@>
+@
+
 @*2 Loading genome features.
 
 A General Feature Format (GFF) file contains the locations of features relative
@@ -400,7 +430,7 @@ filed. Currently \fagin{} performs NO checking on correctness of order. It
 is assumed that the input was created by an (as of yet unwritten) utility
 that parsed it from a GFF file and carefully validated it.
 
-@<Program input functions@>=
+@<Genome structure input@>
 Node * loadNodeList(char * filename){
     FILE * fp = fopen(filename, "rb");
     char * line = NULL;
@@ -452,6 +482,73 @@ They should have the following columns in exactly the following order:
     \item  strand [char], this can be '+', '-', or '.' (if unknown/irrelevant)
 \end{enumerate}
 
+@<Synteny block input@>
+/*
+typedef struct Block {
+    signed int beg;
+    signed int end;
+    char ** seqname;
+    struct Block * next;
+    struct Block * prev;
+    struct Block * over;
+} Block;
+
+typedef struct BlockSet {
+    char name[NAME_LENGTH];
+    size_t size;
+    struct Block ** blocks;
+    struct BlockSet * next;
+    struct BlockSet * last;
+} Node;
+
+typedef struct SyntenyPair {
+    size_t sizeA;
+    BlockSet ** a;
+    size_t sizeB;
+    BlockSet ** b;
+} SyntenyPair;
+*/
+
+Block * newBlock(){
+    Block * blk = (Block *) malloc(sizeof(Block));
+    blk->beg = 0;
+    blk->end = 0;
+    blk->seqname = NULL;
+    blk->next = NULL;
+    blk->last = NULL;
+    return(blk);
+}
+
+SyntenyPair * loadSynList(char * filename){
+    FILE * fp = fopen(filename, "rb");
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    if(fp == NULL){
+        printf("Cannot open synteny file\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    Block * a = newBlock();
+    Block * b = newBlock();
+    int nblocks = 0;
+
+    while ((read = getline(&line, &len, fp)) != EOF) {
+        nblocks++;
+        sscanf(line, "%*s %d %d %*s %d %d", &a->beg, &a->end, &b->beg, &b->end);
+        a->next = newBlock();
+        b->next = newBlock();
+        a->next->prev = a;
+        b->next->prev = b;
+        a->over = b;
+        b->over = a;
+        a = a->next;
+        b = b->next;
+    }
+    return(root);
+}
+@
 
 
 \cwebIndexIntro{%
