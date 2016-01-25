@@ -106,11 +106,12 @@ Currently this system merely loads a tree and prints it.
 
 int main(int argc, char* argv[]){
 
-    if(argc < 2){
-        printf("USAGE: ./a.out <filename>\n");
+    if(argc < 3){
+        printf("USAGE: ./a.out <filename gen> <filename syn>\n");
         exit(EXIT_FAILURE);
     }
 
+/*
     // get doubly-linked list of nodes
     Node * root = loadNodeList(argv[1]);
 
@@ -123,6 +124,9 @@ int main(int argc, char* argv[]){
     recursivePrintNode(root);
 
     freeNode(root);
+*/
+
+    SyntenyPair * syn = loadSynList(argv[2]);
 
     exit(EXIT_SUCCESS);
 }
@@ -140,6 +144,7 @@ output to |stdout| and |stderr|.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <search.h>
 @
 
 @<Global declarations@>=
@@ -177,7 +182,7 @@ typedef struct BlockSet {
     struct Block ** blocks;
     struct BlockSet * next;
     struct BlockSet * last;
-} Node;
+} BlockSet;
 
 typedef struct SyntenyPair {
     size_t sizeA;
@@ -430,7 +435,7 @@ filed. Currently \fagin{} performs NO checking on correctness of order. It
 is assumed that the input was created by an (as of yet unwritten) utility
 that parsed it from a GFF file and carefully validated it.
 
-@<Genome structure input@>
+@<Genome structure input@>=
 Node * loadNodeList(char * filename){
     FILE * fp = fopen(filename, "rb");
     char * line = NULL;
@@ -482,7 +487,7 @@ They should have the following columns in exactly the following order:
     \item  strand [char], this can be '+', '-', or '.' (if unknown/irrelevant)
 \end{enumerate}
 
-@<Synteny block input@>
+@<Synteny block input@>=
 /*
 typedef struct Block {
     signed int beg;
@@ -515,7 +520,7 @@ Block * newBlock(){
     blk->end = 0;
     blk->seqname = NULL;
     blk->next = NULL;
-    blk->last = NULL;
+    blk->prev = NULL;
     return(blk);
 }
 
@@ -524,28 +529,51 @@ SyntenyPair * loadSynList(char * filename){
     char * line = NULL;
     size_t len = 0;
     ssize_t read;
+    int nblocks = 0;
+    struct SynLink {
+        char qseqid[NAME_LENGTH]; 
+        char tseqid[NAME_LENGTH]; 
+        Block * qblk;
+        Block * tblk;
+    };
+    struct SynLink * syn;
 
     if(fp == NULL){
         printf("Cannot open synteny file\n");
         exit(EXIT_FAILURE);
     }
-    
-    Block * a = newBlock();
-    Block * b = newBlock();
-    int nblocks = 0;
 
     while ((read = getline(&line, &len, fp)) != EOF) {
         nblocks++;
-        sscanf(line, "%*s %d %d %*s %d %d", &a->beg, &a->end, &b->beg, &b->end);
-        a->next = newBlock();
-        b->next = newBlock();
-        a->next->prev = a;
-        b->next->prev = b;
-        a->over = b;
-        b->over = a;
-        a = a->next;
-        b = b->next;
     }
+    fseek(fp, 0, SEEK_SET);
+    
+    struct SynLink * links[nblocks];
+
+    for(int i = 0; i < nblocks; i++){
+        read = getline(&line, &len, fp);
+        syn = (struct SynLink *) malloc(sizeof(struct SynLink));
+        syn->qblk = newBlock();
+        syn->tblk = newBlock();
+        sscanf(line, "%s %d %d %s %d %d", &syn->qseqid,
+                                          &syn->qblk->beg,
+                                          &syn->qblk->end,
+                                          &syn->tseqid,
+                                          &syn->tblk->beg,
+                                          &syn->tblk->end);
+        // cross link query/target synteny blocks
+        syn->qblk->over = syn->tblk;
+        syn->tblk->over = syn->qblk;
+
+        links[i] = syn;
+    }
+
+    for(int i = 0; i < nblocks; i++){
+        printf("%s %s %d\n", links[i]->qseqid, links[i]->tseqid, links[i]->qblk->beg);
+    }
+
+    SyntenyPair * root;
+
     return(root);
 }
 @
@@ -566,6 +594,7 @@ void freeList(Node * node);
 Node * buildTree(Node * root, size_t nlevels);
 void wireGenomeTree(Node * node);
 Node * loadNodeList(char * filename);
+SyntenyPair * loadSynList(char * filename);
 @
 
 \end{document}
