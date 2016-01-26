@@ -107,11 +107,10 @@ Currently this system merely loads a tree and prints it.
 int main(int argc, char* argv[]){
 
     if(argc < 3){
-        printf("USAGE: ./a.out <filename gen> <filename syn>\n");
+        fprintf(stderr, "USAGE: ./a.out <filename gen> <filename syn>\n");
         exit(EXIT_FAILURE);
     }
 
-/*
     // get doubly-linked list of nodes
     Node * root = loadNodeList(argv[1]);
 
@@ -121,12 +120,13 @@ int main(int argc, char* argv[]){
     // wire siblings
     wireGenomeTree(root);
 
-    recursivePrintNode(root);
+//    recursivePrintNode(root);
 
     freeNode(root);
-*/
 
     SyntenyPair * syn = loadSynList(argv[2]);
+
+    //print_SyntenyPair(syn);
 
     exit(EXIT_SUCCESS);
 }
@@ -170,9 +170,6 @@ typedef struct Node {
 typedef struct Block {
     signed int beg;
     signed int end;
-    char ** seqname;
-    struct Block * next;
-    struct Block * prev;
     struct Block * over;
 } Block;
 
@@ -180,8 +177,8 @@ typedef struct BlockSet {
     char name[NAME_LENGTH];
     size_t size;
     struct Block ** blocks;
+    struct BlockSet * prev;
     struct BlockSet * next;
-    struct BlockSet * last;
 } BlockSet;
 
 typedef struct SyntenyPair {
@@ -443,7 +440,7 @@ Node * loadNodeList(char * filename){
     ssize_t read;
 
     if(fp == NULL){
-        printf("Cannot open file\n");
+        fprintf(stderr, "Cannot open file\n");
         exit(1);
     }
     
@@ -488,41 +485,153 @@ They should have the following columns in exactly the following order:
 \end{enumerate}
 
 @<Synteny block input@>=
-/*
-typedef struct Block {
-    signed int beg;
-    signed int end;
-    char ** seqname;
-    struct Block * next;
-    struct Block * prev;
-    struct Block * over;
-} Block;
-
-typedef struct BlockSet {
-    char name[NAME_LENGTH];
-    size_t size;
-    struct Block ** blocks;
-    struct BlockSet * next;
-    struct BlockSet * last;
-} Node;
-
-typedef struct SyntenyPair {
-    size_t sizeA;
-    BlockSet ** a;
-    size_t sizeB;
-    BlockSet ** b;
-} SyntenyPair;
-*/
 
 Block * newBlock(){
     Block * blk = (Block *) malloc(sizeof(Block));
     blk->beg = 0;
     blk->end = 0;
-    blk->seqname = NULL;
-    blk->next = NULL;
-    blk->prev = NULL;
+    blk->over = NULL;
     return(blk);
 }
+
+BlockSet * newBlockSet(){
+    BlockSet * blkset = (BlockSet *) malloc(sizeof(BlockSet));
+    blkset->size = 0;
+    blkset->blocks = NULL;
+    blkset->prev = NULL;
+    blkset->next = NULL;
+    return(blkset);
+}
+
+void print_BlockSet(BlockSet * blkset) {
+    printf(
+        "%s\t%d\t%x\t%x\n",
+        blkset->name,
+        blkset->size,
+        blkset->prev,
+        blkset->next
+    );
+}
+
+struct SynHandle {
+    char seqid[NAME_LENGTH]; 
+    Block * blk;
+};
+
+int SynHandle_cmp(const void * va, const void * vb){
+    const struct SynHandle * a = * (struct SynHandle * const *) va;
+    const struct SynHandle * b = * (struct SynHandle * const *) vb;
+    int strres = strcmp(a->seqid, b->seqid);
+    return(strres == 0 ? a->blk->beg - b->blk->beg : strres);
+}
+
+void print_SyntenyPair(SyntenyPair * syn){
+    printf("Query\n");
+    for(BlockSet * blkset = syn->a[0]; blkset != NULL; blkset = blkset->next){
+        printf("  %s", blkset->name);
+        for(int i = 0; i < blkset->size; i++){
+            printf("    %d %d\n", blkset->blocks[i]->beg, blkset->blocks[i]->end); 
+        }
+    }
+}
+
+/* 1) Sort a Block array that is sorted by seqid and then by position.
+ * 2) Iterate through the sorted array
+ * 3) Count the number of elements in each seqid
+ * 4) When the seqid changes, call addNode
+ * 5) Return the final BlockSet struct
+ * Net results:
+ * Allocate memory and knit structure, but do not yet add Block objects to
+ * the BlockSet blocks array. This is the next step.
+ */
+BlockSet * build_BlockSet_List(struct SynHandle * links[], size_t size){
+    qsort(&links[0], size, sizeof(struct SynHandle *), SynHandle_cmp);
+    size_t counts = 0;
+    BlockSet * blkset = newBlockSet();
+    for(int i = 0; i < size; i++){
+        printf(" %s %s\n", links[i]->seqid, links[i-1]->seqid);
+        /* Add a node to the end of a growing node chain.
+         * This does the following:
+         *  1) Allocate memory for a new BlockSet
+         *  2) set the name of the new BlockSet
+         *  3) link the new BlockSet to the prior BlockSet and vice versa.
+         *  4) Allocate memory for the Block structs in the prior BlockSet
+         */
+        if(i > 0 && strcmp(links[i]->seqid, links[i-1]->seqid) != 0){
+            printf(" --\n");
+            // set name of i-1 entry
+            strcpy(blkset->name, links[i-1]->seqid);
+            // link i-1 entry to i entry
+            blkset->next = newBlockSet();
+            blkset->next->prev = blkset;
+            // set number of i-1 children
+            blkset->size = counts;
+            // allocate memory for its children
+            blkset->blocks = malloc(blkset->size * sizeof(Block));
+
+            // set up for next iteration
+            counts = 0;
+            blkset = blkset->next;
+        }
+        counts++;
+    }
+    // TODO, clean this shit up
+    blkset->next = newBlockSet();
+    blkset->next->prev = blkset;
+    blkset = blkset->next;
+    strcpy(blkset->name, links[counts-1]->seqid);
+    blkset->size = counts;
+    blkset->blocks = malloc(blkset->size * sizeof(Block));
+
+
+    // Rewind to first BlockSet
+    while(blkset->prev != NULL){
+        blkset = blkset->prev; 
+    }
+
+    size_t links_idx = 0;
+    for(BlockSet * blk = blkset; blk != NULL; blk = blk->next){
+        for(size_t i = 0; i < blk->size; i++){
+            blk->blocks[i] = links[links_idx]->blk;
+        }
+        links_idx++;
+    }
+
+    return(blkset);
+}
+
+size_t get_BlockSet_size(BlockSet * blkset){
+    size_t nseqs = 0;
+    printf("%x\n", blkset);
+    for(BlockSet * blk = blkset; blk != NULL; blk = blk->next){
+        printf(" %x %s\n", blk, blk->name);
+        nseqs++; 
+    }
+    printf(". %d\n", nseqs);
+    return(nseqs);
+}
+
+void load_BlockSet(BlockSet * array[], BlockSet * blkset){
+    size_t i = 0;
+    for(BlockSet * blk = blkset; blk != NULL; blk = blk->next){
+        array[i] = blk; 
+        i++;
+    }
+}
+
+SyntenyPair * getSyntenyPair(struct SynHandle * qlinks[], struct SynHandle * tlinks[], size_t nblocks){
+    SyntenyPair * root;
+    BlockSet * a = build_BlockSet_List(qlinks, nblocks);
+    BlockSet * b = build_BlockSet_List(tlinks, nblocks);
+    root->sizeA = get_BlockSet_size(a);
+    root->sizeB = get_BlockSet_size(b);
+    root->a = malloc(root->sizeA * sizeof(BlockSet *));
+    root->b = malloc(root->sizeB * sizeof(BlockSet *));
+    load_BlockSet(root->a, a);
+    load_BlockSet(root->b, b);
+    return(root);
+}
+
 
 SyntenyPair * loadSynList(char * filename){
     FILE * fp = fopen(filename, "rb");
@@ -530,13 +639,8 @@ SyntenyPair * loadSynList(char * filename){
     size_t len = 0;
     ssize_t read;
     int nblocks = 0;
-    struct SynLink {
-        char qseqid[NAME_LENGTH]; 
-        char tseqid[NAME_LENGTH]; 
-        Block * qblk;
-        Block * tblk;
-    };
-    struct SynLink * syn;
+    struct SynHandle * qsyn;
+    struct SynHandle * tsyn;
 
     if(fp == NULL){
         printf("Cannot open synteny file\n");
@@ -548,31 +652,33 @@ SyntenyPair * loadSynList(char * filename){
     }
     fseek(fp, 0, SEEK_SET);
     
-    struct SynLink * links[nblocks];
+    struct SynHandle * qlinks[nblocks];
+    struct SynHandle * tlinks[nblocks];
 
+    /* Read an input synteny file, build and link Block objects and tie them
+     * together temporarily with SynHandle objects. For each line, one
+     * SynHandle object is attached to the Query, and one to the Target. Each
+     * of these SynHandle arrays will later be sorted prior to the creation of
+     * BlockSet objects.
+     */
     for(int i = 0; i < nblocks; i++){
         read = getline(&line, &len, fp);
-        syn = (struct SynLink *) malloc(sizeof(struct SynLink));
-        syn->qblk = newBlock();
-        syn->tblk = newBlock();
-        sscanf(line, "%s %d %d %s %d %d", &syn->qseqid,
-                                          &syn->qblk->beg,
-                                          &syn->qblk->end,
-                                          &syn->tseqid,
-                                          &syn->tblk->beg,
-                                          &syn->tblk->end);
+        qsyn = (struct SynHandle *) malloc(sizeof(struct SynHandle));
+        tsyn = (struct SynHandle *) malloc(sizeof(struct SynHandle));
+        qsyn->blk = newBlock();
+        tsyn->blk = newBlock();
+        sscanf(line, "%s %d %d %s %d %d",
+               &qsyn->seqid, &qsyn->blk->beg, &qsyn->blk->end,
+               &tsyn->seqid, &tsyn->blk->beg, &tsyn->blk->end);
         // cross link query/target synteny blocks
-        syn->qblk->over = syn->tblk;
-        syn->tblk->over = syn->qblk;
+        qsyn->blk->over = tsyn->blk;
+        tsyn->blk->over = qsyn->blk;
 
-        links[i] = syn;
+        qlinks[i] = qsyn;
+        tlinks[i] = tsyn;
     }
 
-    for(int i = 0; i < nblocks; i++){
-        printf("%s %s %d\n", links[i]->qseqid, links[i]->tseqid, links[i]->qblk->beg);
-    }
-
-    SyntenyPair * root;
+    SyntenyPair * root = getSyntenyPair(qlinks, tlinks, nblocks);
 
     return(root);
 }
@@ -595,6 +701,7 @@ Node * buildTree(Node * root, size_t nlevels);
 void wireGenomeTree(Node * node);
 Node * loadNodeList(char * filename);
 SyntenyPair * loadSynList(char * filename);
+void print_SyntenyPair(SyntenyPair * syn);
 @
 
 \end{document}
