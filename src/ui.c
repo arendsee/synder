@@ -6,12 +6,7 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
-typedef struct Arguments {
-    unsigned int a:1;
-    unsigned int b:1;
-    unsigned int c:1;
-    char * file;
-} Arguments;
+#include "ui.h"
 
 Arguments create_Arguments() {
     Arguments args = {
@@ -22,7 +17,14 @@ Arguments create_Arguments() {
     return args;
 }
 
-int main(int argc, char * argv[]){
+void print_args(Arguments args){
+    printf("a=%d b=%d c=%d\n",
+            args.a ? 1 : 0,
+            args.b ? 1 : 0,
+            args.c ? 1 : 0);
+}
+
+Arguments parse_command(int argc, char * argv[]){
     int opt;
     Arguments args = create_Arguments();
     while((opt = getopt(argc, argv, "abcf:")) != -1){
@@ -47,6 +49,5 @@ int main(int argc, char * argv[]){
     for(; optind < argc; optind++){
         printf("Positional: %s\n", argv[optind]);
     }
-
-    return(EXIT_SUCCESS);
+    return args;
 }

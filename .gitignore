@@ -1,8 +1,3 @@
-*.tex
-*.dvi
-*.out
-*.log
-*.scn
-*.toc
-*.idx
-*.aux
+fagin
+
+*.gch
