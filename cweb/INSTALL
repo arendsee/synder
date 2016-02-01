@@ -1,0 +1,21 @@
+# Compile documentation
+
+```
+make weave
+```
+
+# Compile executable
+
+```
+make tangle
+```
+
+# Cleaning
+
+```
+make clean
+```
+
+# Installation
+
+Currently that is not handled since the code is nowhere near installation ready.
