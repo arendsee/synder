@@ -1,5 +1,6 @@
 \documentclass{cweb}
 \usepackage{enumerate}
+\usepackage{amsmath}
 \def\fagin{{\tt Fagin\/}}
 
 \begin{document}
@@ -80,7 +81,20 @@ Here are a few possible origin stories:
 \end{description}
 
 I will not always be able to infer class with certainty. Will need to develop a
-statistical model to estiate uncertainty in classification.
+statistical model to estimate uncertainty in classification.
+
+
+@*1A formal description of the problem.
+
+\begin{align}
+    G_Q &= \{c_{Q,i}\}_1^{n_Q} \\
+    G_T &= \{c_{T,i}\}_1^{n_T}
+\end{align}
+
+Let $G_Q$ and $G_T$ be two genomes. Each genome is a set contigs, $G = l{c_i}_1^{n}$.
+If the genome is fully assembled, these contigs correspond to
+chromosomes. Let $S$ be a synteny dataset that maps intervals on $G_Q$ to
+intervals on $G_T$. $S$ is comprised of $k$ syntenic blocks, $S = {b_i}_i^k$.
 
 @*1Program overview. 
 
@@ -126,7 +140,7 @@ int main(int argc, char* argv[]){
 
     SyntenyPair * syn = loadSynList(argv[2]);
 
-    //print_SyntenyPair(syn);
+    // print\_SyntenyPair(syn);
 
     exit(EXIT_SUCCESS);
 }
