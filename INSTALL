@@ -1,0 +1,6 @@
+To compile just run:
+
+make
+
+Currently this is no where near production level so I do not have any handling
+for installation.
