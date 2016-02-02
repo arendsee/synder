@@ -51,7 +51,7 @@ die-instructively(){
 parse(){
     input=$1
     outbase=$2
-    sort $input -k1 -nk2,2 | awk -v OFS="\t" -v base=$outbase '
+    sort $input -k1,1 -k2n | awk -v OFS="\t" -v base=$outbase '
         {
             qseqid = $1
             qstart = $2
@@ -87,7 +87,7 @@ parse(){
                 print i, lines[i] > out
             }
         }
-    ' | sort -k1 -nk3,3 | awk -v OFS="\t" -v base=$outbase '
+    '  | sort  -k2,2 -k3n | awk -v OFS="\t" -v base=$outbase '
         {
             blockid = $1
             seqid = $2
@@ -113,6 +113,34 @@ parse(){
     '
 }
 
+append_counts() {
+awk -v NC=$1 '
+        NR == 1 {
+            s = $NC
+            seqid = 0
+        }
+        s != $NC {
+            seqid++
+            blkid = 0
+            s = $1
+        }
+        { 
+            print $0, seqid, blkid 
+            blkid++
+        }
+    '
+}
+
+
+parse2() {
+    # TODO add overall size counts in header
+    intput=$1
+    outbase=$2
+    sort $input -k1,1 -k2n | 
+        append_counts 1 |
+        sort  -k4,4 -k5n |
+        append_counts 4
+}
 
 
 # ============================================================================
@@ -158,4 +186,4 @@ done
 # Now run the thing
 # ============================================================================
 
-parse $input "${outdir}/${query}_${target}"
+parse2 $input "${outdir}/${query}_${target}"
