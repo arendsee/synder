@@ -1,6 +1,7 @@
+#include "ftypes.h"
 #include "ui.h"
 #include "syndb.h"
-#include "ftypes.h"
+#include "interval.h"
 
 int main(int argc, char * argv[]){
 
@@ -9,7 +10,10 @@ int main(int argc, char * argv[]){
     Synmap * syn = load_synmap(args.synfile);
 
     // Do stuff
-    print_synmap(syn);
+    // print_synmap(syn);
+    uint x = 15000;
+    uint anc = anchor(x, syn->genome[0]->contig[0]);
+    printf("%u\n", anc);
 
     // Cleanup
     free_synmap(syn);
