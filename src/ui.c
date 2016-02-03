@@ -17,15 +17,22 @@ Arguments create_Arguments() {
     return args;
 }
 
+void free_Arguments(Arguments arg){
+    if(arg.file)
+        free(arg.file);
+}
+
 void print_args(Arguments args){
-    printf("a=%d b=%d c=%d\n",
+    printf("a=%d b=%d c=%d file=%s\n",
             args.a ? 1 : 0,
             args.b ? 1 : 0,
-            args.c ? 1 : 0);
+            args.c ? 1 : 0,
+            args.file);
 }
 
 Arguments parse_command(int argc, char * argv[]){
     int opt;
+    size_t size;
     Arguments args = create_Arguments();
     while((opt = getopt(argc, argv, "abcf:")) != -1){
         switch(opt) {
@@ -39,13 +46,14 @@ Arguments parse_command(int argc, char * argv[]){
                 args.c = true;
                 break;
             case 'f':
-                strcpy(args.file, optarg);
+                size = sizeof(char) * strlen(optarg);
+                args.file = (char *)malloc(size + sizeof(char));
+                strncpy(args.file, optarg, size);
                 break;
             case '?':
                 exit(EXIT_FAILURE);
         }
     }
-
     for(; optind < argc; optind++){
         printf("Positional: %s\n", argv[optind]);
     }

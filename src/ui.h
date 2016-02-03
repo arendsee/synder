@@ -8,6 +8,8 @@ typedef struct Arguments {
     char * file;
 } Arguments;
 
+void free_Arguments(Arguments arg);
+
 Arguments create_Arguments();
 
 void print_args(Arguments args);
