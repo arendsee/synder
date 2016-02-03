@@ -94,6 +94,7 @@ parse() {
     write_side $target 4 11 < $outtmp >> $outdb
     awk '{print $9, $10, $2, $3, $11, $12, $5, $6, $13}' $outtmp |
         sort -k1,1n -k2,2n >> $outdb
+    rm $outtmp
 }
 
 

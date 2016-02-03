@@ -1,23 +1,25 @@
 #ifndef __SYNDB_H__
 #define __SYNDB_H__
 
+#include <stdlib.h>
+
 typedef struct {
     unsigned int start;
     unsigned int stop;
     unsigned int oseqid;
     unsigned int oblkid;
     unsigned int linkid;
-} interval;
+} block;
 
 typedef struct {
     size_t size;
     block * blocks;
-} contig
+} contig;
 
 typedef struct {
     size_t size;
     contig * contigs;
-} contig_set 
+} contig_set;
 
 typedef struct {
     char * name_a;
