@@ -2,32 +2,36 @@
 #define __SYNDB_H__
 
 #include <stdlib.h>
+#include <stdio.h>
+
+#define uint unsigned int
 
 typedef struct {
-    unsigned int start;
-    unsigned int stop;
-    unsigned int oseqid;
-    unsigned int oblkid;
-    unsigned int linkid;
-} block;
+    uint start;
+    uint stop;
+    uint oseqid;
+    uint oblkid;
+    uint linkid;
+} Block;
 
 typedef struct {
+    char * name;
     size_t size;
-    block * blocks;
-} contig;
+    Block ** block;
+} Contig;
 
 typedef struct {
+    char * name;
     size_t size;
-    contig * contigs;
-} contig_set;
+    Contig ** contig;
+} Genome;
 
 typedef struct {
-    char * name_a;
-    size_t size_a;
-    contig * a;
-    char * name_b;
-    size_t size_b;
-    contig * b;
-} synteny_pair;
+    Genome ** genome;
+} Synmap;
+
+Synmap * load_synmap(FILE * synfile);
+
+void free_synmap(Synmap * synmap);
 
 #endif

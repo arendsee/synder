@@ -45,9 +45,10 @@ Arguments parse_command(int argc, char * argv[]){
                 break;
             case 'f':
                 args.synfile = fopen(optarg, "r");
-                if(!args.synfile)
+                if(args.synfile == NULL){
                     fprintf(stderr, "ERROR: Failed to open synteny file '%s'\n", optarg);
                     exit(EXIT_FAILURE);
+                }
                 break;
             case '?':
                 exit(EXIT_FAILURE);

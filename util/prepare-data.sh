@@ -70,7 +70,7 @@ write_side() {
         }
         END{
             for (k in map){ nseqs++ }
-            print seqname,  nseqs
+            print ">", seqname,  nseqs
             for (k in map){
                 print k, counts[k], map[k]
             }
