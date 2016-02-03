@@ -9,7 +9,7 @@ int main(int argc, char * argv[]){
 
     print_args(args);
 
-    free_Arguments(args);
+    close_Arguments(args);
 
     return(EXIT_SUCCESS);
 }

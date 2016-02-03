@@ -1,14 +1,16 @@
 #ifndef __UI_H__
 #define __UI_U__
 
+#include <stdio.h>
+
 typedef struct Arguments {
     unsigned int a:1;
     unsigned int b:1;
     unsigned int c:1;
-    char * file;
+    FILE * synfile;
 } Arguments;
 
-void free_Arguments(Arguments arg);
+void close_Arguments(Arguments arg);
 
 Arguments create_Arguments();
 
