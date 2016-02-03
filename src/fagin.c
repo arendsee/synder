@@ -1,8 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "ui.h"
 #include "syndb.h"
+#include "ftypes.h"
 
 int main(int argc, char * argv[]){
 

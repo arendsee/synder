@@ -1,12 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-
 #define _GNU_SOURCE
 #include <getopt.h>
 
 #include "ui.h"
+#include "ftypes.h"
 
 Arguments create_Arguments() {
     Arguments args = {
