@@ -42,87 +42,17 @@ die-instructively(){
 
 
 # ============================================================================
-# Parse data into four files 
-#  * <query>_<target>_left.tab   - the query, or input
-#  * <query>_<target>_right.tab  - the target
-#  * <query>_<target>_score.tab  - a list of scores linked to blockid
-#  * <query>_<target>_strand.tab - a list of the direction of the matches
+# Parse utilities
 # ============================================================================
-parse(){
-    input=$1
-    outbase=$2
-    sort $input -k1,1 -k2n | awk -v OFS="\t" -v base=$outbase '
-        {
-            qseqid = $1
-            qstart = $2
-            qstop  = $3
-            tseqid = $4
-            tstart = $5
-            tstop  = $6
-            score  = $7
-            strand = $8
-
-            blockid++
-            qcounts[qseqid]++
-            lines[blockid] = qstart "\t" qstop
-
-            if(NR == 1 || $1 != prev){
-                start[blockid] = qseqid
-            }
-            prev = $1
-
-            # Record block data
-            print blockid, score > base "_score.tab"
-            print blockid, strand > base "_strand.tab"
-
-            # send target data to STDOUT
-            print blockid, tseqid, tstart, tstop
-        }
-        END {
-            out = base "_left.tab"
-            for(i = 1; i <= blockid; i++){
-                if(i in start){
-                    print "> " ++j " " start[i] " " qcounts[start[i]] > out
-                }
-                print i, lines[i] > out
-            }
-        }
-    '  | sort  -k2,2 -k3n | awk -v OFS="\t" -v base=$outbase '
-        {
-            blockid = $1
-            seqid = $2
-            start = $3
-            stop = $4
-
-            lines[blockid] = start "\t" stop
-            qcounts[seqid]++
-            if(NR == 1 || seqid != prev){
-                seq_start[blockid] = seqid
-            }
-            prev = seqid
-        }
-        END {
-            out = base "_right.tab"
-            for(k in lines){
-                if(k in seq_start){
-                    print "> " ++j " " seq_start[k] " " qcounts[seq_start[k]] > out
-                }
-                print k, lines[k] > out
-            }
-        }
-    '
-}
 
 append_counts() {
-awk -v NC=$1 '
-        NR == 1 {
-            s = $NC
-            seqid = 0
-        }
+sort -k$1,$1 -k${2}n | awk -v NC=$1 '
+        BEGIN { blkid=0; seqid=0 }
+        NR == 1 { s = $NC }
         s != $NC {
             seqid++
             blkid = 0
-            s = $1
+            s = $NC
         }
         { 
             print $0, seqid, blkid 
@@ -131,15 +61,39 @@ awk -v NC=$1 '
     '
 }
 
+write_side() {
+    awk -v seqname=$1 -v namecol=$2 -v idcol=$3 '
+        BEGIN{ OFS="\t" }
+        {
+            counts[$idcol]++
+            map[$idcol] = $namecol
+        }
+        END{
+            for (k in map){ nseqs++ }
+            print seqname,  nseqs
+            for (k in map){
+                print k, counts[k], map[k]
+            }
+            print "@"
+        }
+    '
+}
 
-parse2() {
-    # TODO add overall size counts in header
+parse() {
     intput=$1
     outbase=$2
-    sort $input -k1,1 -k2n | 
-        append_counts 1 |
-        sort  -k4,4 -k5n |
-        append_counts 4
+    query=$3
+    target=$4
+    outdb=${outbase}.txt
+    outtmp=${outbase}_temp.txt
+    append_counts 1 2 < $input |
+        append_counts 4 5 |
+        awk '{print $0, linkid++}' > $outtmp
+    > $outdb
+    write_side $query  1 9  < $outtmp >> $outdb
+    write_side $target 4 11 < $outtmp >> $outdb
+    awk '{print $9, $10, $2, $3, $11, $12, $5, $6, $13}' $outtmp |
+        sort -k1,1n -k2,2n >> $outdb
 }
 
 
@@ -186,4 +140,4 @@ done
 # Now run the thing
 # ============================================================================
 
-parse2 $input "${outdir}/${query}_${target}"
+parse $input "${outdir}/${query}_${target}" $query $target
