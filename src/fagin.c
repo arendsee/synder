@@ -11,7 +11,7 @@ int main(int argc, char * argv[]){
 
     // Do stuff
     // print_synmap(syn);
-    uint x = 15000;
+    uint x = 5000;
     uint anc = anchor(x, syn->genome[0]->contig[0]);
     printf("%u\n", anc);
 
