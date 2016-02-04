@@ -9,11 +9,6 @@
 #define uint unsigned int
 
 typedef struct {
-    uint a;
-    uint b;
-} Interval;
-
-typedef struct {
     uint start;
     uint stop;
     uint oseqid;

@@ -26,3 +26,24 @@ uint anchor(uint x, Contig * contig){
     }
     return i;
 }
+
+Contig * get_overlapping(uint a, uint b, Contig * con){
+    // STUB
+    return con;
+}
+
+Contig * get_flanks(uint a, uint b, Contig * con, uint nup, uint ndown){
+    // STUB
+    return con;
+}
+
+uint count_overlaps(uint a, uint b, Contig * con){
+    // STUB
+    return a;
+}
+
+MapResult map(uint a, uint b, Contig * con){
+    // STUB
+    MapResult mr;
+    return mr;
+}
