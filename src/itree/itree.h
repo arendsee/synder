@@ -1,11 +1,10 @@
 #ifndef __ITREE_H__
 #define __ITREE_H__
 
+#include "../global.h"
 #include "ia.h"
 #include "interval.h"
 #include "interval-tree.h"
-
-typedef unsigned int uint;
 
 Pos point_overlap(unsigned int, Interval);
 

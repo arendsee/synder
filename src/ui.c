@@ -2,7 +2,6 @@
 #include <getopt.h>
 
 #include "ui.h"
-#include "ftypes.h"
 
 Arguments create_Arguments() {
     Arguments args = {

@@ -1,7 +1,7 @@
 #ifndef __UI_H__
 #define __UI_U__
 
-#include <stdio.h>
+#include "global.h"
 
 typedef struct Arguments {
     unsigned int a:1;

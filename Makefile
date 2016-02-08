@@ -1,4 +1,4 @@
-TARGET=fagin
+TARGET=main
 SOURCE=src
 CFLAGS=-Wall -g -o $(TARGET)
 CC=cc

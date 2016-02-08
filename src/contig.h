@@ -1,25 +1,22 @@
-#include "ftypes.h"
+#ifndef __CONTIG_H__
+#define __CONTIG_H__
 
-/**
- * Store results from synteny search
- *
- * This structure currently only contains the most basic return values.
- * Later I my expand this to cover whatever other metrics I gather.
- */
+#include "global.h"
+#include "block.h"
+#include "result.h"
+
 typedef struct {
-    uint qseqid;
-    uint qstart;
-    uint qstop;
-    uint tseqid;
-    uint tstart;
-    uint tstop;
-    bool mismatch;
-} MapResult;
+    char * name;
+    size_t size;
+    struct IntervalTree * itree;
+    Block ** block;
+} Contig;
 
-/**
- * Determine wither interval (a,b) overlaps interval (c,d)
- */
-bool overlap(uint, uint, uint, uint);
+Contig * init_contig(char *, size_t);
+
+void free_contig(Contig *);
+
+void print_contig(Contig *);
 
 /**
  * Find index of downstream Block nearest the query point
@@ -44,4 +41,6 @@ uint count_overlaps(uint, uint, Contig *);
 /**
  * Given two points, get the expected location on the target
  */
-MapResult map(uint, uint, Contig *);
+Result map(uint, uint, Contig *);
+
+#endif
