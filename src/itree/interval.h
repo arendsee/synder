@@ -5,6 +5,7 @@
 typedef struct {
     unsigned int start;
     unsigned int stop;
+    void * link; /* a pointer to arbitrary related data */
 } Interval;
 
 /* position of Interval or point A relative to B */
@@ -20,6 +21,6 @@ int cmp_start(const void *, const void *);
 Pos point_overlap(unsigned int A, Interval B);
 
 /* find position of interval A relative to interval B (see Pos) */
-Pos overlap(Interval, Interval);
+Pos interval_overlap(Interval, Interval);
 
 #endif

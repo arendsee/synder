@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "itree/itree.h"
+
 #define uint unsigned int
 
 typedef struct {
@@ -19,6 +21,7 @@ typedef struct {
 typedef struct {
     char * name;
     size_t size;
+    struct IntervalTree * itree;
     Block ** block;
 } Contig;
 

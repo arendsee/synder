@@ -128,6 +128,7 @@ Contig * init_contig(char * name, size_t size){
     Contig* con = (Contig*)malloc(sizeof(Contig));
     con->name = strdup(name);
     con->size = size;
+    con->itree = NULL;
     con->block = (Block**)malloc(size * sizeof(Block*));
     return con;
 }

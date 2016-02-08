@@ -8,7 +8,8 @@ Arguments create_Arguments() {
     Arguments args = {
         .a = false,
         .b = false,
-        .c = false
+        .c = false,
+        .synfile = NULL
     };
     return args;
 }
@@ -41,15 +42,17 @@ Arguments parse_command(int argc, char * argv[]){
                 break;
             case 'f':
                 args.synfile = fopen(optarg, "r");
-                if(args.synfile == NULL){
-                    fprintf(stderr, "ERROR: Failed to open synteny file '%s'\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
                 break;
             case '?':
                 exit(EXIT_FAILURE);
         }
     }
+
+    if(args.synfile == NULL){
+        fprintf(stderr, "ERROR: Failed to open synteny file '%s'\n", optarg);
+        exit(EXIT_FAILURE);
+    }
+
     for(; optind < argc; optind++){
         printf("Positional: %s\n", argv[optind]);
     }
