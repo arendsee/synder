@@ -30,7 +30,7 @@ Pos point_overlap(unsigned int a, Interval b){
 }
 
 /* find position of interval A relative to interval B (see Pos) */
-Pos overlap(Interval a, Interval b){
+Pos interval_overlap(Interval a, Interval b){
     if(a.stop < b.start){
         return lo;
     }

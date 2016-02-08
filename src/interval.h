@@ -1,6 +1,8 @@
 #include "ftypes.h"
 
 /**
+ * Store results from synteny search
+ *
  * This structure currently only contains the most basic return values.
  * Later I my expand this to cover whatever other metrics I gather.
  */
