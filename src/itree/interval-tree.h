@@ -3,6 +3,8 @@
 
 #include "ia.h"
 
+/** An interval tree data structure allowing log(n) searches for overlapping
+ * intervals.  */
 struct IntervalTree {
     unsigned int center;
     IA * by_start;

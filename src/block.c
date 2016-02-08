@@ -44,6 +44,16 @@ void print_block(Block * block){
         block->linkid);
 }
 
+/**
+ * Determine whether interval (a,b) overlaps interval (c,d)
+ *
+ * @param a1 start of first interval
+ * @param a2 stop of first interval
+ * @param b1 start of second interval
+ * @param b2 stop of second interval
+ *
+ * @return TRUE if the intervals overlap
+ */
 bool overlap(uint a1, uint a2, uint b1, uint b2){
     return a1 <= b2 && a2 >= b1;
 }

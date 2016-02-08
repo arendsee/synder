@@ -11,10 +11,10 @@ typedef struct {
     Interval * v;
 } IA;
 
-/* initialize to {.size=0, .v=NULL} */
+/** initialize to {.size=0, .v=NULL} */
 IA * init_ia();
 
-/* initialize to a size, allocate memory to v */
+/** initialize to a size, allocate memory to v */
 IA * init_set_ia(size_t size);
 
 void free_ia(IA * ia);

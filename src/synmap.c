@@ -6,26 +6,12 @@
 #include "contig.h"
 #include "block.h"
 
-/**
- * Allocate memory for a new Synmap.
- *
- * This struct holds the pair of genomes that wil be compared.
- *
- * @return pointer to the new Synmap
- */
 Synmap * init_synmap(){
     Synmap* syn = (Synmap*)malloc(sizeof(Synmap));
     syn->genome = (Genome**)malloc(2 * sizeof(Genome*));
     return(syn);
 }
 
-/** Recursively free all memory allocated to the synteny map.
- * 
- * Calls free_genome on both its Genome children.
- *
- * @param pointer to Synmap struct
- *
- * */
 void free_synmap(Synmap * synmap){
     free_genome(synmap->genome[0]);
     free_genome(synmap->genome[1]);
@@ -33,22 +19,11 @@ void free_synmap(Synmap * synmap){
     free(synmap);
 }
 
-/** Recursively print a synteny map. */
 void print_synmap(Synmap * synmap){
     print_genome(synmap->genome[0]);
     print_genome(synmap->genome[1]);
 }
 
-/** Build synteny tree from specially formatted file.
- *
- * @warning This function is VERY picky about input. It expects input to be
- * formatted exactly as util/prepare-data.sh produces. You must not feed this
- * function raw synteny files. I currently have no input checks.
- *
- * @param synfile specially formatted synteny file
- *
- * @return pointer to a complete Synmap object
- */
 Synmap * load_synmap(FILE * synfile){
     assert(synfile != NULL);
 

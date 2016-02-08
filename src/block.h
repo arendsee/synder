@@ -3,6 +3,7 @@
 
 #include "global.h"
 
+/** Query interval with directions to matching target*/
 typedef struct {
     uint start;
     uint stop;
@@ -17,9 +18,6 @@ void free_block(Block *);
 
 void print_block(Block *);
 
-/**
- * Determine wether interval (a,b) overlaps interval (c,d)
- */
 bool overlap(uint, uint, uint, uint);
 
 #endif

@@ -104,7 +104,7 @@ struct IntervalTree * build_tree(IA * intervals){
 
 
 
-/**
+/*
  * Select a point at the center of the middle interval.
  * This guarantees at least one interval overlaps each node.
  * If the intervals are sorted, it also favors (but doesn't guarantee) a

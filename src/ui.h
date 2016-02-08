@@ -3,6 +3,7 @@
 
 #include "global.h"
 
+/** Parsed command line arguments */
 typedef struct Arguments {
     unsigned int a:1;
     unsigned int b:1;

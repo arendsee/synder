@@ -5,6 +5,7 @@
 
 #include "interval.h"
 
+/** An automatically resizing vector of Interval objects  */
 typedef struct {
     size_t available; /* total allocated memory */
     size_t size;      /* memory used */
