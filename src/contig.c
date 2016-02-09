@@ -59,9 +59,29 @@ uint anchor(Contig * contig, uint x){
     return i;
 }
 
+// local function
+IA * ia_from_blocks(Contig * con){
+    IA * ia = init_set_ia(con->size);
+    for(int i = 0; i < con->size; i++){
+        ia->v[i].start = con->block[i]->start;
+        ia->v[i].stop = con->block[i]->stop;
+        ia->v[i].link = (void*)con->block[i];
+    }
+    return ia;
+}
+
 Contig * get_overlapping(Contig * con, uint a, uint b){
-    // STUB
-    return con;
+    if(!con->itree)
+        con->itree = build_tree(ia_from_blocks(con));
+    Interval * inv = init_interval(a, b); 
+    IA * ia = get_interval_overlaps(inv, con->itree);
+    Contig * newcon = init_contig(con->name, ia->size);
+    for(int i = 0; i < ia->size; i++){
+        newcon->block[i] = (Block*)(ia->v[i].link);
+    }
+    free_ia(ia);
+    free(inv);
+    return newcon;
 }
 
 Contig * get_flanks(Contig * con, uint a, uint b, uint nup, uint ndown){
@@ -70,8 +90,12 @@ Contig * get_flanks(Contig * con, uint a, uint b, uint nup, uint ndown){
 }
 
 uint count_overlaps(Contig * con, uint a, uint b){
-    // STUB
-    return a;
+    if(!con->itree)
+        con->itree = build_tree(ia_from_blocks(con));
+    Interval * inv = init_interval(a, b); 
+    uint count = count_interval_overlaps(inv, con->itree);
+    free(inv);
+    return count;
 }
 
 Result map(Contig * con, uint a, uint b){

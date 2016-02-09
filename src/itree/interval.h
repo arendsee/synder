@@ -8,6 +8,9 @@ typedef struct {
     void * link; /* a pointer to arbitrary related data */
 } Interval;
 
+/** initialize Interval with start and stop, but set link to NULL */
+Interval * init_interval(unsigned int start, unsigned int stop);
+
 /** position of Interval or point A relative to B */
 typedef enum {lo, in, hi} Pos;
 

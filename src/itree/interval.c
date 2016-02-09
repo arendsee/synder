@@ -2,6 +2,14 @@
 
 #include "interval.h"
 
+Interval * init_interval(uint start, uint stop){
+    Interval * inv = (Interval*)malloc(sizeof(Interval));
+    inv->start = start;
+    inv->stop = stop;
+    inv->link = NULL;
+    return(inv);
+}
+
 int cmp_stop(const void *ap, const void *bp){
     Interval a = * (Interval *) ap;
     Interval b = * (Interval *) bp;
