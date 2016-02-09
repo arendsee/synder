@@ -14,7 +14,12 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Do stuff 
     // ------------------------------------------------------------------------
-    print_synmap(syn);
+
+    //print_synmap(syn);
+    print_args(args);
+
+    uint count = count_overlaps(syn->genome[0]->contig[args.chr], args.start, args.stop);
+    printf("%u\n", count);
 
 
     // ------------------------------------------------------------------------

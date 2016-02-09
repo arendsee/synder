@@ -5,9 +5,9 @@
 
 Arguments create_Arguments() {
     Arguments args = {
-        .a = false,
-        .b = false,
-        .c = false,
+        .chr   = 0,
+        .start = 0,
+        .stop  = 0,
         .synfile = NULL
     };
     return args;
@@ -19,25 +19,22 @@ void close_Arguments(Arguments arg){
 }
 
 void print_args(Arguments args){
-    printf("a=%d b=%d c=%d\n",
-            args.a ? 1 : 0,
-            args.b ? 1 : 0,
-            args.c ? 1 : 0);
+    printf("chr-%lu (%lu, %lu)\n", args.chr, args.start, args.stop);
 }
 
 Arguments parse_command(int argc, char * argv[]){
     int opt;
     Arguments args = create_Arguments();
-    while((opt = getopt(argc, argv, "abcf:")) != -1){
+    while((opt = getopt(argc, argv, "a:b:c:f:")) != -1){
         switch(opt) {
             case 'a':
-                args.a = true;
+                args.chr = atoi(optarg);
                 break;
             case 'b': 
-                args.b = true;
+                args.start = atoi(optarg);
                 break;
             case 'c': 
-                args.c = true;
+                args.stop = atoi(optarg);
                 break;
             case 'f':
                 args.synfile = fopen(optarg, "r");

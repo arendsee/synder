@@ -5,9 +5,9 @@
 
 /** Parsed command line arguments */
 typedef struct Arguments {
-    unsigned int a:1;
-    unsigned int b:1;
-    unsigned int c:1;
+    size_t chr;
+    size_t start;
+    size_t stop;
     FILE * synfile;
 } Arguments;
 
