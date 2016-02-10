@@ -8,11 +8,15 @@ typedef struct Arguments {
     FILE * synfile;
     FILE * intfile;
     char * db_filename;
+    char * cmd;
+    char ** pos;
 } Arguments;
 
 void close_Arguments(Arguments arg);
 
 Arguments create_Arguments();
+
+void print_help();
 
 void print_args(Arguments args);
 

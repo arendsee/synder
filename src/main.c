@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "global.h"
 #include "ui.h"
@@ -14,10 +15,12 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     Arguments args = parse_command(argc, argv);
     if(args.db_filename){
+        if(!(args.pos[0] && args.pos[1] && args.pos[2]))
+            print_help();
         char cmd[256];
         sprintf(cmd,
                 "./util/prepare-data.sh -a %s -b %s -i %s -d %s",
-                "susan", "philus", args.db_filename, "db");
+                args.pos[0], args.pos[1], args.db_filename, args.pos[2]);
         system(cmd);
     }
     if(args.synfile){
@@ -27,7 +30,7 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Do stuff 
     // ------------------------------------------------------------------------
-    if(args.intfile && args.synfile){
+    if(strcmp(args.cmd, "count") && args.intfile && args.synfile){
         uint count = 0;
         char seqname[128];
         int chrid, start, stop;
