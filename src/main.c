@@ -14,15 +14,20 @@ int main(int argc, char * argv[]){
     // Prep input 
     // ------------------------------------------------------------------------
     Arguments args = parse_command(argc, argv);
+
+    // Build database and exit
     if(args.db_filename){
         if(!(args.pos[0] && args.pos[1] && args.pos[2]))
             print_help();
         char cmd[256];
         sprintf(cmd,
-                "./util/prepare-data.sh -a %s -b %s -i %s -d %s",
+                "prepare-data.sh -a %s -b %s -i %s -d %s",
                 args.pos[0], args.pos[1], args.db_filename, args.pos[2]);
         system(cmd);
+        exit(EXIT_SUCCESS);
     }
+
+    // Load synteny map from database
     if(args.synfile){
         syn = load_synmap(args.synfile);
     }
@@ -30,7 +35,12 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Do stuff 
     // ------------------------------------------------------------------------
-    if(strcmp(args.cmd, "count") && args.intfile && args.synfile){
+    
+    if(!syn){
+        printf("Nothing to do ...\n");
+        print_help();
+    }
+    else if(strcmp(args.cmd, "count") == 0 && args.intfile){
         uint count = 0;
         char seqname[128];
         int chrid, start, stop;
@@ -40,6 +50,10 @@ int main(int argc, char * argv[]){
             count = count_overlaps(syn->genome[0]->contig[chrid], start, stop);
             printf("%s\t%u\n", seqname, count);
         }
+    }
+    else{
+        printf("No command found\n");
+        print_help();
     }
 
 
