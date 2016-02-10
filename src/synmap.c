@@ -14,10 +14,12 @@ Synmap * init_synmap(){
 }
 
 void free_synmap(Synmap * synmap){
-    free_genome(synmap->genome[0]);
-    free_genome(synmap->genome[1]);
-    free(synmap->genome);
-    free(synmap);
+    if(synmap){
+        free_genome(synmap->genome[0]);
+        free_genome(synmap->genome[1]);
+        free(synmap->genome);
+        free(synmap);
+    }
 }
 
 void print_synmap(Synmap * synmap){
@@ -77,7 +79,6 @@ Synmap * load_synmap(FILE * synfile){
             }
         }
     }
-    free(line);
 
     line_no = 0;
     uint qcon_id, qblk_id, qstart, qstop;
@@ -116,6 +117,7 @@ Synmap * load_synmap(FILE * synfile){
         new_block = init_block(tstart, tstop, qcon_id, qblk_id, link_id);
         synmap->genome[1]->contig[tcon_id]->block[tblk_id] = new_block;
     }
+    free(line);
 
     /* each block specified has been loaded */
     if(unloaded_blocks != 0){

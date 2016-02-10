@@ -5,10 +5,9 @@
 
 /** Parsed command line arguments */
 typedef struct Arguments {
-    size_t chr;
-    size_t start;
-    size_t stop;
     FILE * synfile;
+    FILE * intfile;
+    char * db_filename;
 } Arguments;
 
 void close_Arguments(Arguments arg);

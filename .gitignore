@@ -2,3 +2,6 @@ fagin
 
 *.gch
 db
+
+# my temp file prefix
+zzz*
