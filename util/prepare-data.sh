@@ -121,10 +121,7 @@ while getopts "ha:b:d:i:" opt; do
             ;;
         d)
             outdir="$OPTARG"
-            if [[ ! -d $outdir ]]
-            then
-                die "Cannot access directory '$outdir'"
-            fi
+            [[ -d $outdir ]] || mkdir $outdir || die "Cannot access directory '$outdir'"
             ;;
     esac
 done
