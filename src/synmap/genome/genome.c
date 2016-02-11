@@ -1,8 +1,8 @@
 #include "string.h"
+#include "stdlib.h"
+#include "stdio.h"
 
-#include "global.h"
 #include "genome.h"
-#include "contig.h"
 
 Genome * init_genome(char * name, size_t size){
     Genome * gen = (Genome*)malloc(sizeof(Genome));

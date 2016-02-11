@@ -1,9 +1,13 @@
 #ifndef __CONTIG_H__
 #define __CONTIG_H__
 
-#include "global.h"
-#include "block.h"
-#include "result.h"
+#include <stdlib.h>
+
+#include "block/block.h"
+
+#ifndef uint
+#define uint unsigned int
+#endif
 
 /** Contiguous sequence object containing list of Block structures and an
  * interval tree to search them.*/
@@ -55,18 +59,8 @@ uint anchor(Contig * contig, uint x);
 Contig * get_overlapping(Contig * contig, uint a, uint b);
 
 /**
- * Given two points, find the blocks flanking them
- */
-Contig * get_flanks(Contig * contig, uint a, uint b, uint nup, uint ndown);
-
-/**
  * Given two points, find the number of blocks they overlap
  */
 uint count_overlaps(Contig * contig, uint a, uint b);
-
-/**
- * Given two points, get the expected location on the target
- */
-Result map(Contig * contig, uint a, uint b);
 
 #endif

@@ -1,9 +1,9 @@
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "global.h"
 #include "contig.h"
-#include "block.h"
-#include "result.h"
+#include "block/block.h"
 
 #include "itree/itree.h"
 
@@ -84,11 +84,6 @@ Contig * get_overlapping(Contig * con, uint a, uint b){
     return newcon;
 }
 
-Contig * get_flanks(Contig * con, uint a, uint b, uint nup, uint ndown){
-    // STUB
-    return con;
-}
-
 uint count_overlaps(Contig * con, uint a, uint b){
     if(!con->itree)
         con->itree = build_tree(ia_from_blocks(con));
@@ -96,10 +91,4 @@ uint count_overlaps(Contig * con, uint a, uint b){
     uint count = count_interval_overlaps(inv, con->itree);
     free(inv);
     return count;
-}
-
-Result map(Contig * con, uint a, uint b){
-    // STUB
-    Result mr;
-    return mr;
 }

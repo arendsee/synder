@@ -1,12 +1,15 @@
 #ifndef __ITREE_H__
 #define __ITREE_H__
 
-#include "../global.h"
 #include "ia.h"
 #include "interval.h"
 #include "interval-tree.h"
 
-Pos point_overlap(unsigned int, Interval);
+#ifdef uint
+#define uint unsigned int
+#endif
+
+Pos point_overlap(uint, Interval);
 
 struct IntervalTree * build_tree(IA*);
 

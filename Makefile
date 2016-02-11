@@ -1,14 +1,15 @@
-TARGET=main
-SOURCE=src
-CFLAGS=-Wall -g -o $(TARGET)
-CC=cc
+TARGET=synfull
+LIBMAIN=src/main.a
 
-# If anything changes, recompile the whole thing
-all:
-	$(CC) $(CFLAGS) $(SOURCE)/*.c $(SOURCE)/itree/*.c $(SOURCE)/*.h $(SOURCE)/itree/*.h || rm -f $(SOURCE)/**.gch
+${TARGET}: ${LIBMAIN}
+	gcc -o ${TARGET} ${LIBMAIN}
 
-docs:
-	doxygen Doxyfile
+${LIBMAIN}:
+	make -C src
 
 clean:
-	rm -f $(TARGET) $(SOURCE)/*.gch
+	rm -f ${TARGET}
+
+rclean:
+	make clean
+	make -C src rclean

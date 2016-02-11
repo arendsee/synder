@@ -1,7 +1,11 @@
 #ifndef __BLOCK_H__ 
 #define __BLOCK_H__
 
-#include "global.h"
+#include <stdbool.h>
+
+#ifndef uint
+#define uint unsigned int
+#endif
 
 /** Query interval with directions to matching target*/
 typedef struct {

@@ -1,8 +1,7 @@
 #ifndef __GENOME_H__
 #define __GENOME_H__
 
-#include "global.h"
-#include "contig.h"
+#include "contig/contig.h"
 
 /** A named set of Contig objects*/
 typedef struct {

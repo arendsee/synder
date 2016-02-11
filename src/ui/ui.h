@@ -1,7 +1,7 @@
 #ifndef __UI_H__
 #define __UI_U__
 
-#include "global.h"
+#include <stdio.h>
 
 /** Parsed command line arguments */
 typedef struct Arguments {

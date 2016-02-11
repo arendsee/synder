@@ -1,6 +1,8 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "ui.h"
 

@@ -1,10 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "global.h"
-#include "ui.h"
-#include "synmap.h"
-#include "analysis.h"
+#include "ui/ui.h"
+#include "synmap/synmap.h"
 
 int main(int argc, char * argv[]){
 
@@ -19,6 +18,9 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Do stuff 
     // ------------------------------------------------------------------------
+
+    /** \todo Replace a system call to the prepare-data.sh script with a raw
+     * synteny file to parser in synmap  */
 
     // Build database and exit
     if(args.db_filename){

@@ -1,4 +1,6 @@
-#include "global.h"
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "block.h"
 
 /** Allocate memory for a block and set each field.
