@@ -1,6 +1,8 @@
-fagin
+synfull
 
 *.gch
+*.o
+*.a
 db
 
 # my temp file prefix
