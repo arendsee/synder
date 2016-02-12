@@ -7,6 +7,9 @@ ${TARGET}: ${LIBMAIN}
 ${LIBMAIN}:
 	make -C src --no-print-directory
 
+docs:
+	doxygen Doxyfile
+
 clean:
 	rm -f ${TARGET}
 
