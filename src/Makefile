@@ -2,17 +2,19 @@ TARGET=main.a
 LIBSYNMAP=synmap/libsynmap.a
 OUI=ui/ui.o
 
-${TARGET}: main.o ${OUI} ${LIBSYNMAP}
+.PHONY: ${LIBSYNMAP} ${TARGET} ${UIO}
+
+${LIBSYNMAP}:
+	cd synmap && ${MAKE}
+
+${UIO}:
+	cd ui && ${MAKE}
+
+${TARGET}: main.o
 	ar crT ${TARGET} main.o ${OUI} ${LIBSYNMAP}
 
 main.o: main.c
 	gcc -c main.c
-
-${LIBSYNMAP}:
-	make --no-print-directory -C synmap
-
-${UIO}:
-	make --no-print-directory -C ui
 
 clean:
 	rm -f *.a *.o

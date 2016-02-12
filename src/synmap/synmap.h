@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "genome/genome.h"
+#include "genome.h"
 
 #ifndef uint
 #define uint unsigned int

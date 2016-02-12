@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "contig.h"
-#include "block/block.h"
+#include "block.h"
 
 #include "itree/itree.h"
 

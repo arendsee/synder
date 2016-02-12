@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#include "block/block.h"
+#include "block.h"
 
 #ifndef uint
 #define uint unsigned int
