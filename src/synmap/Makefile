@@ -2,11 +2,17 @@ TARGET=libsynmap.a
 LIBGENOME=genome/libgenome.a
 CFLAGS=-Wall -pedantic -g
 
-${TARGET}: synmap.o ${LIBGENOME}
-	ar crT ${TARGET} synmap.o ${LIBGENOME}
+${TARGET}: synmap.o synmap_io.o synmap_analysis.o ${LIBGENOME}
+	ar crT ${TARGET} synmap.o synmap_io.o synmap_analysis.o ${LIBGENOME}
 
 synmap.o:
 	gcc ${CFLAGS} -c synmap.[ch]
+
+synmap_io.o:
+	gcc ${CFLAGS} -c synmap_io.[ch]
+	
+synmap_analysis.o:
+	gcc ${CFLAGS} -c synmap_analysis.[ch]
 
 ${LIBGENOME}:
 	make -C genome
