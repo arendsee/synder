@@ -1,5 +1,5 @@
 libitree.a: itree.o interval.o iv.o interval-tree.o ia.o
-	ar crv libitree.a *.o
+	ar cr libitree.a *.o
 
 itree.o: itree.h itree.c iv.o interval-tree.o ia.o
 	gcc -c itree.[hc]

@@ -3,7 +3,7 @@ LIBGENOME=genome/libgenome.a
 CFLAGS=-Wall -pedantic -g
 
 ${TARGET}: synmap.o ${LIBGENOME}
-	ar crTv ${TARGET} synmap.o ${LIBGENOME}
+	ar crT ${TARGET} synmap.o ${LIBGENOME}
 
 synmap.o:
 	gcc ${CFLAGS} -c synmap.[ch]
