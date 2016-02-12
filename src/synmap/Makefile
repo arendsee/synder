@@ -1,29 +1,30 @@
 TARGET=libsynmap.a
 LIBCONTIG=contig/libcontig.a
 CFLAGS=-Wall -pedantic -g
+OBJECTS=synmap.o synmap_io.o synmap_analysis.o genome.o
 
-.PHONY: ${LIBCONTIG} ${TARGET}
+all: make-contig ${TARGET}
 
-${LIBCONTIG}:
+make-contig:
 	cd contig && ${MAKE}
 
-${TARGET}: synmap.o synmap_io.o synmap_analysis.o genome.o
-	ar crT ${TARGET} synmap.o synmap_io.o synmap_analysis.o ${LIBCONTIG}
+${TARGET}: ${OBJECTS}
+	ar crT ${TARGET} ${OBJECTS} ${LIBCONTIG}
 
-synmap.o:
+synmap.o: synmap.c synmap.h genome.h
 	gcc ${CFLAGS} -c synmap.[ch]
 
-synmap_io.o:
+synmap_io.o: synmap_io.c synmap_io.h genome.h
 	gcc ${CFLAGS} -c synmap_io.[ch]
 	
-synmap_analysis.o:
+synmap_analysis.o: synmap_analysis.c synmap_analysis.h genome.h
 	gcc ${CFLAGS} -c synmap_analysis.[ch]
 
-genome.o:
+genome.o: genome.c genome.h
 	gcc ${CFLAGS} -c genome.[ch]
 
 clean:
-	rm -f ${TARGET} *.o *.gch
+	rm -f ${TARGET} ${OBJECTS} *.gch
 
 rclean:
 	make clean

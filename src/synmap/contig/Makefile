@@ -1,18 +1,18 @@
 TARGET=libcontig.a
 LIBITREE=itree/libitree.a
 
-.PHONY: itree-build ${TARGET}
+all: make-itree ${TARGET}
 
-itree-build:
+make-itree:
 	cd itree && ${MAKE}
 
-${TARGET}: contig.o block.o ${LIBITREE}
+${TARGET}: contig.o block.o
 	ar crT ${TARGET} contig.o block.o ${LIBITREE}
 
-contig.o: contig.h contig.h
+contig.o: contig.c contig.h block.h
 	gcc -c contig.[ch]
 
-block.o:
+block.o: block.c block.h
 	gcc -c block.[ch]
 
 clean:

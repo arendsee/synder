@@ -2,12 +2,12 @@ TARGET=main.a
 LIBSYNMAP=synmap/libsynmap.a
 OUI=ui/ui.o
 
-.PHONY: ${LIBSYNMAP} ${TARGET} ${UIO}
+all: build-synmap build-ui ${TARGET}
 
-${LIBSYNMAP}:
+build-synmap:
 	cd synmap && ${MAKE}
 
-${UIO}:
+build-ui:
 	cd ui && ${MAKE}
 
 ${TARGET}: main.o

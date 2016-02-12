@@ -1,9 +1,9 @@
 TARGET=synfull
 LIBMAIN=src/main.a
 
-.PHONY: ${LIBMAIN} ${TARGET}
+all: build-src ${TARGET}
 
-${LIBMAIN}:
+build-src:
 	cd src && ${MAKE}
 
 ${TARGET}:
