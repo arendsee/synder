@@ -1,7 +1,7 @@
 TARGET=libsynmap.a
 LIBCONTIG=contig/libcontig.a
 CFLAGS=-Wall -pedantic -g
-OBJECTS=synmap.o synmap_io.o synmap_analysis.o genome.o
+OBJECTS=synmap.o synmap_io.o analysis.o genome.o
 
 all: make-contig ${TARGET}
 
@@ -17,8 +17,8 @@ synmap.o: synmap.c synmap.h genome.h
 synmap_io.o: synmap_io.c synmap_io.h genome.h
 	gcc ${CFLAGS} -c synmap_io.[ch]
 	
-synmap_analysis.o: synmap_analysis.c synmap_analysis.h genome.h
-	gcc ${CFLAGS} -c synmap_analysis.[ch]
+analysis.o: analysis.c analysis.h genome.h
+	gcc ${CFLAGS} -c analysis.[ch]
 
 genome.o: genome.c genome.h
 	gcc ${CFLAGS} -c genome.[ch]

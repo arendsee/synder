@@ -5,7 +5,7 @@
 #include "ui/ui.h"
 #include "synmap/synmap.h"
 #include "synmap/synmap_io.h"
-#include "synmap/synmap_analysis.h"
+#include "synmap/analysis.h"
 
 int main(int argc, char * argv[]){
 

@@ -1,4 +1,4 @@
-#include "synmap_analysis.h"
+#include "analysis.h"
 
 void analysis_count(Synmap * syn, FILE * intfile){
     char seqname[128];
