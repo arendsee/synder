@@ -24,4 +24,13 @@ void print_block(Block *);
 
 bool overlap(uint, uint, uint, uint);
 
+/** compare intervals by stop
+ *
+ * \todo test sort_contig_by_start and sort_contig_by_stop functions
+ */
+int block_cmp_stop(const void *, const void *);
+
+/** compare intervals by start */
+int block_cmp_start(const void *, const void *);
+
 #endif

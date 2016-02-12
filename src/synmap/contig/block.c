@@ -59,3 +59,17 @@ void print_block(Block * block){
 bool overlap(uint a1, uint a2, uint b1, uint b2){
     return a1 <= b2 && a2 >= b1;
 }
+
+/** Compare by Block stop position */
+int block_cmp_stop(const void *ap, const void *bp){
+    Block * a = * (Block **) ap;
+    Block * b = * (Block **) bp;
+    return((a->stop > b->stop) - (b->stop > a->stop));
+}
+
+/** Compare by Block start position */
+int block_cmp_start(const void *ap, const void *bp){
+    Block * a = * (Block **) ap;
+    Block * b = * (Block **) bp;
+    return((a->start > b->start) - (b->start > a->start));
+}

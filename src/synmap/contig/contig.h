@@ -2,6 +2,7 @@
 #define __CONTIG_H__
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "block.h"
 
@@ -10,11 +11,19 @@
 #endif
 
 /** Contiguous sequence object containing list of Block structures and an
- * interval tree to search them.*/
+ * interval tree to search them.
+ *
+ * Fields:
+ * - name  - a unique name for this contig (e.g. "Chr1")
+ * - size  - number of blocks in the block array
+ * - block - array of pointers to Block objects
+ * - itree - an IntervalTree that allows log(n)+m search of overlapping intervals
+ *
+ * */
 typedef struct {
     char * name;
-    size_t size;
     struct IntervalTree * itree;
+    size_t size;
     Block ** block;
 } Contig;
 
@@ -48,19 +57,19 @@ void free_contig(Contig * contig);
 /** Recursively print contig. */
 void print_contig(Contig * contig);
 
-/**
- * Find index of downstream Block nearest the query point
- */
+/** Find index of downstream Block nearest the query point */
 uint anchor(Contig * contig, uint x);
 
-/**
- * Given two points, find all blocks overlapping them
- */
+/** Given two points, find all blocks overlapping them */
 Contig * get_overlapping(Contig * contig, uint a, uint b);
 
-/**
- * Given two points, find the number of blocks they overlap
- */
+/** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);
+
+/** Sort Block objects by start position */
+void sort_contig_by_start(Contig * contig);
+
+/** Sort Block objects by stop position */
+void sort_contig_by_stop(Contig * contig);
 
 #endif
