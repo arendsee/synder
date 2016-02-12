@@ -11,16 +11,16 @@ Synmap * init_synmap(){
 
 void free_synmap(Synmap * synmap){
     if(synmap){
-        free_genome(synmap->genome[0]);
-        free_genome(synmap->genome[1]);
+        free_genome(SG(synmap, 0));
+        free_genome(SG(synmap, 1));
         free(synmap->genome);
         free(synmap);
     }
 }
 
 void print_synmap(Synmap * synmap){
-    print_genome(synmap->genome[0]);
-    print_genome(synmap->genome[1]);
+    print_genome(SG(synmap, 0));
+    print_genome(SG(synmap, 1));
 }
 
 void check_args(int line_no, int nargs, int correct_nargs){
@@ -58,7 +58,7 @@ Synmap * load_synmap(FILE * synfile){
             if(line[0] == '>'){
                 status = sscanf(line, "> %s %u %c", seqid, &ncontigs, &dummy);
                 check_args(line_no, status, 2);
-                synmap->genome[i] = init_genome(seqid, ncontigs);
+                SG(synmap, i) = init_genome(seqid, ncontigs);
             }
             else if(line[0] == '@'){
                 break;
@@ -66,7 +66,7 @@ Synmap * load_synmap(FILE * synfile){
             else if(line[0] == '$') {
                 status = sscanf(line, "$ %u %u %s %c\n", &id, &nblocks, seqid, &dummy);
                 check_args(line_no, status, 3);
-                synmap->genome[i]->contig[id] = init_contig(seqid, nblocks);
+                SGC(synmap, i, id) = init_contig(seqid, nblocks);
                 unloaded_blocks += nblocks;
             }
             else {
@@ -80,7 +80,6 @@ Synmap * load_synmap(FILE * synfile){
     uint qcon_id, qblk_id, qstart, qstop;
     uint tcon_id, tblk_id, tstart, tstop;
     uint link_id;
-    Block * new_block;
     while ((read = getline(&line, &len, synfile)) != EOF) {
         line_no++;
         if(line[0] != '$')
@@ -96,22 +95,22 @@ Synmap * load_synmap(FILE * synfile){
             exit(EXIT_FAILURE);
         }
         // don't exceed the specified number of Contig in Genome
-        if(qcon_id >= synmap->genome[0]->size || tcon_id >= synmap->genome[1]->size){
+        if(qcon_id >= SG(synmap, 0)->size || tcon_id >= SG(synmap, 1)->size){
             fprintf(stderr, "too few contigs specified\n");
             exit(EXIT_FAILURE);
         }
         // don't exceed the specified size of the Contig block arrays
-        if(qblk_id >= synmap->genome[0]->contig[qcon_id]->size ||
-           tblk_id >= synmap->genome[1]->contig[tcon_id]->size){
+        if(qblk_id >= SGC(synmap, 0, qcon_id)->size ||
+           tblk_id >= SGC(synmap, 1, tcon_id)->size){
             fprintf(stderr, "too few blocks specified\n");
             exit(EXIT_FAILURE);
         }
 
-        new_block = init_block(qstart, qstop, tcon_id, tblk_id, link_id);
-        synmap->genome[0]->contig[qcon_id]->block[qblk_id] = new_block;
-
-        new_block = init_block(tstart, tstop, qcon_id, qblk_id, link_id);
-        synmap->genome[1]->contig[tcon_id]->block[tblk_id] = new_block;
+        SGCB(synmap, 0, qcon_id, qblk_id) =
+            init_block(qstart, qstop, tcon_id, tblk_id, link_id);
+        
+        SGCB(synmap, 1, tcon_id, tblk_id) =
+            init_block(tstart, tstop, qcon_id, qblk_id, link_id);
     }
     free(line);
 
@@ -132,7 +131,7 @@ void analysis_count(Synmap * syn, FILE * intfile){
                    "%d %*s %*s %d %d %*c %*c %*s %s\n",
                    &chrid, &start, &stop, seqname)) != EOF)
     {
-        count = count_overlaps(syn->genome[0]->contig[chrid], start, stop);
+        count = count_overlaps(SGC(syn, 0, chrid), start, stop);
         printf("%s\t%u\n", seqname, count);
     }
 }
@@ -148,11 +147,11 @@ void analysis_map(Synmap * syn, FILE * intfile){
                    "%d %*s %*s %d %d %*c %*c %*s %s\n",
                    &chrid, &start, &stop, seqname)) != EOF)
     {
-        contigs = get_overlapping(syn->genome[0]->contig[chrid], start, stop);
+        contigs = get_overlapping(SGC(syn, 0, chrid), start, stop);
         for(int i = 0; i < contigs->size; i++){
             qblk = contigs->block[i];
-            tcon = syn->genome[1]->contig[qblk->oseqid];
-            tblk = tcon->block[qblk->oblkid];
+            tcon = QT_SGC(syn, qblk);
+            tblk = QT_SGCB(syn, qblk);
             printf("%s %s %u %u\n", seqname, tcon->name, tblk->start, tblk->stop);
         }
     }
