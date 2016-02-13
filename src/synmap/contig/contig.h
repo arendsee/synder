@@ -25,6 +25,9 @@ typedef struct {
     struct IntervalTree * itree;
     size_t size;
     Block ** block;
+    Block ** by_stop;
+    uint start_sorted:1;
+    uint stop_sorted:1;
 } Contig;
 
 /** Allocate memory for a contig and set each field.
@@ -66,10 +69,12 @@ Contig * get_overlapping(Contig * contig, uint a, uint b);
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);
 
-///** Sort Block objects by start position */
-//void sort_contig_by_start(Contig * contig);
-//
-///** Sort Block objects by stop position */
-//void sort_contig_by_stop(Contig * contig);
+Contig * get_flanks(Contig * contig, size_t n, bool left);
+
+/** Sort Block objects by start position */
+void sort_blocks_by_start(Contig * contig);
+
+/** Sort Block objects by stop position */
+void sort_blocks_by_stop(Contig * contig);
 
 #endif

@@ -1,11 +1,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "contig.h"
 #include "block.h"
 
 #include "itree/itree.h"
+#include "itree/search.h"
 
 Contig * init_contig(char * name, size_t size){
     Contig* con = (Contig*)malloc(sizeof(Contig));
@@ -13,6 +15,9 @@ Contig * init_contig(char * name, size_t size){
     con->size = size;
     con->itree = NULL;
     con->block = (Block**)malloc(size * sizeof(Block*));
+    con->by_stop = NULL;
+    con->start_sorted = false;
+    con->stop_sorted  = false;
     return con;
 }
 
@@ -93,12 +98,33 @@ uint count_overlaps(Contig * con, uint a, uint b){
     return count;
 }
 
-/*
+/** \todo check sort_contig_by_start function */
 void sort_contig_by_start(Contig * contig){
-    qsort(*contig->block, contig->size, sizeof(Block*), block_cmp_start);
+    if(!contig->start_sorted){
+        qsort(contig->block, contig->size, sizeof(Block*), block_cmp_start);
+        for(int i = 0; i < contig->size; i++){
+            contig->block[i]->startid = i;
+        }
+        contig->start_sorted = true;
+    }
 }
 
+/** \todo check sort_contig_by_stop function */
 void sort_contig_by_stop(Contig * contig){
-    qsort(*contig->block, contig->size, sizeof(Block*), block_cmp_stop);
+    if(!contig->stop_sorted){
+        if(!contig->by_stop){
+            contig->by_stop = (Block**)malloc(contig->size * sizeof(Block*));
+            memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block*));
+        }
+        qsort(contig->block, contig->size, sizeof(Block*), block_cmp_stop);
+        for(int i = 0; i < contig->size; i++){
+            contig->block[i]->stopid = i;
+        }
+        contig->stop_sorted = true;
+    }
 }
-*/
+
+/** \todo write this (get_flanks) function */
+Contig * get_flanks(Contig * contig, size_t n, bool left){
+    return(contig);
+}

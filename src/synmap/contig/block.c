@@ -38,12 +38,14 @@ void free_block(Block * block){
 
 /** Print all fields in this block (TAB-delimited). */
 void print_block(Block * block){
-    printf("%u\t%u\t%u\t%u\t%u\n", 
+    printf("%u\t%u\t%u\t%u\t%u\t%lu\t%lu\n", 
         block->start,
         block->stop,
         block->oseqid,
         block->oblkid,
-        block->linkid);
+        block->linkid,
+        block->startid,
+        block->stopid);
 }
 
 /**

@@ -5,5 +5,7 @@ synfull
 *.a
 db
 
+doc
+
 # my temp file prefix
 zzz*

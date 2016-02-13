@@ -1,6 +1,7 @@
 #ifndef __BLOCK_H__ 
 #define __BLOCK_H__
 
+#include <stdlib.h>
 #include <stdbool.h>
 
 #ifndef uint
@@ -14,6 +15,8 @@ typedef struct {
     uint oseqid;
     uint oblkid;
     uint linkid;
+    size_t startid;
+    size_t stopid;
 } Block;
 
 Block * init_block(uint, uint, uint, uint, uint);
