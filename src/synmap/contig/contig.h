@@ -66,10 +66,10 @@ Contig * get_overlapping(Contig * contig, uint a, uint b);
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);
 
-/** Sort Block objects by start position */
-void sort_contig_by_start(Contig * contig);
-
-/** Sort Block objects by stop position */
-void sort_contig_by_stop(Contig * contig);
+///** Sort Block objects by start position */
+//void sort_contig_by_start(Contig * contig);
+//
+///** Sort Block objects by stop position */
+//void sort_contig_by_stop(Contig * contig);
 
 #endif

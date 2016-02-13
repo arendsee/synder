@@ -93,10 +93,12 @@ uint count_overlaps(Contig * con, uint a, uint b){
     return count;
 }
 
+/*
 void sort_contig_by_start(Contig * contig){
-    qsort(contig->block, contig->size, sizeof(Block*), block_cmp_start);
+    qsort(*contig->block, contig->size, sizeof(Block*), block_cmp_start);
 }
 
 void sort_contig_by_stop(Contig * contig){
-    qsort(contig->block, contig->size, sizeof(Block*), block_cmp_stop);
+    qsort(*contig->block, contig->size, sizeof(Block*), block_cmp_stop);
 }
+*/
