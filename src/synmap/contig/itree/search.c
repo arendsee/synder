@@ -177,11 +177,14 @@ void get_interval_overlaps_r(Interval * inv, struct IntervalTree * tree, Interva
         }
     }
     else{
+fprintf(stderr, "in\n");
         /** \todo In itree, make explicit function for splicing an IV and IA */
         for(int i = 0; i < tree->by_start->size; i++){
             iv_add(results->iv, tree->by_start->v[i]);
         }
-        get_interval_overlaps_r(inv, tree->r_child, results);
-        get_interval_overlaps_r(inv, tree->l_child, results);
+        if(tree->r_child)
+            get_interval_overlaps_r(inv, tree->r_child, results);
+        if(tree->l_child)
+            get_interval_overlaps_r(inv, tree->l_child, results);
     }
 }
