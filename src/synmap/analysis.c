@@ -20,6 +20,7 @@ void analysis_map(Synmap * syn, FILE * intfile){
     Contig * tcon;
     Block * qblk;
     Block * tblk;
+    Block twoblk;
     bool missing;
     while ((fscanf(intfile,
                    "%d %*s %*s %d %d %*c %*c %*s %s\n",
@@ -27,10 +28,15 @@ void analysis_map(Synmap * syn, FILE * intfile){
     {
         missing = false;
         contigs = get_region(SGC(syn, 0, chrid), start, stop);
-        if(contigs->size < 3){
-            qblk = contigs->block[0];
-            if(!overlap(qblk->start, qblk->stop, start, stop) || contigs->size == 1){
-                missing = true;      
+        // If the interval is between blocks, the size will ALWAYS be 2,
+        // However, one of these may be NULL
+        if(contigs->size == 2){
+            twoblk.start = start;
+            twoblk.stop = stop;
+            if(!((CB(contigs, 0) && block_overlap(CB(contigs, 0), &twoblk)) || 
+                 (CB(contigs, 1) && block_overlap(CB(contigs, 1), &twoblk))
+                )){
+                missing = true;
             }
         }
         for(int i = 0; i < contigs->size; i++){

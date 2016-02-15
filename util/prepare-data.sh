@@ -46,7 +46,7 @@ die-instructively(){
 # ============================================================================
 
 append_counts() {
-sort -k${1},${1}n -k${2}n | awk -v NC=$1 '
+sort -k${1},${1} -k${2},${2}n -k${3},${3}n | awk -v NC=$1 '
         BEGIN { blkid=0; seqid=0 }
         NR == 1 { s = $NC }
         s != $NC {
@@ -80,14 +80,14 @@ write_side() {
 }
 
 parse() {
-    intput=$1
+    input=$1
     outbase=$2
     query=$3
     target=$4
     outdb=${outbase}.txt
     outtmp=${outbase}_temp.txt
-    append_counts 1 2 < $input |
-        append_counts 4 5 |
+    append_counts 1 2 3 < $input |
+        append_counts 4 5 6 |
         awk '{print $0, linkid++}' > $outtmp
     > $outdb
     write_side $query  1 9  < $outtmp >> $outdb

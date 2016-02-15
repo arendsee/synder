@@ -83,6 +83,8 @@ uint anchor(Contig * contig, uint x);
  *
  * Otherwise, return the blocks above and below the input region
  *
+ * If there is no block above or below, return NULL
+ *
  * */
 Contig * get_region(Contig * contig, uint a, uint b);
 
