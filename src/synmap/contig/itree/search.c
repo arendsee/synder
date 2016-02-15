@@ -22,7 +22,7 @@ uint count_point_overlaps(uint point, struct IntervalTree * tree){
 }
 
 IntervalResult * init_IntervalResult(size_t size){
-    IntervalResult * res = (IntervalResult *)malloc(sizeof(IntervalResult *));
+    IntervalResult * res = (IntervalResult *)malloc(sizeof(IntervalResult));
     res->iv = iv_init(size);
     res->inbetween = false;
     return(res);

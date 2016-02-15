@@ -140,18 +140,3 @@ void sort_blocks_by_stop(Contig * contig){
         contig->stop_sorted = true;
     }
 }
-
-
-// Contig * get_left_flanks(Contig * contig, size_t n){
-//     if(!contig->stop_sorted)
-//         sort_contig_by_stop(contig);
-//     return contig;
-//     
-// }
-// 
-// /** \todo write this (get_flanks) function */
-// Contig * get_right_flanks(Contig * contig, size_t n){
-//     if(!contig->start_sorted)
-//         sort_contig_by_start(contig);
-//     return contig;
-// }
