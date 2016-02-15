@@ -46,7 +46,7 @@ die-instructively(){
 # ============================================================================
 
 append_counts() {
-sort -k$1,$1 -k${2}n | awk -v NC=$1 '
+sort -k${1},${1}n -k${2}n | awk -v NC=$1 '
         BEGIN { blkid=0; seqid=0 }
         NR == 1 { s = $NC }
         s != $NC {
