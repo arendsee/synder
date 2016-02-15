@@ -1,6 +1,8 @@
 #ifndef __IV_H__
 #define __IV_H__
 
+#define IV_INITIAL_SIZE 8
+
 #include <stdlib.h>
 
 #include "interval.h"

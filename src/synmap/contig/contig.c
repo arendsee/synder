@@ -79,12 +79,12 @@ Contig * get_overlapping(Contig * con, uint a, uint b){
     if(!con->itree)
         con->itree = build_tree(ia_from_blocks(con));
     Interval * inv = init_interval(a, b); 
-    IA * ia = get_interval_overlaps(inv, con->itree);
-    Contig * newcon = init_contig(con->name, ia->size);
-    for(int i = 0; i < ia->size; i++){
-        newcon->block[i] = (Block*)(ia->v[i].link);
+    IntervalResult * res = get_interval_overlaps(inv, con->itree);
+    Contig * newcon = init_contig(con->name, res->iv->size);
+    for(int i = 0; i < res->iv->size; i++){
+        newcon->block[i] = (Block*)(res->iv->data[i].link);
     }
-    free_ia(ia);
+    free_IntervalResult(res);
     free(inv);
     return newcon;
 }
@@ -124,7 +124,17 @@ void sort_contig_by_stop(Contig * contig){
     }
 }
 
-/** \todo write this (get_flanks) function */
-Contig * get_flanks(Contig * contig, size_t n, bool left){
-    return(contig);
-}
+
+// Contig * get_left_flanks(Contig * contig, size_t n){
+//     if(!contig->stop_sorted)
+//         sort_contig_by_stop(contig);
+//     return contig;
+//     
+// }
+// 
+// /** \todo write this (get_flanks) function */
+// Contig * get_right_flanks(Contig * contig, size_t n){
+//     if(!contig->start_sorted)
+//         sort_contig_by_start(contig);
+//     return contig;
+// }

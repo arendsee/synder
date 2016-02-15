@@ -69,7 +69,8 @@ Contig * get_overlapping(Contig * contig, uint a, uint b);
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);
 
-Contig * get_flanks(Contig * contig, size_t n, bool left);
+// /** Get intervals flanking input interval */
+// Contig * get_flanks(Contig * contig, size_t n, bool left);
 
 /** Sort Block objects by start position */
 void sort_blocks_by_start(Contig * contig);
