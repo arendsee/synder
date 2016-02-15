@@ -16,6 +16,14 @@
 
 #define GET_RESULT_BLOCK(result, i) (Block*)result->iv->data[(i)].link
 
+#define CB(con, i) (con)->block[(i)]
+
+#define CB_STOP(con, i)  (con)->block[(i)]->stop
+#define CB_START(con, i) (con)->block[(i)]->start
+
+#define CB_STOPID(con, i)  (con)->block[(i)]->stopid
+#define CB_STARTID(con, i) (con)->block[(i)]->startid
+
 /** Contiguous sequence object containing list of Block structures and an
  * interval tree to search them.
  *
