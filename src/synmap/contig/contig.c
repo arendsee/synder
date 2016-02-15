@@ -116,7 +116,7 @@ uint count_overlaps(Contig * con, uint a, uint b){
 }
 
 /** \todo check sort_contig_by_start function */
-void sort_contig_by_start(Contig * contig){
+void sort_blocks_by_start(Contig * contig){
     if(!contig->start_sorted){
         qsort(contig->block, contig->size, sizeof(Block*), block_cmp_start);
         for(int i = 0; i < contig->size; i++){
@@ -127,7 +127,7 @@ void sort_contig_by_start(Contig * contig){
 }
 
 /** \todo check sort_contig_by_stop function */
-void sort_contig_by_stop(Contig * contig){
+void sort_blocks_by_stop(Contig * contig){
     if(!contig->stop_sorted){
         if(!contig->by_stop){
             contig->by_stop = (Block**)malloc(contig->size * sizeof(Block*));
