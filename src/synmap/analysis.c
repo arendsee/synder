@@ -35,10 +35,16 @@ void analysis_map(Synmap * syn, FILE * intfile){
         }
         for(int i = 0; i < contigs->size; i++){
             qblk = contigs->block[i];
-            tcon = QT_SGC(syn, qblk);
-            tblk = QT_SGCB(syn, qblk);
-            printf("%s %s %u %u %d\n",
-                   seqname, tcon->name, tblk->start, tblk->stop, missing);
+            if(qblk){
+                tcon = QT_SGC(syn, qblk);
+                tblk = QT_SGCB(syn, qblk);
+                printf("%s %s %u %u %d\n",
+                       seqname, tcon->name, tblk->start, tblk->stop, missing);
+            }
+            else {
+                printf("%s %s %s %s %d\n", 
+                       seqname, tcon->name, "NA", "NA", missing);
+            }
         }
     }
 }
