@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "contig.h"
 #include "block.h"
@@ -75,15 +76,31 @@ IA * ia_from_blocks(Contig * con){
     return ia;
 }
 
-Contig * get_overlapping(Contig * con, uint a, uint b){
+Contig * get_region(Contig * con, uint a, uint b){
     if(!con->itree)
         con->itree = build_tree(ia_from_blocks(con));
     Interval * inv = init_interval(a, b); 
     IntervalResult * res = get_interval_overlaps(inv, con->itree);
-    Contig * newcon = init_contig(con->name, res->iv->size);
-    for(int i = 0; i < res->iv->size; i++){
-        newcon->block[i] = (Block*)(res->iv->data[i].link);
+    Contig * newcon;
+    if(res->inbetween){
+        // Only one adjacent region should be returned in the inbetween case
+        assert(res->iv->size == 1); 
+        newcon = init_contig(con->name, 2);
+        Block * nearest = GET_RESULT_BLOCK(res, 0);
+        if(nearest->stop < a){
+            newcon->block[0] = nearest; 
+            newcon->block[1] = NEXT_BLOCK_BYSTART(con, newcon->block[0]);
+        } else {
+            newcon->block[1] = nearest; 
+            newcon->block[0] = PREV_BLOCK_BYSTOP(con, newcon->block[1]);
+        }
     }
+    else {
+        newcon = init_contig(con->name, res->iv->size);
+        for(int i = 0; i < res->iv->size; i++){
+            newcon->block[i] = GET_RESULT_BLOCK(res, i);
+        }
+    } 
     free_IntervalResult(res);
     free(inv);
     return newcon;

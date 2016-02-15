@@ -10,6 +10,12 @@
 #define uint unsigned int
 #endif
 
+#define NEXT_BLOCK_BYSTART(con, blk) (blk->startid + 1) < con->size ? con->block[blk->startid + 1] : NULL
+
+#define PREV_BLOCK_BYSTOP(con, blk) (blk->stopid > 0) ? con->block[blk->stopid - 1] : NULL
+
+#define GET_RESULT_BLOCK(result, i) (Block*)result->iv->data[(i)].link
+
 /** Contiguous sequence object containing list of Block structures and an
  * interval tree to search them.
  *
@@ -63,8 +69,14 @@ void print_contig(Contig * contig);
 /** Find index of downstream Block nearest the query point */
 uint anchor(Contig * contig, uint x);
 
-/** Given two points, find all blocks overlapping them */
-Contig * get_overlapping(Contig * contig, uint a, uint b);
+/** Given two points, find all blocks overlapping or flanking them
+ *
+ * If there is at least one overlapping block, return all overlapping blocks
+ *
+ * Otherwise, return the blocks above and below the input region
+ *
+ * */
+Contig * get_region(Contig * contig, uint a, uint b);
 
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);

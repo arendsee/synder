@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "synmap.h"
+#include "contig/contig.h"
 
 /** Count blocks overlapping intervals in intfile
  *

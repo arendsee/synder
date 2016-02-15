@@ -27,6 +27,8 @@ void print_block(Block *);
 
 bool overlap(uint, uint, uint, uint);
 
+bool block_overlap(Block *, Block *);
+
 /** compare intervals by stop
  *
  * \todo test sort_contig_by_start and sort_contig_by_stop functions

@@ -62,6 +62,15 @@ bool overlap(uint a1, uint a2, uint b1, uint b2){
     return a1 <= b2 && a2 >= b1;
 }
 
+/**
+ * Determine whether two Blocks overlap 
+ *
+ * @return TRUE if they overlap 
+ */
+bool block_overlap(Block * a, Block * b){
+    return a->start <= b->stop && a->stop >= b->start;
+}
+
 /** Compare by Block stop position */
 int block_cmp_stop(const void *ap, const void *bp){
     Block * a = (Block *) ap;
