@@ -6,6 +6,8 @@
 
 #include "ui.h"
 
+#define MAX_POS 3
+
 /** contains all legal arguments from all subcommands */
 Arguments create_Arguments() {
     Arguments args = {
@@ -13,7 +15,8 @@ Arguments create_Arguments() {
         .intfile = NULL,
         .hitfile = NULL,
         .db_filename  = NULL,
-        .cmd = NULL
+        .cmd = NULL,
+        .pos = (char **)malloc(MAX_POS * sizeof(char *))
     };
     return args;
 }
@@ -27,6 +30,11 @@ void close_Arguments(Arguments arg){
         fclose(arg.hitfile);
     if(arg.db_filename)
         free(arg.db_filename);
+    if(arg.pos)
+        for(int i = 0; i < 3; i++){
+            free(arg.pos[i]);
+        }
+        free(arg.pos);
     if(arg.cmd)
         free(arg.cmd);
 }
@@ -87,6 +95,14 @@ Arguments parse_command(int argc, char * argv[]){
             case '?':
                 exit(EXIT_FAILURE);
         }
+    }
+
+    for(int i = 0; optind < argc; optind++, i++){		
+        if(i >= MAX_POS){		
+            printf("There can be only %d positionals\n", MAX_POS);		
+            exit(EXIT_FAILURE);		
+        }		
+        args.pos[i] = strdup(argv[optind]);		
     }
     return args;
 }

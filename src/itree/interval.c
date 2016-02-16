@@ -34,11 +34,11 @@ Pos point_overlap(unsigned int a, Interval * b){
     }
 }
 
-Pos interval_overlap(Interval a, Interval b){
-    if(a.stop < b.start){
+Pos interval_overlap(Interval * a, Interval * b){
+    if(a->stop < b->start){
         return lo;
     }
-    else if(a.start > b.stop){
+    else if(a->start > b->stop){
         return hi;
     }
     else{

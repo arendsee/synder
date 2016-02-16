@@ -12,7 +12,7 @@ typedef struct {
 Interval * init_interval(unsigned int start, unsigned int stop);
 
 /** position of Interval or point A relative to B */
-typedef enum {lo, in, hi} Pos;
+typedef enum {lo=0, in=1, hi=2} Pos;
 
 /** compare intervals by stop */
 int cmp_stop(const void *, const void *);
@@ -24,6 +24,6 @@ int cmp_start(const void *, const void *);
 Pos point_overlap(unsigned int A, Interval * B);
 
 /** find position of interval A relative to interval B (see Pos) */
-Pos interval_overlap(Interval, Interval);
+Pos interval_overlap(Interval *, Interval *);
 
 #endif
