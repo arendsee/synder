@@ -47,7 +47,7 @@ int main(int argc, char * argv[]){
 
     if(args.hitfile){
         if(strcmp(args.cmd, "filter") == 0){
-            int width = 1000;
+            int width = 5000;
             analysis_filter(syn, args.hitfile, single_advocate, &width);
         }
     }

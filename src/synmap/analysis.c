@@ -86,7 +86,6 @@ bool single_advocate(Synmap * syn, Link * query, void * width_ptr){
     // get the region that actually overlaps (or flanks, if the query is inbetween hits)
     con = get_region(SGC(syn, 0, query->qseqid), query->qstart, query->qstop);
 
-
     // determine the search interval on the query
     Block qgood = {
         .start = (query->qstart > width) ? query->qstart - width : 0,
@@ -103,25 +102,29 @@ bool single_advocate(Synmap * syn, Link * query, void * width_ptr){
     // Query contig pointer
     qcon = SGC(syn, 0, query->qseqid);
 
-    // look down
-    int lo_id = CB_STOPID(con, 0);
-    for(; lo_id >= 0 && CB_STOP(qcon, lo_id) > qgood.start; lo_id--){
-        qblk = CB(qcon, lo_id); 
-        if(qblk->oseqid == query->tseqid){
-            tblk = QT_SGCB(syn, qblk);
-            if(block_overlap(&tgood, tblk))
-                return true;
+    if(con->block[0]){
+        // look down
+        int lo_id = CB_STOPID(con, 0);
+        for(; lo_id >= 0 && CB_STOP(qcon, lo_id) > qgood.start; lo_id--){
+            qblk = CB(qcon, lo_id); 
+            if(qblk->oseqid == query->tseqid){
+                tblk = QT_SGCB(syn, qblk);
+                if(block_overlap(&tgood, tblk))
+                    return true;
+            }
         }
     }
 
-    // look up 
-    int hi_id = CB_STARTID(con, con->size - 1);
-    for(; hi_id < qcon->size && CB_START(qcon, hi_id) < qgood.stop; hi_id++){
-        qblk = CB(qcon, hi_id); 
-        if(qblk->oseqid == query->tseqid){
-            tblk = QT_SGCB(syn, qblk);
-            if(block_overlap(&tgood, tblk))
-                return true;
+    if(con->block[con->size - 1]){
+        // look up 
+        int hi_id = CB_STARTID(con, con->size - 1);
+        for(; hi_id < qcon->size && CB_START(qcon, hi_id) < qgood.stop; hi_id++){
+            qblk = CB(qcon, hi_id); 
+            if(qblk->oseqid == query->tseqid){
+                tblk = QT_SGCB(syn, qblk);
+                if(block_overlap(&tgood, tblk))
+                    return true;
+            }
         }
     }
     
