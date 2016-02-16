@@ -6,7 +6,7 @@
 #include "ia.h"
 #include "iv.h"
 #include "interval.h"
-#include "interval-tree.h"
+#include "itree.h"
 
 #ifdef uint
 #define uint unsigned int

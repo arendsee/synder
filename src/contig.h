@@ -14,7 +14,7 @@
 
 #define PREV_BLOCK_BYSTOP(con, blk) (blk->stopid > 0) ? con->block[blk->stopid - 1] : NULL
 
-#define GET_RESULT_BLOCK(result, i) (Block*)result->iv->data[(i)].link
+#define GET_RESULT_BLOCK(result, i) (Block*)result->iv->v[(i)].link
 
 #define CB(con, i) (con)->block[(i)]
 

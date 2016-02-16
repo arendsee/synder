@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ui/ui.h"
-#include "synmap/synmap.h"
-#include "synmap/synmap_io.h"
-#include "synmap/analysis.h"
+#include "ui.h"
+#include "io.h"
+#include "synmap.h"
+#include "analysis.h"
 
 int main(int argc, char * argv[]){
 

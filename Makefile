@@ -1,13 +1,8 @@
 TARGET=synfull
-LIBMAIN=src/main.a
 
-all: build-src ${TARGET}
-
-build-src:
+all:
 	cd src && ${MAKE}
-
-${TARGET}:
-	gcc -o ${TARGET} ${LIBMAIN}
+	mv src/${TARGET} ${TARGET}
 
 docs:
 	doxygen Doxyfile
@@ -17,4 +12,4 @@ clean:
 
 rclean:
 	make clean
-	make -C src --no-print-directory rclean
+	make -C src --no-print-directory clean

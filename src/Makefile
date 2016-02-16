@@ -1,25 +1,13 @@
-TARGET=main.a
-LIBSYNMAP=synmap/libsynmap.a
-OUI=ui/ui.o
+CFLAGS=-Wall -Ofast
+CC=gcc
+TARGET=synfull
 
-all: build-synmap build-ui ${TARGET}
+${TARGET}:
+	${CC} -o ${TARGET} ${CFLAGS} *.c *.h itree/*.c itree/*.h
 
-build-synmap:
-	cd synmap && ${MAKE}
-
-build-ui:
-	cd ui && ${MAKE}
-
-${TARGET}: main.o
-	ar crT ${TARGET} main.o ${OUI} ${LIBSYNMAP}
-
-main.o: main.c
-	gcc -c main.c
+profiler-build:
+	${CC} -o ${TARGET} ${CFLAGS} -pg *.c *.h itree/*.c itree/*.h
 
 clean:
-	rm -f *.a *.o
-
-rclean:
-	make clean
-	make --no-print-directory -C synmap rclean
-	make --no-print-directory -C ui clean
+	rm -f *.o *.gch ${TARGET}
+	rm -f itree/*.o itree/*.gch

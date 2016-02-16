@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include "synmap_io.h"
+#include "io.h"
 
 void check_args(int line_no, int nargs, int correct_nargs);
 

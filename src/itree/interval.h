@@ -21,7 +21,7 @@ int cmp_stop(const void *, const void *);
 int cmp_start(const void *, const void *);
 
 /** find position of point A relative to interval B (see Pos) */
-Pos point_overlap(unsigned int A, Interval B);
+Pos point_overlap(unsigned int A, Interval * B);
 
 /** find position of interval A relative to interval B (see Pos) */
 Pos interval_overlap(Interval, Interval);

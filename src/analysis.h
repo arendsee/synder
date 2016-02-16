@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "synmap.h"
-#include "contig/contig.h"
+#include "contig.h"
 
 /** Count blocks overlapping intervals in intfile
  *

@@ -22,11 +22,11 @@ int cmp_start(const void *ap, const void *bp){
     return((a.start > b.start) - (b.start > a.start));
 }
 
-Pos point_overlap(unsigned int a, Interval b){
-    if(a < b.start){
+Pos point_overlap(unsigned int a, Interval * b){
+    if(a < b->start){
         return lo;
     }
-    else if(a > b.stop){
+    else if(a > b->stop){
         return hi;
     }
     else{
