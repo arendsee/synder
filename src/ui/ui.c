@@ -11,6 +11,7 @@ Arguments create_Arguments() {
     Arguments args = {
         .synfile = NULL,
         .intfile = NULL,
+        .hitfile = NULL,
         .db_filename  = NULL,
         .cmd = NULL
     };
@@ -22,6 +23,8 @@ void close_Arguments(Arguments arg){
         fclose(arg.synfile);
     if(arg.intfile)
         fclose(arg.intfile);
+    if(arg.hitfile)
+        fclose(arg.hitfile);
     if(arg.db_filename)
         free(arg.db_filename);
     if(arg.cmd)
@@ -44,6 +47,8 @@ void print_help(){
     printf("USAGE: synfull -i GFF_FILE -s SYNTENY_DB\n");
     printf("$ synfull -d at-al.tab athalian alyrata db\n");
     printf("$ synfull -i at.gff -s db/at_al.tab -c count\n");
+    printf("$ synfull -i at.gff -s db/at_al.tab -c map\n");
+    printf("$ synfull -f hits.syn -s db/at_al.tab -c filter\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -53,7 +58,7 @@ Arguments parse_command(int argc, char * argv[]){
     int opt;
     FILE * temp;
     Arguments args = create_Arguments();
-    while((opt = getopt(argc, argv, "hd:s:i:c:")) != -1){
+    while((opt = getopt(argc, argv, "hd:s:i:c:f:")) != -1){
         switch(opt) {
             case 'h':
                 print_help();
@@ -71,6 +76,10 @@ Arguments parse_command(int argc, char * argv[]){
             case 'i':
                 args.intfile = fopen(optarg, "r");
                 check_file(args.intfile, optarg);
+                break;
+            case 'f':
+                args.hitfile = fopen(optarg, "r");
+                check_file(args.hitfile, optarg);
                 break;
             case 'c':
                 args.cmd = strdup(optarg);

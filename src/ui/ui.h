@@ -7,6 +7,7 @@
 typedef struct Arguments {
     FILE * synfile;
     FILE * intfile;
+    FILE * hitfile;
     char * db_filename;
     char * cmd;
     char ** pos;

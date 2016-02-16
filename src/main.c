@@ -45,6 +45,13 @@ int main(int argc, char * argv[]){
         print_help();
     }
 
+    if(args.hitfile){
+        if(strcmp(args.cmd, "filter") == 0){
+            int width = 1000;
+            analysis_filter(syn, args.hitfile, single_advocate, &width);
+        }
+    }
+
     if(args.intfile){
         if(strcmp(args.cmd, "count") == 0){
             analysis_count(syn, args.intfile);

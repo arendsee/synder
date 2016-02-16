@@ -60,62 +60,75 @@ void analysis_map(Synmap * syn, FILE * intfile){
 
 void analysis_filter(Synmap * syn, FILE * hitfile,
                      bool(*classifier)(Synmap *, Link *, void *), void * arg){
+    sort_all_contigs(syn);
     Link link;
-    char * line;
-    size_t len;
-    int read;
+    char * line = NULL;
+    size_t len = 0;
+    int read = 0;
     bool agrees;
     while ((read = getline(&line, &len, hitfile)) != EOF){
-        scanf(line, "%d %d %d %d %d %d\n",
+        sscanf(line, "%lu %u %u %lu %u %u\n",
                      &link.qseqid, &link.qstart, &link.qstop,
                      &link.tseqid, &link.tstart, &link.tstop);
         agrees = classifier(syn, &link, arg);
-        printf("%d %s\n", agrees, line);
+        printf("%d\t%s", agrees, line);
     }
+    free(line);
 }
 
 bool single_advocate(Synmap * syn, Link * query, void * width_ptr){
-    uint width, max_pos, min_pos;
-    Contig * con;
+    uint width;
+    Contig * con, * qcon;
     Block * qblk, *tblk;
+
     width = * (uint *)width_ptr; 
 
-    con = get_region(SGC(syn, 0, query->qseqid),
-                                  query->qstart, query->qstop);
+    // get the region that actually overlaps (or flanks, if the query is inbetween hits)
+    con = get_region(SGC(syn, 0, query->qseqid), query->qstart, query->qstop);
 
-    if(!con->start_sorted)
-        sort_blocks_by_start(con);
 
-    if(!con->stop_sorted)
-        sort_blocks_by_stop(con);
+    // determine the search interval on the query
+    Block qgood = {
+        .start = (query->qstart > width) ? query->qstart - width : 0,
+        .stop  = query->qstop + width
+    };
 
-    min_pos = (query->qstart > width) ? query->qstart - width : 0;
-    max_pos = query->qstop + width;
+    // determine the search interval on the target
+    Block tgood = {
+        .start = (query->tstart > width) ? query->tstart - width : 0,
+        .stop  = query->tstop + width
+    };
+
+
+    // Query contig pointer
+    qcon = SGC(syn, 0, query->qseqid);
 
     // look down
     int lo_id = CB_STOPID(con, 0);
-    for(; lo_id >= 0 && CB_STOP(con, lo_id) > min_pos; lo_id--){
-        qblk = CB(con, lo_id); 
-        if(qblk->stop >= query->qstart)
-            continue;
+    for(; lo_id >= 0 && CB_STOP(qcon, lo_id) > qgood.start; lo_id--){
+        qblk = CB(qcon, lo_id); 
         if(qblk->oseqid == query->tseqid){
             tblk = QT_SGCB(syn, qblk);
-            if(overlap(query->tstart, query->tstop, tblk->start, tblk->stop))
+            if(block_overlap(&tgood, tblk))
                 return true;
         }
     }
 
     // look up 
     int hi_id = CB_STARTID(con, con->size - 1);
-    for(; hi_id < con->size && CB_START(con, hi_id) < max_pos; hi_id++){
-        qblk = CB(con, hi_id); 
-        if(qblk->start <= query->qstop)
-            continue;
+    for(; hi_id < qcon->size && CB_START(qcon, hi_id) < qgood.stop; hi_id++){
+        qblk = CB(qcon, hi_id); 
         if(qblk->oseqid == query->tseqid){
             tblk = QT_SGCB(syn, qblk);
-            if(overlap(query->tstart, query->tstop, tblk->start, tblk->stop))
+            if(block_overlap(&tgood, tblk))
                 return true;
         }
     }
+    
+    /** \todo find the memory leak  */
+    free(con->block);
+    free(con->name);
+    free(con->by_stop);
+    free(con);
     return false;
 }
