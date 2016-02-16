@@ -14,6 +14,10 @@ void analysis_count(Synmap * syn, FILE * intfile){
 }
 
 void analysis_map(Synmap * syn, FILE * intfile){
+
+    // contigs must be sorted before mapping
+    sort_all_contigs(syn);
+
     char seqname[128];
     int chrid, start, stop;
     Contig * contigs;
@@ -47,11 +51,10 @@ void analysis_map(Synmap * syn, FILE * intfile){
                 printf("%s %s %u %u %d\n",
                        seqname, tcon->name, tblk->start, tblk->stop, missing);
             }
-            else {
-                printf("%s %s %s %s %d\n", 
-                       seqname, tcon->name, "NA", "NA", missing);
-            }
         }
+        free(contigs->name);
+        free(contigs->block);
+        free(contigs);
     }
 }
 

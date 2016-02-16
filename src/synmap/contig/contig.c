@@ -27,7 +27,11 @@ void free_contig(Contig * contig){
         if(contig->itree)
             free_interval_tree(contig->itree);
         for(int i = 0; i < contig->size; i++){
-            free_block(contig->block[i]);
+            if(contig->block[i])
+                free_block(contig->block[i]);
+        }
+        if(contig->by_stop){
+            free(contig->by_stop);
         }
         free(contig->block);
         free(contig->name);
@@ -79,8 +83,8 @@ IA * ia_from_blocks(Contig * con){
 Contig * get_region(Contig * con, uint a, uint b){
     if(!con->itree)
         con->itree = build_tree(ia_from_blocks(con));
-    Interval * inv = init_interval(a, b); 
-    IntervalResult * res = get_interval_overlaps(inv, con->itree);
+    Interval inv = {.start = a, .stop = b}; 
+    IntervalResult * res = get_interval_overlaps(&inv, con->itree);
     Contig * newcon;
     if(res->inbetween){
         // Only one adjacent region should be returned in the inbetween case
@@ -102,7 +106,6 @@ Contig * get_region(Contig * con, uint a, uint b){
         }
     } 
     free_IntervalResult(res);
-    free(inv);
     return newcon;
 }
 

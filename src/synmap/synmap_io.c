@@ -89,8 +89,6 @@ Synmap * load_synmap(FILE * synfile){
         exit(EXIT_FAILURE);
     }
 
-    sort_all_contigs(synmap);
-
     return(synmap);
 }
 
