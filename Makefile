@@ -1,6 +1,6 @@
-TARGET=synfull
+TARGET=run
 
-all:
+${TARGET}: ${OBJECTS}
 	cd src && ${MAKE}
 	mv src/${TARGET} ${TARGET}
 
