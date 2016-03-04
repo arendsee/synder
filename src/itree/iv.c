@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "iv.h"
 
@@ -40,7 +41,28 @@ void iv_join (IV * self, IA * other){
     self->size += other->size;
 }
 
+
+
+// ------------------------------------------------------------------
+// Test code
+// ------------------------------------------------------------------
+
 bool test_iv(){
-    printf("This is a stub\n");
+    IV * iv = iv_init(2);
+    Interval * a = init_interval(12,22);
+    Interval * b = init_interval(23,33);
+    Interval * c = init_interval(34,44);
+
+    printf("iv: vector realloc when size is passed\n");
+    iv_add(iv, *a);
+    iv_add(iv, *b);
+    assert(iv->available == 2);
+    iv_add(iv, *c);
+    assert(iv->available == 4);
+
+    printf("iv: correct addition of elements\n");
+    assert(iv->v[0].start == 12);
+    assert(iv->v[1].start == 23);
+    assert(iv->v[2].start == 34);
     return true;
 }
