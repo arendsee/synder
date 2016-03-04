@@ -1,6 +1,6 @@
 TARGET=run
 
-${TARGET}: ${OBJECTS}
+all:
 	cd src && ${MAKE}
 	mv src/${TARGET} ${TARGET}
 
