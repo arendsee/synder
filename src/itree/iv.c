@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "iv.h"
 
@@ -36,4 +38,9 @@ void iv_join (IV * self, IA * other){
     }
     memcpy(self->v + self->size, other->v, other->size * sizeof(other->v[0]));
     self->size += other->size;
+}
+
+bool test_iv(){
+    printf("This is a stub\n");
+    return true;
 }

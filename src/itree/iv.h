@@ -4,6 +4,8 @@
 #define IV_INITIAL_SIZE 8
 
 #include <stdlib.h>
+#include <stdbool.h>
+
 
 #include "interval.h"
 #include "ia.h"
@@ -22,5 +24,7 @@ void iv_add (IV *, Interval);
 void iv_join (IV *, IA *);
 
 void iv_free(IV *);
+
+bool test_iv();
 
 #endif

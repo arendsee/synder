@@ -6,6 +6,7 @@
 #include "io.h"
 #include "synmap.h"
 #include "analysis.h"
+#include "test.h"
 
 int main(int argc, char * argv[]){
 
@@ -20,6 +21,9 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Do stuff 
     // ------------------------------------------------------------------------
+    
+    if(args.test)
+        return test_all();
 
     /** \todo Replace a system call to the prepare-data.sh script with a raw
      * synteny file to parser in synmap  */
