@@ -64,5 +64,11 @@ bool test_iv(){
     assert(iv->v[0].start == 12);
     assert(iv->v[1].start == 23);
     assert(iv->v[2].start == 34);
+
+    free(a);
+    free(b);
+    free(c);
+    iv_free(iv);
+
     return true;
 }

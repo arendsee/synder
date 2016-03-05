@@ -23,7 +23,7 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     
     if(args.test)
-        return test_all();
+        test_all();
 
     /** \todo Replace a system call to the prepare-data.sh script with a raw
      * synteny file to parser in synmap  */
@@ -44,7 +44,7 @@ int main(int argc, char * argv[]){
         syn = load_synmap(args.synfile);
     }
 
-    if(!syn){
+    if(!(syn || args.test)){
         printf("Nothing to do ...\n");
         print_help();
     }
@@ -73,7 +73,8 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Clean up
     // ------------------------------------------------------------------------
-    free_synmap(syn);
+    if(syn)
+        free_synmap(syn);
     close_Arguments(args);
 
     return(EXIT_SUCCESS);

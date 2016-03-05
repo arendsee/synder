@@ -21,6 +21,7 @@ Arguments create_Arguments() {
         .pos = (char **)malloc(MAX_POS * sizeof(char *)),
         .test = false
     };
+    memset(args.pos, 0, MAX_POS * sizeof(char *));
     return args;
 }
 
@@ -35,7 +36,8 @@ void close_Arguments(Arguments arg){
         free(arg.db_filename);
     if(arg.pos)
         for(int i = 0; i < 3; i++){
-            free(arg.pos[i]);
+            if(arg.pos[i])
+                free(arg.pos[i]);
         }
         free(arg.pos);
     if(arg.cmd)
