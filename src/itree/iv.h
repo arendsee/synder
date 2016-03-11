@@ -25,6 +25,4 @@ void iv_join (IV *, IA *);
 
 void iv_free(IV *);
 
-bool test_iv();
-
 #endif

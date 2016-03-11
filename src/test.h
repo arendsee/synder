@@ -5,4 +5,7 @@
 
 bool test_all();
 
+bool test_iv();
+bool test_search();
+
 #endif

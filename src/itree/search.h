@@ -45,6 +45,4 @@ IntervalResult * get_point_overlaps(uint, struct IntervalTree *);
 
 IntervalResult * get_interval_overlaps(Interval *, struct IntervalTree *);
 
-bool test_search();
-
 #endif
