@@ -51,12 +51,20 @@ void check_file(FILE * fp, char * name){
 }
 
 void print_help(){
-    printf("USAGE: synfull -d SYNTENY_FILE QUERY TARGET DEST_DIR\n");
-    printf("USAGE: synfull -i GFF_FILE -s SYNTENY_DB\n");
-    printf("$ synfull -d at-al.tab athalian alyrata db\n");
-    printf("$ synfull -i at.gff -s db/at_al.tab -c count\n");
-    printf("$ synfull -i at.gff -s db/at_al.tab -c map\n");
-    printf("$ synfull -f hits.syn -s db/at_al.tab -c filter\n");
+    printf(
+    "USAGE: synfull -d SYNTENY_FILE QUERY TARGET DEST_DIR\n"
+    "USAGE: synfull -i GFF_FILE -s SYNTENY_DB\n"
+    "COMMANDS\n"
+    "map    - print target intervals overlapping each query interval\n"
+    "count  - like map but prints only the number that overlap\n"
+    "filter - print query-to-target links consistent with the synteny map\n"
+    "pred   - predict target search spaces for each query interval\n"
+    "EXAMPLES:\n"
+    "$ synfull -d at-al.tab athalian alyrata db\n"
+    "$ synfull -i at.gff -s db/at_al.tab -c count\n"
+    "$ synfull -i at.gff -s db/at_al.tab -c map\n"
+    "$ synfull -f hits.syn -s db/at_al.tab -c filter\n"
+    );
     exit(EXIT_SUCCESS);
 }
 
