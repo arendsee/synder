@@ -4,6 +4,8 @@
 #define IV_INITIAL_SIZE 8
 
 #include <stdlib.h>
+#include <stdbool.h>
+
 
 #include "interval.h"
 #include "ia.h"

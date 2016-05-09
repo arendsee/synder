@@ -1,4 +1,4 @@
-TARGET=synfull
+TARGET=run
 
 all:
 	cd src && ${MAKE}

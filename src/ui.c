@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 
 #include "ui.h"
 
@@ -14,10 +16,12 @@ Arguments create_Arguments() {
         .synfile = NULL,
         .intfile = NULL,
         .hitfile = NULL,
-        .db_filename  = NULL,
+        .db_filename = NULL,
         .cmd = NULL,
-        .pos = (char **)malloc(MAX_POS * sizeof(char *))
+        .pos = (char **)malloc(MAX_POS * sizeof(char *)),
+        .test = false
     };
+    memset(args.pos, 0, MAX_POS * sizeof(char *));
     return args;
 }
 
@@ -32,7 +36,8 @@ void close_Arguments(Arguments arg){
         free(arg.db_filename);
     if(arg.pos)
         for(int i = 0; i < 3; i++){
-            free(arg.pos[i]);
+            if(arg.pos[i])
+                free(arg.pos[i]);
         }
         free(arg.pos);
     if(arg.cmd)
@@ -64,6 +69,7 @@ void print_help(){
     "$ synfull -i at.gff -s db/at_al.tab -c count\n"
     "$ synfull -i at.gff -s db/at_al.tab -c map\n"
     "$ synfull -f hits.syn -s db/at_al.tab -c filter\n"
+    "$ synfull test\n"
     );
     exit(EXIT_SUCCESS);
 }
@@ -74,6 +80,10 @@ Arguments parse_command(int argc, char * argv[]){
     int opt;
     FILE * temp;
     Arguments args = create_Arguments();
+    if(argc == 2 && strcmp(argv[1], "test") == 0){
+        args.test = true; 
+        return args;
+    }
     while((opt = getopt(argc, argv, "hd:s:i:c:f:")) != -1){
         switch(opt) {
             case 'h':

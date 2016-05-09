@@ -6,6 +6,7 @@
 #include "io.h"
 #include "synmap.h"
 #include "analysis.h"
+#include "test.h"
 
 int main(int argc, char * argv[]){
 
@@ -20,6 +21,9 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Do stuff 
     // ------------------------------------------------------------------------
+    
+    if(args.test)
+        test_all();
 
     /** \todo Replace a system call to the prepare-data.sh script with a raw
      * synteny file to parser in synmap  */
@@ -40,7 +44,7 @@ int main(int argc, char * argv[]){
         syn = load_synmap(args.synfile);
     }
 
-    if(!syn){
+    if(!(syn || args.test)){
         printf("Nothing to do ...\n");
         print_help();
     }
@@ -69,7 +73,8 @@ int main(int argc, char * argv[]){
     // ------------------------------------------------------------------------
     // Clean up
     // ------------------------------------------------------------------------
-    free_synmap(syn);
+    if(syn)
+        free_synmap(syn);
     close_Arguments(args);
 
     return(EXIT_SUCCESS);
