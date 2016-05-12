@@ -8,6 +8,9 @@ void analysis_count(Synmap * syn, FILE * intfile){
                    "%d %*s %*s %d %d %*c %*c %*s %s\n",
                    &chrid, &start, &stop, seqname)) != EOF)
     {
+        // contig.c::count_overlaps ->
+        //   itree/search.c::count_interval_overlaps ->
+        //   itree/search.c::count_interval_overlaps_r
         count = count_overlaps(SGC(syn, 0, chrid), start, stop);
         printf("%s\t%u\n", seqname, count);
     }
