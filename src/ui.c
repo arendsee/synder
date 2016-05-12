@@ -65,10 +65,10 @@ void print_help(){
     "filter - print query-to-target links consistent with the synteny map\n"
     "pred   - predict target search spaces for each query interval\n"
     "EXAMPLES:\n"
-    "$ synfull -d at-al.tab athalian alyrata db\n"
-    "$ synfull -i at.gff -s db/at_al.tab -c count\n"
-    "$ synfull -i at.gff -s db/at_al.tab -c map\n"
-    "$ synfull -f hits.syn -s db/at_al.tab -c filter\n"
+    "$ synfull -d at-al.tab at al db\n"
+    "$ synfull -i at.gff -s db/at_al.txt -c count\n"
+    "$ synfull -i at.gff -s db/at_al.txt -c map\n"
+    "$ synfull -f hits.syn -s db/at_al.txt -c filter\n"
     "$ synfull test\n"
     );
     exit(EXIT_SUCCESS);
