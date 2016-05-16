@@ -1,6 +1,8 @@
 synfull
 run
 
+README.pdf
+
 *.gch
 *.o
 *.a
