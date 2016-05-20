@@ -12,8 +12,8 @@
    chromosome (or scaffold) and no other interval is fully contained between
    them
 
- * block adjacency - two blocks are adjacent if the intervals are adjacent on
-   both the query and target sides
+ * block adjacency - two blocks are adjacent if 1) the intervals are adjacent on
+   both the query and target sides and 2) both have the same sign.
 
  * query context - all blocks that overlap or are adjacent to the query interval
 
