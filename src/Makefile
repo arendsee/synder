@@ -1,7 +1,7 @@
 CFLAGS=-Wall -g -O2
 CC=gcc
 TARGET=run
-OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o
+OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
@@ -32,6 +32,9 @@ synmap.o: synmap.c synmap.h
 
 ui.o: ui.c ui.h
 	${CC} -c ${CFLAGS} ui.[ch]
+
+contiguous.o: contiguous.c contiguous.h
+	${CC} -c ${CFLAGS} contiguous.[ch]
 
 itree.o: itree/itree.c itree/itree.h
 	${CC} -c ${CFLAGS} itree/itree.[ch]
