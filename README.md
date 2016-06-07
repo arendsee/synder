@@ -1,5 +1,22 @@
 # Manual stub
 
+#Contiguous Set Use
+./run -i GFF -s DB -c contig
+
+output is like -c map with additon of flag
+SEQNAME TARGETNAME SEARCH_INTERVAL_START SEARCH_INTERVAL_STOP FLAG
+
+Flag is to keep track of edge dependability:
+0 -> Reliable
+1 -> Start Edge Unreliable [Case F]
+2 -> Stop Edge Unreliable [Case F]
+3 -> Both Edges Unreliable [Case E or C extended to F]
+
+if INTERVAL_START and INTERVAL_END are . then the query interval met the 
+criteria for Case E
+
+
+
 # Definitions
 
  * query interval - an interval on the query genome
