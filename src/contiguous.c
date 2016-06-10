@@ -57,8 +57,13 @@ void contiguous_query(Synmap * syn, FILE * intfile){
             if(qblk){
                 tblk = QT_SGCB(syn, qblk);
 				endblk = cmap->map[tblk->linkid]->match;
-				if(endblk->oblkid < region[0]){region[0]=endblk->oblkid;}
-				if(endblk->oblkid > region[1]){region[1]=endblk->oblkid;}
+				if(i==0){
+					region[0] = endblk->oblkid;
+					region[1] = endblk->oblkid;
+				} else {
+					if(endblk->oblkid < region[0]){region[0]=endblk->oblkid;}
+					if(endblk->oblkid > region[1]){region[1]=endblk->oblkid;}
+				}
         	printf("[%d]\t%u\t%u\n",
               	qblk->linkid,qblk->start,qblk->stop);
         	}
@@ -77,8 +82,8 @@ void contiguous_query(Synmap * syn, FILE * intfile){
             tcon = QT_SGC(syn, qblk);
 			if(missing){
 				flag=3;
-	//      		printf("%s\t%s\t.\t.\t%d\n",
-    //           		seqname, tcon->name,flag);
+	      		printf("%s\t%s\t.\t.\t%d\n",
+               		seqname, tcon->name,flag);
 				break;
 			}
 
@@ -127,8 +132,8 @@ void contiguous_query(Synmap * syn, FILE * intfile){
 				}
 			}
 		
-    //  	printf("%s\t%s\t%u\t%u\t%d\n",
-    //           	seqname, tcon->name, tblk->start, tblk->stop, flag);
+      	printf("%s\t%s\t%u\t%u\t%d\n",
+               	seqname, tcon->name, tblk->start, tblk->stop, flag);
 	
 		}
         free(contigs->name);
