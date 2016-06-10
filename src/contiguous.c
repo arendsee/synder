@@ -64,8 +64,10 @@ void contiguous_query(Synmap * syn, FILE * intfile){
 					if(endblk->oblkid < region[0]){region[0]=endblk->oblkid;}
 					if(endblk->oblkid > region[1]){region[1]=endblk->oblkid;}
 				}
-        	printf("[%d]\t%u\t%u\n",
-              	qblk->linkid,qblk->start,qblk->stop);
+//        	printf("[%d]\t%u\t%u\t%d\n",
+//              	qblk->linkid,qblk->start,qblk->stop, cmap->map[tblk->linkid]->flag);
+//        	printf("[%d]\t%u\t%u\n",
+//              	qblk->linkid,tblk->start,tblk->stop);
         	}
 		}
 		for(int i= region[0]; i<= region[1];i++){
