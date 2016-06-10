@@ -94,7 +94,7 @@ void contiguous_query(Synmap * syn, FILE * intfile){
 				while(qnode->prev != NULL && start > qnode->feature->stop){
 					qnode = qnode->prev;
 				}
-				if(qnode->flag >1 && start < qnode->feature->stop){ //avoid duplicates in cases of overlap
+				if(qnode->flag >1 && start > qnode->feature->stop){ //avoid duplicates in cases of overlap
 					continue;
 				}
 				if(start < qnode->feature->start){ // Check we didn't advance into a case E,F Situation
@@ -198,11 +198,11 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 				}
 					if(q_overlap){
 						 cnode->flag=2;
-					 printf("query overlap \n");
+//					 printf("[%u]\tquery overlap \n",j);
 					}
 					if(t_overlap){
 						cnode->flag=3;
-						printf("target overlap\n");
+//					 	printf("[%u]\ttarget overlap \n",j);
 					}
 				if(q_overlap || t_overlap){
 					if(q_overlap && t_overlap) cnode->flag = 4;
@@ -216,28 +216,28 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 			}
 			// On different contig from previous 
 			if(cnode->feature->oseqid != cmap->map[ctig->block[j-1]->linkid]->feature->oseqid){
-				printf("Different contig\n");
+//				printf("[%u]\tDifferent contig\n",j);
 				cmap->map[cnode->feature->linkid] = cnode;
 			} else if (cnode->feature->oblkid == ctig->block[j-1]->oblkid+1){ // Regular contiguous interval
 				cmap->map[cnode->feature->linkid] = cnode;
 				cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 				cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
-				printf("contiguous\n");
+//				printf("[%u]\tcontiguous\n",j);
 			} else if( cnode->feature->oblkid < ctig->block[j-1]->oblkid){ //Twist to left of previous block
 				cnode->flag = cmap->map[ctig->block[j-1]->linkid]->flag  < -1 ? -3:-1;
 				cmap->map[cnode->feature->linkid] = cnode;
 				if(cnode->feature->oblkid == ctig->block[j-1]->oblkid - 1){
 					cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 					cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
-					printf("Twisted Left\n");
 				}
+//					printf("[%u]\tTwisted Left\n",j);
 			} else if( cnode->feature->oblkid > ctig->block[j-1]->oblkid){// Twist to right, possible transposition
 				cnode->flag=-2;
 				cmap->map[cnode->feature->linkid] = cnode;
-				printf("Twisted Right\n");
-			} else {
-				printf("OTHER\n");
-			// Default case that should never be reached.	
+//				printf("[%u]\tTwisted Right\n",j);
+			} else { // Default case that should never be reached.	
+				cmap->map[cnode->feature->linkid] = cnode;
+//				printf("[%u]\tOTHER\n",j);
 			}	
 		}
 
