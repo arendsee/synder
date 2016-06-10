@@ -5,6 +5,8 @@
 #include "block.h"
 #include "synmap.h"
 
+#define cmloc(cmap,blk) cmap->map[block->linkid]
+
 //Build contiguous set as adjacency list attached to hash map
 
 /** Contiguous list object holding current Block and its neighbors
@@ -16,8 +18,9 @@
  * prev  	- Previous contiguous node, if any
  * next		- Next contiguous node, if any 
  * flag		- Used to indicate several state
+ * 			 -2 - Left of last contiguous block
+ * 			 -1 - Right of last contiguous block	
  * 			  0 - Normal Interval
- * 			  1 - Scrambled (Currently includes transposition
  * 			  2 - Query Interval overlaps
  * 			  3 - Target Interval overlaps
  *
