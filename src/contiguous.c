@@ -77,8 +77,8 @@ void contiguous_query(Synmap * syn, FILE * intfile){
             tcon = QT_SGC(syn, qblk);
 			if(missing){
 				flag=3;
-        		printf("%s\t%s\t.\t.\t%d\n",
-               		seqname, tcon->name,flag);
+//      		printf("%s\t%s\t.\t.\t%d\n",
+//               		seqname, tcon->name,flag);
 					break;
 			}
 
@@ -127,8 +127,8 @@ void contiguous_query(Synmap * syn, FILE * intfile){
 				}
 			}
 		
-        	printf("%s\t%s\t%u\t%u\t%d\n",
-               	seqname, tcon->name, tblk->start, tblk->stop, flag);
+//        	printf("%s\t%s\t%u\t%u\t%d\n",
+//               	seqname, tcon->name, tblk->start, tblk->stop, flag);
 	
 		}
         free(contigs->name);
@@ -183,7 +183,7 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 			if(j==0){
 				cmap->map[cnode->feature->linkid] = cnode;
 				continue;
-//				printf("head \t%u::%u \t[%u:%u] \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid);
+				printf("head \t%u::%u \t[%u:%u] \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid);
 			//Otherwise we get to figure out if the current block can be added to or breaks the current ContiguousSet
 			} else {
 		
@@ -198,11 +198,11 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 				}
 					if(q_overlap){
 						 cnode->flag=2;
-//					 printf("[%u]\tquery overlap \n",j);
+					 printf("[%u]\tquery overlap \n",j);
 					}
 					if(t_overlap){
 						cnode->flag=3;
-//					 	printf("[%u]\ttarget overlap \n",j);
+					 	printf("[%u]\ttarget overlap \n",j);
 					}
 				if(q_overlap || t_overlap){
 					if(q_overlap && t_overlap) cnode->flag = 4;
@@ -216,13 +216,13 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 			}
 			// On different contig from previous 
 			if(cnode->feature->oseqid != cmap->map[ctig->block[j-1]->linkid]->feature->oseqid){
-//				printf("[%u]\tDifferent contig\n",j);
+				printf("[%u]\tDifferent contig\n",j);
 				cmap->map[cnode->feature->linkid] = cnode;
 			} else if (cnode->feature->oblkid == ctig->block[j-1]->oblkid+1){ // Regular contiguous interval
 				cmap->map[cnode->feature->linkid] = cnode;
 				cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 				cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
-//				printf("[%u]\tcontiguous\n",j);
+				printf("[%u]\tcontiguous\n",j);
 			} else if( cnode->feature->oblkid < ctig->block[j-1]->oblkid){ //Twist to left of previous block
 				cnode->flag = cmap->map[ctig->block[j-1]->linkid]->flag  < -1 ? -3:-1;
 				cmap->map[cnode->feature->linkid] = cnode;
@@ -230,14 +230,14 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 					cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 					cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
 				}
-//					printf("[%u]\tTwisted Left\n",j);
+					printf("[%u]\tTwisted Left\n",j);
 			} else if( cnode->feature->oblkid > ctig->block[j-1]->oblkid){// Twist to right, possible transposition
 				cnode->flag=-2;
 				cmap->map[cnode->feature->linkid] = cnode;
-//				printf("[%u]\tTwisted Right\n",j);
+				printf("[%u]\tTwisted Right\n",j);
 			} else { // Default case that should never be reached.	
 				cmap->map[cnode->feature->linkid] = cnode;
-//				printf("[%u]\tOTHER\n",j);
+				printf("[%u]\tOTHER\n",j);
 			}	
 		}
 
