@@ -5,7 +5,7 @@ void analysis_count(Synmap * syn, FILE * intfile){
     uint count;
     int chrid, start, stop;
     while ((fscanf(intfile,
-                   "%d %*s %*s %d %d %*c %*c %*s %s\n",
+                   "%d %*s %*s %d %d %*s %*c %*s %s\n",
                    &chrid, &start, &stop, seqname)) != EOF)
     {
         // contig.c::count_overlaps ->
@@ -30,7 +30,7 @@ void analysis_map(Synmap * syn, FILE * intfile){
     Block twoblk;
     bool missing;
     while ((fscanf(intfile,
-                   "%d %*s %*s %d %d %*c %*c %*s %s\n",
+                   "%d %*s %*s %d %d %*s %*c %*s %s\n",
                    &chrid, &start, &stop, seqname)) != EOF)
     {
         missing = false;
