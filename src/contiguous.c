@@ -188,8 +188,8 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 				cmap->map[cnode->feature->linkid] = cnode;
 			if(j==0){
 				cmap->map[cnode->feature->linkid] = cnode;
-				printf("%d\t head \t%u::%u \t[%u:%u] {%u,%u} \n",i,cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//				printf("%d\t head \t%u::%u \t[%u:%u] {%u,%u} \n",i,cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 				continue;
 			//Otherwise we get to figure out if the current block can be added to or breaks the current ContiguousSet
 			} else {
@@ -205,13 +205,13 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 				}
 					if(q_overlap){
 						 cnode->flag=2;
-						printf("Query Overlap \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-						printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//						printf("Query Overlap \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//						printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 					}
 					if(t_overlap){
 						cnode->flag=3;
-						printf("Target Overlap \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-						printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//						printf("Target Overlap \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//						printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 //						printf("[Target] \t%u::%u \n",cnode->match->start,cnode->match->stop);
 					}
 				if(q_overlap || t_overlap){
@@ -226,15 +226,15 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 			}
 			// On different contig from previous 
 			if(cnode->feature->oseqid != cmap->map[ctig->block[j-1]->linkid]->feature->oseqid){
-				printf("Different Contig \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//				printf("Different Contig \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 				cmap->map[cnode->feature->linkid] = cnode;
 			} else if (cnode->feature->oblkid == ctig->block[j-1]->oblkid+1){ // Regular contiguous interval
 				cmap->map[cnode->feature->linkid] = cnode;
 				cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 				cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
-				printf("Contiguous \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//				printf("Contiguous \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid < ctig->block[j-1]->oblkid){ //Twist to left of previous block
 				cnode->flag = cmap->map[ctig->block[j-1]->linkid]->flag  < -1 ? -3:-1;
 				cmap->map[cnode->feature->linkid] = cnode;
@@ -242,17 +242,17 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 					cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 					cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
 				}
-				printf("Twist Left \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//				printf("Twist Left \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid > ctig->block[j-1]->oblkid){// Twist to right, possible transposition
 				cnode->flag=-2;
 				cmap->map[cnode->feature->linkid] = cnode;
-				printf("Twist Right \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//				printf("Twist Right \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else { // Default case that should never be reached.	
 				cmap->map[cnode->feature->linkid] = cnode;
-				printf("OTHER \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
-				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
+//				printf("OTHER \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
+//				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			}	
 		}
 
