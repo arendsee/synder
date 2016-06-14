@@ -65,7 +65,7 @@ int main(int argc, char * argv[]){
         else if(strcmp(args.cmd, "map") == 0){
 	        analysis_map(syn, args.intfile);
         }
-        else if(strcmp(args.cmd, "contig") ==0){
+        else if(strcmp(args.cmd, "search") ==0){
        		contiguous_query(syn, args.intfile);   
 		}
         else{

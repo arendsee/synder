@@ -34,12 +34,13 @@ void close_Arguments(Arguments arg){
         fclose(arg.hitfile);
     if(arg.db_filename)
         free(arg.db_filename);
-    if(arg.pos)
+    if(arg.pos){
         for(int i = 0; i < 3; i++){
             if(arg.pos[i])
                 free(arg.pos[i]);
         }
         free(arg.pos);
+    }
     if(arg.cmd)
         free(arg.cmd);
 }
@@ -57,19 +58,21 @@ void check_file(FILE * fp, char * name){
 
 void print_help(){
     printf(
-    "USAGE: synfull -d SYNTENY_FILE QUERY TARGET DEST_DIR\n"
-    "USAGE: synfull -i GFF_FILE -s SYNTENY_DB\n"
+    "USAGE\n"
+    "  synder -d SYNTENY_FILE QUERY TARGET DB_DIR\n"
+    "  synder [OPTIONS] -s SYNTENY_DB -c COMMAND\n"
     "COMMANDS\n"
-    "map    - print target intervals overlapping each query interval\n"
-    "count  - like map but prints only the number that overlap\n"
-    "filter - print query-to-target links consistent with the synteny map\n"
-    "pred   - predict target search spaces for each query interval\n"
-    "EXAMPLES:\n"
-    "$ synfull -d at-al.tab at al db\n"
-    "$ synfull -i at.gff -s db/at_al.txt -c count\n"
-    "$ synfull -i at.gff -s db/at_al.txt -c map\n"
-    "$ synfull -f hits.syn -s db/at_al.txt -c filter\n"
-    "$ synfull test\n"
+    "  map    - print target intervals overlapping each query interval\n"
+    "  count  - like map but prints only the number that overlap\n"
+    "  search - find target search spaces for each query interval\n"
+    "  filter - print query-to-target links consistent with the synteny map\n"
+    "EXAMPLES\n"
+    "  synder -d at-al.tab at al db\n"
+    "  synder -i at.gff   -s db/at_al.txt -c map\n"
+    "  synder -i at.gff   -s db/at_al.txt -c count\n"
+    "  synder -i at.syn   -s db/at_al.txt -c search\n"
+    "  synder -f hits.syn -s db/at_al.txt -c filter\n"
+    "  synder test\n"
     );
     exit(EXIT_SUCCESS);
 }

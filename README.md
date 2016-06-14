@@ -1,7 +1,7 @@
 # Manual stub
 
 #Contiguous Set Use
-./run -i GFF -s DB -c contig
+./synder -i GFF -s DB -c contig
 
 output is like -c map with additon of flag
 SEQNAME TARGETNAME SEARCH_INTERVAL_START SEARCH_INTERVAL_STOP FLAG
@@ -60,8 +60,8 @@ of the syntenic blocks, will always be considered "syntenically scrambled".
 
 # TODO list for version 1
 
- - [ ] Implement the query context to contiguous function
- - [ ] Implement the contiguous set to search interval function
+ - [x] Implement the query context to contiguous function
+ - [x] Implement the contiguous set to search interval function
  - [ ] Clean up the CLI user interface
  - [ ] Specify the synteny class (A-F) of the output search intervals 
 

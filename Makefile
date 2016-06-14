@@ -1,4 +1,4 @@
-TARGET=run
+TARGET=synder
 
 all:
 	cd src && ${MAKE}

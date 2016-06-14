@@ -1,6 +1,6 @@
 CFLAGS=-Wall -g -O2
 CC=gcc
-TARGET=run
+TARGET=synder
 OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o
 
 ${TARGET}: ${OBJECTS}
