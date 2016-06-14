@@ -2,6 +2,7 @@
 #define __CONTIGUOUS_H__
 
 #include <stdlib.h>
+#include <stdint.h>
 #include "block.h"
 #include "synmap.h"
 
@@ -33,6 +34,7 @@ typedef struct  ContiguousNode{
 	struct ContiguousNode * prev;
     struct ContiguousNode * next;	
 	int flag;
+	uint32_t qblkid;
 } ContiguousNode;
 
 /** Adjacency list structure to store head and tail 
