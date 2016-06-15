@@ -19,6 +19,7 @@
  * prev  	- Previous contiguous node, if any
  * next		- Next contiguous node, if any 
  * flag		- Used to indicate several state
+ * 			 -3 - Part of a transposed block
  * 			 -2 - Left of last contiguous block
  * 			 -1 - Right of last contiguous block	
  * 			  0 - Normal Interval

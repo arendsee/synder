@@ -103,12 +103,25 @@ void contiguous_query(Synmap * syn, FILE * intfile){
 					continue;
 				}
 				if(start < qnode->feature->start){ // Check we didn't advance into a case E,F Situation
-					flag = 1;
-					tblk ->start = qnode->match->start;
+					if(qnode->flag > -2){
+						flag = 1;
+						tblk ->start = qnode->match->start;
+					} else {
+						flag = 2;
+						tblk ->stop = qnode->match->stop;
+					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
-					tblk->start = qnode->match->start;
+					if(qnode->flag > -2){
+						tblk->start = qnode->match->start;
+					} else {
+						tblk ->stop = qnode->match->stop;
+					}
 				} else {	//Case A,B situations
-					tblk->start = qnode->match->stop;
+					if(qnode->flag > -2){
+						tblk->start = qnode->match->stop;
+					} else {
+						tblk ->stop = qnode->match->start;
+					}
 				}
 			
 			}
@@ -123,12 +136,26 @@ void contiguous_query(Synmap * syn, FILE * intfile){
 					continue;
 				}
 				if(stop > qnode->feature->stop){ //Case E,F situations
-					flag = flag==1? 3:2;
-					tblk->stop = qnode->match->stop;					
+					if(qnode->flag > -2){
+						flag = flag==1? 3:2;
+						tblk->stop = qnode->match->stop;					
+					} else {
+						flag = flag==2? 3:1;
+						tblk ->start = qnode->match->start;
+					}
 				} else if (stop < qnode->feature->stop){
 					tblk->stop = qnode->match->stop;
+					if(qnode->flag > -2){
+						tblk ->stop = qnode->match->stop;
+					} else {
+						tblk->start = qnode->match->start;
+					}
 				} else {
-					tblk->stop = qnode->match->start;
+					if(qnode->flag > -2){
+						tblk->stop = qnode->match->start;
+					} else {
+						tblk->start = qnode->match->start;
+					}
 				}
 			}
 		
@@ -236,7 +263,7 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 //				printf("Contiguous \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid < ctig->block[j-1]->oblkid){ //Twist to left of previous block
-				cnode->flag = cmap->map[ctig->block[j-1]->linkid]->flag  < -1 ? -3:-1;
+				cnode->flag = cmap->map[ctig->block[j-1]->linkid]->flag  < -1 ? -3:-2;
 				cmap->map[cnode->feature->linkid] = cnode;
 				if(cnode->feature->oblkid == ctig->block[j-1]->oblkid - 1){
 					cmap->map[ctig->block[j-1]->linkid]->next = cnode;
@@ -245,7 +272,7 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 //				printf("Twist Left \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid > ctig->block[j-1]->oblkid){// Twist to right, possible transposition
-				cnode->flag=-2;
+				cnode->flag= ctig->block[j]->oblkid == ctig->block[j+1]->oblkid+1 ? -3:-1;
 				cmap->map[cnode->feature->linkid] = cnode;
 //				printf("Twist Right \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
