@@ -97,7 +97,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			Contig* t_con;
 			
 			if(missing){
-				flag=3;
+				flag=4;
 				if(pblock){		
 					q_blk = SGCB(syn,0,chrid,missloc);
 					t_blk = QT_SGCB(syn,q_blk);
@@ -143,12 +143,14 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 						tblk ->stop = qnode->match->stop;
 					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
+					printf("oom\n");
 					if(qnode->flag > -2){
 						tblk->start = qnode->match->start;
 					} else {
 						tblk ->stop = qnode->match->stop;
 					}
 				} else {	//Case A,B situations
+					printf("moo\n");
 					if(qnode->flag > -2){
 						tblk->start = qnode->match->stop;
 					} else {
