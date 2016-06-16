@@ -335,7 +335,7 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 					}
 				if(q_overlap || t_overlap){
 					if(q_overlap && t_overlap) cnode->flag = 4;
-					if(cnode->feature->oblkid < ctig->block[j-1]->oblkid) cnode->flag = -4;
+					//if(cnode->feature->oblkid < ctig->block[j-1]->oblkid) cnode->flag = -2;
 					overlap_bound[1]=j;
 					cmap->map[cnode->feature->linkid] = cnode;
 					continue;
@@ -361,6 +361,7 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 				cmap->map[cnode->feature->linkid] = cnode;
 				if(cnode->feature->oblkid == ctig->block[j-1]->oblkid - 1){
 					cmap->map[ctig->block[j-1]->linkid]->next = cnode;
+					cmap->map[ctig->block[j-1]->linkid]->flag = -3;
 					cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
 				}
 //				printf("Twist Left \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
