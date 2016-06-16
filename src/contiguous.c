@@ -33,7 +33,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
     Block * qblk;
 	uint32_t blkid;
 	ContiguousNode * qnode;
-    Block * tblk;
 	Block twoblk;
     bool missing;
     while ((fscanf(intfile,
@@ -90,7 +89,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			flag = 0;
 			qblk = SGCB(syn,0,chrid,i);
 			Contig* qcon = SGC(syn,0,chrid);
-            tblk = QT_SGCB(syn, qblk);
+            Block* tblk = init_block( QT_SGCB(syn, qblk)->start, QT_SGCB(syn,qblk)->stop,0,0,0);
             tcon = QT_SGC(syn, qblk);
 			Block* q_blk;
 			Block* t_blk;
@@ -115,6 +114,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 				printf(">\t%u\t%s\t%s\t%u\t%u\t.\t.\t.\t%d\n",
                		interval,seqname,qcon->name,start,stop,flag);
 				interval++;
+				free_block(tblk);
 				break;
 			}
 
@@ -123,7 +123,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			// Set return region assumes case D;
 			tblk->start= qnode->match->start;
 			tblk->stop = qnode->match->stop;
-			printf("ooogaBooga\n");
 			// Start is BEFORE current query Block;
 			if (start< qblk->start) {
 				//Move down contiguous block, stoping at leftmost possible point
@@ -136,23 +135,20 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 
 				
 				if(start < qnode->feature->start){ // Check we didn't advance into a case E,F Situation
-					printf("DOOM\n");
 					if(qnode->flag > -2){
 						flag = 1;
-						tblk ->start = qnode->feature->start;
+						tblk ->start = qnode->match->start;
 					} else {
 						flag = 2;
-						tblk ->stop = qnode->feature->stop;
+						tblk ->stop = qnode->match->start;
 					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
-					printf("oom\n");
 					if(qnode->flag > -2){
 						tblk->start = qnode->match->start;
 					} else {
 						tblk ->stop = qnode->match->stop;
 					}
 				} else {	//Case A,B situations
-					printf("moo\n");
 					if(qnode->flag > -2){
 						tblk->start = qnode->match->stop;
 					} else {
@@ -169,7 +165,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
       			printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
             	   	seqname, qcon->name, q_blk->start, q_blk->stop,
 					t_con->name,t_blk->start,t_blk->stop, interval);
-				
 				t_blk = SGCB(syn,1,qnode->feature->oseqid,
 					(qnode->feature->oblkid >0 ? qnode->feature->oblkid-1:0));
 				q_blk = SGCB(syn,0,t_blk->oseqid, t_blk->oblkid);
@@ -180,7 +175,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
       	
       			printf("I\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
             	   	seqname, qcon->name, qblk->start, qblk->stop,
-					tcon->name,tblk->start,tblk->stop, interval);
+					tcon->name,qnode->match->start,qnode->match->stop, interval);
 			}			
 
 			//Stop is AFTER current query Block
@@ -258,6 +253,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 
 			interval++;
 	
+			free_block(tblk);
 		}
         free(contigs->name);
         free(contigs->block);
