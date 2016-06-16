@@ -85,6 +85,6 @@ void contiguous_list_reset(ContiguousList *clist, ContiguousNode *cnode);
 ContiguousMap * init_contiguous_map(size_t size);
 ContiguousMap * populate_contiguous_map(Synmap * syn);
 
-void contiguous_query(Synmap * syn, FILE * intfile);
+void contiguous_query(Synmap * syn, FILE * intfile, bool pblock);
 
 #endif

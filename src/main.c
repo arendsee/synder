@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "ui.h"
 #include "io.h"
@@ -65,8 +66,11 @@ int main(int argc, char * argv[]){
         else if(strcmp(args.cmd, "map") == 0){
 	        analysis_map(syn, args.intfile);
         }
-        else if(strcmp(args.cmd, "contig") ==0){
-       		contiguous_query(syn, args.intfile);   
+        else if(strcmp(args.cmd, "search") ==0){
+       		contiguous_query(syn, args.intfile,false);   
+		}
+        else if(strcmp(args.cmd, "searchblock") ==0){
+       		contiguous_query(syn, args.intfile,true);   
 		}
         else{
             printf("Command '%s' not recognized\n", args.cmd);
