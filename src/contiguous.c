@@ -139,10 +139,10 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 					printf("DOOM\n");
 					if(qnode->flag > -2){
 						flag = 1;
-						tblk ->start = qnode->match->start;
+						tblk ->start = qnode->feature->start;
 					} else {
 						flag = 2;
-						tblk ->stop = qnode->match->stop;
+						tblk ->stop = qnode->feature->stop;
 					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
 					printf("oom\n");
