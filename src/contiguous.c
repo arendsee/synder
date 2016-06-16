@@ -140,7 +140,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 						tblk ->start = qnode->match->start;
 					} else {
 						flag = 2;
-						tblk ->stop = qnode->match->stop;
+						tblk ->stop = qnode->match->start;
 					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
 					printf("oom\n");
