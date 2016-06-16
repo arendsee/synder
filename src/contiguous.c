@@ -136,12 +136,13 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 
 				
 				if(start < qnode->feature->start){ // Check we didn't advance into a case E,F Situation
+					printf("DOOM\n");
 					if(qnode->flag > -2){
 						flag = 1;
 						tblk ->start = qnode->match->start;
 					} else {
 						flag = 2;
-						tblk ->stop = qnode->match->start;
+						tblk ->stop = qnode->match->stop;
 					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
 					printf("oom\n");
@@ -161,7 +162,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			
 			}
 			if(pblock){	
-				qnode = cmap->map[qblk->linkid];
+				//qnode = cmap->map[qblk->linkid];
 				q_blk = SGCB(syn,0,chrid,qnode->qblkid >0?qnode->qblkid-1:0);
 				t_blk = QT_SGCB(syn,q_blk);
 				t_con = QT_SGC(syn,q_blk);
