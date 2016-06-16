@@ -123,6 +123,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			// Set return region assumes case D;
 			tblk->start= qnode->match->start;
 			tblk->stop = qnode->match->stop;
+			printf("ooogaBooga\n");
 			// Start is BEFORE current query Block;
 			if (start< qblk->start) {
 				//Move down contiguous block, stoping at leftmost possible point
