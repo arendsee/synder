@@ -18,8 +18,8 @@ ContiguousMap * init_contiguous_map(size_t size){
 }
 
 void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
-	// EAnsure blocks are sorted (BAD IDEA, REDACTED FOR NOW)
-//	sort_all_contigs(syn);
+	// Ensure blocks are sorted (BAD IDEA, REDACTED FOR NOW)
+	//	sort_all_contigs(syn);
 	
 	// count total number of unique block-block pairs for hashmap
 	ContiguousMap *cmap= populate_contiguous_map(syn);
@@ -121,26 +121,11 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			
 			qnode = cmap->map[qblk->linkid];
 		    original = cmap->map[qblk->linkid];
-			bool q_overlap = false;
-			bool t_overlap = false;		
-//			for(int k = region[0]; k<= region[1]; k++){
-//				q_blk = SGCB(syn,0,chrid,k);	
-//		        q_overlap = block_overlap(qnode->feature,cmap->map[q_blk->linkid]->feature) || q_overlap;
-//				t_overlap = (block_overlap(qnode->match,cmap->map[q_blk->linkid]->match) && 
-//						 (qnode->feature->oseqid == q_blk->oseqid)) || t_overlap;
-//				if(q_overlap || t_overlap){
-//                  qnode->flag = 5;
-//				    continue;
-//				}
-//			}
 
 			// Set return region assumes case D;
 			tblk->start= qnode->match->start;
 			tblk->stop = qnode->match->stop;
 			// Start is BEFORE current query Block;
-      		//	printf("TEST\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t[%d]{%d}\n",
-            //	   	seqname, qcon->name, qblk->start, qblk->stop,
-			//		tcon->name,tblk->start,tblk->stop, interval,qnode->flag,flag);
 			
 			if (start< qblk->start) {
 				//Move down contiguous block, stoping at leftmost possible point
@@ -153,7 +138,11 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 
 				
 				if(start < qnode->feature->start){ // Check we didn't advance into a case E,F Situation
-					if(qnode->flag > -2  || (original->next != NULL && original->next->flag == 0)){
+					if(qnode->flag > -2  || (original->next != NULL && original->next->flag == 0)){ 
+						// The next check here and in the next block is to detect edge cases where block we are checking is
+						// registering as a left translation, but is part of a continuous run to the right
+						// most often occcurs in the middle of messy overlap blocks
+
 						flag = 1;
 						tblk ->start = qnode->match->start;
 					} else {
@@ -182,7 +171,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 				t_con = QT_SGC(syn,q_blk);
       			printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t\n",
             	   	seqname, qcon->name, q_blk->start, q_blk->stop,
-					t_con->name,t_blk->start,t_blk->stop, interval);//,cmap->map[qblk->linkid]->flag);
+					t_con->name,t_blk->start,t_blk->stop, interval);
 				t_blk = SGCB(syn,1,qnode->feature->oseqid,
 					(qnode->feature->oblkid >0 ? qnode->feature->oblkid-1:0));
 				q_blk = SGCB(syn,0,t_blk->oseqid, t_blk->oblkid);
@@ -193,7 +182,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
       	
       			printf("I\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
             	   	seqname, qcon->name, qblk->start, qblk->stop,
-					tcon->name,qnode->match->start,qnode->match->stop, interval);//, qnode->flag);
+					tcon->name,qnode->match->start,qnode->match->stop, interval);
 			}			
 
 			
@@ -230,7 +219,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 					} else {	//Case A,B situations
 						q_blk = SGCB(syn,0,chrid, i+1 < qcon->size ? i+1:i);
 						t_blk = QT_SGCB(syn,q_blk);
-						if(cmap->map[qblk->linkid]->flag > -2 || qnode->next->flag == 0){
+						if(cmap->map[qblk->linkid]->flag > -2 || qnode->next->flag == 0){ //similar check to above 
 							tblk->stop = t_blk->start;
 							
 						} else {
@@ -258,7 +247,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 				t_con = QT_SGC(syn,q_blk);
 	      		printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
 	               	seqname, qcon->name, q_blk->start, q_blk->stop,
-					t_con->name,t_blk->start,t_blk->stop, interval);//,cmap->map[q_blk->linkid]->flag);
+					t_con->name,t_blk->start,t_blk->stop, interval);
 				t_blk = SGCB(syn,1,qnode->feature->oseqid,qnode->feature->oblkid+1< tcon->size? qnode->feature->oblkid+1:qnode->feature->oblkid);
 				q_blk = SGCB(syn,0,t_blk->oseqid, t_blk->oblkid);
 				t_con = SGC(syn,1,q_blk->oseqid);
