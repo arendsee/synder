@@ -19,6 +19,7 @@
  * prev  	- Previous contiguous node, if any
  * next		- Next contiguous node, if any 
  * flag		- Used to indicate several state
+ * 			 -3 - Part of a transposed block
  * 			 -2 - Left of last contiguous block
  * 			 -1 - Right of last contiguous block	
  * 			  0 - Normal Interval
@@ -84,6 +85,6 @@ void contiguous_list_reset(ContiguousList *clist, ContiguousNode *cnode);
 ContiguousMap * init_contiguous_map(size_t size);
 ContiguousMap * populate_contiguous_map(Synmap * syn);
 
-void contiguous_query(Synmap * syn, FILE * intfile);
+void contiguous_query(Synmap * syn, FILE * intfile, bool pblock);
 
 #endif
