@@ -33,6 +33,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
     Block * qblk;
 	uint32_t blkid;
 	ContiguousNode * qnode;
+	ContiguousNode * original;
 	Block twoblk;
     bool missing;
     while ((fscanf(intfile,
@@ -119,7 +120,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			}
 			
 			qnode = cmap->map[qblk->linkid];
-		    
+		    original = cmap->map[qblk->linkid];
 			bool q_overlap = false;
 			bool t_overlap = false;		
 //			for(int k = region[0]; k<= region[1]; k++){
@@ -152,7 +153,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 
 				
 				if(start < qnode->feature->start){ // Check we didn't advance into a case E,F Situation
-					if(qnode->flag > -2){
+					if(qnode->flag > -2  || (original->next != NULL && original->next->flag == 0)){
 						flag = 1;
 						tblk ->start = qnode->match->start;
 					} else {
@@ -229,7 +230,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 					} else {	//Case A,B situations
 						q_blk = SGCB(syn,0,chrid, i+1 < qcon->size ? i+1:i);
 						t_blk = QT_SGCB(syn,q_blk);
-						if(cmap->map[qblk->linkid]->flag > -2){
+						if(cmap->map[qblk->linkid]->flag > -2 || qnode->next->flag == 0){
 							tblk->stop = t_blk->start;
 							
 						} else {
