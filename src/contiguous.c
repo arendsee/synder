@@ -124,6 +124,10 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			tblk->start= qnode->match->start;
 			tblk->stop = qnode->match->stop;
 			// Start is BEFORE current query Block;
+      		//	printf("TEST\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t[%d]{%d}\n",
+            //	   	seqname, qcon->name, qblk->start, qblk->stop,
+			//		tcon->name,tblk->start,tblk->stop, interval,qnode->flag,flag);
+			
 			if (start< qblk->start) {
 				//Move down contiguous block, stoping at leftmost possible point
 				while(qnode->prev != NULL && start > qnode->feature->stop){
@@ -140,7 +144,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 						tblk ->start = qnode->match->start;
 					} else {
 						flag = 2;
-						tblk ->stop = qnode->match->start;
+						tblk ->stop = qnode->match->stop;
 					}
 				} else if( start > qnode->feature->start)  {	//Start is contained within current block C,D
 					if(qnode->flag > -2){
@@ -178,6 +182,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 					tcon->name,qnode->match->start,qnode->match->stop, interval);
 			}			
 
+			
 			//Stop is AFTER current query Block
 			if (stop > qblk->stop){ //Stop is AFTER
 				while(qnode->next != NULL && stop){
@@ -356,10 +361,11 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 //				printf("Contiguous \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid < ctig->block[j-1]->oblkid){ //Twist to left of previous block
-				cnode->flag = cmap->map[ctig->block[j-1]->linkid]->flag  < -1 ? -3:-2;
+				cnode->flag = (cmap->map[ctig->block[j-1]->linkid]->flag  == -1 || cmap->map[ctig->block[j-1]->linkid]->flag > 0) ? 0:-2;
 				cmap->map[ctig->block[j-1]->linkid]->next = NULL;
 				cmap->map[cnode->feature->linkid] = cnode;
 				if(cnode->feature->oblkid == ctig->block[j-1]->oblkid - 1){
+					cnode->flag = -3;
 					cmap->map[ctig->block[j-1]->linkid]->next = cnode;
 					cmap->map[ctig->block[j-1]->linkid]->flag = -3;
 					cmap->map[cnode->feature->linkid]->prev = cmap->map[ctig->block[j-1]->linkid];
