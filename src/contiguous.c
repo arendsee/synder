@@ -117,16 +117,29 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 				free_block(tblk);
 				break;
 			}
-
-
+			
 			qnode = cmap->map[qblk->linkid];
+		    
+			bool q_overlap = false;
+			bool t_overlap = false;		
+			for(int k = region[0]; k<= region[1]; k++){
+				q_blk = SGCB(syn,0,chrid,k);	
+		        q_overlap = block_overlap(qnode->feature,cmap->map[q_blk->linkid]->feature) || q_overlap;
+				t_overlap = (block_overlap(qnode->match,cmap->map[q_blk->linkid]->match) && 
+						 (qnode->feature->oseqid == q_blk->oseqid)) || t_overlap;
+				if(q_overlap || t_overlap){
+                    qnode->flag = 5;
+				    continue;
+				}
+			}
+
 			// Set return region assumes case D;
 			tblk->start= qnode->match->start;
 			tblk->stop = qnode->match->stop;
 			// Start is BEFORE current query Block;
-//      			printf("TEST\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t[%d]{%d}\n",
-//            	   	seqname, qcon->name, qblk->start, qblk->stop,
-//					tcon->name,tblk->start,tblk->stop, interval,qnode->flag,flag);
+      		//	printf("TEST\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t[%d]{%d}\n",
+            //	   	seqname, qcon->name, qblk->start, qblk->stop,
+			//		tcon->name,tblk->start,tblk->stop, interval,qnode->flag,flag);
 			
 			if (start< qblk->start) {
 				//Move down contiguous block, stoping at leftmost possible point
@@ -166,9 +179,9 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 				q_blk = SGCB(syn,0,chrid,qnode->qblkid >0?qnode->qblkid-1:0);
 				t_blk = QT_SGCB(syn,q_blk);
 				t_con = QT_SGC(syn,q_blk);
-      			printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
+      			printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t\n",
             	   	seqname, qcon->name, q_blk->start, q_blk->stop,
-					t_con->name,t_blk->start,t_blk->stop, interval);
+					t_con->name,t_blk->start,t_blk->stop, interval);//,cmap->map[qblk->linkid]->flag);
 				t_blk = SGCB(syn,1,qnode->feature->oseqid,
 					(qnode->feature->oblkid >0 ? qnode->feature->oblkid-1:0));
 				q_blk = SGCB(syn,0,t_blk->oseqid, t_blk->oblkid);
@@ -179,7 +192,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
       	
       			printf("I\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
             	   	seqname, qcon->name, qblk->start, qblk->stop,
-					tcon->name,qnode->match->start,qnode->match->stop, interval);
+					tcon->name,qnode->match->start,qnode->match->stop, interval);//, qnode->flag);
 			}			
 
 			
@@ -244,7 +257,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 				t_con = QT_SGC(syn,q_blk);
 	      		printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
 	               	seqname, qcon->name, q_blk->start, q_blk->stop,
-					t_con->name,t_blk->start,t_blk->stop, interval);
+					t_con->name,t_blk->start,t_blk->stop, interval);//,cmap->map[q_blk->linkid]->flag);
 				t_blk = SGCB(syn,1,qnode->feature->oseqid,qnode->feature->oblkid+1< tcon->size? qnode->feature->oblkid+1:qnode->feature->oblkid);
 				q_blk = SGCB(syn,0,t_blk->oseqid, t_blk->oblkid);
 				t_con = SGC(syn,1,q_blk->oseqid);
@@ -344,7 +357,8 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 					overlap_bound[1]=j;
 					cmap->map[cnode->feature->linkid] = cnode;
 					continue;
-				} else {
+				} 
+				 else {
 					overlap_bound[0] = j;
 					overlap_bound[1] = j;
 				}
