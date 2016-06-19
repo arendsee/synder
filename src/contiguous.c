@@ -122,16 +122,16 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 		    
 			bool q_overlap = false;
 			bool t_overlap = false;		
-			for(int k = region[0]; k<= region[1]; k++){
-				q_blk = SGCB(syn,0,chrid,k);	
-		        q_overlap = block_overlap(qnode->feature,cmap->map[q_blk->linkid]->feature) || q_overlap;
-				t_overlap = (block_overlap(qnode->match,cmap->map[q_blk->linkid]->match) && 
-						 (qnode->feature->oseqid == q_blk->oseqid)) || t_overlap;
-				if(q_overlap || t_overlap){
-                    qnode->flag = 5;
-				    continue;
-				}
-			}
+//			for(int k = region[0]; k<= region[1]; k++){
+//				q_blk = SGCB(syn,0,chrid,k);	
+//		        q_overlap = block_overlap(qnode->feature,cmap->map[q_blk->linkid]->feature) || q_overlap;
+//				t_overlap = (block_overlap(qnode->match,cmap->map[q_blk->linkid]->match) && 
+//						 (qnode->feature->oseqid == q_blk->oseqid)) || t_overlap;
+//				if(q_overlap || t_overlap){
+//                  qnode->flag = 5;
+//				    continue;
+//				}
+//			}
 
 			// Set return region assumes case D;
 			tblk->start= qnode->match->start;
