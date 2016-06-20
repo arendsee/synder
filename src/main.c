@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "ui.h"
 #include "io.h"
@@ -58,8 +59,12 @@ int main(int argc, char * argv[]){
             analysis_filter(syn, args.hitfile, single_advocate, &width);
         }
     }
-
-    if(args.intfile){
+	
+    if(args.synfile){
+		if(args.intfile == NULL){
+			 args.intfile =stdin;
+		}
+ 
         if(strcmp(args.cmd, "count") == 0){
             analysis_count(syn, args.intfile);
         }
