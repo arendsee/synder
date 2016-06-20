@@ -20,7 +20,6 @@ ContiguousMap * init_contiguous_map(size_t size){
 void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 	// Ensure blocks are sorted (BAD IDEA, REDACTED FOR NOW)
 	//	sort_all_contigs(syn);
-	
 	// count total number of unique block-block pairs for hashmap
 	ContiguousMap *cmap= populate_contiguous_map(syn);
     
@@ -36,10 +35,14 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 	ContiguousNode * original;
 	Block twoblk;
     bool missing;
-    while ((fscanf(intfile,
-                   "%d %*s %*s %d %d %*s %*c %*s %s\n",
-                   &chrid, &start, &stop, seqname)) != EOF)
-    {
+    size_t length = 1024;
+	char *line = (char*) malloc(length*sizeof(char));
+
+while(fgets(line,length,intfile) && !feof(intfile)){
+	if(!sscanf(line, "%d %*s %*s %d %d %*s %*c %*s %s\n", &chrid, &start, &stop, seqname)){
+		printf("invalid input\n");
+		continue;
+	}
         contigs = get_region(SGC(syn, 0, chrid), start, stop);
 		uint32_t region[2]={0,0};
         missing = false;
@@ -267,7 +270,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
         free(contigs->block);
         free(contigs);
 	}
-	
+	free(line);
 	free_contiguous_map(cmap);
 }	
 
