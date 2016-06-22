@@ -94,7 +94,7 @@ Arguments parse_command(int argc, char * argv[]){
         args.test = true; 
         return args;
     }
-    while((opt = getopt(argc, argv, "hd:s:i:c:f:")) != -1){
+    while((opt = getopt(argc, argv, "hrd:s:i:c:f:")) != -1){
         switch(opt) {
             case 'h':
                 print_help();
@@ -120,6 +120,9 @@ Arguments parse_command(int argc, char * argv[]){
             case 'c':
                 args.cmd = strdup(optarg);
                 break;
+            case 'r':
+                args.swap = true;
+			    break;
             case '?':
                 exit(EXIT_FAILURE);
         }

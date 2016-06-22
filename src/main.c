@@ -44,7 +44,10 @@ int main(int argc, char * argv[]){
     }
 
     if(args.synfile){
-        syn = load_synmap(args.synfile);
+        syn = load_synmap(args.synfile, args.swap);
+//		if( args.swap){
+//          invert_synmap(syn);
+//	    }
     }
 
     if(!(syn || args.test)){
