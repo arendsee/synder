@@ -10,8 +10,10 @@
 #include "analysis.h"
 #include "test.h"
 #include "contiguous.h"
+#include "lev.h"
 
 int main(int argc, char * argv[]){
+
 
     Synmap * syn = NULL;
 
@@ -31,6 +33,10 @@ int main(int argc, char * argv[]){
     /** \todo Replace a system call to the prepare-data.sh script with a raw
      * synteny file to parser in synmap  */
 
+	if(strcmp(args.cmd, "convert")==0 && args.intfile && args.intfile){
+		convert_seqname(args.synfile, args.intfile);
+        exit(EXIT_SUCCESS);
+	}
     // Build database and exit
     if(args.db_filename){
         if(!(args.pos[0] && args.pos[1] && args.pos[2]))
@@ -45,10 +51,7 @@ int main(int argc, char * argv[]){
 
     if(args.synfile){
         syn = load_synmap(args.synfile, args.swap);
-//		if( args.swap){
-//          invert_synmap(syn);
-//	    }
-    }
+  }
 
     if(!(syn || args.test)){
         printf("Nothing to do ...\n");
@@ -63,7 +66,7 @@ int main(int argc, char * argv[]){
     }
 	
     if(args.synfile){
-		if(args.intfile == NULL){
+        if (args.intfile == NULL){
 			 args.intfile =stdin;
 		}
  
@@ -92,7 +95,7 @@ int main(int argc, char * argv[]){
 
     if(syn)
         free_synmap(syn);
-    close_Arguments(args);
+  close_Arguments(args);
 
     return(EXIT_SUCCESS);
 }
