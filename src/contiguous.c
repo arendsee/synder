@@ -381,7 +381,11 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 //				printf("Twist Left \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid > ctig->block[j-1]->oblkid){// Twist to right, possible transposition
-				cnode->flag= ctig->block[j]->oblkid == ctig->block[j+1]->oblkid+1 ? -3:-1;
+				if(j+1< ctig->size){
+				    cnode->flag= ctig->block[j]->oblkid == ctig->block[j+1]->oblkid+1 ? -3:-1;
+				} else {
+					cnode->flag = -1;
+				}
 				cmap->map[cnode->feature->linkid] = cnode;
 //				printf("Twist Right \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
