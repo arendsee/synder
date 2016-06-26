@@ -114,9 +114,41 @@ while(fgets(line,length,intfile) && !feof(intfile)){
       				printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
             		   	seqname, qcon->name, q_blk->start, q_blk->stop,
 						t_con->name,t_blk->start,t_blk->stop, interval);
+
 				}
-				printf(">\t%u\t%s\t%s\t%u\t%u\t.\t.\t.\t%d\n",
-               		interval,seqname,qcon->name,start,stop,flag);
+			
+				if(start < qblk->start){ // query region is before block
+					if(cmap->map[missloc]->flag >-2){ 
+					// return from start of block, to offest to start of query
+					// on target side
+						flag = 4;
+						tblk->stop = t_blk->start; 
+						tblk->start = t_blk->start - (q_blk->start - start);
+					} else {
+						flag = 5;
+						tblk->start = t_blk->stop; 
+						tblk->stop = t_blk->stop + (q_blk->start - start);
+					}
+				} else { // query region after block
+					if(cmap->map[missloc]->flag >-2){
+					// return from end of block, to offest to end of query
+					// on target side
+						flag = 5;
+						tblk->start = t_blk->stop; 
+						tblk->stop = t_blk->stop + (q_blk->stop - stop);
+					} else {
+						flag = 5;
+						tblk->stop = t_blk->start; 
+						tblk->start = t_blk->stop + (q_blk->start - start);
+					}
+				}
+
+
+				printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+               			interval,seqname,qcon->name,start,stop,
+						tcon->name, tblk->start,tblk->stop,flag);
+					
+
 				interval++;
 				free_block(tblk);
 				break;
