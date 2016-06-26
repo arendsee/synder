@@ -133,11 +133,11 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[missloc]->flag >-2){
 					// return from end of block, to offest to end of query
 					// on target side
-						flag = 5;
+						flag = 6;
 						tblk->start = t_blk->stop; 
 						tblk->stop = t_blk->stop + (q_blk->stop - stop);
 					} else {
-						flag = 5;
+						flag = 7;
 						tblk->stop = t_blk->start; 
 						tblk->start = t_blk->stop + (q_blk->start - start);
 					}
