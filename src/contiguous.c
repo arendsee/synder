@@ -450,11 +450,11 @@ int print_e_block(Block* q_blk, Block* t_blk, Block* tblk,
 		// on target side
 			flag = 5;
 			tblk->start = t_blk->stop; 
-			tblk->stop = t_blk->stop + (q_blk->stop - stop);
+			tblk->stop = t_blk->stop + (stop - q_blk->stop);
 		} else {
 			flag = 4;
 			tblk->stop = t_blk->start; 
-			tblk->start = t_blk->stop + (q_blk->start - start);
+			tblk->start = t_blk->start - (stop - q_blk->stop);
 		}
 	}
 
