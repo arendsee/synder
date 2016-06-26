@@ -173,11 +173,11 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						if(cmap->map[q_blk->linkid]->flag >-2){ 
 						// return from start of block, to offest to start of query
 						// on target side
-							flag = 4;
+							flag = 6;
 							tblk->stop = t_blk->start; 
 							tblk->start = t_blk->start - (q_blk->start - start);
 						} else {
-							flag = 5;
+							flag = 7;
 							tblk->start = t_blk->stop; 
 							tblk->stop = t_blk->stop + (q_blk->start - start);
 						}
