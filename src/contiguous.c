@@ -147,6 +147,45 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             	   			interval,seqname,qcon->name,start,stop,
 							tcon->name, tblk->start,tblk->stop,flag);
 				
+				if (missloc >0 && missloc+1<qcon->length){
+	
+					if(start < q_blk->start){ // query region is before block
+				        q_blk = SGCB(syn,0,chrid,missloc-1);
+				        t_blk = QT_SGCB(syn,q_blk);
+				        t_con = QT_SGC(syn,q_blk);
+						
+				        if(cmap->map[q_blk->linkid]->flag >-2){
+						// return from end of block, to offest to end of query
+						// on target side
+							flag = 5;
+							tblk->start = t_blk->stop; 
+							tblk->stop = t_blk->stop + (stop - q_blk->stop);
+						} else {
+							flag = 4;
+							tblk->stop = t_blk->start; 
+							tblk->start = t_blk->start - (stop - q_blk->stop);
+						}
+					} else { // query region after block
+					
+				        q_blk = SGCB(syn,0,chrid,missloc+1);
+				        t_blk = QT_SGCB(syn,q_blk);
+				        t_con = QT_SGC(syn,q_blk);
+						if(cmap->map[q_blk->linkid]->flag >-2){ 
+						// return from start of block, to offest to start of query
+						// on target side
+							flag = 4;
+							tblk->stop = t_blk->start; 
+							tblk->start = t_blk->start - (q_blk->start - start);
+						} else {
+							flag = 5;
+							tblk->start = t_blk->stop; 
+							tblk->stop = t_blk->stop + (q_blk->start - start);
+						}
+					}
+				    printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+            	   		interval,seqname,qcon->name,start,stop,
+						tcon->name, tblk->start,tblk->stop,flag);
+				}
     // query region is before block
 
 				interval++;
@@ -434,12 +473,5 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 
 }
 
-int print_e_block(Block* q_blk, Block* t_blk, Block* tblk, 
-     ContiguousMap* cmap, int start, int stop){
-
-	int flag;
-
-	return flag;
-}
 
 
