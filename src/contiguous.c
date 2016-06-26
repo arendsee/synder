@@ -147,7 +147,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             	   			interval,seqname,qcon->name,start,stop,
 							tcon->name, tblk->start,tblk->stop,flag);
 				
-				if (missloc >0 && missloc+1<qcon->length){
+				if (missloc >0 && missloc+1<qcon->size){
 	
 					if(start < q_blk->start){ // query region is before block
 				        q_blk = SGCB(syn,0,chrid,missloc-1);
