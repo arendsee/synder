@@ -448,11 +448,11 @@ int print_e_block(Block* q_blk, Block* t_blk, Block* tblk,
 		if(cmap->map[q_blk->linkid]->flag >-2){
 		// return from end of block, to offest to end of query
 		// on target side
-			flag = 5;
+			flag = 6;
 			tblk->start = t_blk->stop; 
 			tblk->stop = t_blk->stop + (stop - q_blk->stop);
 		} else {
-			flag = 4;
+			flag = 7;
 			tblk->stop = t_blk->start; 
 			tblk->start = t_blk->start - (stop - q_blk->stop);
 		}
