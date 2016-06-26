@@ -122,22 +122,24 @@ while(fgets(line,length,intfile) && !feof(intfile)){
                			interval,seqname,qcon->name,start,stop,
 						tcon->name, tblk->start,tblk->stop,flag);
 				
-				// Print flanking blocks
-				if(start < qblk->start && i > 0){
-					q_blk = SGCB(syn,0,chrid,missloc-1);
-					t_blk = QT_SGCB(syn,q_blk);
-					t_con = QT_SGC(syn,q_blk);
-				} else if (i < qcon->size){
-					q_blk = SGCB(syn,0,chrid,missloc+1);
-					t_blk = QT_SGCB(syn,q_blk);
-					t_con = QT_SGC(syn,q_blk);
-				}
-				
-				flag = print_e_block(q_blk, t_blk, tblk, cmap,start, stop);
+				// Print flanking block
+				if(i > 0 || i< qcon->size-1){
+					if(start < qblk->start){
+						q_blk = SGCB(syn,0,chrid,missloc-1);
+						t_blk = QT_SGCB(syn,q_blk);
+						t_con = QT_SGC(syn,q_blk);
+					} else{
+						q_blk = SGCB(syn,0,chrid,missloc+1);
+						t_blk = QT_SGCB(syn,q_blk);
+						t_con = QT_SGC(syn,q_blk);
+					}
+					
+					flag = print_e_block(q_blk, t_blk, tblk, cmap,start, stop);
 
-				printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
-               			interval,seqname,qcon->name,start,stop,
+					printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+            	   			interval,seqname,qcon->name,start,stop,
 						tcon->name, tblk->start,tblk->stop,flag);
+				}
     // query region is before block
 
 				interval++;
