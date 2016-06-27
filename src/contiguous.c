@@ -152,19 +152,19 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 				int64_t offset;
 				blkid = cmap->map[q_blk->linkid]-> qblkid;
 				if (start < q_blk->start && blkid >0){
-					q_blk = SGCB(syn,0,chrid,missloc-1);
+					q_blk = SGCB(syn,0,chrid,blkid-1);
 					t_blk = QT_SGCB(syn,q_blk);
             		tcon = QT_SGC(syn, q_blk);
 
 					if(cmap->map[q_blk->linkid]->flag >-2){
 						flag = 5;
 					    tblk->start = t_blk->stop;
-						offset = t_blk->stop + (stop-t_blk->stop);
+						offset = t_blk->stop + (stop-q_blk->stop);
 					    tblk->stop = (uint32_t)offset>=0 ?offset:0;
 					} else {
 						flag = 4;
 					    tblk->stop = t_blk->start;
-						offset = t_blk->start - (stop-t_blk->stop);
+						offset = t_blk->start - (stop-q_blk->stop);
 					    tblk->start = offset >= 0 ? (uint32_t)offset : 0;
 					}	
 			    	printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
@@ -172,19 +172,19 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						tcon->name, tblk->start,tblk->stop,flag);
 				
 				} else if(blkid +1 < qcon->size){ // query region after block
-					q_blk = SGCB(syn,0,chrid,missloc+1);
+					q_blk = SGCB(syn,0,chrid,blkid+1);
 					t_blk = QT_SGCB(syn,q_blk);
             		tcon = QT_SGC(syn, q_blk);
 					
 					if(cmap->map[q_blk->linkid]->flag >-2){
 						flag = 4;
 					    tblk->stop = t_blk->start;
-						offset = t_blk->start - (t_blk->start-start);
+						offset = t_blk->start - (q_blk->start-start);
 					    tblk->start = offset >= 0 ? (uint32_t)offset : 0;
 					} else {
 						flag = 5;
 					    tblk->start = t_blk->stop;
-						offset = t_blk->stop + (t_blk->start - start);
+						offset = t_blk->stop + (q_blk->start - start);
 					    tblk->stop = (uint32_t)offset>=0 ?offset:0;
 					}	
 					
