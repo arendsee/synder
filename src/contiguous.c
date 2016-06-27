@@ -179,12 +179,12 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[q_blk->linkid]->flag >-2){
 						flag = 4;
 					    tblk->stop = t_blk->start;
-						offset = t_blk->start - (stop-t_blk->stop);
+						offset = t_blk->start - (t_blk->start-start);
 					    tblk->start = offset >= 0 ? (uint32_t)offset : 0;
 					} else {
 						flag = 5;
 					    tblk->start = t_blk->stop;
-						offset = t_blk->stop + (stop-t_blk->stop);
+						offset = t_blk->stop + (t_blk->start - start);
 					    tblk->stop = (uint32_t)offset>=0 ?offset:0;
 					}	
 					
