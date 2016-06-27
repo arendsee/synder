@@ -165,7 +165,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (stop-q_blk->stop);
-					    tblk->start = offset >= 0 ? (uint32_t)offset : 0;
+					    tblk->start = offset < tblk->stop ? (uint32_t)offset : 0;
 					}	
 			    	printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
         	   			interval,seqname,qcon->name,start,stop,
@@ -180,7 +180,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (q_blk->start-start);
-					    tblk->start = offset >= 0 ? (uint32_t)offset : 0;
+					    tblk->start = offset < tblk->stop ? (uint32_t)offset : 0;
 					} else {
 						flag = 5;
 					    tblk->start = t_blk->stop;
