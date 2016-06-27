@@ -118,13 +118,15 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 				q_blk = SGCB(syn,0,chrid,missloc);
 				t_blk = QT_SGCB(syn,q_blk);
 				t_con = QT_SGC(syn,q_blk);
+				int64_t offset;
 				if(start < q_blk->start){ // query region is before block
 					if(cmap->map[q_blk->linkid]->flag >-2){ 
 					// return from start of block, to offest to start of query
 					// on target side
 						flag = 4;
-						tblk->stop = t_blk->start; 
-						tblk->start = t_blk->start - (q_blk->start - start);
+					    tblk->stop = t_blk->start;
+						offset = t_blk->start - (q_blk->start-start);
+					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
 					} else {
 						flag = 5;
 						tblk->start = t_blk->stop; 
@@ -140,6 +142,9 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						tblk->stop = t_blk->stop + (stop - q_blk->stop);
 					} else {
 						flag = 7;
+					    tblk->stop = t_blk->start;
+						offset = t_blk->start - (stop-q_blk->stop);
+					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
 						tblk->stop = t_blk->start; 
 						tblk->start = t_blk->start - (stop - q_blk->stop);
 					}
@@ -149,7 +154,6 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             	   			interval,seqname,qcon->name,start,stop,
 							tcon->name, tblk->start,tblk->stop,flag);
 				
-				int64_t offset;
 				blkid = cmap->map[q_blk->linkid]-> qblkid;
 				if (start < q_blk->start && blkid >0){
 					q_blk = SGCB(syn,0,chrid,blkid-1);
