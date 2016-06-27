@@ -145,8 +145,6 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (stop-q_blk->stop);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
-						tblk->stop = t_blk->start; 
-						tblk->start = t_blk->start - (stop - q_blk->stop);
 					}
 				}
 				
