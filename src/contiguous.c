@@ -167,8 +167,9 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					} else {
 						flag = 8;
 					    tblk->stop = t_blk->start;
-						offset = t_blk->start - (stop-q_blk->stop);
-					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
+						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
+						offset = t_blk->start - offset;
+					    tblk->start = offset > 0 ? (uint32_t)offset : 0;
 					}	
 			    	printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
         	   			interval,seqname,qcon->name,start,stop,
@@ -182,8 +183,9 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[q_blk->linkid]->flag >-2){
 						flag = 9;
 					    tblk->stop = t_blk->start;
-						offset = t_blk->start - (q_blk->start-start);
-					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
+						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
+						offset = t_blk->start - offset;
+					    tblk->start = offset > 0 ? (uint32_t)offset : 0;
 					} else {
 						flag = 5;
 					    tblk->start = t_blk->stop;
