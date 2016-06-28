@@ -119,7 +119,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 				}
 				q_blk = SGCB(syn,0,chrid,missloc);
 				t_blk = QT_SGCB(syn,q_blk);
-				t_con = QT_SGC(syn,q_blk);
+				tcon = QT_SGC(syn,q_blk);
 				int64_t offset;
 				if(start < q_blk->start){ // query region is before block
 					if(cmap->map[q_blk->linkid]->flag >-2){ 
