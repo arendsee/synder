@@ -123,7 +123,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[q_blk->linkid]->flag >-2){ 
 					// return from start of block, to offest to start of query
 					// on target side
-						flag = 6;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (q_blk->start-start);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
@@ -141,7 +141,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						tblk->start = t_blk->stop; 
 						tblk->stop = t_blk->stop + (stop - q_blk->stop);
 					} else {
-						flag = 7;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (stop-q_blk->stop);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
@@ -165,7 +165,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						offset += t_blk->stop;
 					    tblk->stop = offset >= 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 8;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset = t_blk->start - offset;
@@ -181,7 +181,7 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             		tcon = QT_SGC(syn, q_blk);
 					
 					if(cmap->map[q_blk->linkid]->flag >-2){
-						flag = 9;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset = t_blk->start - offset;
