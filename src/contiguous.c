@@ -120,18 +120,17 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 				q_blk = SGCB(syn,0,chrid,missloc);
 				t_blk = QT_SGCB(syn,q_blk);
 				tcon = QT_SGC(syn,q_blk);
-				tcon = t_con;
 				int64_t offset;
 				if(start < q_blk->start){ // query region is before block
 					if(cmap->map[q_blk->linkid]->flag >-2){ 
 					// return from start of block, to offest to start of query
 					// on target side
-						flag = 20;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (q_blk->start-start);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 30;
+						flag = 5;
 						tblk->start = t_blk->stop; 
 						tblk->stop = t_blk->stop + (q_blk->start - start);
 					}
@@ -140,11 +139,11 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[q_blk->linkid]->flag >-2){
 					// return from end of block, to offest to end of query
 					// on target side
-						flag = 31;
+						flag = 5;
 						tblk->start = t_blk->stop; 
 						tblk->stop = t_blk->stop + (stop - q_blk->stop);
 					} else {
-						flag = 21;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (stop-q_blk->stop);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
@@ -162,13 +161,13 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             		tcon = QT_SGC(syn, q_blk);
 
 					if(cmap->map[q_blk->linkid]->flag >-2){
-						flag = 10;
+						flag = 5;
 					    tblk->start = t_blk->stop;
 						offset = stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
 						offset += t_blk->stop;
 					    tblk->stop = offset >= 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 6;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
 						offset = t_blk->start - offset;
@@ -184,13 +183,13 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             		tcon = QT_SGC(syn, q_blk);
 					
 					if(cmap->map[q_blk->linkid]->flag >-2){
-						flag = 7;
+						flag = 4;
 					    tblk->stop = t_blk->start;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset = t_blk->start - offset;
 					    tblk->start = offset > 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 11;
+						flag = 5;
 					    tblk->start = t_blk->stop;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset += t_blk->stop;
