@@ -125,12 +125,12 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[q_blk->linkid]->flag >-2){ 
 					// return from start of block, to offest to start of query
 					// on target side
-						flag = 4;
+						flag = 20;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (q_blk->start-start);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 5;
+						flag = 30;
 						tblk->start = t_blk->stop; 
 						tblk->stop = t_blk->stop + (q_blk->start - start);
 					}
@@ -139,11 +139,11 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 					if(cmap->map[q_blk->linkid]->flag >-2){
 					// return from end of block, to offest to end of query
 					// on target side
-						flag = 5;
+						flag = 31;
 						tblk->start = t_blk->stop; 
 						tblk->stop = t_blk->stop + (stop - q_blk->stop);
 					} else {
-						flag = 4;
+						flag = 21;
 					    tblk->stop = t_blk->start;
 						offset = t_blk->start - (stop-q_blk->stop);
 					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
