@@ -60,6 +60,8 @@ while(fgets(line,length,intfile) && !feof(intfile)){
 						missloc = missloc >0 ? missloc : 0;
 
             		}
+
+					
 					missing = true;
         	}
      	}
@@ -159,13 +161,13 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             		tcon = QT_SGC(syn, q_blk);
 
 					if(cmap->map[q_blk->linkid]->flag >-2){
-						flag = 5;
+						flag = 10;
 					    tblk->start = t_blk->stop;
 						offset = stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
 						offset += t_blk->stop;
 					    tblk->stop = offset >= 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 4;
+						flag = 6;
 					    tblk->stop = t_blk->start;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset = t_blk->start - offset;
@@ -181,13 +183,13 @@ while(fgets(line,length,intfile) && !feof(intfile)){
             		tcon = QT_SGC(syn, q_blk);
 					
 					if(cmap->map[q_blk->linkid]->flag >-2){
-						flag = 4;
+						flag = 7;
 					    tblk->stop = t_blk->start;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset = t_blk->start - offset;
 					    tblk->start = offset > 0 ? (uint32_t)offset : 0;
 					} else {
-						flag = 5;
+						flag = 11;
 					    tblk->start = t_blk->stop;
 						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
 						offset += t_blk->stop;
