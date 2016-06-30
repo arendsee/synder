@@ -1,7 +1,7 @@
 CFLAGS=-Wall -g -O2
 CC=gcc
 TARGET=synder
-OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o
+OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o lev.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
@@ -51,6 +51,8 @@ ia.o: itree/ia.c itree/ia.h
 iv.o: itree/iv.c itree/iv.h
 	${CC} -c ${CFLAGS} itree/iv.[ch]
 
+lev.o: lev.c lev.h
+	${CC} -c ${CFLAGS} lev.[ch]
 
 
 profiler-build:

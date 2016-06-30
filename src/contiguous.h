@@ -87,4 +87,6 @@ ContiguousMap * populate_contiguous_map(Synmap * syn);
 
 void contiguous_query(Synmap * syn, FILE * intfile, bool pblock);
 
+int print_e_block(Block* q_blk, Block* t_blk, Block* tblk, ContiguousMap* cmap, int start, int stop);
+
 #endif

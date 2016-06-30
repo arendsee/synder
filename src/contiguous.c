@@ -20,7 +20,6 @@ ContiguousMap * init_contiguous_map(size_t size){
 void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 	// Ensure blocks are sorted (BAD IDEA, REDACTED FOR NOW)
 	//	sort_all_contigs(syn);
-	
 	// count total number of unique block-block pairs for hashmap
 	ContiguousMap *cmap= populate_contiguous_map(syn);
     
@@ -36,10 +35,14 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 	ContiguousNode * original;
 	Block twoblk;
     bool missing;
-    while ((fscanf(intfile,
-                   "%d %*s %*s %d %d %*s %*c %*s %s\n",
-                   &chrid, &start, &stop, seqname)) != EOF)
-    {
+    size_t length = 1024;
+	char *line = (char*) malloc(length*sizeof(char));
+
+while(fgets(line,length,intfile) && !feof(intfile)){
+	if(!sscanf(line, "%d %*s %*s %d %d %*s %*c %*s %s\n", &chrid, &start, &stop, seqname)){
+		printf("invalid input\n");
+		continue;
+	}
         contigs = get_region(SGC(syn, 0, chrid), start, stop);
 		uint32_t region[2]={0,0};
         missing = false;
@@ -57,6 +60,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 						missloc = missloc >0 ? missloc : 0;
 
             		}
+
+					
 					missing = true;
         	}
      	}
@@ -97,7 +102,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
 			Contig* t_con;
 			
 			if(missing){
-				flag=4;
 				if(pblock){		
 					q_blk = SGCB(syn,0,chrid,missloc);
 					t_blk = QT_SGCB(syn,q_blk);
@@ -111,9 +115,94 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
       				printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
             		   	seqname, qcon->name, q_blk->start, q_blk->stop,
 						t_con->name,t_blk->start,t_blk->stop, interval);
+
 				}
-				printf(">\t%u\t%s\t%s\t%u\t%u\t.\t.\t.\t%d\n",
-               		interval,seqname,qcon->name,start,stop,flag);
+				q_blk = SGCB(syn,0,chrid,missloc);
+				t_blk = QT_SGCB(syn,q_blk);
+				tcon = QT_SGC(syn,q_blk);
+				int64_t offset;
+				if(start < q_blk->start){ // query region is before block
+					if(cmap->map[q_blk->linkid]->flag >-2){ 
+					// return from start of block, to offest to start of query
+					// on target side
+						flag = 4;
+					    tblk->stop = t_blk->start;
+						offset = t_blk->start - (q_blk->start-start);
+					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
+					} else {
+						flag = 5;
+						tblk->start = t_blk->stop; 
+						tblk->stop = t_blk->stop + (q_blk->start - start);
+					}
+				} else { // query region after block
+					
+					if(cmap->map[q_blk->linkid]->flag >-2){
+					// return from end of block, to offest to end of query
+					// on target side
+						flag = 5;
+						tblk->start = t_blk->stop; 
+						tblk->stop = t_blk->stop + (stop - q_blk->stop);
+					} else {
+						flag = 4;
+					    tblk->stop = t_blk->start;
+						offset = t_blk->start - (stop-q_blk->stop);
+					    tblk->start = offset < tblk->stop && offset > 0 ? (uint32_t)offset : 0;
+					}
+				}
+				
+				printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+            	   			interval,seqname,qcon->name,start,stop,
+							tcon->name, tblk->start,tblk->stop,flag);
+				
+				blkid = cmap->map[q_blk->linkid]-> qblkid;
+				if (start < q_blk->start && blkid >0){
+					q_blk = SGCB(syn,0,chrid,blkid-1);
+					t_blk = QT_SGCB(syn,q_blk);
+            		tcon = QT_SGC(syn, q_blk);
+
+					if(cmap->map[q_blk->linkid]->flag >-2){
+						flag = 5;
+					    tblk->start = t_blk->stop;
+						offset = stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
+						offset += t_blk->stop;
+					    tblk->stop = offset >= 0 ? (uint32_t)offset : 0;
+					} else {
+						flag = 4;
+					    tblk->stop = t_blk->start;
+						offset = stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
+						offset = t_blk->start - offset;
+					    tblk->start = offset > 0 ? (uint32_t)offset : 0;
+					}	
+			    	printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+        	   			interval,seqname,qcon->name,start,stop,
+						tcon->name, tblk->start,tblk->stop,flag);
+				
+				} else if(blkid +1 < qcon->size){ // query region after block
+					q_blk = SGCB(syn,0,chrid,blkid+1);
+					t_blk = QT_SGCB(syn,q_blk);
+            		tcon = QT_SGC(syn, q_blk);
+					
+					if(cmap->map[q_blk->linkid]->flag >-2){
+						flag = 4;
+					    tblk->stop = t_blk->start;
+						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
+						offset = t_blk->start - offset;
+					    tblk->start = offset > 0 ? (uint32_t)offset : 0;
+					} else {
+						flag = 5;
+					    tblk->start = t_blk->stop;
+						offset = start <= q_blk->start ? q_blk->start - start : start-q_blk->start;
+						offset += t_blk->stop;
+					    tblk->stop = offset >= 0 ? (uint32_t)offset : 0;
+					}	
+					
+			    	printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+        	   			interval,seqname,qcon->name,start,stop,
+						tcon->name, tblk->start,tblk->stop,flag);
+				}
+			
+    // query region is before block
+
 				interval++;
 				free_block(tblk);
 				break;
@@ -267,7 +356,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock){
         free(contigs->block);
         free(contigs);
 	}
-	
+	free(line);
 	free_contiguous_map(cmap);
 }	
 
@@ -378,7 +467,11 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 //				printf("Twist Left \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
 			} else if( cnode->feature->oblkid > ctig->block[j-1]->oblkid){// Twist to right, possible transposition
-				cnode->flag= ctig->block[j]->oblkid == ctig->block[j+1]->oblkid+1 ? -3:-1;
+				if(j+1< ctig->size){
+				    cnode->flag= ctig->block[j]->oblkid == ctig->block[j+1]->oblkid+1 ? -3:-1;
+				} else {
+					cnode->flag = -1;
+				}
 				cmap->map[cnode->feature->linkid] = cnode;
 //				printf("Twist Right \t%u::%u \t[%u:%u] {%u,%u} \n",cnode->feature->start,cnode->feature->stop,cnode->feature->oseqid,cnode->feature->oblkid,j,cnode->match->oblkid);
 //				printf("\t[%u:%u]  \n",cnode->match->start,cnode->match->stop);
@@ -394,7 +487,6 @@ ContiguousMap * populate_contiguous_map(Synmap * syn){
 	return cmap;
 
 }
-
 
 
 

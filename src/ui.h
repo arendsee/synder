@@ -13,6 +13,7 @@ typedef struct Arguments {
     char * cmd;
     char ** pos;
     bool test;
+    bool swap;
 } Arguments;
 
 void close_Arguments(Arguments arg);

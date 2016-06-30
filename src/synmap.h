@@ -45,4 +45,5 @@ void print_synmap(Synmap *);
 /** Sort all the blocks in each contig both my start and stop */
 void sort_all_contigs(Synmap * synmap);
 
+
 #endif

@@ -1,18 +1,22 @@
 # Manual stub
 
 #Contiguous Set Use
+
 ./synder -i GFF -s DB -c contig
 
 output is like -c map with additon of flag
 SEQNAME TARGETNAME SEARCH_INTERVAL_START SEARCH_INTERVAL_STOP FLAG
 
 Flag is to keep track of edge dependability:
-0 -> Reliable
-1 -> Start Edge Unreliable [Case F]
-2 -> Stop Edge Unreliable [Case F]
-3 -> Both Edges Unreliable [Case E or C extended to F]
 
-if INTERVAL_START and INTERVAL_END are . then the query interval met the 
+ 0 -> the search interval is bound on both ends (is reliable)
+ 1 -> the start edge is unbounded
+ 2 -> the stop edge is unbound
+ 3 -> both edges are unbound, but there are internal overlaps
+ 4 -> query is to the left of a contig, no overlap
+ 5 -> query is to the right of a contig, no overlap
+
+if INTERVAL_START and INTERVAL_END are. then the query interval met the 
 criteria for Case E
 
 

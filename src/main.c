@@ -10,8 +10,10 @@
 #include "analysis.h"
 #include "test.h"
 #include "contiguous.h"
+#include "lev.h"
 
 int main(int argc, char * argv[]){
+
 
     Synmap * syn = NULL;
 
@@ -43,8 +45,13 @@ int main(int argc, char * argv[]){
         exit(EXIT_SUCCESS);
     }
 
+	if(strcmp(args.cmd, "convert")==0 && args.intfile && args.intfile){
+		convert_seqname(args.synfile, args.intfile);
+        exit(EXIT_SUCCESS);
+	}
+	
     if(args.synfile){
-        syn = load_synmap(args.synfile);
+        syn = load_synmap(args.synfile, args.swap);
     }
 
     if(!(syn || args.test)){
@@ -58,8 +65,12 @@ int main(int argc, char * argv[]){
             analysis_filter(syn, args.hitfile, single_advocate, &width);
         }
     }
-
-    if(args.intfile){
+	
+    if(args.synfile){
+        if (args.intfile == NULL){
+			 args.intfile =stdin;
+		}
+ 
         if(strcmp(args.cmd, "count") == 0){
             analysis_count(syn, args.intfile);
         }
@@ -85,7 +96,7 @@ int main(int argc, char * argv[]){
 
     if(syn)
         free_synmap(syn);
-    close_Arguments(args);
+  close_Arguments(args);
 
     return(EXIT_SUCCESS);
 }
