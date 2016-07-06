@@ -5,9 +5,9 @@
 
 /** A named set of Contig objects*/
 typedef struct {
-    char * name;
-    size_t size;
-    Contig ** contig;
+  char *name;
+  size_t size;
+  Contig **contig;
 } Genome;
 
 /** Allocate memory for Genome *name* of size *size*.
@@ -17,7 +17,7 @@ typedef struct {
  *
  * @return pointer to new Genome struct 
  * */
-Genome * init_genome(char *, size_t);
+Genome *init_genome(char *, size_t);
 
 /**
  * Recursively free all memory

@@ -18,7 +18,7 @@
 
 /** A pair of syntenically linked Genome objects  */
 typedef struct {
-    Genome ** genome;
+  Genome **genome;
 } Synmap;
 
 /**
@@ -28,7 +28,7 @@ typedef struct {
  *
  * @return pointer to the new Synmap
  */
-Synmap * init_synmap();
+Synmap *init_synmap();
 
 /** Recursively free all memory allocated to the synteny map.
  * 

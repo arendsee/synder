@@ -35,13 +35,13 @@
  *
  * */
 typedef struct {
-    char * name;
-    struct IntervalTree * itree;
-    size_t size;
-    Block ** block;
-    Block ** by_stop;
-    uint start_sorted:1;
-    uint stop_sorted:1;
+  char *name;
+  struct IntervalTree *itree;
+  size_t size;
+  Block **block;
+  Block **by_stop;
+  uint start_sorted:1;
+  uint stop_sorted:1;
 } Contig;
 
 /** Allocate memory for a contig and set each field.
@@ -59,7 +59,7 @@ typedef struct {
  * @return pointer to a new Contig
  *
  * */
-Contig * init_contig(char * name, size_t size);
+Contig *init_contig(char *name, size_t size);
 
 /** Recursively free all memory.
  *
@@ -86,7 +86,7 @@ uint anchor(Contig * contig, uint x);
  * If there is no block above or below, return NULL
  *
  * */
-Contig * get_region(Contig * contig, uint a, uint b);
+Contig *get_region(Contig * contig, uint a, uint b);
 
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);

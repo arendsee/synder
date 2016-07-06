@@ -13,6 +13,6 @@
  *
  * @return pointer to a complete Synmap object
  */
-Synmap * load_synmap(FILE *, int);
+Synmap *load_synmap(FILE *, int);
 
 #endif

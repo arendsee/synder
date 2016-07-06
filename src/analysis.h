@@ -36,12 +36,12 @@ void analysis_map(Synmap * syn, FILE * gff_file);
  *
  */
 typedef struct {
-    size_t qseqid;
-    uint qstart;
-    uint qstop;
-    size_t tseqid;
-    uint tstart;
-    uint tstop;
+  size_t qseqid;
+  uint qstart;
+  uint qstop;
+  size_t tseqid;
+  uint tstart;
+  uint tstop;
 } Link;
 
 /** Identifies syntenic links that agree with the syntenic database
@@ -50,8 +50,7 @@ typedef struct {
  * @param syn_file FILE pointer to data with synteny format
  */
 void analysis_filter(Synmap * syn, FILE * syn_file,
-                     bool(*classifier)(Synmap *, Link *, void *),
-                     void *);
+                     bool(*classifier) (Synmap *, Link *, void *), void *);
 
 /** Classify as supported if at least one syn block is nearby
  *
@@ -64,6 +63,6 @@ void analysis_filter(Synmap * syn, FILE * syn_file,
  * @param width a pointer to an unsigned integer describing the distance from
  *              QUERY flanks to search for a parallel block
  */
-bool single_advocate(Synmap * syn, Link * query, void * width);
+bool single_advocate(Synmap * syn, Link * query, void *width);
 
 #endif

@@ -6,14 +6,14 @@
 
 /** Parsed command line arguments */
 typedef struct Arguments {
-    FILE * synfile;
-    FILE * intfile;
-    FILE * hitfile;
-    char * db_filename;
-    char * cmd;
-    char ** pos;
-    bool test;
-    bool swap;
+  FILE *synfile;
+  FILE *intfile;
+  FILE *hitfile;
+  char *db_filename;
+  char *cmd;
+  char **pos;
+  bool test;
+  bool swap;
 } Arguments;
 
 void close_Arguments(Arguments arg);
@@ -24,6 +24,6 @@ void print_help();
 
 void print_args(Arguments args);
 
-Arguments parse_command(int argc, char * argv[]);
+Arguments parse_command(int argc, char *argv[]);
 
 #endif

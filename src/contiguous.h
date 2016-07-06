@@ -10,7 +10,8 @@
 
 //Build contiguous set as adjacency list attached to hash map
 
-/** Contiguous list object holding current Block and its neighbors
+/** 
+ * @brief Contiguous list object holding current Block and its neighbors
  * 
  *
  * Fields:
@@ -27,31 +28,14 @@
  * 			  3 - Target Interval overlaps
  *
  */
-
-
-typedef struct  ContiguousNode{
-	Block * feature;
-	Block * match;
-	struct ContiguousNode * prev;
-    struct ContiguousNode * next;	
-	int flag;
-	uint32_t qblkid;
+typedef struct ContiguousNode {
+  Block *feature;
+  Block *match;
+  struct ContiguousNode *prev;
+  struct ContiguousNode *next;
+  int flag;
+  uint32_t qblkid;
 } ContiguousNode;
-
-/** Adjacency list structure to store head and tail 
- * of each contiguous set
- *
- * Fields:
- * first - head of contiguous set
- * last - tail of contiguous set
- * size - number of members of contiguous set
- *
- */
-typedef struct ContiguousList {
-	ContiguousNode * first;
-	ContiguousNode * last;
-	size_t  size;
-} ContiguousList;
 
 /** Map using linkid to serve as a hashmap to allow quick access
  * of individual nodes of the adjacency list
@@ -61,32 +45,51 @@ typedef struct ContiguousList {
  * size - number of nodes in map
  *
  */
-typedef struct ContiguousMap{
-	ContiguousNode ** map;
-	size_t size;
+typedef struct ContiguousMap {
+  ContiguousNode **map;
+  size_t size;
 } ContiguousMap;
 
-/**Create a new contiguous list
+
+/**
+ * @brief Frees contiguous map from memory
  *
- * This initializes an empty contiguous list
- *
- * @return pointer to new contiguous list
+ * @param ContiguousMap* cmap The contiguous map to free
  */
+void free_contiguous_map(ContiguousMap * cmap);
 
-ContiguousList * create_contiguous_list();
+/**
+ * @brief Initialize a new contiguous map
+ *
+ * @param size_t size Number of nodes in the contiguous map
+ *
+ * @return ContiguousMap* New contiguous map
+ */
+ContiguousMap *init_contiguous_map(size_t size);
 
-//Clear existing contiguous list
-void free_contiguous_list(ContiguousList *clist);
-void free_contiguous_map(ContiguousMap *cmap);
+/**
+ * @brief Populate  a new contiguous map from a synteny db
+ *
+ * @param Synmap* syn Synteny db
+ *
+ * @return ContiguousMap* populated contiguous map
+ */
+ContiguousMap *populate_contiguous_map(Synmap * syn);
 
-void contiguous_list_push(ContiguousList *clist, ContiguousNode *cnode);
-void contiguous_list_reset(ContiguousList *clist, ContiguousNode *cnode);
-
-ContiguousMap * init_contiguous_map(size_t size);
-ContiguousMap * populate_contiguous_map(Synmap * syn);
-
+/**
+ * @brief Print target regions from a given query
+ *
+ * Generates a new contiguous map, then searches map for the target regions as
+ * passed in through the intfile. 
+ *
+ * @param Synmap* syn Synteny db
+ * @param FILE* intfile GFF file containing query-side target regions, may be
+ *                      streamed from STDIN
+ * @param bool pblock Toggle to print flanking query and target side blocks to
+ *                    a given search region
+ * 
+ */
 void contiguous_query(Synmap * syn, FILE * intfile, bool pblock);
 
-int print_e_block(Block* q_blk, Block* t_blk, Block* tblk, ContiguousMap* cmap, int start, int stop);
 
 #endif
