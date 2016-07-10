@@ -1,6 +1,20 @@
-# Manual stub
+**This program is under development, 
 
-#Contiguous Set Use
+# Synder
+
+    Map query intervals to target search spaces using a synteny map
+
+# Installation
+
+Just run `make`
+
+# Getting help
+
+To get a usage statement and descriptions of commands, type
+
+`synder -h`
+
+# Contiguous Set Use
 
 ./synder -i GFF -s DB -c contig
 
@@ -15,11 +29,6 @@ Flag is to keep track of edge dependability:
  3 -> both edges are unbound, but there are internal overlaps
  4 -> query is to the left of a contig, no overlap
  5 -> query is to the right of a contig, no overlap
-
-if INTERVAL_START and INTERVAL_END are. then the query interval met the 
-criteria for Case E
-
-
 
 # Definitions
 
@@ -62,12 +71,15 @@ of the syntenic blocks, will always be considered "syntenically scrambled".
 
  ![Contiguous set to search interval. Cases E and F are considered syntenically scrambled so no search interval is obtained.](figures/contiguous-set-to-search-interval.pdf)
 
+Note: The image above is out of date. We now guess a search interval for cases
+E and F.
+
 # TODO list for version 1
 
  - [x] Implement the query context to contiguous function
  - [x] Implement the contiguous set to search interval function
- - [ ] Clean up the CLI user interface
- - [ ] Specify the synteny class (A-F) of the output search intervals 
+ - [x] Clean up the CLI user interface
+ - [x] Specify the synteny class (A-F) of the output search intervals 
 
 # TODO list for version 2
 
@@ -75,6 +87,6 @@ of the syntenic blocks, will always be considered "syntenically scrambled".
    will map to the same search spaces. But, at least for tandem duplicates, we
    may be able assign unique search spaces to each. But is this worth doing?
  - [ ] Identify target side insertions. This may not be necessary since the
-   Cadmium pipeline will find these.
+   Fagin pipeline will find these.
  - [ ] Account for uncertainty in syntenic blocks. This may be hard.
- - [ ] Possibly try to resolve cases E and F (perhaps as an optional feature)
+ - [x] Possibly try to resolve cases E and F (perhaps as an optional feature)
