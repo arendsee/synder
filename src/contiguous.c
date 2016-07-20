@@ -370,9 +370,9 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
                seqname, qcon->name, q_blk->start, q_blk->stop,
                t_con->name, t_blk->start, t_blk->stop, interval);
       }
-      printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
+      printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%c\t%d\n",
              interval, seqname, qcon->name, start, stop,
-             tcon->name, tblk->start, tblk->stop, flag);
+             tcon->name, tblk->start, tblk->stop, tblk->strand, flag);
 
       interval++;
 
