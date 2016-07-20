@@ -17,9 +17,10 @@ typedef struct {
   uint linkid;
   size_t startid;
   size_t stopid;
+  char strand;
 } Block;
 
-Block *init_block(uint, uint, uint, uint, uint);
+Block *init_block(uint, uint, uint, uint, uint, char);
 
 void free_block(Block *);
 

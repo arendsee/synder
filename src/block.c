@@ -14,7 +14,7 @@
  * @return pointer to new Block
  *
  * */
-Block *init_block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid)
+Block *init_block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid, char strand)
 {
   Block *block = (Block *) malloc(sizeof(Block));
   block->start = start;
@@ -22,6 +22,7 @@ Block *init_block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid)
   block->oseqid = oseqid;
   block->oblkid = oblkid;
   block->linkid = linkid;
+  block->strand = strand;
   return (block);
 }
 
@@ -39,11 +40,16 @@ void free_block(Block * block)
 /** Print all fields in this block (TAB-delimited). */
 void print_block(Block * block)
 {
-  printf("%u\t%u\t%u\t%u\t%u\t%lu\t%lu\n",
+  printf("%u\t%u\t%u\t%u\t%u\t%lu\t%lu\t%c\n",
          block->start,
          block->stop,
          block->oseqid,
-         block->oblkid, block->linkid, block->startid, block->stopid);
+         block->oblkid,
+         block->linkid,
+         block->startid,
+         block->stopid,
+         block->strand
+  );
 }
 
 /**

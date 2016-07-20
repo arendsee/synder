@@ -13,7 +13,7 @@ REQUIRED ARGUMENTS
   -b name of target organism
   -i name of input sequence
   -d output data directory
-INPUT FORMAT (read from STDIN)
+INPUT FORMAT
   qseqid qstart qend tseqid tstart tend score strand
 Where:
   qseqid: name of the query sequence
@@ -73,6 +73,11 @@ done
 # ============================================================================
 # Parse utilities
 # ============================================================================
+
+# Move the strand column in the input file to column 1
+move_strand_to_col_one() {
+    awk '{print $8, $1, $2, $3, $4, $5, $6, $7}'
+}
 
 # Add two columns to the input table
 #  1. Map of sequence names to 0-based indices (alphabetically)
@@ -145,22 +150,37 @@ parse() {
     outdb=${outbase}.txt       # ultimate output
     outtmp=${outbase}_temp.txt # temporary output
     # outtmp columns (1-8 are from the synteny map, see USAGE):
-    # 9  qseqid - index for query sequence
-    # 10 qblkid - index for interval in a query sequence array
-    # 11 tseqid - index for target sequence
-    # 12 tblkid - index for interval in a target sequence array
-    # 13 linkid - index for the link between a query and target interval
+    # 10 qseqid - index for query sequence
+    # 11 qblkid - index for interval in a query sequence array
+    # 12 tseqid - index for target sequence
+    # 13 tblkid - index for interval in a target sequence array
+    # 14 linkid - index for the link between a query and target interval
     cat $input |
+        move_strand_to_col_one |
         # Append qseqid and qblkid
-        append_counts 1 2 3 | 
+        append_counts 2 3 4 | 
         # Append tseqid and tblkid
-        append_counts 4 5 6 | 
+        append_counts 5 6 7 | 
         # Append linkid
         awk '{print $0, linkid++}' > $outtmp
-    write_side $query  1 9  < $outtmp >  $outdb
-    write_side $target 4 11 < $outtmp >> $outdb
-    awk '{print "$", $9, $10, $2, $3, $11, $12, $5, $6, $13}' $outtmp |
-        sort -k3,3n -k4,4n >> $outdb
+    write_side $query 2 9 < $outtmp >  $outdb
+    write_side $target 5 11 < $outtmp >> $outdb
+    awk '
+        {
+            qseqid=$9
+            qblkid=$10
+            qstart=$3
+            qstop=$4
+            tseqid=$11
+            tblkid=$12
+            tstart=$6
+            tstop=$7
+            linkid=$13
+            strand=$1
+            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, qstart, qstop, linkid, strand
+        }
+    ' $outtmp |
+        sort -k2,2n -k3,3n >> $outdb
     rm $outtmp
 }
 

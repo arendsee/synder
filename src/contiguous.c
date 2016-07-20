@@ -107,9 +107,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
       flag = 0;
       qblk = SGCB(syn, 0, chrid, i);
       Contig *qcon = SGC(syn, 0, chrid);
-      Block *tblk =
-        init_block(QT_SGCB(syn, qblk)->start, QT_SGCB(syn, qblk)->stop, 0, 0,
-                   0);
+      Block *tblk = init_block(QT_SGCB(syn, qblk)->start, QT_SGCB(syn, qblk)->stop,
+                               0, 0, 0, QT_SGCB(syn, qblk)->strand);
       tcon = QT_SGC(syn, qblk);
       Block *q_blk;
       Block *t_blk;

@@ -41,6 +41,7 @@ Synmap *load_synmap(FILE * synfile, int swap)
         unloaded_blocks += nblocks;
       } else {
         fprintf(stderr, "Incorrect file format, line %d\n", line_no);
+        fprintf(stderr, "Offending line:\n%s", line);
         exit(EXIT_FAILURE);
       }
     }
@@ -50,6 +51,7 @@ Synmap *load_synmap(FILE * synfile, int swap)
   line_no = 0;
   uint qcon_id, qblk_id, qstart, qstop;
   uint tcon_id, tblk_id, tstart, tstop;
+  char strand;
   uint link_id;
 
   while ((read = getline(&line, &len, synfile)) != EOF) {
@@ -57,10 +59,10 @@ Synmap *load_synmap(FILE * synfile, int swap)
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %u %c\n",
+    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %u %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
-                    &tcon_id, &tblk_id, &tstart, &tstop, &link_id, &dummy);
-    check_args(line_no, status, 9);
+                    &tcon_id, &tblk_id, &tstart, &tstop, &link_id, &strand, &dummy);
+    check_args(line_no, status, 10);
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %d\n", line_no);
       exit(EXIT_FAILURE);
@@ -79,10 +81,10 @@ Synmap *load_synmap(FILE * synfile, int swap)
     }
 
     SGCB(synmap, query, qcon_id, qblk_id) =
-      init_block(qstart, qstop, tcon_id, tblk_id, link_id);
+      init_block(qstart, qstop, tcon_id, tblk_id, link_id, strand);
 
     SGCB(synmap, target, tcon_id, tblk_id) =
-      init_block(tstart, tstop, qcon_id, qblk_id, link_id);
+      init_block(tstart, tstop, qcon_id, qblk_id, link_id, strand);
   }
   free(line);
 
@@ -100,6 +102,7 @@ void check_args(int line_no, int nargs, int correct_nargs)
   if (nargs < correct_nargs) {
     fprintf(stderr, "Either too few fields on input line %d,", line_no);
     fprintf(stderr, "or they are of the wrong type\n");
+    fprintf(stderr, "Found %d arguments, expected %d.\n", nargs, correct_nargs);
     exit(EXIT_FAILURE);
   } else if (nargs > correct_nargs) {
     fprintf(stderr, "Too many fields on input line %d\n", line_no);
