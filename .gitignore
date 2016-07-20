@@ -9,5 +9,9 @@ db
 
 doc
 
+big-sample-inputs/*syn
+big-sample-inputs/*gff
+big-sample-inputs/*tab
+
 # my temp file prefix
-zzz*
+z*
