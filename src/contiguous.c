@@ -8,6 +8,9 @@
 #include "contig.h"
 #include "synmap.h"
 
+#define PRINT_SRC printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%c\t%d\n", \
+                  interval, seqname, qcon->name, start, stop, \
+                  tcon->name, tblk->start, tblk->stop, tblk->strand, flag);
 
 ContiguousMap *init_contiguous_map(size_t size)
 {
@@ -166,9 +169,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
           }
         }
 
-        printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
-               interval, seqname, qcon->name, start, stop,
-               tcon->name, tblk->start, tblk->stop, flag);
+        PRINT_SRC
 
         blkid = cmap->map[q_blk->linkid]->qblkid;
         if (start < q_blk->start && blkid > 0) {
@@ -191,9 +192,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             offset = t_blk->start - offset;
             tblk->start = offset > 0 ? (uint32_t) offset : 0;
           }
-          printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
-                 interval, seqname, qcon->name, start, stop,
-                 tcon->name, tblk->start, tblk->stop, flag);
+
+          PRINT_SRC
 
         } else if (blkid + 1 < qcon->size) {    // query region after block
           q_blk = SGCB(syn, 0, chrid, blkid + 1);
@@ -218,9 +218,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             tblk->stop = offset >= 0 ? (uint32_t) offset : 0;
           }
 
-          printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%d\n",
-                 interval, seqname, qcon->name, start, stop,
-                 tcon->name, tblk->start, tblk->stop, flag);
+          PRINT_SRC
+
         }
         // query region is before block
 
@@ -370,9 +369,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
                seqname, qcon->name, q_blk->start, q_blk->stop,
                t_con->name, t_blk->start, t_blk->stop, interval);
       }
-      printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%c\t%d\n",
-             interval, seqname, qcon->name, start, stop,
-             tcon->name, tblk->start, tblk->stop, tblk->strand, flag);
+
+      PRINT_SRC
 
       interval++;
 
