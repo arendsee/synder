@@ -171,7 +171,7 @@ parse() {
             tstop=$6
             linkid=$13
             strand=$8
-            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, qstart, qstop, linkid, strand
+            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, linkid, strand
         }
     ' $outtmp |
         sort -k3,3n -k4,4n >> $outdb
