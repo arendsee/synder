@@ -74,11 +74,6 @@ done
 # Parse utilities
 # ============================================================================
 
-# Move the strand column in the input file to column 1
-move_strand_to_col_one() {
-    awk '{print $8, $1, $2, $3, $4, $5, $6, $7}'
-}
-
 # Add two columns to the input table
 #  1. Map of sequence names to 0-based indices (alphabetically)
 #  2. Map of intervals on a sequence to 0-based indices (by start and stop) 
@@ -156,27 +151,26 @@ parse() {
     # 13 tblkid - index for interval in a target sequence array
     # 14 linkid - index for the link between a query and target interval
     cat $input |
-        move_strand_to_col_one |
         # Append qseqid and qblkid
-        append_counts 2 3 4 | 
+        append_counts 1 2 3 | 
         # Append tseqid and tblkid
-        append_counts 5 6 7 | 
+        append_counts 4 5 6 | 
         # Append linkid
         awk '{print $0, linkid++}' > $outtmp
-    write_side $query 2 9 < $outtmp >  $outdb
-    write_side $target 5 11 < $outtmp >> $outdb
+    write_side $query 1 9 < $outtmp >  $outdb
+    write_side $target 4 11 < $outtmp >> $outdb
     awk '
         {
             qseqid=$9
             qblkid=$10
-            qstart=$3
-            qstop=$4
+            qstart=$2
+            qstop=$3
             tseqid=$11
             tblkid=$12
-            tstart=$6
-            tstop=$7
+            tstart=$5
+            tstop=$6
             linkid=$13
-            strand=$1
+            strand=$8
             print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, qstart, qstop, linkid, strand
         }
     ' $outtmp |
