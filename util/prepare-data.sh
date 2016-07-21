@@ -180,7 +180,7 @@ parse() {
             print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, qstart, qstop, linkid, strand
         }
     ' $outtmp |
-        sort -k2,2n -k3,3n >> $outdb
+        sort -k3,3n -k4,4n >> $outdb
     rm $outtmp
 }
 
