@@ -14,6 +14,15 @@
                   interval, seqname, qcon->name, start, stop, \
                   tcon->name, tblk->start, tblk->stop, '.', flag);
 
+#define PRINT_Q printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n", \
+                seqname, qcon->name, q_blk->start, q_blk->stop, \
+                t_con->name, t_blk->start, t_blk->stop, interval);
+
+#define PRINT_T printf("T\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n", \
+               seqname, qcon->name, q_blk->start, q_blk->stop, \
+               t_con->name, t_blk->start, t_blk->stop, interval);
+
+
 ContiguousMap *init_contiguous_map(size_t size)
 {
   ContiguousMap *cmap = (ContiguousMap *) malloc(sizeof(ContiguousMap));
@@ -68,14 +77,14 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
           missloc = cmap->map[contigs->block[0]->linkid]->qblkid;
         } else {
           missloc = cmap->map[contigs->block[1]->linkid]->qblkid;
+          // TODO Q - When will this be needed? Can qblkid be negative? Or is
+          // this to deal with overflows?
           missloc = missloc > 0 ? missloc : 0;
-
         }
-
-
         missing = true;
       }
     }
+
     // Set range of blocks query overlaps. Doing it this way adverts the chance
     // that get_region doesn't return every overlapping block.
     for (int i = 0; i < contigs->size; i++) {
@@ -101,11 +110,11 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
     for (int i = region[0]; i <= region[1]; i++) {
       /*
        * Flag -> keeps track of edge reliability 
-       * 0 = determinable boundries (case A,B,C,D)
-       * 1 = Left hand  undeterminable (case F)
-       * 2 = Right hand undertrminable (caseF)
-       * 3 = Neitherside determiable (case F on both sides) 
-       * 4 = Case E to the left of neareset block
+       * 0 = Determinable boundries (case A,B,C,D)
+       * 1 = Left hand undeterminable (case F)
+       * 2 = Right hand undeterminable (case F)
+       * 3 = Neitherside determinable (case F on both sides) 
+       * 4 = Case E to the left of nearest block
        * 5 = Case E to the right of nearest block
        */
 
@@ -113,7 +122,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
       qblk = SGCB(syn, 0, chrid, i);
       Contig *qcon = SGC(syn, 0, chrid);
       Block *tblk = init_block(QT_SGCB(syn, qblk)->start, QT_SGCB(syn, qblk)->stop,
-                               0, 0, 0, QT_SGCB(syn, qblk)->strand);
+                               0, 0, 0, '.');
       tcon = QT_SGC(syn, qblk);
       Block *q_blk;
       Block *t_blk;
@@ -125,16 +134,11 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
           q_blk = SGCB(syn, 0, chrid, missloc);
           t_blk = QT_SGCB(syn, q_blk);
           t_con = QT_SGC(syn, q_blk);
-          printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
-                 seqname, qcon->name, q_blk->start, q_blk->stop,
-                 t_con->name, t_blk->start, t_blk->stop, interval);
+          PRINT_Q
           q_blk = SGCB(syn, 0, chrid, missloc + 1);
           t_blk = QT_SGCB(syn, q_blk);
           t_con = QT_SGC(syn, q_blk);
-          printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
-                 seqname, qcon->name, q_blk->start, q_blk->stop,
-                 t_con->name, t_blk->start, t_blk->stop, interval);
-
+          PRINT_Q
         }
         q_blk = SGCB(syn, 0, chrid, missloc);
         t_blk = QT_SGCB(syn, q_blk);
@@ -155,7 +159,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             tblk->stop = t_blk->stop + (q_blk->start - start);
           }
         } else {                // query region after block
-
           if (cmap->map[q_blk->linkid]->flag > -2) {
             // return from end of block, to offest to end of query
             // on target side
@@ -170,7 +173,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
               && offset > 0 ? (uint32_t) offset : 0;
           }
         }
-
         PRINT_SRC
 
         blkid = cmap->map[q_blk->linkid]->qblkid;
@@ -178,7 +180,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
           q_blk = SGCB(syn, 0, chrid, blkid - 1);
           t_blk = QT_SGCB(syn, q_blk);
           tcon = QT_SGC(syn, q_blk);
-
           if (cmap->map[q_blk->linkid]->flag > -2) {
             flag = 5;
             tblk->start = t_blk->stop;
@@ -194,14 +195,12 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             offset = t_blk->start - offset;
             tblk->start = offset > 0 ? (uint32_t) offset : 0;
           }
-
           PRINT_SRC
 
         } else if (blkid + 1 < qcon->size) {    // query region after block
           q_blk = SGCB(syn, 0, chrid, blkid + 1);
           t_blk = QT_SGCB(syn, q_blk);
           tcon = QT_SGC(syn, q_blk);
-
           if (cmap->map[q_blk->linkid]->flag > -2) {
             flag = 4;
             tblk->stop = t_blk->start;
@@ -219,7 +218,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             offset += t_blk->stop;
             tblk->stop = offset >= 0 ? (uint32_t) offset : 0;
           }
-
           PRINT_SRC
 
         }
@@ -236,25 +234,22 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
       // Set return region assumes case D;
       tblk->start = qnode->match->start;
       tblk->stop = qnode->match->stop;
-      // Start is BEFORE current query Block;
 
+      // Start is BEFORE current query Block;
       if (start < qblk->start) {
-        //Move down contiguous block, stoping at leftmost possible point
+        //Move down contiguous block, stopping at leftmost possible point
         while (qnode->prev != NULL && start > qnode->feature->stop) {
           qnode = qnode->prev;
         }
         if (qnode->flag > 1 && start > qnode->feature->stop) {  //avoid duplicates in cases of overlap
           continue;
         }
-
-
         if (start < qnode->feature->start) {    // Check we didn't advance into a case E,F Situation
           if (qnode->flag > -2
               || (original->next != NULL && original->next->flag == 0)) {
             // The next check here and in the next block is to detect edge cases where block we are checking is
             // registering as a left translation, but is part of a continuous run to the right
             // most often occcurs in the middle of messy overlap blocks
-
             flag = 1;
             tblk->start = qnode->match->start;
           } else {
@@ -274,29 +269,25 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             tblk->stop = qnode->match->start;
           }
         }
-
       }
+
       if (pblock) {
         //qnode = cmap->map[qblk->linkid];
         q_blk = SGCB(syn, 0, chrid, qnode->qblkid > 0 ? qnode->qblkid - 1 : 0);
         t_blk = QT_SGCB(syn, q_blk);
         t_con = QT_SGC(syn, q_blk);
-        printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\t\n",
-               seqname, qcon->name, q_blk->start, q_blk->stop,
-               t_con->name, t_blk->start, t_blk->stop, interval);
+        PRINT_Q
         t_blk = SGCB(syn, 1, qnode->feature->oseqid,
                      (qnode->feature->oblkid >
                       0 ? qnode->feature->oblkid - 1 : 0));
         q_blk = SGCB(syn, 0, t_blk->oseqid, t_blk->oblkid);
         t_con = SGC(syn, 1, q_blk->oseqid);
-        printf("T\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
-               seqname, qcon->name, q_blk->start, q_blk->stop,
-               t_con->name, t_blk->start, t_blk->stop, interval);
-
+        PRINT_T
         printf("I\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
                seqname, qcon->name, qblk->start, qblk->stop,
                tcon->name, qnode->match->start, qnode->match->stop, interval);
       }
+
       //Stop is AFTER current query Block
       if (stop > qblk->stop) {  //Stop is AFTER
         while (qnode->next != NULL && stop) {
@@ -333,7 +324,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             t_blk = QT_SGCB(syn, q_blk);
             if (cmap->map[qblk->linkid]->flag > -2 || qnode->next->flag == 0) { //similar check to above 
               tblk->stop = t_blk->start;
-
             } else {
               tblk->start = t_blk->stop;
             }
@@ -346,20 +336,17 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             tblk->start = qnode->match->stop;
           }
         }
-
       }
+
       if (pblock) {
         if (stop < qnode->feature->start) {
           q_blk = qnode->feature;
         } else {
           q_blk = SGCB(syn, 0, chrid, i + 1 < qcon->size ? i + 1 : i);
         }
-
         t_blk = QT_SGCB(syn, q_blk);
         t_con = QT_SGC(syn, q_blk);
-        printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
-               seqname, qcon->name, q_blk->start, q_blk->stop,
-               t_con->name, t_blk->start, t_blk->stop, interval);
+        PRINT_Q
         t_blk =
           SGCB(syn, 1, qnode->feature->oseqid,
                qnode->feature->oblkid + 1 <
@@ -367,9 +354,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
                1 : qnode->feature->oblkid);
         q_blk = SGCB(syn, 0, t_blk->oseqid, t_blk->oblkid);
         t_con = SGC(syn, 1, q_blk->oseqid);
-        printf("T\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n",
-               seqname, qcon->name, q_blk->start, q_blk->stop,
-               t_con->name, t_blk->start, t_blk->stop, interval);
+        PRINT_T
       }
 
       PRINT_SRC
