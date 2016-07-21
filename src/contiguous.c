@@ -8,9 +8,11 @@
 #include "contig.h"
 #include "synmap.h"
 
+// strand is hardcoded as '.' (strand unknown) because correct strand handling
+// is not yet implemented.
 #define PRINT_SRC printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%c\t%d\n", \
                   interval, seqname, qcon->name, start, stop, \
-                  tcon->name, tblk->start, tblk->stop, tblk->strand, flag);
+                  tcon->name, tblk->start, tblk->stop, '.', flag);
 
 ContiguousMap *init_contiguous_map(size_t size)
 {
