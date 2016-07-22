@@ -7,6 +7,7 @@
 
 
 #include "ui.h"
+#include "version.h"
 
 #define MAX_POS 3
 
@@ -60,6 +61,12 @@ void check_file(FILE * fp, char *name)
   }
 }
 
+void print_version()
+{
+    printf("%s\n", VERSION);    
+    exit(EXIT_SUCCESS);
+}
+
 void print_help()
 {
   printf("USAGE\n"
@@ -106,10 +113,13 @@ Arguments parse_command(int argc, char *argv[])
     args.test = true;
     return args;
   }
-  while ((opt = getopt(argc, argv, "hrd:s:i:c:f:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
+        break;
+      case 'v':
+        print_version();
         break;
       case 'd':
         temp = fopen(optarg, "r");
