@@ -74,19 +74,11 @@ of the syntenic blocks, will always be considered "syntenically scrambled".
 Note: The image above is out of date. We now guess a search interval for cases
 E and F.
 
-# TODO list for version 1
+# TODO list
 
- - [x] Implement the query context to contiguous function
- - [x] Implement the contiguous set to search interval function
- - [x] Clean up the CLI user interface
- - [x] Specify the synteny class (A-F) of the output search intervals 
-
-# TODO list for version 2
-
- - [ ] Distinguish between tandem duplicates. Currently query-side duplicates
-   will map to the same search spaces. But, at least for tandem duplicates, we
-   may be able assign unique search spaces to each. But is this worth doing?
- - [ ] Identify target side insertions. This may not be necessary since the
-   Fagin pipeline will find these.
- - [ ] Account for uncertainty in syntenic blocks. This may be hard.
- - [x] Possibly try to resolve cases E and F (perhaps as an optional feature)
+ - [ ] Add strand awareness to contiguity rules (so all contiguous sets are elements on the same strand)
+ - [ ] Determine direction of SI for `flag = {1, 2, 3}` based on strand
+ - [ ] Snap search space boundaries for `flag = {1, 2, 3, 4, 5}` to nearest block on target side
+ - [ ] Merge two blocks if they overlap on both the target and query sides
+ - [ ] Merge overlapping search intervals
+ - [ ] If query interval is between two blocks on the query side, and if the homologs of the two blocks overlap on the target, set the search space length to 0 (the point inbetween the overlaps)
