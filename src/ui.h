@@ -20,6 +20,8 @@ void close_Arguments(Arguments arg);
 
 Arguments create_Arguments();
 
+void print_version();
+
 void print_help();
 
 void print_args(Arguments args);
