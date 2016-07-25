@@ -34,16 +34,23 @@ int main(int argc, char *argv[])
     /** \todo Replace a system call to the prepare-data.sh script with a raw
      * synteny file to parser in synmap  */
 
-  // Build database and exit
+  // Try to build database. Exit afterwards.
   if (args.db_filename) {
-    if (!(args.pos[0] && args.pos[1] && args.pos[2]))
+    if (!(args.pos[0] && args.pos[1] && args.pos[2])){
       print_help();
-    char cmd[256];
+    }
+    char cmd[512];
     sprintf(cmd,
-            "util/prepare-data.sh -a %s -b %s -i %s -d %s",
+            "make-synder-db.sh -a %s -b %s -i %s -d %s",
             args.pos[0], args.pos[1], args.db_filename, args.pos[2]);
-    system(cmd);
-    exit(EXIT_SUCCESS);
+    
+    int exit_status = system(cmd);
+    if(exit_status != 0){
+        fprintf(stderr, "ERROR: Failed to make synder database\n");
+        exit(EXIT_FAILURE);
+    } else {
+        exit(EXIT_SUCCESS);
+    }
   }
   // Converts between gff contig naming conventions (field 1)
   if (strcmp(args.cmd, "convert") == 0 && args.intfile && args.intfile) {
