@@ -349,9 +349,9 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
         PRINT_Q
         t_blk =
           SGCB(syn, 1, qnode->feature->oseqid,
-               qnode->feature->oblkid + 1 <
-               tcon->size ? qnode->feature->oblkid +
-               1 : qnode->feature->oblkid);
+               qnode->feature->oblkid + 1 < tcon->size ?
+               qnode->feature->oblkid + 1 :
+               qnode->feature->oblkid);
         q_blk = SGCB(syn, 0, t_blk->oseqid, t_blk->oblkid);
         t_con = SGC(syn, 1, q_blk->oseqid);
         PRINT_T
@@ -393,40 +393,49 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
   }
 
   // Initialize new ContiguousMap to that size to serve as hashmap
-  // when looking up overlaping blocks
+  // when looking up overlapping blocks
   ContiguousMap *cmap = init_contiguous_map(size);
   // Initialize ContiguousList structure to hold head and tail of current
   // Contiguous Set
   cmap->size = size;
 
+  // Loop through each contig in the query genome
   for (uint32_t i = 0; i < syn->genome[0]->size; i++) {
 
-    //Grab contig to variable, to save writing
+    // Grab contig to variable, to save writing
     Contig *ctig = (Contig *) malloc(sizeof(Contig));
     ctig = syn->genome[0]->contig[i];
     uint32_t overlap_bound[2] = { 0, 0 };
 
+    uint coseqid;
+    uint coblkid;
+    uint clinkid;
+
+    // Loop though each block in current contig
     for (uint32_t j = 0; j < ctig->size; j++) {
 
-      //set current block up to be a new node
+      // Set current block up to be a new node
       ContiguousNode *cnode = (ContiguousNode *) malloc(sizeof(ContiguousNode));
+      cnode->feature = ctig->block[j];
+        // Define a few shortcuts
+        coseqid = cnode->feature->oseqid;
+        coblkid = cnode->feature->oblkid;
+        clinkid = cnode->feature->linkid;
       cnode->flag = 0;
       cnode->next = NULL;
       cnode->prev = NULL;
-      cnode->feature = ctig->block[j];
-      cnode->match =
-        syn->genome[1]->contig[cnode->feature->oseqid]->block[cnode->
-                                                              feature->oblkid];
+      cnode->match = SGCB(syn, 1, coseqid, coblkid);
       cnode->qblkid = j;
-      //Start of contig is always a default node
-      cmap->map[cnode->feature->linkid] = cnode;
-      if (j == 0) {
-        cmap->map[cnode->feature->linkid] = cnode;
-        continue;
-        //Otherwise we get to figure out if the current block can be added to or breaks the current ContiguousSet
-      } else {
 
-        //// Test for overlap on query side
+
+      // Start of contig is always a default node
+      cmap->map[clinkid] = cnode;
+      if (j == 0) {
+        continue;
+      }
+      // Otherwise we get to figure out if the current block can be added to or breaks the current ContiguousSet
+      else {
+        // Test for overlap on query side
         bool q_overlap = false;
         bool t_overlap = false;
         for (int k = overlap_bound[0]; k <= overlap_bound[1]; k++) {
@@ -435,7 +444,7 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
           t_overlap =
             (block_overlap
              (cnode->match, cmap->map[ctig->block[k]->linkid]->match)
-             && (cnode->feature->oseqid == ctig->block[k]->oseqid))
+             && (coseqid == ctig->block[k]->oseqid))
             || t_overlap;
           if (q_overlap || t_overlap)
             continue;
@@ -450,46 +459,47 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
           if (q_overlap && t_overlap)
             cnode->flag = 4;
           overlap_bound[1] = j;
-          cmap->map[cnode->feature->linkid] = cnode;
+          cmap->map[clinkid] = cnode;
           continue;
         } else {
           overlap_bound[0] = j;
           overlap_bound[1] = j;
         }
       }
+
       // On different contig from previous 
-      if (cnode->feature->oseqid !=
+      if (coseqid !=
           cmap->map[ctig->block[j - 1]->linkid]->feature->oseqid) {
-        cmap->map[cnode->feature->linkid] = cnode;
-      } else if (cnode->feature->oblkid == ctig->block[j - 1]->oblkid + 1) {    // Regular contiguous interval
+        cmap->map[clinkid] = cnode;
+      } else if (coblkid == ctig->block[j - 1]->oblkid + 1) {    // Regular contiguous interval
         cnode->flag = 0;
-        cmap->map[cnode->feature->linkid] = cnode;
+        cmap->map[clinkid] = cnode;
         cmap->map[ctig->block[j - 1]->linkid]->next = cnode;
-        cmap->map[cnode->feature->linkid]->prev =
+        cmap->map[clinkid]->prev =
           cmap->map[ctig->block[j - 1]->linkid];
-      } else if (cnode->feature->oblkid < ctig->block[j - 1]->oblkid) { //Twist to left of previous block
+      } else if (coblkid < ctig->block[j - 1]->oblkid) { //Twist to left of previous block
         cnode->flag = (cmap->map[ctig->block[j - 1]->linkid]->flag == -2
                        || cmap->map[ctig->block[j - 1]->linkid]->flag ==
                        0) ? -2 : 0;
         cmap->map[ctig->block[j - 1]->linkid]->next = NULL;
-        cmap->map[cnode->feature->linkid] = cnode;
-        if (cnode->feature->oblkid == ctig->block[j - 1]->oblkid - 1) {
+        cmap->map[clinkid] = cnode;
+        if (coblkid == ctig->block[j - 1]->oblkid - 1) {
           cnode->flag = -3;
           cmap->map[ctig->block[j - 1]->linkid]->next = cnode;
           cmap->map[ctig->block[j - 1]->linkid]->flag = -3;
-          cmap->map[cnode->feature->linkid]->prev =
+          cmap->map[clinkid]->prev =
             cmap->map[ctig->block[j - 1]->linkid];
         }
-      } else if (cnode->feature->oblkid > ctig->block[j - 1]->oblkid) { // Twist to right, possible transposition
+      } else if (coblkid > ctig->block[j - 1]->oblkid) { // Twist to right, possible transposition
         if (j + 1 < ctig->size) {
           cnode->flag =
             ctig->block[j]->oblkid == ctig->block[j + 1]->oblkid + 1 ? -3 : -1;
         } else {
           cnode->flag = -1;
         }
-        cmap->map[cnode->feature->linkid] = cnode;
+        cmap->map[clinkid] = cnode;
       } else {                  // Default case that should never be reached.  
-        cmap->map[cnode->feature->linkid] = cnode;
+        cmap->map[clinkid] = cnode;
       }
     }
 
