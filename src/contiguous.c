@@ -10,8 +10,10 @@
 
 // strand is hardcoded as '.' (strand unknown) because correct strand handling
 // is not yet implemented.
-#define PRINT_SRC printf(">\t%u\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%c\t%d\n", \
-                  interval, seqname, qcon->name, start, stop, \
+#define PRINT_SRC if(pblock) \
+                    printf(">\t%u\t", interval); \
+                  printf("%s\t%s\t%u\t%u\t%s\t%u\t%u\t%c\t%d\n", \
+                  seqname, qcon->name, start, stop, \
                   tcon->name, tblk->start, tblk->stop, '.', flag);
 
 #define PRINT_Q printf("Q\t%s\t%s\t%u\t%u\t%s\t%u\t%u\t%u\n", \
