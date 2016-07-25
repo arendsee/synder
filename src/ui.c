@@ -96,8 +96,8 @@ void print_help()
          "  synder -d at-al.tab at al db\n"
          "  synder -i at.gff   -s db/at_al.txt -c map\n"
          "  synder -i at.gff   -s db/at_al.txt -c count\n"
-         "  synder -i at.syn   -s db/at_al.txt -c search\n"
-         "  synder -i at.syn   -s db/at_al.txt -c convert -t\n"
+         "  synder -i at.gff   -s db/at_al.txt -c search\n"
+         "  synder -i at.gff   -s db/at_al.txt -c convert -t\n"
          "  synder -f hits.syn -s db/at_al.txt -c filter\n" "  synder test\n");
   exit(EXIT_SUCCESS);
 }
