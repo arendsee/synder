@@ -6,7 +6,30 @@
 
 # Installation
 
-Just run `make`
+``` bash
+make
+make install
+```
+
+This will install the program into /usr/local. To install elsewhere, run (for
+example)
+
+``` bash
+make
+make install PREFIX=$HOME
+```
+
+To uninstall Synder, run
+
+``` bash
+make uninstall
+```
+
+Or
+
+``` bash
+make uninstall PREFIX=<PATH>
+```
 
 # Getting help
 
