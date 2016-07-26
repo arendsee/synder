@@ -18,10 +18,6 @@ void analysis_count(Synmap * syn, FILE * intfile)
 
 void analysis_map(Synmap * syn, FILE * intfile)
 {
-
-  // contigs must be sorted before mapping
-  sort_all_contigs(syn);
-
   char seqname[128];
   int chrid, start, stop;
   Contig *contigs;
@@ -64,7 +60,6 @@ void analysis_map(Synmap * syn, FILE * intfile)
 void analysis_filter(Synmap * syn, FILE * hitfile,
                      bool(*classifier) (Synmap *, Link *, void *), void *arg)
 {
-  sort_all_contigs(syn);
   Link link;
   char *line = NULL;
   size_t len = 0;

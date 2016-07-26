@@ -20,10 +20,10 @@ void free_synmap(Synmap * synmap)
   }
 }
 
-void print_synmap(Synmap * synmap)
+void print_synmap(Synmap * synmap, bool forward)
 {
-  print_genome(SG(synmap, 0));
-  print_genome(SG(synmap, 1));
+  print_genome(SG(synmap, 0), forward);
+  print_genome(SG(synmap, 1), forward);
 }
 
 void sort_all_contigs(Synmap * synmap)

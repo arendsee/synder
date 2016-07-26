@@ -2,6 +2,7 @@
 #define __SYNMAP_H__
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "genome.h"
 
@@ -40,7 +41,7 @@ Synmap *init_synmap();
 void free_synmap(Synmap *);
 
 /** Recursively print a synteny map. */
-void print_synmap(Synmap *);
+void print_synmap(Synmap *, bool forward);
 
 /** Sort all the blocks in each contig both my start and stop */
 void sort_all_contigs(Synmap * synmap);

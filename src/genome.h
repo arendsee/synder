@@ -1,6 +1,8 @@
 #ifndef __GENOME_H__
 #define __GENOME_H__
 
+#include <stdbool.h>
+
 #include "contig.h"
 
 /** A named set of Contig objects*/
@@ -29,6 +31,6 @@ Genome *init_genome(char *, size_t);
 void free_genome(Genome *);
 
 /** Recursively print a genome. */
-void print_genome(Genome *);
+void print_genome(Genome *, bool forward);
 
 #endif

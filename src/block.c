@@ -19,6 +19,8 @@ Block *init_block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid, 
   Block *block = (Block *) malloc(sizeof(Block));
   block->start = start;
   block->stop = stop;
+  block->startid = 0;
+  block->stopid = 0;
   block->oseqid = oseqid;
   block->oblkid = oblkid;
   block->linkid = linkid;
@@ -80,15 +82,15 @@ bool block_overlap(Block * a, Block * b)
 /** Compare by Block stop position */
 int block_cmp_stop(const void *ap, const void *bp)
 {
-  Block *a = (Block *) ap;
-  Block *b = (Block *) bp;
-  return ((a->stop > b->stop) - (b->stop > a->stop));
+  Block *a = * (Block **) ap;
+  Block *b = * (Block **) bp;
+  return (int)(a->stop > b->stop) - (int)(a->stop < b->stop);
 }
 
 /** Compare by Block start position */
 int block_cmp_start(const void *ap, const void *bp)
 {
-  Block *a = (Block *) ap;
-  Block *b = (Block *) bp;
-  return ((a->start > b->start) - (b->start > a->start));
+  Block *a = * (Block **) ap;
+  Block *b = * (Block **) bp;
+  return (int)(a->start > b->start) - (int)(a->start < b->start);
 }
