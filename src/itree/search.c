@@ -8,17 +8,17 @@
 #include "search.h"
 #include "iv.h"
 
-uint count_interval_overlaps_r(Interval *, struct IntervalTree *, uint);
-uint count_point_overlaps_r(uint, struct IntervalTree *, uint);
+uint count_interval_overlaps_r(Interval *, IntervalTree *, uint);
+uint count_point_overlaps_r(uint, IntervalTree *, uint);
 
-IV * get_interval_overlaps_r(Interval *, struct IntervalTree *, IV *);
-void get_point_overlaps_r(uint, struct IntervalTree *, IntervalResult *);
+IV * get_interval_overlaps_r(Interval *, IntervalTree *, IV *);
+void get_point_overlaps_r(uint, IntervalTree *, IntervalResult *);
 
-uint count_interval_overlaps(Interval * inv, struct IntervalTree * tree){
+uint count_interval_overlaps(Interval * inv, IntervalTree * tree){
     return count_interval_overlaps_r(inv, tree, 0);
 }
 
-uint count_point_overlaps(uint point, struct IntervalTree * tree){
+uint count_point_overlaps(uint point, IntervalTree * tree){
     return count_point_overlaps_r(point, tree, 0);
 }
 
@@ -37,13 +37,13 @@ void free_IntervalResult(IntervalResult * res){
     }
 }
 
-IntervalResult * get_point_overlaps(uint point, struct IntervalTree * tree){
+IntervalResult * get_point_overlaps(uint point, IntervalTree * tree){
     IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
     get_point_overlaps_r(point, tree, res);
     return res;
 }
 
-IntervalResult * get_interval_overlaps(Interval * inv, struct IntervalTree * tree){
+IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
     IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
     res->iv = get_interval_overlaps_r(inv, tree, iv_init(8));
     res->inbetween = (res->iv->size == 1 && interval_overlap(inv, &res->iv->v[0]) != 1);
@@ -52,7 +52,7 @@ IntervalResult * get_interval_overlaps(Interval * inv, struct IntervalTree * tre
 
 
 
-uint count_point_overlaps_r(uint point, struct IntervalTree * tree, uint count){
+uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
     if(point >= tree->center) {
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
             if(point <= T_STOP_STOP(tree, i)){
@@ -78,7 +78,7 @@ uint count_point_overlaps_r(uint point, struct IntervalTree * tree, uint count){
     return count;
 }
 
-uint count_interval_overlaps_r(Interval * inv, struct IntervalTree * tree, uint count){
+uint count_interval_overlaps_r(Interval * inv, IntervalTree * tree, uint count){
     if(!tree)
         return count;
 
@@ -108,7 +108,7 @@ uint count_interval_overlaps_r(Interval * inv, struct IntervalTree * tree, uint 
     }
 }
 
-void get_point_overlaps_r(uint point, struct IntervalTree * tree, IntervalResult * results){
+void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * results){
     if(point >= tree->center) {
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
             if(point <= T_STOP_STOP(tree, i)){
@@ -142,7 +142,7 @@ void get_point_overlaps_r(uint point, struct IntervalTree * tree, IntervalResult
     }
 }
 
-IV * get_interval_overlaps_r(Interval * inv, struct IntervalTree * tree, IV * results){
+IV * get_interval_overlaps_r(Interval * inv, IntervalTree * tree, IV * results){
 
     if(!tree)
         return results;
