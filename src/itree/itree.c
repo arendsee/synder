@@ -9,15 +9,15 @@
 #include "iv.h"
 
 /* local function prototypes */
-void print_interval_tree_verbosity_1(struct IntervalTree * n, int depth, char pos);
-void print_interval_tree_verbosity_2(struct IntervalTree * n, int depth, char pos);
-void print_interval_tree_verbosity_3(struct IntervalTree * n, int depth, char pos);
-void print_interval_tree_r(struct IntervalTree * n, int depth, char pos, int verbosity);
+void print_interval_tree_verbosity_1(IntervalTree * n, int depth, char pos);
+void print_interval_tree_verbosity_2(IntervalTree * n, int depth, char pos);
+void print_interval_tree_verbosity_3(IntervalTree * n, int depth, char pos);
+void print_interval_tree_r(IntervalTree * n, int depth, char pos, int verbosity);
 uint get_center(IA *);
 
 
-struct IntervalTree * init_interval_tree(){
-    struct IntervalTree * tree = (struct IntervalTree *)malloc(sizeof(struct IntervalTree));
+IntervalTree * init_interval_tree(){
+    IntervalTree * tree = (IntervalTree *)malloc(sizeof(IntervalTree));
     tree->center   = 0;
     tree->by_start = NULL;
     tree->by_stop  = NULL;
@@ -25,7 +25,7 @@ struct IntervalTree * init_interval_tree(){
     tree->r_child  = NULL;
     return(tree);
 }
-void free_interval_tree(struct IntervalTree * tree){
+void free_interval_tree(IntervalTree * tree){
     if(tree->l_child)
         free_interval_tree(tree->l_child);
     if(tree->r_child)
@@ -38,9 +38,9 @@ void free_interval_tree(struct IntervalTree * tree){
         free(tree);
 }
 
-struct IntervalTree * build_tree(IA * intervals){
+IntervalTree * build_tree(IA * intervals){
     /* initialize returned product */
-    struct IntervalTree * tree = init_interval_tree();
+    IntervalTree * tree = init_interval_tree();
 
     tree->center = get_center(intervals);
 
@@ -136,12 +136,12 @@ uint get_center(IA * intr){
 
 
 /* write tree and center */
-void print_interval_tree_verbosity_1(struct IntervalTree * n, int depth, char pos){
+void print_interval_tree_verbosity_1(IntervalTree * n, int depth, char pos){
     printf("%*d - %c%d\n", depth * 2, depth, pos, n->center);
 }
 
 /* write tree, center, and start-sorted */
-void print_interval_tree_verbosity_2(struct IntervalTree * n, int depth, char pos){
+void print_interval_tree_verbosity_2(IntervalTree * n, int depth, char pos){
     printf("%*d   %*s\t%c%d:",
            depth * 2, depth, 
            10 - depth * 2, "", pos, n->center);
@@ -154,7 +154,7 @@ void print_interval_tree_verbosity_2(struct IntervalTree * n, int depth, char po
 }
 
 /* write start- and stop-sorted vectors for each node */
-void print_interval_tree_verbosity_3(struct IntervalTree * n, int depth, char pos){
+void print_interval_tree_verbosity_3(IntervalTree * n, int depth, char pos){
     print_interval_tree_verbosity_1(n, depth, pos);
     for(int i = 0; i < n->by_start->size; i++){
         printf("\t\t(%u,%u) ",
@@ -167,7 +167,7 @@ void print_interval_tree_verbosity_3(struct IntervalTree * n, int depth, char po
 }
 
 /* local print function */
-void print_interval_tree_r(struct IntervalTree * n, int depth, char pos, int verbosity){
+void print_interval_tree_r(IntervalTree * n, int depth, char pos, int verbosity){
     switch(verbosity){
         case 1:
             print_interval_tree_verbosity_1(n, depth, pos); break;
@@ -189,6 +189,6 @@ void print_interval_tree_r(struct IntervalTree * n, int depth, char pos, int ver
 }
 
 /* public wrapper for real print function */
-void print_interval_tree(struct IntervalTree * n, int verbosity){
+void print_interval_tree(IntervalTree * n, int verbosity){
     print_interval_tree_r(n, 0, 'c', verbosity);
 }
