@@ -25,10 +25,10 @@ void free_genome(Genome * genome)
   }
 }
 
-void print_genome(Genome * genome)
+void print_genome(Genome * genome, bool forward)
 {
   printf(">\t%s\t%lu\n", genome->name, genome->size);
   for (int i = 0; i < genome->size; i++) {
-    print_contig(genome->contig[i]);
+    print_contig(genome->contig[i], forward);
   }
 }

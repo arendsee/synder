@@ -41,11 +41,17 @@ void free_contig(Contig * contig)
   }
 }
 
-void print_contig(Contig * contig)
+void print_contig(Contig * contig, bool forward)
 {
   printf("%lu\t%s\n", contig->size, contig->name);
-  for (int i = 0; i < contig->size; i++) {
-    print_block(contig->block[i]);
+  if(forward){
+    for (int i = 0; i < contig->size; i++) {
+      print_block(contig->block[i]);
+    }
+  } else {
+    for (int i = 0; i < contig->size; i++) {
+      print_block(contig->by_stop[i]);
+    }
   }
 }
 
@@ -98,10 +104,10 @@ Contig *get_region(Contig * con, uint a, uint b)
     Block *nearest = GET_RESULT_BLOCK(res, 0);
     if (nearest->stop < a) {
       newcon->block[0] = nearest;
-      newcon->block[1] = NEXT_BLOCK_BYSTART(con, newcon->block[0]);
+      newcon->block[1] = NEXT_BLOCK_BYSTART(con, nearest);
     } else {
+      newcon->block[0] = PREV_BLOCK_BYSTOP(con, nearest);
       newcon->block[1] = nearest;
-      newcon->block[0] = PREV_BLOCK_BYSTOP(con, newcon->block[1]);
     }
   } else {
     newcon = init_contig(con->name, res->iv->size);
@@ -123,7 +129,7 @@ uint count_overlaps(Contig * con, uint a, uint b)
   return count;
 }
 
-/** \todo check sort_contig_by_start function */
+
 void sort_blocks_by_start(Contig * contig)
 {
   if (!contig->start_sorted) {
@@ -135,7 +141,6 @@ void sort_blocks_by_start(Contig * contig)
   }
 }
 
-/** \todo check sort_contig_by_stop function */
 void sort_blocks_by_stop(Contig * contig)
 {
   if (!contig->stop_sorted) {
@@ -143,9 +148,9 @@ void sort_blocks_by_stop(Contig * contig)
       contig->by_stop = (Block **) malloc(contig->size * sizeof(Block *));
       memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block *));
     }
-    qsort(contig->block, contig->size, sizeof(Block *), block_cmp_stop);
+    qsort(contig->by_stop, contig->size, sizeof(Block *), block_cmp_stop);
     for (int i = 0; i < contig->size; i++) {
-      contig->block[i]->stopid = i;
+      contig->by_stop[i]->stopid = i;
     }
     contig->stop_sorted = true;
   }

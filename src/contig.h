@@ -12,7 +12,7 @@
 
 #define NEXT_BLOCK_BYSTART(con, blk) (blk->startid + 1) < con->size ? con->block[blk->startid + 1] : NULL
 
-#define PREV_BLOCK_BYSTOP(con, blk) (blk->stopid > 0) ? con->block[blk->stopid - 1] : NULL
+#define PREV_BLOCK_BYSTOP(con, blk) (blk->stopid > 0) ? con->by_stop[blk->stopid - 1] : NULL
 
 #define GET_RESULT_BLOCK(result, i) (Block*)result->iv->v[(i)].link
 
@@ -72,7 +72,7 @@ Contig *init_contig(char *name, size_t size);
 void free_contig(Contig * contig);
 
 /** Recursively print contig. */
-void print_contig(Contig * contig);
+void print_contig(Contig * contig, bool forward);
 
 /** Find index of downstream Block nearest the query point */
 uint anchor(Contig * contig, uint x);

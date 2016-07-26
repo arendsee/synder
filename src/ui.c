@@ -93,12 +93,12 @@ void print_help()
          "\tconvert\n"
          "\t\t convert names in provided gff file to match names in synteny db\n"
          "EXAMPLES\n"
-         "  synder -d at-al.tab at al db\n"
-         "  synder -i at.gff   -s db/at_al.txt -c map\n"
-         "  synder -i at.gff   -s db/at_al.txt -c count\n"
-         "  synder -i at.gff   -s db/at_al.txt -c search\n"
-         "  synder -i at.gff   -s db/at_al.txt -c convert -t\n"
-         "  synder -f hits.syn -s db/at_al.txt -c filter\n" "  synder test\n");
+         "  synder -d a-b.syn a b db\n"
+         "  synder -i a.gff   -s db/a_b.txt -c map\n"
+         "  synder -i a.gff   -s db/a_b.txt -c count\n"
+         "  synder -i a.gff   -s db/a_b.txt -c search\n"
+         "  synder -i a.gff   -s db/a_b.txt -c convert -t\n"
+         "  synder -f hits.syn -s db/a_b.txt -c filter\n" "  synder test\n");
   exit(EXIT_SUCCESS);
 }
 
