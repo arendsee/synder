@@ -96,11 +96,6 @@ Synmap *load_synmap(FILE * synfile, int swap)
 
   sort_all_contigs(synmap);
 
-print_synmap(synmap, true);
-print_synmap(synmap, false);
-printf("\n");
-exit(EXIT_FAILURE);
-
   return (synmap);
 }
 
