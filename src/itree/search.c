@@ -1,4 +1,3 @@
-/** /todo figure out which of these I need */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,9 +21,9 @@ uint count_point_overlaps(uint point, IntervalTree * tree){
     return count_point_overlaps_r(point, tree, 0);
 }
 
-IntervalResult * init_IntervalResult(size_t size){
+IntervalResult * init_IntervalResult(){
     IntervalResult * res = (IntervalResult *)malloc(sizeof(IntervalResult));
-    res->iv = iv_init(size);
+    res->iv = NULL;
     res->inbetween = false;
     return(res);
 }
@@ -38,19 +37,18 @@ void free_IntervalResult(IntervalResult * res){
 }
 
 IntervalResult * get_point_overlaps(uint point, IntervalTree * tree){
-    IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
+    IntervalResult * res = init_IntervalResult();
+    res->iv = iv_init(IV_INITIAL_SIZE); 
     get_point_overlaps_r(point, tree, res);
     return res;
 }
 
 IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
-    IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
-    res->iv = get_interval_overlaps_r(inv, tree, iv_init(8));
+    IntervalResult * res = init_IntervalResult();
+    res->iv = get_interval_overlaps_r(inv, tree, iv_init(IV_INITIAL_SIZE));
     res->inbetween = (res->iv->size == 1 && interval_overlap(inv, &res->iv->v[0]) != 1);
     return res;
 }
-
-
 
 uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
     if(point >= tree->center) {
@@ -81,7 +79,6 @@ uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
 uint count_interval_overlaps_r(Interval * inv, IntervalTree * tree, uint count){
     if(!tree)
         return count;
-
     switch(point_overlap(tree->center, inv)){
     case lo:
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
@@ -143,10 +140,8 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
 }
 
 IV * get_interval_overlaps_r(Interval * inv, IntervalTree * tree, IV * results){
-
     if(!tree)
         return results;
-
     switch(point_overlap(tree->center, inv)){
     case lo:
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
