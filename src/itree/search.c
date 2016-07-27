@@ -46,6 +46,7 @@ IntervalResult * get_point_overlaps(uint point, IntervalTree * tree){
 IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
     IntervalResult * res = init_IntervalResult();
     res->iv = get_interval_overlaps_r(inv, tree, iv_init(IV_INITIAL_SIZE));
+    // TODO necessary??
     res->inbetween = (res->iv->size == 1 && interval_overlap(inv, &res->iv->v[0]) != 1);
     return res;
 }
@@ -114,12 +115,13 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
                 break;
             }
         }
-        if(RIGHT(tree)){
+        if(RIGHT(tree) != NULL){
             get_point_overlaps_r(point, RIGHT(tree), results);
         } 
-        else if(!R_SIZE(results)) {
+        else if(R_SIZE(results) != 0) {
             results->inbetween = true;
             iv_add(results->iv, LAST_STOP(tree));
+            // jump to parent, recurse up 
         }
     }
     else {
@@ -130,7 +132,7 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
                 break;
             }
         }
-        if(LEFT(tree))
+        if(LEFT(tree) != NULL)
             get_point_overlaps_r(point, LEFT(tree), results);
         else if(!R_SIZE(results)) {
             results->inbetween = true;
