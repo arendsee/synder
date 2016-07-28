@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "interval.h"
 
@@ -8,6 +9,10 @@ Interval * init_interval(uint start, uint stop){
     inv->stop = stop;
     inv->link = NULL;
     return(inv);
+}
+
+void print_Interval(Interval * interval){
+    printf("%u %u\n", interval->start, interval->stop);
 }
 
 int cmp_stop(const void *ap, const void *bp){

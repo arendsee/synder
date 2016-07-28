@@ -23,9 +23,6 @@
 #define T_STOP(tree, i) tree->by_stop->v[i]
 #define T_STOP_STOP(tree, i) tree->by_stop->v[i].stop
 
-#define RIGHT(tree) tree->r_child
-#define LEFT(tree) tree->l_child
-
 #define R_SIZE(result) result->iv->size
 
 /** A container for results from searches for overlaps
@@ -36,6 +33,8 @@
 typedef struct {
     IV * iv;
     bool inbetween;
+    bool leftmost;
+    bool rightmost;
 } IntervalResult;
 
 
@@ -58,11 +57,14 @@ uint count_interval_overlaps(Interval * interval, IntervalTree * tree);
 
 
 /** Allocate memory and set defaults for an IntervalResults struct */
-IntervalResult * init_IntervalResult(size_t initial_iv_size);
+IntervalResult * init_IntervalResult();
 
 
 /** Free memory of an IntervalResults struct */
 void free_IntervalResult(IntervalResult *);
+
+/** Print interval result */
+void print_IntervalResult(IntervalResult *);
 
 
 /** Retrieve all target intervals overlapping a query point
@@ -83,5 +85,27 @@ IntervalResult * get_point_overlaps(uint, IntervalTree *);
  * @param tree an IntervalTree
  */
 IntervalResult * get_interval_overlaps(Interval *, IntervalTree *);
+
+/**
+ * Given a node containing one flank of a non-overlapping interval, find the other flank
+ *                              ...
+ *                             /
+ *              _____________ B ______________
+ *             /     |     |                  \
+ *            /      |     | ----  i3           ...
+ *           O       |     |  ---- i4
+ *      ... / \      |     |   --- i5
+ *             O     |     |
+ *           /  \    |     |      Where:
+ *       ...     A   |     |        - { i1, i2 } are intervals in A 
+ *           i1 ---- | --- |        - { i3, i4, i5 } are intervals in B
+ *           i2 ---   query       Given A, adds i3 to result
+ *           
+ * If starting from A, move up through parents until you reach a LEFT node.
+ * Then ascend to the parent. This node is the lowest node on the right of A,
+ * thus it will contain the nearest intervals. 
+ *
+ */
+void set_nearest_opposing_interval(IntervalTree * tree, IntervalResult * result, Pos position);
 
 #endif

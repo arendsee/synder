@@ -10,10 +10,6 @@ all:
 docs:
 	doxygen Doxyfile
 
-clean:
-	rm -f ${TARGET}
-	cd src && ${MAKE} clean
-
 install:
 	mkdir -p ${PREFIX}/bin
 	cp -f ${TARGET} ${PREFIX}/bin
@@ -22,3 +18,13 @@ install:
 uninstall:
 	rm -f ${PREFIX}/bin/synder
 	rm -f ${PREFIX}/bin/${DBSCRIPT}
+
+.PHONY: clean
+clean:
+	rm -f ${TARGET}
+	cd src && ${MAKE} clean
+
+.PHONY: test 
+test:
+	./test/runtests.sh || echo -e "\nmake: build does not pass"
+

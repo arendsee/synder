@@ -11,6 +11,8 @@ typedef struct {
 /** initialize Interval with start and stop, but set link to NULL */
 Interval * init_interval(unsigned int start, unsigned int stop);
 
+void print_Interval(Interval *);
+
 /** position of Interval or point A relative to B */
 typedef enum {lo=0, in=1, hi=2} Pos;
 
