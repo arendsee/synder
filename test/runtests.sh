@@ -11,7 +11,12 @@ warn(){
 }
 
 emphasize(){
-    echo -e "\e[01;39m$1\e[0m"
+   emphasize_n "$1" 
+   echo
+}
+
+emphasize_n(){
+    echo -ne "\e[01;39m$1\e[0m"
 }
 
 runtest(){
@@ -58,7 +63,6 @@ runtest $dir hi "itree (set B - hi)"
 runtest $dir within "itree (set B - within)"
 runtest $dir lo "itree (set B - lo)"
 
-
 #---------------------------------------------------------------------
 dir="$PWD/test/C"
 runtest $dir a "itree (set C - a)"
@@ -74,9 +78,45 @@ runtest $dir j "itree (set C - j)"
 
 #---------------------------------------------------------------------
 echo
+ 
+#---------------------------------------------------------------------
+# valgrind
+
+valgrind_checked=0
+valgrind_exit_status=1
+if hash valgrind 2> /dev/null; then
+    valgrind_checked=1
+    dir="$PWD/test/C"
+    tmp=/tmp/synder-$RANDOM
+    mkdir $tmp
+    $synder -d $dir/map.syn a b $tmp/db 
+    valgrind $synder \
+        -i "$PWD/test/C/c.gff" \
+        -s $tmp/db/a_b.txt \
+        -c search > /dev/null 2> valgrind.log
+    valgrind_exit_status=$?
+    rm -rf tmp
+fi
+
+
+#---------------------------------------------------------------------
 
 total=$(( total_passed + total_failed))
 emphasize "$total_passed tests successful out of $total"
+
+if [[ $valgrind_checked == 0 ]]
+then
+    warn "valgrind not found, no memory tests performed"
+else
+    if [[ $valgrind_exit_status == 0 ]]
+    then
+        emphasize_n "valgrind pure"
+        echo " (for synder search of C/c.gff against C/map.syn)"
+        rm valgrind.log
+    else
+        warn "valgrind failed - see valgrind.log"
+    fi
+fi
 
 if [[ $total_failed > 0 ]]
 then
