@@ -51,7 +51,7 @@ IntervalResult * get_point_overlaps(uint point, IntervalTree * tree){
 }
 
 IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
-    IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
+    IntervalResult * res = init_IntervalResult();
     res->iv = init_IV(IV_INITIAL_SIZE); 
     get_interval_overlaps_r(inv, tree, res);
     return res;
