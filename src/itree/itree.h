@@ -4,13 +4,14 @@
 #include "ia.h"
 #include "interval.h"
 
-#ifdef uint
+#ifndef uint
 #define uint unsigned int
 #endif
 
 typedef enum orientation {
     O_LEFT = -1,
-    O_ROOT = 0, O_RIGHT = 1,
+    O_ROOT = 0,
+    O_RIGHT = 1,
     O_UNSET = 99
 } Orientation;
 
@@ -33,11 +34,11 @@ typedef struct IntervalTree {
     Orientation orientation;
 } IntervalTree;
 
-IntervalTree * init_interval_tree();
+IntervalTree * init_IntervalTree();
 
-void free_interval_tree(IntervalTree *);
+void free_IntervalTree(IntervalTree *);
 
-void print_interval_tree(IntervalTree*, int verbosity);
+void print_IntervalTree(IntervalTree*, int verbosity);
 
 IntervalTree * build_tree(IA*);
 

@@ -6,7 +6,7 @@
 
 #include "iv.h"
 
-IV * iv_init(size_t available){
+IV * init_IV(size_t available){
     IV * iv = (IV *)malloc(sizeof(IV)); 
     if(iv == NULL){
         exit(EXIT_FAILURE);
@@ -20,7 +20,7 @@ IV * iv_init(size_t available){
     return(iv);
 }
 
-void iv_free(IV * self){
+void free_IV(IV * self){
     if(self != NULL){
         if(self->v != NULL){
             free(self->v);
@@ -29,14 +29,14 @@ void iv_free(IV * self){
     }
 }
 
-void print_iv(IV * self){
+void print_IV(IV * self){
     for(size_t i = 0; i < self->size; i++){
         printf("(%u, %u) ", self->v[i].start, self->v[i].stop); 
     }
     printf("\n");
 }
 
-void iv_add (IV * self, Interval dat){
+void add_IV (IV * self, Interval dat){
     if(self->size == self->available){
         self->v = (Interval *)realloc(self->v, self->size * 2 * sizeof(Interval));
         if(self->v == NULL){
@@ -48,7 +48,7 @@ void iv_add (IV * self, Interval dat){
     self->size++;
 }
 
-void iv_join (IV * self, IA * other){
+void join_IV (IV * self, IA * other){
     if(self->size + other->size > self->available){
         self->available = 2 * (self->size + other->size);
         self->v = (Interval *)realloc(self->v, self->available * sizeof(Interval));

@@ -56,7 +56,7 @@ typedef struct ContiguousMap {
  *
  * @param ContiguousMap* cmap The contiguous map to free
  */
-void free_contiguous_map(ContiguousMap * cmap);
+void free_ContiguousMap(ContiguousMap * cmap);
 
 /**
  * @brief Initialize a new contiguous map
@@ -65,7 +65,7 @@ void free_contiguous_map(ContiguousMap * cmap);
  *
  * @return ContiguousMap* New contiguous map
  */
-ContiguousMap *init_contiguous_map(size_t size);
+ContiguousMap *init_ContiguousMap(size_t size);
 
 /**
  * @brief Populate  a new contiguous map from a synteny db

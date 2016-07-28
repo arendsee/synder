@@ -20,11 +20,11 @@ typedef struct {
   char strand;
 } Block;
 
-Block *init_block(uint, uint, uint, uint, uint, char);
+Block *init_Block(uint, uint, uint, uint, uint, char);
 
-void free_block(Block *);
+void free_Block(Block *);
 
-void print_block(Block *);
+void print_Block(Block *);
 
 bool overlap(uint, uint, uint, uint);
 

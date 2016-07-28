@@ -8,7 +8,7 @@
 #include "interval.h"
 #include "itree.h"
 
-#ifdef uint
+#ifndef uint
 #define uint unsigned int
 #endif
 

@@ -1,4 +1,4 @@
-#ifndef __UI_H__
+#ifndef __UI_U__
 #define __UI_U__
 
 #include <stdio.h>

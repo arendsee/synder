@@ -12,11 +12,11 @@ typedef struct {
 } IA;
 
 /** initialize to {.size=0, .v=NULL} */
-IA * init_ia();
+IA * init_IA();
 
 /** initialize to a size, allocate memory to v */
-IA * init_set_ia(size_t size);
+IA * init_set_IA(size_t size);
 
-void free_ia(IA * ia);
+void free_IA(IA * ia);
 
 #endif

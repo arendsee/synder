@@ -29,22 +29,22 @@ Arguments create_Arguments()
 
 void close_Arguments(Arguments arg)
 {
-  if (arg.synfile)
+  if (arg.synfile != NULL)
     fclose(arg.synfile);
-  if (arg.intfile)
+  if (arg.intfile != NULL)
     fclose(arg.intfile);
-  if (arg.hitfile)
+  if (arg.hitfile != NULL)
     fclose(arg.hitfile);
-  if (arg.db_filename)
+  if (arg.db_filename != NULL)
     free(arg.db_filename);
-  if (arg.pos) {
+  if (arg.pos != NULL) {
     for (int i = 0; i < 3; i++) {
-      if (arg.pos[i])
+      if (arg.pos[i] != NULL)
         free(arg.pos[i]);
     }
     free(arg.pos);
   }
-  if (arg.cmd)
+  if (arg.cmd != NULL)
     free(arg.cmd);
 }
 

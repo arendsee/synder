@@ -3,7 +3,7 @@
 
 #include "interval.h"
 
-Interval * init_interval(uint start, uint stop){
+Interval * init_Interval(uint start, uint stop){
     Interval * inv = (Interval*)malloc(sizeof(Interval));
     inv->start = start;
     inv->stop = stop;
@@ -27,7 +27,7 @@ int cmp_start(const void *ap, const void *bp){
     return((a.start > b.start) - (b.start > a.start));
 }
 
-Pos point_overlap(unsigned int a, Interval * b){
+Pos point_overlap(uint a, Interval * b){
     if(a < b->start){
         return lo;
     }

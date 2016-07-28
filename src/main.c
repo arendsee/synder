@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   }
   // Load synteny db 
   if (args.synfile) {
-    syn = load_synmap(args.synfile, args.swap);
+    syn = load_Synmap(args.synfile, args.swap);
   }
   // No arguments passed
   if (!(syn || args.test)) {
@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
   // Clean up
   // ------------------------------------------------------------------------
 
-  if (syn)
-    free_synmap(syn);
+  if (syn != NULL)
+    free_Synmap(syn);
   close_Arguments(args);
 
   return (EXIT_SUCCESS);

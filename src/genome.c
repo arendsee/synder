@@ -4,7 +4,7 @@
 
 #include "genome.h"
 
-Genome *init_genome(char *name, size_t size)
+Genome *init_Genome(char *name, size_t size)
 {
   Genome *gen = (Genome *) malloc(sizeof(Genome));
   gen->name = strdup(name);
@@ -13,11 +13,11 @@ Genome *init_genome(char *name, size_t size)
   return (gen);
 }
 
-void free_genome(Genome * genome)
+void free_Genome(Genome * genome)
 {
-  if (genome) {
+  if (genome != NULL) {
     for (int i = 0; i < genome->size; i++) {
-      free_contig(genome->contig[i]);
+      free_Contig(genome->contig[i]);
     }
     free(genome->contig);
     free(genome->name);
@@ -25,10 +25,10 @@ void free_genome(Genome * genome)
   }
 }
 
-void print_genome(Genome * genome, bool forward)
+void print_Genome(Genome * genome, bool forward)
 {
   printf(">\t%s\t%lu\n", genome->name, genome->size);
   for (int i = 0; i < genome->size; i++) {
-    print_contig(genome->contig[i], forward);
+    print_Contig(genome->contig[i], forward);
   }
 }

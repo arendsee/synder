@@ -31,28 +31,28 @@ IntervalResult * init_IntervalResult(){
 }
 
 void print_IntervalResult(IntervalResult * res){
-    print_iv(res->iv);
+    print_IV(res->iv);
     printf("inbetween=%i leftmost=%i rightmost=%i\n", res->inbetween, res->leftmost, res->rightmost);
 }
 
 void free_IntervalResult(IntervalResult * res){
-    if(res){
-        if(res->iv)
-            iv_free(res->iv);
+    if(res != NULL){
+        if(res->iv != NULL)
+            free_IV(res->iv);
         free(res);
     }
 }
 
 IntervalResult * get_point_overlaps(uint point, IntervalTree * tree){
     IntervalResult * res = init_IntervalResult();
-    res->iv = iv_init(IV_INITIAL_SIZE); 
+    res->iv = init_IV(IV_INITIAL_SIZE); 
     get_point_overlaps_r(point, tree, res);
     return res;
 }
 
 IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
-    IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
-    res->iv = iv_init(IV_INITIAL_SIZE); 
+    IntervalResult * res = init_IntervalResult();
+    res->iv = init_IV(IV_INITIAL_SIZE); 
     get_interval_overlaps_r(inv, tree, res);
     return res;
 }
@@ -66,7 +66,7 @@ uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
                 break;
             }
         }
-        if(RIGHT(tree))
+        if(RIGHT(tree) != NULL)
             return count_point_overlaps_r(point, RIGHT(tree), count);
     }
     else {
@@ -77,14 +77,14 @@ uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
                 break;
             }
         }
-        if(LEFT(tree))
+        if(LEFT(tree) != NULL)
             return count_point_overlaps_r(point, LEFT(tree), count);
     }
     return count;
 }
 
 uint count_interval_overlaps_r(Interval * inv, IntervalTree * tree, uint count){
-    if(!tree)
+    if(tree == NULL)
         return count;
     switch(point_overlap(tree->center, inv)){
     case lo:
@@ -135,9 +135,9 @@ void set_nearest_opposing_interval(IntervalTree * node, IntervalResult * results
       else { results->rightmost = true; }
     #define SET_NEAREST_NODE \
       if(orientation == O_RIGHT) \
-      { iv_add(results->iv, node->by_start->v[0]); } \
+      { add_IV(results->iv, node->by_start->v[0]); } \
       else if(orientation == O_LEFT) \
-      { iv_add(results->iv, node->by_stop->v[node->by_stop->size - 1]); }
+      { add_IV(results->iv, node->by_stop->v[node->by_stop->size - 1]); }
 
     SET_INITIAL_ORIENTATION 
 
@@ -167,7 +167,7 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
     if(point >= tree->center) {
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
             if(point <= T_STOP_STOP(tree, i)){
-                iv_add(results->iv, T_STOP(tree, i));
+                add_IV(results->iv, T_STOP(tree, i));
             } else {
                 break;
             }
@@ -177,14 +177,14 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
         } 
         else if(R_SIZE(results) != 0) {
             results->inbetween = true;
-            iv_add(results->iv, LAST_STOP(tree));
+            add_IV(results->iv, LAST_STOP(tree));
             set_nearest_opposing_interval(tree, results, hi);
         }
     }
     else {
         for(int i = 0; i < T_SIZE(tree); i++){
             if(point >= T_START_START(tree, i)){
-                iv_add(results->iv, T_START(tree, i));
+                add_IV(results->iv, T_START(tree, i));
             } else {
                 break;
             }
@@ -194,7 +194,7 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
         }
         else if(R_SIZE(results) != 0) {
             results->inbetween = true;
-            iv_add(results->iv, FIRST_START(tree));
+            add_IV(results->iv, FIRST_START(tree));
             set_nearest_opposing_interval(tree, results, lo);
         }
     }
@@ -207,14 +207,14 @@ IntervalResult * get_interval_overlaps_r(Interval * inv, IntervalTree * tree, In
     case lo: // center lower than interval start
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
             if(inv->start <= T_STOP_STOP(tree, i)){
-                iv_add(results->iv, T_STOP(tree, i));
+                add_IV(results->iv, T_STOP(tree, i));
             } else {
                 break;
             }
         }
         // Reach a leaf and still have no overlaps
         if(RIGHT(tree) == NULL && results->iv->size == 0){
-            iv_add(results->iv, LAST_STOP(tree));
+            add_IV(results->iv, LAST_STOP(tree));
             // get nearest interval on the other side
             set_nearest_opposing_interval(tree, results, hi);
         }
@@ -222,20 +222,20 @@ IntervalResult * get_interval_overlaps_r(Interval * inv, IntervalTree * tree, In
     case hi:
         for(int i = 0; i < T_SIZE(tree); i++){
             if(inv->stop >= T_START_START(tree, i)){
-                iv_add(results->iv, T_START(tree, i));
+                add_IV(results->iv, T_START(tree, i));
             } else {
                 break;
             }
         }
         // Reach a leaf and still have no overlaps
         if(LEFT(tree) == NULL && results->iv->size == 0){
-            iv_add(results->iv, FIRST_START(tree));
+            add_IV(results->iv, FIRST_START(tree));
             // get nearest interval on the other side
             set_nearest_opposing_interval(tree, results, lo);
         }
         return get_interval_overlaps_r(inv, LEFT(tree), results);
     default: // in
-        iv_join(results->iv, tree->by_start);
+        join_IV(results->iv, tree->by_start);
         return get_interval_overlaps_r(inv, RIGHT(tree), 
                get_interval_overlaps_r(inv, LEFT(tree), results));
     };

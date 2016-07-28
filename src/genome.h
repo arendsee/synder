@@ -19,7 +19,7 @@ typedef struct {
  *
  * @return pointer to new Genome struct 
  * */
-Genome *init_genome(char *, size_t);
+Genome *init_Genome(char *, size_t);
 
 /**
  * Recursively free all memory
@@ -28,9 +28,9 @@ Genome *init_genome(char *, size_t);
  *
  * @param pointer to a Genome struct
  */
-void free_genome(Genome *);
+void free_Genome(Genome *);
 
 /** Recursively print a genome. */
-void print_genome(Genome *, bool forward);
+void print_Genome(Genome *, bool forward);
 
 #endif

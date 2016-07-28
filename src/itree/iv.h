@@ -17,14 +17,14 @@ typedef struct {
     Interval * v;
 } IV;
 
-IV * iv_init(size_t);
+IV * init_IV(size_t);
 
-void print_iv(IV * self);
+void print_IV(IV * self);
 
-void iv_add (IV *, Interval);
+void add_IV(IV *, Interval);
 
-void iv_join (IV *, IA *);
+void join_IV(IV *, IA *);
 
-void iv_free(IV *);
+void free_IV(IV *);
 
 #endif

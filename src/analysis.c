@@ -44,7 +44,7 @@ void analysis_map(Synmap * syn, FILE * intfile)
     }
     for (int i = 0; i < contigs->size; i++) {
       qblk = contigs->block[i];
-      if (qblk) {
+      if (qblk != NULL) {
         tcon = QT_SGC(syn, qblk);
         tblk = QT_SGCB(syn, qblk);
         printf("%s %s %u %u %d\n",
