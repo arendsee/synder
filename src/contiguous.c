@@ -73,7 +73,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
       if (!((CB(contigs, 0) && block_overlap(CB(contigs, 0), &twoblk)) ||
             (CB(contigs, 1) && block_overlap(CB(contigs, 1), &twoblk))
           )) {
-        if (contigs->block[0]) {
+        if (contigs->block[0] != NULL) {
           missloc = cmap->map[contigs->block[0]->linkid]->qblkid;
         } else {
           missloc = cmap->map[contigs->block[1]->linkid]->qblkid;
@@ -89,7 +89,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
     // that get_region doesn't return every overlapping block.
     for (int i = 0; i < contigs->size; i++) {
       qblk = contigs->block[i];
-      if (qblk) {
+      if (qblk != NULL) {
         blkid = cmap->map[qblk->linkid]->qblkid;
         if (i == 0) {
           region[0] = blkid;
@@ -380,7 +380,7 @@ void free_contiguous_map(ContiguousMap * cmap)
   }
   if (cmap->map)
     free(cmap->map);
-  if (cmap)
+  if (cmap != NULL)
     free(cmap);
 }
 

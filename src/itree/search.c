@@ -36,8 +36,8 @@ void print_IntervalResult(IntervalResult * res){
 }
 
 void free_IntervalResult(IntervalResult * res){
-    if(res){
-        if(res->iv)
+    if(res != NULL){
+        if(res->iv != NULL)
             iv_free(res->iv);
         free(res);
     }
@@ -66,7 +66,7 @@ uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
                 break;
             }
         }
-        if(RIGHT(tree))
+        if(RIGHT(tree) != NULL)
             return count_point_overlaps_r(point, RIGHT(tree), count);
     }
     else {
@@ -77,14 +77,14 @@ uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
                 break;
             }
         }
-        if(LEFT(tree))
+        if(LEFT(tree) != NULL)
             return count_point_overlaps_r(point, LEFT(tree), count);
     }
     return count;
 }
 
 uint count_interval_overlaps_r(Interval * inv, IntervalTree * tree, uint count){
-    if(!tree)
+    if(tree == NULL)
         return count;
     switch(point_overlap(tree->center, inv)){
     case lo:

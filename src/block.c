@@ -34,7 +34,7 @@ Block *init_block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid, 
  * */
 void free_block(Block * block)
 {
-  if (block) {
+  if (block != NULL) {
     free(block);
   }
 }

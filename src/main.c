@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   // Clean up
   // ------------------------------------------------------------------------
 
-  if (syn)
+  if (syn != NULL)
     free_synmap(syn);
   close_Arguments(args);
 

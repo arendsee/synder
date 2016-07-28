@@ -15,7 +15,7 @@ Genome *init_genome(char *name, size_t size)
 
 void free_genome(Genome * genome)
 {
-  if (genome) {
+  if (genome != NULL) {
     for (int i = 0; i < genome->size; i++) {
       free_contig(genome->contig[i]);
     }

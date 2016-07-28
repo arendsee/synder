@@ -25,14 +25,14 @@ Contig *init_contig(char *name, size_t size)
 
 void free_contig(Contig * contig)
 {
-  if (contig) {
-    if (contig->itree)
+  if (contig != NULL) {
+    if (contig->itree != NULL)
       free_interval_tree(contig->itree);
     for (int i = 0; i < contig->size; i++) {
-      if (contig->block[i])
+      if (contig->block[i] != NULL)
         free_block(contig->block[i]);
     }
-    if (contig->by_stop) {
+    if (contig->by_stop != NULL) {
       free(contig->by_stop);
     }
     free(contig->block);
@@ -92,7 +92,7 @@ IA *ia_from_blocks(Contig * con)
 
 Contig *get_region(Contig * con, uint a, uint b)
 {
-  if (!con->itree)
+  if (con->itree == NULL)
     con->itree = build_tree(ia_from_blocks(con));
   Interval inv = {.start = a,.stop = b };
   IntervalResult *res = get_interval_overlaps(&inv, con->itree);
@@ -125,7 +125,7 @@ Contig *get_region(Contig * con, uint a, uint b)
 
 uint count_overlaps(Contig * con, uint a, uint b)
 {
-  if (!con->itree)
+  if (con->itree == NULL)
     con->itree = build_tree(ia_from_blocks(con));
   Interval *inv = init_interval(a, b);
   uint count = count_interval_overlaps(inv, con->itree);
@@ -148,7 +148,7 @@ void sort_blocks_by_start(Contig * contig)
 void sort_blocks_by_stop(Contig * contig)
 {
   if (!contig->stop_sorted) {
-    if (!contig->by_stop) {
+    if (contig->by_stop == NULL) {
       contig->by_stop = (Block **) malloc(contig->size * sizeof(Block *));
       memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block *));
     }

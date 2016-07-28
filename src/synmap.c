@@ -12,7 +12,7 @@ Synmap *init_synmap()
 
 void free_synmap(Synmap * synmap)
 {
-  if (synmap) {
+  if (synmap != NULL) {
     free_genome(SG(synmap, 0));
     free_genome(SG(synmap, 1));
     free(synmap->genome);

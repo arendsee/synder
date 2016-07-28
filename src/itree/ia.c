@@ -22,8 +22,8 @@ IA * init_set_ia(size_t size){
 }
 
 void free_ia(IA * ia){
-    if(ia->v)
+    if(ia->v != NULL)
         free(ia->v);
-    if(ia)
+    if(ia != NULL)
         free(ia);
 }
