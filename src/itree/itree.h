@@ -4,7 +4,7 @@
 #include "ia.h"
 #include "interval.h"
 
-#ifdef uint
+#ifndef uint
 #define uint unsigned int
 #endif
 
