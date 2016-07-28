@@ -11,14 +11,14 @@
 
 /* local function prototypes */
 IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation orientation);
-void print_interval_tree_verbosity_1(IntervalTree * n, int depth, char pos);
-void print_interval_tree_verbosity_2(IntervalTree * n, int depth, char pos);
-void print_interval_tree_verbosity_3(IntervalTree * n, int depth, char pos);
-void print_interval_tree_r(IntervalTree * n, int depth, char pos, int verbosity);
+void print_IntervalTree_verbosity_1(IntervalTree * n, int depth, char pos);
+void print_IntervalTree_verbosity_2(IntervalTree * n, int depth, char pos);
+void print_IntervalTree_verbosity_3(IntervalTree * n, int depth, char pos);
+void print_IntervalTree_r(IntervalTree * n, int depth, char pos, int verbosity);
 uint get_center(IA *);
 
 
-IntervalTree * init_interval_tree(){
+IntervalTree * init_IntervalTree(){
     IntervalTree * tree = (IntervalTree *)malloc(sizeof(IntervalTree));
     tree->center   = 0;
     tree->by_start = NULL;
@@ -30,15 +30,15 @@ IntervalTree * init_interval_tree(){
     return(tree);
 }
 
-void free_interval_tree(IntervalTree * tree){
+void free_IntervalTree(IntervalTree * tree){
     if(LEFT(tree))
-        free_interval_tree(LEFT(tree));
+        free_IntervalTree(LEFT(tree));
     if(RIGHT(tree))
-        free_interval_tree(RIGHT(tree));
+        free_IntervalTree(RIGHT(tree));
     if(tree->by_start)
-        free_ia(tree->by_start);
+        free_IA(tree->by_start);
     if(tree->by_stop)
-        free_ia(tree->by_stop);
+        free_IA(tree->by_stop);
     if(tree != NULL)
         free(tree);
 }
@@ -49,7 +49,7 @@ IntervalTree * build_tree(IA * intervals){
 
 IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation orientation){
     /* initialize returned product */
-    IntervalTree * tree = init_interval_tree();
+    IntervalTree * tree = init_IntervalTree();
     tree->parent = parent;
     tree->orientation = orientation;
     tree->center = get_center(intervals);
@@ -72,10 +72,10 @@ IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation o
     }
 
     /* initialise interval arrays */
-    IA * right     = init_set_ia(npos[lo]);
-    IA * left      = init_set_ia(npos[hi]);
-    tree->by_start = init_set_ia(npos[in]);
-    tree->by_stop  = init_set_ia(npos[in]);
+    IA * right     = init_set_IA(npos[lo]);
+    IA * left      = init_set_IA(npos[hi]);
+    tree->by_start = init_set_IA(npos[in]);
+    tree->by_stop  = init_set_IA(npos[in]);
 
     /* track index of interval to add */
     size_t lo_idx = 0;
@@ -107,13 +107,13 @@ IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation o
     if(npos[lo] > 0){
         RIGHT(tree) = build_tree_r(right, tree, O_RIGHT);
     } else {
-        free_ia(right);
+        free_IA(right);
     }
 
     if(npos[hi] > 0){
         LEFT(tree) = build_tree_r(left, tree, O_LEFT);
     } else {
-        free_ia(left);
+        free_IA(left);
     }
     
     if(npos[in] > 0){
@@ -122,7 +122,7 @@ IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation o
     }
 
     free(pos);
-    free_ia(intervals);
+    free_IA(intervals);
 
     return(tree);
 }
@@ -144,12 +144,12 @@ uint get_center(IA * intr){
 }
 
 /* write tree and center */
-void print_interval_tree_verbosity_1(IntervalTree * n, int depth, char pos){
+void print_IntervalTree_verbosity_1(IntervalTree * n, int depth, char pos){
     printf("%*d - %c%d\n", depth * 2, depth, pos, n->center);
 }
 
 /* write tree, center, and start-sorted */
-void print_interval_tree_verbosity_2(IntervalTree * n, int depth, char pos){
+void print_IntervalTree_verbosity_2(IntervalTree * n, int depth, char pos){
     printf("%*d   %*s\t%c%d:",
            depth * 2, depth, 
            10 - depth * 2, "", pos, n->center);
@@ -162,8 +162,8 @@ void print_interval_tree_verbosity_2(IntervalTree * n, int depth, char pos){
 }
 
 /* write start- and stop-sorted vectors for each node */
-void print_interval_tree_verbosity_3(IntervalTree * n, int depth, char pos){
-    print_interval_tree_verbosity_1(n, depth, pos);
+void print_IntervalTree_verbosity_3(IntervalTree * n, int depth, char pos){
+    print_IntervalTree_verbosity_1(n, depth, pos);
     for(int i = 0; i < n->by_start->size; i++){
         printf("\t\t(%u,%u) ",
                n->by_start->v[i].start,
@@ -175,28 +175,28 @@ void print_interval_tree_verbosity_3(IntervalTree * n, int depth, char pos){
 }
 
 /* local print function */
-void print_interval_tree_r(IntervalTree * n, int depth, char pos, int verbosity){
+void print_IntervalTree_r(IntervalTree * n, int depth, char pos, int verbosity){
     switch(verbosity){
         case 1:
-            print_interval_tree_verbosity_1(n, depth, pos); break;
+            print_IntervalTree_verbosity_1(n, depth, pos); break;
         case 2:
-            print_interval_tree_verbosity_2(n, depth, pos); break;
+            print_IntervalTree_verbosity_2(n, depth, pos); break;
         case 3:
-            print_interval_tree_verbosity_3(n, depth, pos); break;
+            print_IntervalTree_verbosity_3(n, depth, pos); break;
         default:
             fprintf(stderr, "verbosity must be 1, 2, or 3\n");
             exit(EXIT_FAILURE);
     }
     depth++;
     if(LEFT(n) != NULL){
-        print_interval_tree_r(LEFT(n), depth, 'l', verbosity);
+        print_IntervalTree_r(LEFT(n), depth, 'l', verbosity);
     }
     if(RIGHT(n) != NULL){
-        print_interval_tree_r(RIGHT(n), depth, 'r', verbosity);
+        print_IntervalTree_r(RIGHT(n), depth, 'r', verbosity);
     }
 }
 
 /* public wrapper for real print function */
-void print_interval_tree(IntervalTree * n, int verbosity){
-    print_interval_tree_r(n, 0, 'c', verbosity);
+void print_IntervalTree(IntervalTree * n, int verbosity){
+    print_IntervalTree_r(n, 0, 'c', verbosity);
 }

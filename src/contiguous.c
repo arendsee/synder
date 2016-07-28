@@ -25,7 +25,7 @@
                t_con->name, t_blk->start, t_blk->stop, interval);
 
 
-ContiguousMap *init_contiguous_map(size_t size)
+ContiguousMap *init_ContiguousMap(size_t size)
 {
   ContiguousMap *cmap = (ContiguousMap *) malloc(sizeof(ContiguousMap));
   cmap->size = size;
@@ -121,7 +121,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
       flag = 0;
       qblk = SGCB(syn, 0, chrid, i);
       Contig *qcon = SGC(syn, 0, chrid);
-      Block *tblk = init_block(QT_SGCB(syn, qblk)->start, QT_SGCB(syn, qblk)->stop,
+      Block *tblk = init_Block(QT_SGCB(syn, qblk)->start, QT_SGCB(syn, qblk)->stop,
                                0, 0, 0, '.');
       tcon = QT_SGC(syn, qblk);
       Block *q_blk;
@@ -224,7 +224,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
         // query region is before block
 
         interval++;
-        free_block(tblk);
+        free_Block(tblk);
         break;
       }
 
@@ -361,18 +361,18 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
 
       interval++;
 
-      free_block(tblk);
+      free_Block(tblk);
     }
-    // free_contig(contigs);
+    // free_Contig(contigs);
     free(contigs->name);
     free(contigs->block);
     free(contigs);
   }
   free(line);
-  free_contiguous_map(cmap);
+  free_ContiguousMap(cmap);
 }
 
-void free_contiguous_map(ContiguousMap * cmap)
+void free_ContiguousMap(ContiguousMap * cmap)
 {
   for (int i = 0; i < cmap->size; i++) {
     if (cmap->map[i])
@@ -395,7 +395,7 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
 
   // Initialize new ContiguousMap to that size to serve as hashmap
   // when looking up overlapping blocks
-  ContiguousMap *cmap = init_contiguous_map(size);
+  ContiguousMap *cmap = init_ContiguousMap(size);
   // Initialize ContiguousList structure to hold head and tail of current
   // Contiguous Set
   cmap->size = size;

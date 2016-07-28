@@ -3,14 +3,14 @@
 #include "ia.h"
 #include "interval.h"
 
-IA * init_ia(){
+IA * init_IA(){
     IA * ia = (IA *)malloc(sizeof(IA));
     ia->size = 0;
     ia->v = NULL;
     return(ia);
 }
 
-IA * init_set_ia(size_t size){
+IA * init_set_IA(size_t size){
     IA * ia = (IA *)malloc(sizeof(IA));
     ia->size = size;
     if(size > 0){
@@ -21,7 +21,7 @@ IA * init_set_ia(size_t size){
     return(ia);
 }
 
-void free_ia(IA * ia){
+void free_IA(IA * ia){
     if(ia->v != NULL)
         free(ia->v);
     if(ia != NULL)

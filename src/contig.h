@@ -59,20 +59,20 @@ typedef struct {
  * @return pointer to a new Contig
  *
  * */
-Contig *init_contig(char *name, size_t size);
+Contig *init_Contig(char *name, size_t size);
 
 /** Recursively free all memory.
  *
- * This functions calls free_block on each Block in its block field.
+ * This functions calls free_Block on each Block in its block field.
  *
- * If the Contig has an IntervalTree defined, it will free it with free_interval_tree.
+ * If the Contig has an IntervalTree defined, it will free it with free_IntervalTree.
  *
  * @param contig pointer to a contig, may be NULL
  * */
-void free_contig(Contig * contig);
+void free_Contig(Contig * contig);
 
 /** Recursively print contig. */
-void print_contig(Contig * contig, bool forward);
+void print_Contig(Contig * contig, bool forward);
 
 /** Find index of downstream Block nearest the query point */
 uint anchor(Contig * contig, uint x);

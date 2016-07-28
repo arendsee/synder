@@ -3,27 +3,27 @@
 
 #include "synmap.h"
 
-Synmap *init_synmap()
+Synmap *init_Synmap()
 {
   Synmap *syn = (Synmap *) malloc(sizeof(Synmap));
   syn->genome = (Genome **) malloc(2 * sizeof(Genome *));
   return (syn);
 }
 
-void free_synmap(Synmap * synmap)
+void free_Synmap(Synmap * synmap)
 {
   if (synmap != NULL) {
-    free_genome(SG(synmap, 0));
-    free_genome(SG(synmap, 1));
+    free_Genome(SG(synmap, 0));
+    free_Genome(SG(synmap, 1));
     free(synmap->genome);
     free(synmap);
   }
 }
 
-void print_synmap(Synmap * synmap, bool forward)
+void print_Synmap(Synmap * synmap, bool forward)
 {
-  print_genome(SG(synmap, 0), forward);
-  print_genome(SG(synmap, 1), forward);
+  print_Genome(SG(synmap, 0), forward);
+  print_Genome(SG(synmap, 1), forward);
 }
 
 void sort_all_contigs(Synmap * synmap)

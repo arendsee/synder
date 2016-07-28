@@ -4,11 +4,11 @@
 
 void check_args(int line_no, int nargs, int correct_nargs);
 
-Synmap *load_synmap(FILE * synfile, int swap)
+Synmap *load_Synmap(FILE * synfile, int swap)
 {
   assert(synfile != NULL);
 
-  Synmap *synmap = init_synmap();
+  Synmap *synmap = init_Synmap();
 
   int query = swap;
   int target = !swap;
@@ -31,13 +31,13 @@ Synmap *load_synmap(FILE * synfile, int swap)
       if (line[0] == '>') {
         status = sscanf(line, "> %s %u %c", seqid, &ncontigs, &dummy);
         check_args(line_no, status, 2);
-        SG(synmap, loc) = init_genome(seqid, ncontigs);
+        SG(synmap, loc) = init_Genome(seqid, ncontigs);
       } else if (line[0] == '@') {
         break;
       } else if (line[0] == '$') {
         status = sscanf(line, "$ %u %u %s %c\n", &id, &nblocks, seqid, &dummy);
         check_args(line_no, status, 3);
-        SGC(synmap, loc, id) = init_contig(seqid, nblocks);
+        SGC(synmap, loc, id) = init_Contig(seqid, nblocks);
         unloaded_blocks += nblocks;
       } else {
         fprintf(stderr, "Incorrect file format, line %d\n", line_no);
@@ -81,10 +81,10 @@ Synmap *load_synmap(FILE * synfile, int swap)
     }
 
     SGCB(synmap, query, qcon_id, qblk_id) =
-      init_block(qstart, qstop, tcon_id, tblk_id, link_id, strand);
+      init_Block(qstart, qstop, tcon_id, tblk_id, link_id, strand);
 
     SGCB(synmap, target, tcon_id, tblk_id) =
-      init_block(tstart, tstop, qcon_id, qblk_id, link_id, strand);
+      init_Block(tstart, tstop, qcon_id, qblk_id, link_id, strand);
   }
   free(line);
 

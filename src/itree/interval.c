@@ -3,7 +3,7 @@
 
 #include "interval.h"
 
-Interval * init_interval(uint start, uint stop){
+Interval * init_Interval(uint start, uint stop){
     Interval * inv = (Interval*)malloc(sizeof(Interval));
     inv->start = start;
     inv->stop = stop;

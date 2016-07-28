@@ -19,16 +19,16 @@ bool test_all()
 
 bool test_iv()
 {
-  IV *iv = iv_init(2);
-  Interval *a = init_interval(12, 22);
-  Interval *b = init_interval(23, 33);
-  Interval *c = init_interval(34, 44);
+  IV *iv = init_IV(2);
+  Interval *a = init_Interval(12, 22);
+  Interval *b = init_Interval(23, 33);
+  Interval *c = init_Interval(34, 44);
 
   printf("iv: vector realloc when size is passed\n");
-  iv_add(iv, *a);
-  iv_add(iv, *b);
+  add_IV(iv, *a);
+  add_IV(iv, *b);
   assert(iv->available == 2);
-  iv_add(iv, *c);
+  add_IV(iv, *c);
   assert(iv->available == 4);
 
   printf("iv: correct addition of elements\n");
@@ -39,7 +39,7 @@ bool test_iv()
   free(a);
   free(b);
   free(c);
-  iv_free(iv);
+  free_IV(iv);
 
   return true;
 }
@@ -47,7 +47,7 @@ bool test_iv()
 bool test_search()
 {
   IntervalResult *res;
-  IA *ia = init_set_ia(2);
+  IA *ia = init_set_IA(2);
   Interval a = {.start = 10,.stop = 20 };
   Interval b = {.start = 30,.stop = 40 };
   ia->v[0] = a;
@@ -99,6 +99,6 @@ bool test_search()
   assert(res->inbetween == true);
   free_IntervalResult(res);
 
-  free_interval_tree(tree);
+  free_IntervalTree(tree);
   return true;
 }

@@ -29,7 +29,7 @@ typedef struct {
  *
  * @return pointer to the new Synmap
  */
-Synmap *init_synmap();
+Synmap *init_Synmap();
 
 /** Recursively free all memory allocated to the synteny map.
  * 
@@ -38,10 +38,10 @@ Synmap *init_synmap();
  * @param pointer to Synmap struct
  *
  * */
-void free_synmap(Synmap *);
+void free_Synmap(Synmap *);
 
 /** Recursively print a synteny map. */
-void print_synmap(Synmap *, bool forward);
+void print_Synmap(Synmap *, bool forward);
 
 /** Sort all the blocks in each contig both my start and stop */
 void sort_all_contigs(Synmap * synmap);

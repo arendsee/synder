@@ -9,7 +9,7 @@ typedef struct {
 } Interval;
 
 /** initialize Interval with start and stop, but set link to NULL */
-Interval * init_interval(unsigned int start, unsigned int stop);
+Interval * init_Interval(unsigned int start, unsigned int stop);
 
 void print_Interval(Interval *);
 
