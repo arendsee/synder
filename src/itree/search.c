@@ -1,4 +1,3 @@
-/** /todo figure out which of these I need */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,9 +21,9 @@ uint count_point_overlaps(uint point, IntervalTree * tree){
     return count_point_overlaps_r(point, tree, 0);
 }
 
-IntervalResult * init_IntervalResult(size_t size){
+IntervalResult * init_IntervalResult(){
     IntervalResult * res = (IntervalResult *)malloc(sizeof(IntervalResult));
-    res->iv = iv_init(size);
+    res->iv = NULL;
     res->inbetween = false;
     res->leftmost = false;
     res->rightmost = false;
@@ -45,18 +44,18 @@ void free_IntervalResult(IntervalResult * res){
 }
 
 IntervalResult * get_point_overlaps(uint point, IntervalTree * tree){
-    IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
+    IntervalResult * res = init_IntervalResult();
+    res->iv = iv_init(IV_INITIAL_SIZE); 
     get_point_overlaps_r(point, tree, res);
     return res;
 }
 
 IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
     IntervalResult * res = init_IntervalResult(IV_INITIAL_SIZE);
+    res->iv = iv_init(IV_INITIAL_SIZE); 
     get_interval_overlaps_r(inv, tree, res);
     return res;
 }
-
-
 
 uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
     if(point >= tree->center) {
@@ -87,7 +86,6 @@ uint count_point_overlaps_r(uint point, IntervalTree * tree, uint count){
 uint count_interval_overlaps_r(Interval * inv, IntervalTree * tree, uint count){
     if(!tree)
         return count;
-
     switch(point_overlap(tree->center, inv)){
     case lo:
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){
@@ -174,10 +172,10 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
                 break;
             }
         }
-        if(RIGHT(tree)){
+        if(RIGHT(tree) != NULL){
             get_point_overlaps_r(point, RIGHT(tree), results);
         } 
-        else if(!R_SIZE(results)) {
+        else if(R_SIZE(results) != 0) {
             results->inbetween = true;
             iv_add(results->iv, LAST_STOP(tree));
             set_nearest_opposing_interval(tree, results, hi);
@@ -203,10 +201,8 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
 }
 
 IntervalResult * get_interval_overlaps_r(Interval * inv, IntervalTree * tree, IntervalResult * results){
-
     if(tree == NULL)
         return results;
-
     switch(point_overlap(tree->center, inv)){
     case lo: // center lower than interval start
         for(int i = T_SIZE(tree) - 1; i >= 0 ; i--){

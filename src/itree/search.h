@@ -57,7 +57,7 @@ uint count_interval_overlaps(Interval * interval, IntervalTree * tree);
 
 
 /** Allocate memory and set defaults for an IntervalResults struct */
-IntervalResult * init_IntervalResult(size_t initial_iv_size);
+IntervalResult * init_IntervalResult();
 
 
 /** Free memory of an IntervalResults struct */

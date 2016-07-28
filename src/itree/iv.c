@@ -8,9 +8,15 @@
 
 IV * iv_init(size_t available){
     IV * iv = (IV *)malloc(sizeof(IV)); 
+    if(iv == NULL){
+        exit(EXIT_FAILURE);
+    }
     iv->size = 0;
     iv->available = available;
     iv->v = (Interval *)malloc(available * sizeof(Interval));
+    if(iv->v == NULL){
+        exit(EXIT_FAILURE);
+    }
     return(iv);
 }
 
@@ -33,6 +39,9 @@ void print_iv(IV * self){
 void iv_add (IV * self, Interval dat){
     if(self->size == self->available){
         self->v = (Interval *)realloc(self->v, self->size * 2 * sizeof(Interval));
+        if(self->v == NULL){
+            exit(EXIT_FAILURE);
+        }
         self->available *= 2;
     }
     self->v[self->size] = dat;
@@ -43,6 +52,9 @@ void iv_join (IV * self, IA * other){
     if(self->size + other->size > self->available){
         self->available = 2 * (self->size + other->size);
         self->v = (Interval *)realloc(self->v, self->available * sizeof(Interval));
+        if(self->v == NULL){
+            exit(EXIT_FAILURE);
+        }
     }
     memcpy(self->v + self->size, other->v, other->size * sizeof(other->v[0]));
     self->size += other->size;
