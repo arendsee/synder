@@ -26,5 +26,4 @@ clean:
 
 .PHONY: test 
 test:
-	./test/runtests.sh || echo -e "\nmake: build does not pass"
-
+	./test/runtests.sh
