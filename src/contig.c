@@ -96,6 +96,10 @@ Contig *get_region(Contig * con, uint a, uint b)
     con->itree = build_tree(ia_from_blocks(con));
   Interval inv = {.start = a,.stop = b };
   IntervalResult *res = get_interval_overlaps(&inv, con->itree);
+
+print_IntervalResult(res);
+
+/*
   Contig *newcon;
   if (res->inbetween) {
     // Only one adjacent region should be returned in the inbetween case
@@ -115,8 +119,14 @@ Contig *get_region(Contig * con, uint a, uint b)
       newcon->block[i] = GET_RESULT_BLOCK(res, i);
     }
   }
+*/
+
   free_IntervalResult(res);
-  return newcon;
+
+exit(EXIT_FAILURE);
+
+return NULL;
+//  return newcon;
 }
 
 uint count_overlaps(Contig * con, uint a, uint b)

@@ -15,12 +15,19 @@ IV * iv_init(size_t available){
 }
 
 void iv_free(IV * self){
-    if(self){
-        if(self->v){
+    if(self != NULL){
+        if(self->v != NULL){
             free(self->v);
         }
         free(self);
     }
+}
+
+void print_iv(IV * self){
+    for(size_t i = 0; i < self->size; i++){
+        printf("(%u, %u) ", self->v[i].start, self->v[i].stop); 
+    }
+    printf("\n");
 }
 
 void iv_add (IV * self, Interval dat){

@@ -97,6 +97,27 @@ of the syntenic blocks, will always be considered "syntenically scrambled".
 Note: The image above is out of date. We now guess a search interval for cases
 E and F.
 
+# Output
+
+## Search subcommand
+
+One table with the following fields:
+ 1. query interval name (e.g. AT1G20300)
+ 2. query chromosome name
+ 3. query start position
+ 4. query stop position
+ 5. target chromosome name
+ 6. search interval start position on target chromsome
+ 7. search interval stop position on target chromsome
+ 8. score
+ 9. flag
+    0. query interval falls between two intervals within the contiguous set
+    1. query overlaps synteny block(s), but the left edge is inbetween
+    2. query overlaps synteny block(s), but the right edge is inbetween
+    3. query overlaps synteny block(s), but the both edges are inbetween
+    4. query is to the left of the contiguous set
+    5. query is to the right of the contiguous set
+
 # TODO list
 
  - [ ] Add strand awareness to contiguity rules (so all contiguous sets are elements on the same strand)

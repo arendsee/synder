@@ -19,6 +19,8 @@ typedef struct {
 
 IV * iv_init(size_t);
 
+void print_iv(IV * self);
+
 void iv_add (IV *, Interval);
 
 void iv_join (IV *, IA *);
