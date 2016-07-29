@@ -1,5 +1,8 @@
 synder
 
+# ctags file used internally by some editors
+tags
+
 README.pdf
 
 *.gch
