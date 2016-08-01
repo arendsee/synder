@@ -30,6 +30,7 @@ runtest(){
     dif=$1
     base=$2
     msg=$3
+    errmsg=${4:-0}
     tmp=/tmp/synder-$RANDOM$RANDOM
     mkdir $tmp
     echo -n "Testing $msg ... "
@@ -42,16 +43,17 @@ runtest(){
         echo "OK"
     else
         warn "FAIL"
+        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt) && echo
         total_failed=$(( $total_failed + 1 ))
         echo "======================================="
         emphasize "expected output:"
-        cat $dir/${base}-exp.txt
+        column -t $dir/${base}-exp.txt
         emphasize "observed output:"
-        cat $tmp/a
+        column -t $tmp/a
         emphasize "query gff:"
-        cat $dir/$base.gff
+        column -t $dir/$base.gff
         emphasize "synteny map:"
-        cat $dir/map.syn
+        column -t $dir/map.syn
         echo -e "---------------------------------------\n"
     fi
 
@@ -95,6 +97,40 @@ runtest $dir between "Query starts between the duplicated intervals"
 dir="$PWD/test/test-data/one-interval-inversion"
 announce "\nTest when a single interval is inverted"
 runtest $dir between "Query next to inverted interval"
+runtest $dir over    "Query overlaps inverted interval"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/two-interval-inversion"
+announce "\nTest when two interval are inverted"
+runtest $dir beside "Query next to inverted interval"
+runtest $dir within "Query between inverted intervals"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/tiny-indel-query-side"
+announce "\nTest when a small interval interupts on one side"
+runtest $dir beside "Query side"
+dir="$PWD/test/test-data/tiny-indel-target-side"
+runtest $dir beside "Target side"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/tandem-transposition"
+announce "\nTest tandem transposition"
+runtest $dir beside "Query beside the transposed pair"
+runtest $dir within "Query between the transposed pair"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/irregular-overlaps"
+announce "\nTest target side internal overlaps"
+runtest $dir left "Left side" "You are either 1) not sorting the by_stop vector
+in Contig by Block stop positions, or 2) are snapping the search interval left
+boundary to a Block that is nearest by start, but not be stop."
+runtest $dir right "Right side"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/multi-chromosome"
+announce "\nTest two intervals on same query chr but different target chr"
+runtest $dir between "Between the query intervals"
+
 
 #---------------------------------------------------------------------
 echo

@@ -1,0 +1,2 @@
+between	que	225	275	mirkwood	201	275	.	7
+between	que	225	275	mordor	225	299	.	6
