@@ -1,4 +1,4 @@
-**This program is under development, 
+**This program is under development**
 
 # Synder
 
@@ -46,12 +46,12 @@ SEQNAME TARGETNAME SEARCH_INTERVAL_START SEARCH_INTERVAL_STOP FLAG
 
 Flag is to keep track of edge dependability:
 
- 0 -> the search interval is bound on both ends (is reliable)
- 1 -> the start edge is unbounded
- 2 -> the stop edge is unbound
- 3 -> both edges are unbound, but there are internal overlaps
- 4 -> query is to the left of a contig, no overlap
- 5 -> query is to the right of a contig, no overlap
+ * 0 -> the search interval is bound on both ends (is reliable)
+ * 1 -> the start edge is unbounded
+ * 2 -> the stop edge is unbound
+ * 3 -> both edges are unbound, but there are internal overlaps
+ * 4 -> query is to the left of a contig, no overlap
+ * 5 -> query is to the right of a contig, no overlap
 
 # Definitions
 
