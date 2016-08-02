@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/arendsee/synder.svg?branch=master)](https://travis-ci.org/arendsee/synder)
+
 **This program is under development**
 
 # Synder
