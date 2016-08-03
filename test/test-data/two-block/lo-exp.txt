@@ -1,1 +1,1 @@
-lo    que	1	10	tar	1	99	.	6
+lo	que	1	10	tar	1	99	.	6
