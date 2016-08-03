@@ -8,24 +8,40 @@
 
 #define cmloc(cmap,blk) cmap->map[block->linkid]
 
-//Build contiguous set as adjacency list attached to hash map
+// Build contiguous set as adjacency list attached to hash map
+
+typedef enum {
+  CNF_UNSET  = -4, // Flag has not yet been set
+  CNF_INV    = -3, // Part of a inverted block
+  CNF_LEFT   = -2, // Left of last contiguous block
+  CNF_RIGHT  = -1, // Right of last contiguous block
+  CNF_NORMAL =  0, // Normal Interval
+  CNF_QOVER  =  1, // (2) Query Interval overlaps
+  CNF_TOVER  =  2, // (3) Target Interval overlaps
+  CNF_BOVER  =  3  // Both sides overlaps
+} ContiguousNodeFlag;
+
+typedef enum {
+  SI_GOOD   = 0, // Determinable boundries (case A,B,C,D)
+  SI_LUNDET = 1, // Left hand undeterminable (case F)
+  SI_RUNDET = 2, // Right hand undeterminable (case F)
+  SI_BUNDET = 3, // Both undeterminable (case F on both sides) 
+  SI_LUNBND = 4, // Left unbound, case E to the left of nearest block
+  SI_RUNBND = 5  // Right unbound, case E to the right of nearest block
+} SearchIntervalFlag;
+
 
 /** 
  * @brief Contiguous list object holding current Block and its neighbors
  * 
  *
  * Fields:
- * feature 	- Current object
- * match 	- Target match of current feature
- * prev  	- Previous contiguous node, if any
- * next		- Next contiguous node, if any 
- * flag		- Used to indicate several state
- * 			 -3 - Part of a transposed block
- * 			 -2 - Left of last contiguous block
- * 			 -1 - Right of last contiguous block	
- * 			  0 - Normal Interval
- * 			  2 - Query Interval overlaps
- * 			  3 - Target Interval overlaps
+ * feature - Current object (query block) 
+ * match   - Target match of current feature
+ * prev    - Previous contiguous node, if any
+ * next    - Next contiguous node, if any 
+ * flag    - A ContiguousNodeFlag value
+ * qblkid  - Id of feature (index in parent Contig->block** array)
  *
  */
 typedef struct ContiguousNode {
@@ -33,7 +49,7 @@ typedef struct ContiguousNode {
   Block *match;
   struct ContiguousNode *prev;
   struct ContiguousNode *next;
-  int flag;
+  ContiguousNodeFlag flag;
   uint32_t qblkid;
 } ContiguousNode;
 
@@ -68,7 +84,7 @@ void free_ContiguousMap(ContiguousMap * cmap);
 ContiguousMap *init_ContiguousMap(size_t size);
 
 /**
- * @brief Populate  a new contiguous map from a synteny db
+ * @brief Populate a new contiguous map from a synteny db
  *
  * @param Synmap* syn Synteny db
  *

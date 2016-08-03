@@ -108,17 +108,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
     // Loop through the query region bounds and print
     // overlapping target regions
     for (int i = region[0]; i <= region[1]; i++) {
-      /*
-       * Flag -> keeps track of edge reliability 
-       * 0 = Determinable boundries (case A,B,C,D)
-       * 1 = Left hand undeterminable (case F)
-       * 2 = Right hand undeterminable (case F)
-       * 3 = Neitherside determinable (case F on both sides) 
-       * 4 = Case E to the left of nearest block
-       * 5 = Case E to the right of nearest block
-       */
 
-      flag = 0;
+      flag = SI_GOOD;
       qblk = SGCB(syn, 0, chrid, i);
       Contig *qcon = SGC(syn, 0, chrid);
       Block *tblk = init_Block(QT_SGCB(syn, qblk)->start, QT_SGCB(syn, qblk)->stop,
@@ -145,28 +136,28 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
         tcon = QT_SGC(syn, q_blk);
         int64_t offset;
         if (start < q_blk->start) {     // query region is before block
-          if (cmap->map[q_blk->linkid]->flag > -2) {
+          if (cmap->map[q_blk->linkid]->flag > CNF_LEFT) {
             // return from start of block, to offest to start of query
             // on target side
-            flag = 4;
+            flag = SI_LUNBND;
             tblk->stop = t_blk->start;
             offset = t_blk->start - (q_blk->start - start);
             tblk->start = offset < tblk->stop
               && offset > 0 ? (uint32_t) offset : 0;
           } else {
-            flag = 5;
+            flag = SI_RUNBND;
             tblk->start = t_blk->stop;
             tblk->stop = t_blk->stop + (q_blk->start - start);
           }
         } else {                // query region after block
-          if (cmap->map[q_blk->linkid]->flag > -2) {
+          if (cmap->map[q_blk->linkid]->flag > CNF_LEFT) {
             // return from end of block, to offest to end of query
             // on target side
-            flag = 5;
+            flag = SI_RUNBND;
             tblk->start = t_blk->stop;
             tblk->stop = t_blk->stop + (stop - q_blk->stop);
           } else {
-            flag = 4;
+            flag = SI_LUNBND;
             tblk->stop = t_blk->start;
             offset = t_blk->start - (stop - q_blk->stop);
             tblk->start = offset < tblk->stop
@@ -180,15 +171,15 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
           q_blk = SGCB(syn, 0, chrid, blkid - 1);
           t_blk = QT_SGCB(syn, q_blk);
           tcon = QT_SGC(syn, q_blk);
-          if (cmap->map[q_blk->linkid]->flag > -2) {
-            flag = 5;
+          if (cmap->map[q_blk->linkid]->flag > CNF_LEFT) {
+            flag = SI_RUNBND;
             tblk->start = t_blk->stop;
             offset =
               stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
             offset += t_blk->stop;
             tblk->stop = offset >= 0 ? (uint32_t) offset : 0;
           } else {
-            flag = 4;
+            flag = SI_LUNBND;
             tblk->stop = t_blk->start;
             offset =
               stop >= q_blk->stop ? stop - q_blk->stop : q_blk->stop - stop;
@@ -201,8 +192,8 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
           q_blk = SGCB(syn, 0, chrid, blkid + 1);
           t_blk = QT_SGCB(syn, q_blk);
           tcon = QT_SGC(syn, q_blk);
-          if (cmap->map[q_blk->linkid]->flag > -2) {
-            flag = 4;
+          if (cmap->map[q_blk->linkid]->flag > CNF_LEFT) {
+            flag = SI_LUNBND;
             tblk->stop = t_blk->start;
             offset =
               start <=
@@ -210,7 +201,7 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             offset = t_blk->start - offset;
             tblk->start = offset > 0 ? (uint32_t) offset : 0;
           } else {
-            flag = 5;
+            flag = SI_RUNBND;
             tblk->start = t_blk->stop;
             offset =
               start <=
@@ -241,29 +232,29 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
         while (qnode->prev != NULL && start > qnode->feature->stop) {
           qnode = qnode->prev;
         }
-        if (qnode->flag > 1 && start > qnode->feature->stop) {  //avoid duplicates in cases of overlap
+        if (qnode->flag > CNF_NORMAL && start > qnode->feature->stop) {  //avoid duplicates in cases of overlap
           continue;
         }
         if (start < qnode->feature->start) {    // Check we didn't advance into a case E,F Situation
-          if (qnode->flag > -2
-              || (original->next != NULL && original->next->flag == 0)) {
+          if (qnode->flag > CNF_LEFT
+              || (original->next != NULL && original->next->flag == CNF_NORMAL)) {
             // The next check here and in the next block is to detect edge cases where block we are checking is
             // registering as a left translation, but is part of a continuous run to the right
             // most often occcurs in the middle of messy overlap blocks
-            flag = 1;
+            flag = SI_LUNDET;
             tblk->start = qnode->match->start;
           } else {
-            flag = 2;
+            flag = SI_RUNDET;
             tblk->stop = qnode->match->stop;
           }
         } else if (start > qnode->feature->start) {     //Start is contained within current block C,D
-          if (qnode->flag > -2) {
+          if (qnode->flag > CNF_LEFT) {
             tblk->start = qnode->match->start;
           } else {
             tblk->stop = qnode->match->stop;
           }
         } else {                //Case A,B situations
-          if (qnode->flag > -2) {
+          if (qnode->flag > CNF_LEFT) {
             tblk->start = qnode->match->stop;
           } else {
             tblk->stop = qnode->match->start;
@@ -307,30 +298,35 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
             break;
           }
         }
-        if (qnode->flag > 1 && stop < qnode->feature->start) {  //avoid duplicates in cases of overlap
+        if (qnode->flag > CNF_NORMAL && stop < qnode->feature->start) {  //avoid duplicates in cases of overlap
           continue;
         }
         if (stop > qnode->feature->stop) {
-          if (qnode->next == NULL) {    //Case E,F situations
-            if (qnode->flag > -2) {
-              flag = flag == 1 ? 3 : 2;
+          //Case E,F situations
+          if (qnode->next == NULL) {
+            if (qnode->flag > CNF_LEFT) {
+              flag = flag == SI_LUNDET ? SI_BUNDET : SI_RUNDET;
               tblk->stop = qnode->match->stop;
             } else {
-              flag = flag == 2 ? 3 : 1;
+              flag = flag == SI_RUNDET ? SI_BUNDET : SI_LUNDET;
               tblk->start = qnode->match->start;
             }
-          } else {              //Case A,B situations
+          }
+          //Case A,B situations
+          else {
             q_blk = SGCB(syn, 0, chrid, i + 1 < qcon->size ? i + 1 : i);
             t_blk = QT_SGCB(syn, q_blk);
-            if (cmap->map[qblk->linkid]->flag > -2 || qnode->next->flag == 0) { //similar check to above 
+            if (cmap->map[qblk->linkid]->flag > CNF_LEFT || qnode->next->flag == CNF_NORMAL) { //similar check to above 
               tblk->stop = t_blk->start;
             } else {
               tblk->start = t_blk->stop;
             }
           }
-        } else {                //Case C,D 
+        }
+        //Case C,D 
+        else {
           tblk->stop = qnode->match->stop;
-          if (qnode->flag > -2) {
+          if (qnode->flag > CNF_LEFT) {
             tblk->stop = qnode->match->stop;
           } else {
             tblk->start = qnode->match->stop;
@@ -363,7 +359,6 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
 
       free_Block(tblk);
     }
-    // free_Contig(contigs);
     free(contigs->name);
     free(contigs->block);
     free(contigs);
@@ -385,124 +380,131 @@ void free_ContiguousMap(ContiguousMap * cmap)
 }
 
 
+ContiguousNode * init_ContiguousNode(Synmap * syn, size_t conid, size_t blkid){
+  ContiguousNode *cnode = (ContiguousNode *) malloc(sizeof(ContiguousNode));
+  cnode->feature = syn->genome[0]->contig[conid]->block[blkid];
+  cnode->flag = CNF_UNSET;
+  cnode->next = NULL;
+  cnode->prev = NULL;
+  cnode->match = SGCB(syn, 1, cnode->feature->oseqid, cnode->feature->oblkid);
+  cnode->qblkid = blkid;
+  return cnode;  
+}
+
 ContiguousMap *populate_contiguous_map(Synmap * syn)
 {
-  // Figure out how many unique blocks the current synmap has     
+  // Sum unique blocks in current synmap
   size_t size = 0;
-  for (uint32_t i = 0; i < syn->genome[0]->size; i++) {
-    size += syn->genome[0]->contig[i]->size;
+  for (uint32_t i = 0; i < SG(syn,0)->size; i++) {
+    size += SGC(syn,0,i)->size;
   }
 
   // Initialize new ContiguousMap to that size to serve as hashmap
   // when looking up overlapping blocks
   ContiguousMap *cmap = init_ContiguousMap(size);
-  // Initialize ContiguousList structure to hold head and tail of current
-  // Contiguous Set
-  cmap->size = size;
 
   // Loop through each contig in the query genome
-  for (uint32_t i = 0; i < syn->genome[0]->size; i++) {
+  // i := contig id
+  for (uint32_t i = 0; i < SG(syn,0)->size; i++) {
 
-    // Grab contig to variable, to save writing
-    Contig *ctig = (Contig *) malloc(sizeof(Contig));
-    ctig = syn->genome[0]->contig[i];
     uint32_t overlap_bound[2] = { 0, 0 };
 
-    uint coseqid;
-    uint coblkid;
-    uint clinkid;
-
     // Loop though each block in current contig
-    for (uint32_t j = 0; j < ctig->size; j++) {
+    // j := block id
+    for (uint32_t j = 0; j < SGC(syn,0,i)->size; j++) {
 
       // Set current block up to be a new node
-      ContiguousNode *cnode = (ContiguousNode *) malloc(sizeof(ContiguousNode));
-      cnode->feature = ctig->block[j];
-        // Define a few shortcuts
-        coseqid = cnode->feature->oseqid;
-        coblkid = cnode->feature->oblkid;
-        clinkid = cnode->feature->linkid;
-      cnode->flag = 0;
-      cnode->next = NULL;
-      cnode->prev = NULL;
-      cnode->match = SGCB(syn, 1, coseqid, coblkid);
-      cnode->qblkid = j;
+      ContiguousNode *cnode = init_ContiguousNode(syn, i, j);
+      // Initialize flags to normal
+      cnode->flag = CNF_NORMAL;
 
+      int clinkid = cnode->feature->linkid;
+      int coseqid = cnode->feature->oseqid;
+      int coblkid = cnode->feature->oblkid;
 
       // Start of contig is always a default node
       cmap->map[clinkid] = cnode;
-      if (j == 0) {
+      if (j == 0)
         continue;
-      }
-      // Otherwise we get to figure out if the current block can be added to or breaks the current ContiguousSet
-      else {
-        // Test for overlap on query side
-        bool q_overlap = false;
-        bool t_overlap = false;
-        for (int k = overlap_bound[0]; k <= overlap_bound[1]; k++) {
-          q_overlap = block_overlap(cnode->feature, ctig->block[k])
-            || q_overlap;
-          t_overlap =
-            (block_overlap
-             (cnode->match, cmap->map[ctig->block[k]->linkid]->match)
-             && (coseqid == ctig->block[k]->oseqid))
-            || t_overlap;
-          if (q_overlap || t_overlap)
-            continue;
-        }
-        if (q_overlap) {
-          cnode->flag = 2;
-        }
-        if (t_overlap) {
-          cnode->flag = 3;
-        }
-        if (q_overlap || t_overlap) {
-          if (q_overlap && t_overlap)
-            cnode->flag = 4;
-          overlap_bound[1] = j;
-          cmap->map[clinkid] = cnode;
+
+      // Otherwise we get to figure out if the current block can be added to or
+      // breaks the current ContiguousSet
+      
+      // Get a ContiguousNode object from a Block id
+      #define BLKID2NODE(idx) cmap->map[syn->genome[0]->contig[i]->block[idx]->linkid]
+
+      // Test for overlap on query side
+      bool q_overlap = false;
+      bool t_overlap = false;
+      ContiguousNodeFlag prior_flag = BLKID2NODE(j - 1)->flag;
+
+      // k := overlapping block id
+      for (int k = overlap_bound[0]; k <= overlap_bound[1]; k++) {
+        q_overlap = block_overlap(cnode->feature, SGCB(syn,0,i,k)) || q_overlap;
+        t_overlap =
+          ((block_overlap(cnode->match, BLKID2NODE(k)->match)) &&
+           (coseqid == SGCB(syn,0,i,k)->oseqid)) || t_overlap;
+        if (q_overlap || t_overlap)
           continue;
-        } else {
-          overlap_bound[0] = j;
-          overlap_bound[1] = j;
-        }
+      }
+      if (q_overlap) {
+        cnode->flag = CNF_QOVER;
+      }
+      if (t_overlap) {
+        cnode->flag = CNF_TOVER;
+      }
+      if (q_overlap || t_overlap) {
+        if (q_overlap && t_overlap)
+          cnode->flag = CNF_BOVER;
+        overlap_bound[1] = j;
+        continue;
+      } else {
+        overlap_bound[0] = j;
+        overlap_bound[1] = j;
       }
 
       // On different contig from previous 
-      if (coseqid !=
-          cmap->map[ctig->block[j - 1]->linkid]->feature->oseqid) {
-        cmap->map[clinkid] = cnode;
-      } else if (coblkid == ctig->block[j - 1]->oblkid + 1) {    // Regular contiguous interval
-        cnode->flag = 0;
-        cmap->map[clinkid] = cnode;
-        cmap->map[ctig->block[j - 1]->linkid]->next = cnode;
-        cmap->map[clinkid]->prev =
-          cmap->map[ctig->block[j - 1]->linkid];
-      } else if (coblkid < ctig->block[j - 1]->oblkid) { //Twist to left of previous block
-        cnode->flag = (cmap->map[ctig->block[j - 1]->linkid]->flag == -2
-                       || cmap->map[ctig->block[j - 1]->linkid]->flag ==
-                       0) ? -2 : 0;
-        cmap->map[ctig->block[j - 1]->linkid]->next = NULL;
-        cmap->map[clinkid] = cnode;
-        if (coblkid == ctig->block[j - 1]->oblkid - 1) {
-          cnode->flag = -3;
-          cmap->map[ctig->block[j - 1]->linkid]->next = cnode;
-          cmap->map[ctig->block[j - 1]->linkid]->flag = -3;
-          cmap->map[clinkid]->prev =
-            cmap->map[ctig->block[j - 1]->linkid];
+      if (coseqid != BLKID2NODE(j - 1)->feature->oseqid) {
+        continue;
+      }
+
+      // Regular contiguous interval
+      else if (coblkid == SGCB(syn,0,i,j-1)->oblkid + 1) {
+        cnode->flag = CNF_NORMAL;
+        // link this node to the previous
+        BLKID2NODE(j - 1)->next = cnode;
+        cmap->map[clinkid]->prev = BLKID2NODE(j - 1);
+      }
+
+      //Twist to left of previous block
+      else if (coblkid < SGCB(syn,0,i,j-1)->oblkid) {
+        cnode->flag = (prior_flag == CNF_LEFT || prior_flag == CNF_NORMAL) ? CNF_LEFT : CNF_NORMAL;
+        BLKID2NODE(j - 1)->next = NULL;
+        if (coblkid == SGCB(syn,0,i,j-1)->oblkid - 1) {
+          cnode->flag = CNF_INV;
+          BLKID2NODE(j - 1)->next = cnode;
+          BLKID2NODE(j - 1)->flag = CNF_INV;
+          cmap->map[clinkid]->prev = BLKID2NODE(j - 1);
         }
-      } else if (coblkid > ctig->block[j - 1]->oblkid) { // Twist to right, possible transposition
-        if (j + 1 < ctig->size) {
-          cnode->flag =
-            ctig->block[j]->oblkid == ctig->block[j + 1]->oblkid + 1 ? -3 : -1;
+      }
+
+      // Twist to right, possible transposition
+      else if (coblkid > SGCB(syn,0,i,j-1)->oblkid) {
+        if (j + 1 < SGC(syn,0,i)->size) {
+          cnode->flag = SGCB(syn,0,i,j)->oblkid == SGCB(syn,0,i,j+1)->oblkid + 1 ? CNF_INV : CNF_RIGHT;
         } else {
-          cnode->flag = -1;
+          cnode->flag = CNF_RIGHT;
         }
-        cmap->map[clinkid] = cnode;
-      } else {                  // Default case that should never be reached.  
-        cmap->map[clinkid] = cnode;
+      }
+
+      // Default case that should never be reached.
+      else {                  
+        fprintf(stderr, "Something strange happened\n");
+        continue;
       }
     }
+
+    #undef BLKID2NODE
 
   }
   return cmap;
