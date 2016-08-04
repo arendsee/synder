@@ -49,8 +49,7 @@ typedef struct ContiguousNode {
   Block *match;
   struct ContiguousNode *prev;
   struct ContiguousNode *next;
-  ContiguousNodeFlag flag;
-  uint32_t qblkid;
+  size_t qblkid;
 } ContiguousNode;
 
 /** Map using linkid to serve as a hashmap to allow quick access
