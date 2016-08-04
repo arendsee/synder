@@ -20,6 +20,7 @@ void analysis_map(Synmap * syn, FILE * intfile)
 {
   char seqname[128];
   int chrid, start, stop;
+  ResultContig * rc;
   Contig *contigs;
   Contig *tcon;
   Block *qblk;
@@ -30,7 +31,9 @@ void analysis_map(Synmap * syn, FILE * intfile)
                  "%d %*s %*s %d %d %*s %*c %*s %s\n",
                  &chrid, &start, &stop, seqname)) != EOF) {
     missing = false;
-    contigs = get_region(SGC(syn, 0, chrid), start, stop);
+    rc = get_region(SGC(syn, 0, chrid), start, stop);
+    contigs = rc->contig;
+    free(rc);
     // If the interval is between blocks, the size will ALWAYS be 2,
     // However, one of these may be NULL
     if (contigs->size == 2) {
@@ -78,13 +81,16 @@ void analysis_filter(Synmap * syn, FILE * hitfile,
 bool single_advocate(Synmap * syn, Link * query, void *width_ptr)
 {
   uint width;
+  ResultContig * rc;
   Contig *con, *qcon;
   Block *qblk, *tblk;
 
   width = *(uint *) width_ptr;
 
   // get the region that actually overlaps (or flanks, if the query is inbetween hits)
-  con = get_region(SGC(syn, 0, query->qseqid), query->qstart, query->qstop);
+  rc = get_region(SGC(syn, 0, query->qseqid), query->qstart, query->qstop);
+  con = rc->contig;
+  free(rc);
 
   // determine the search interval on the query
   Block qgood = {

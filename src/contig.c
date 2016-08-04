@@ -5,10 +5,6 @@
 #include <assert.h>
 
 #include "contig.h"
-#include "block.h"
-
-#include "itree/itree.h"
-#include "itree/search.h"
 
 Contig *init_Contig(char *name, size_t size)
 {
@@ -55,6 +51,32 @@ void print_Contig(Contig * contig, bool forward)
   }
 }
 
+ResultContig * init_ResultContig(Contig * contig, IntervalResult * ir)
+{
+  ResultContig * rc = (ResultContig *)malloc(sizeof(ResultContig));
+  rc->contig        = contig;
+  rc->inbetween     = ir->inbetween;
+  rc->leftmost      = ir->leftmost;
+  rc->rightmost     = ir->leftmost;
+  return rc;
+}
+
+void free_ResultContig(ResultContig * rc)
+{
+  if(rc != NULL){
+    if(rc->contig != NULL){
+        free_Contig(rc->contig);
+    }
+    free(rc);
+  }
+}
+
+void print_ResultContig(ResultContig * rc)
+{
+    printf("inbetween=%i leftmost=%i rightmost=%i\n", rc->inbetween, rc->leftmost, rc->rightmost);
+    print_Contig(rc->contig, true);
+}
+
 uint anchor(Contig * contig, uint x)
 {
   Block **blks = contig->block;
@@ -90,37 +112,27 @@ IA *ia_from_blocks(Contig * con)
   return ia;
 }
 
-Contig *get_region(Contig * con, uint a, uint b)
+ResultContig *get_region(Contig * con, uint a, uint b)
 {
+  // Build itree if necessary
   if (con->itree == NULL)
     con->itree = build_tree(ia_from_blocks(con));
+
+  // Search itree
   Interval inv = {.start = a,.stop = b };
   IntervalResult *res = get_interval_overlaps(&inv, con->itree);
 
-// print_IntervalResult(res);
-// exit(EXIT_FAILURE);
+  // Assign returned intervals to Contig
+  Contig *contig = init_Contig(con->name, res->iv->size);
+  for (int i = 0; i < res->iv->size; i++) {
+    contig->block[i] = GET_RESULT_BLOCK(res, i);
+  }
 
-  Contig *newcon;
-  if (res->leftmost) {
-    newcon = init_Contig(con->name, 2);
-    newcon->block[0] = NULL;
-    newcon->block[1] = GET_RESULT_BLOCK(res, 0);
-  }
-  else if(res->rightmost) {
-    newcon = init_Contig(con->name, 2);
-    newcon->block[0] = GET_RESULT_BLOCK(res, 0);
-    newcon->block[1] = NULL;
-  }
-  else {
-    newcon = init_Contig(con->name, res->iv->size);
-    for (int i = 0; i < res->iv->size; i++) {
-      newcon->block[i] = GET_RESULT_BLOCK(res, i);
-    }
-  }
+  ResultContig * resultcontig = init_ResultContig(contig, res);
 
   free_IntervalResult(res);
 
-  return newcon;
+  return resultcontig;
 }
 
 uint count_overlaps(Contig * con, uint a, uint b)

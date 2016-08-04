@@ -40,8 +40,8 @@ typedef enum {
  * match   - Target match of current feature
  * prev    - Previous contiguous node, if any
  * next    - Next contiguous node, if any 
- * flag    - A ContiguousNodeFlag value
  * qblkid  - Id of feature (index in parent Contig->block** array)
+ * setid   - Unique id for the node's contiguous set
  *
  */
 typedef struct ContiguousNode {
@@ -49,7 +49,9 @@ typedef struct ContiguousNode {
   Block *match;
   struct ContiguousNode *prev;
   struct ContiguousNode *next;
+  ContiguousNodeFlag flag;
   size_t qblkid;
+  size_t setid;
 } ContiguousNode;
 
 /** Map using linkid to serve as a hashmap to allow quick access

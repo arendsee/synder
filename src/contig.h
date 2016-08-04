@@ -6,6 +6,9 @@
 
 #include "block.h"
 
+#include "itree/itree.h"
+#include "itree/search.h"
+
 #ifndef uint
 #define uint unsigned int
 #endif
@@ -74,6 +77,26 @@ void free_Contig(Contig * contig);
 /** Recursively print contig. */
 void print_Contig(Contig * contig, bool forward);
 
+/** A wrapper for Contig that includes IntervalResult flags
+ *
+ *  From ResultInterval:
+ *  1. inbetween - query is between (not overlapping) two search intervals
+ *  2. leftmost - query is further left than any interval
+ *  3. rightmost - query is further right than any interval
+ */
+typedef struct ResultContig{
+    Contig * contig;
+    bool inbetween;
+    bool leftmost;
+    bool rightmost;
+} ResultContig;
+
+ResultContig * init_ResultContig(Contig *, IntervalResult *);
+
+void free_ResultContig(ResultContig *);
+
+void print_ResultContig(ResultContig *);
+
 /** Find index of downstream Block nearest the query point */
 uint anchor(Contig * contig, uint x);
 
@@ -86,7 +109,7 @@ uint anchor(Contig * contig, uint x);
  * If there is no block above or below, return NULL
  *
  * */
-Contig *get_region(Contig * contig, uint a, uint b);
+ResultContig *get_region(Contig * contig, uint a, uint b);
 
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);
