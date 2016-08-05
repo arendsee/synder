@@ -52,16 +52,15 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   uint qcon_id, qblk_id, qstart, qstop;
   uint tcon_id, tblk_id, tstart, tstop;
   char strand;
-  uint link_id;
 
   while ((read = getline(&line, &len, synfile)) != EOF) {
     line_no++;
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %u %c %c\n",
+    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
-                    &tcon_id, &tblk_id, &tstart, &tstop, &link_id, &strand, &dummy);
+                    &tcon_id, &tblk_id, &tstart, &tstop, &strand, &dummy);
     check_args(line_no, status, 10);
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %d\n", line_no);
@@ -81,10 +80,10 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     }
 
     SGCB(synmap, query, qcon_id, qblk_id) =
-      init_Block(qstart, qstop, tcon_id, tblk_id, link_id, strand);
+      init_Block(qstart, qstop, tcon_id, tblk_id, strand);
 
     SGCB(synmap, target, tcon_id, tblk_id) =
-      init_Block(tstart, tstop, qcon_id, qblk_id, link_id, strand);
+      init_Block(tstart, tstop, qcon_id, qblk_id, strand);
   }
   free(line);
 
@@ -95,6 +94,20 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   }
 
   sort_all_contigs(synmap);
+
+  // Set linkids in ascending order relative to query
+  uint linkid = 0; 
+  uint gsize, csize;
+  for(int g = 0; g < 2; g++){
+    gsize = SG(synmap, 0)->size;
+    for(int i = 0; i < gsize; i++){
+      csize = SGC(synmap, 0, i)->size;
+      for(int j = 0; j < csize; j++){
+        SGCB(synmap, 0, i, j)->linkid = linkid;
+        linkid++;
+      }
+    }
+  }
 
   return (synmap);
 }

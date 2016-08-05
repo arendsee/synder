@@ -14,7 +14,7 @@
  * @return pointer to new Block
  *
  * */
-Block *init_Block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid, char strand)
+Block *init_Block(uint start, uint stop, uint oseqid, uint oblkid, char strand)
 {
   Block *block = (Block *) malloc(sizeof(Block));
   block->start = start;
@@ -23,7 +23,7 @@ Block *init_Block(uint start, uint stop, uint oseqid, uint oblkid, uint linkid, 
   block->stopid = 0;
   block->oseqid = oseqid;
   block->oblkid = oblkid;
-  block->linkid = linkid;
+  block->linkid = 0; // linkids will be set by load_synmap
   block->strand = strand;
   return (block);
 }

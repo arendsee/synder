@@ -20,7 +20,7 @@ typedef struct {
   char strand;
 } Block;
 
-Block *init_Block(uint, uint, uint, uint, uint, char);
+Block *init_Block(uint, uint, uint, uint, char);
 
 void free_Block(Block *);
 
