@@ -22,16 +22,29 @@ Contig *init_Contig(char *name, size_t size)
 void free_Contig(Contig * contig)
 {
   if (contig != NULL) {
-    if (contig->itree != NULL)
-      free_IntervalTree(contig->itree);
     for (int i = 0; i < contig->size; i++) {
       if (contig->block[i] != NULL)
         free_Block(contig->block[i]);
     }
-    if (contig->by_stop != NULL) {
+    if (contig->itree != NULL)
+      free_IntervalTree(contig->itree);
+    if (contig->by_stop != NULL)
       free(contig->by_stop);
-    }
     free(contig->block);
+    free(contig->name);
+    free(contig);
+  }
+}
+
+void free_partial_Contig(Contig * contig)
+{
+  if (contig != NULL) {
+    if (contig->itree != NULL)
+      free_IntervalTree(contig->itree);
+    if (contig->by_stop != NULL)
+      free(contig->by_stop);
+    if(contig->block != NULL)
+      free(contig->block);
     free(contig->name);
     free(contig);
   }

@@ -74,6 +74,16 @@ Contig *init_Contig(char *name, size_t size);
  * */
 void free_Contig(Contig * contig);
 
+/** Recursively free all memory EXCEPT blocks
+ *
+ * Like free_Contig but does not free all the Blocks. This is useful for
+ * structures that hold blocks which do not belong to them (i.e. pointers to
+ * blocks held elsewhere).
+ *
+ * @param contig pointer to a contig, may be NULL
+ * */
+void free_partial_Contig(Contig * contig);
+
 /** Recursively print contig. */
 void print_Contig(Contig * contig, bool forward);
 
