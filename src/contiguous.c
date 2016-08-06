@@ -9,59 +9,13 @@
 #include "contig.h"
 #include "synmap.h"
 
-// A list of the highest and lowest members of contiguous sets
+// ---- A local utility structure used filter and store contiguous sets ----
 typedef struct CSList{
   struct CSList * next;
   ContiguousNode * lo; 
   ContiguousNode * hi; 
   int setid;
 } CSList;
-void free_CSList(CSList * cslist);
-void add_cnode_CSList(CSList * cslist, ContiguousNode * cnode);
-CSList * init_empty_CSList();
-CSList * init_CSList();
-
-
-
-void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
-{
-
-  // count total number of unique block-block pairs for hashmap
-  ContiguousMap *cmap = populate_contiguous_map(syn);
-
-  print_ContiguousMap(cmap);
-
-  char seqname[128];
-  int chrid, start, stop;
-  ResultContig * rc;
-  Contig *contig;
-  size_t length = 1024;
-  char *line = (char *) malloc(length * sizeof(char));
-  while (fgets(line, length, intfile) && !feof(intfile)) {
-    if (!sscanf
-        (line, "%d %*s %*s %d %d %*s %*c %*s %s\n", &chrid, &start, &stop,
-         seqname)) {
-      printf("invalid input\n");
-      continue;
-    }
-    rc = get_region(SGC(syn, 0, chrid), start, stop);
-    contig = rc->contig;
-
-    CSList * cslist = init_CSList();
-
-    // get list of highest and lowest members of each contiguous set
-    for(int i = 0; i < contig->size; i++){
-        add_cnode_CSList(cslist, cmap->map[contig->block[i]->linkid]); 
-    }
-
-    free(rc);
-    free_partial_Contig(contig);
-    free_CSList(cslist);
-  }
-  free(line);
-  free_ContiguousMap(cmap);
-
-}
 
 CSList * init_empty_CSList(){
   CSList * cslist = (CSList *)malloc(sizeof(CSList));
@@ -102,6 +56,49 @@ void free_CSList(CSList * cslist){
   if(cslist->next != NULL)
     free_CSList(cslist->next);
   free(cslist);
+}
+// -----------------------------------------------------------
+
+
+
+void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
+{
+
+  // count total number of unique block-block pairs for hashmap
+  ContiguousMap *cmap = populate_contiguous_map(syn);
+
+  print_ContiguousMap(cmap);
+
+  char seqname[128];
+  int chrid, start, stop;
+  ResultContig * rc;
+  Contig *contig;
+  size_t length = 1024;
+  char *line = (char *) malloc(length * sizeof(char));
+  while (fgets(line, length, intfile) && !feof(intfile)) {
+    if (!sscanf
+        (line, "%d %*s %*s %d %d %*s %*c %*s %s\n", &chrid, &start, &stop,
+         seqname)) {
+      printf("invalid input\n");
+      continue;
+    }
+    rc = get_region(SGC(syn, 0, chrid), start, stop);
+    contig = rc->contig;
+
+    CSList * cslist = init_empty_CSList();
+
+    // get list of highest and lowest members of each contiguous set
+    for(int i = 0; i < contig->size; i++){
+        add_cnode_CSList(cslist, cmap->map[contig->block[i]->linkid]); 
+    }
+
+    free(rc);
+    free_partial_Contig(contig);
+    free_CSList(cslist);
+  }
+  free(line);
+  free_ContiguousMap(cmap);
+
 }
 
 /*
