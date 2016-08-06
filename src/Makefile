@@ -1,16 +1,13 @@
-CFLAGS=-Wall -g -O2
+CFLAGS=-Wall -g
 CC=gcc
 TARGET=synder
-OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o lev.o
+OBJECTS=main.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o lev.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
 
 main.o: main.c
 	${CC} -c ${CFLAGS} main.c
-
-test.o: test.c test.h
-	${CC} -c ${CFLAGS} test.[ch]
 
 io.o: io.c io.h
 	${CC} -c ${CFLAGS} io.[ch]

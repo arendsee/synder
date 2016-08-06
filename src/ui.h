@@ -12,7 +12,6 @@ typedef struct Arguments {
   char *db_filename;
   char *cmd;
   char **pos;
-  bool test;
   bool swap;
 } Arguments;
 

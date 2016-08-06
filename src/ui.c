@@ -20,8 +20,7 @@ Arguments create_Arguments()
     .hitfile = NULL,
     .db_filename = NULL,
     .cmd = NULL,
-    .pos = (char **) malloc(MAX_POS * sizeof(char *)),
-    .test = false
+    .pos = (char **) malloc(MAX_POS * sizeof(char *))
   };
   memset(args.pos, 0, MAX_POS * sizeof(char *));
   return args;
@@ -98,7 +97,8 @@ void print_help()
          "  synder -i a.gff   -s db/a_b.txt -c count\n"
          "  synder -i a.gff   -s db/a_b.txt -c search\n"
          "  synder -i a.gff   -s db/a_b.txt -c convert -t\n"
-         "  synder -f hits.syn -s db/a_b.txt -c filter\n" "  synder test\n");
+         "  synder -f hits.syn -s db/a_b.txt -c filter\n"
+  );
   exit(EXIT_SUCCESS);
 }
 
@@ -109,10 +109,6 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  if (argc == 2 && strcmp(argv[1], "test") == 0) {
-    args.test = true;
-    return args;
-  }
   while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:")) != -1) {
     switch (opt) {
       case 'h':

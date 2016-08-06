@@ -30,10 +30,7 @@ bool overlap(uint, uint, uint, uint);
 
 bool block_overlap(Block *, Block *);
 
-/** compare intervals by stop
- *
- * \todo test sort_contig_by_start and sort_contig_by_stop functions
- */
+/** compare intervals by stop */
 int block_cmp_stop(const void *, const void *);
 
 /** compare intervals by start */
