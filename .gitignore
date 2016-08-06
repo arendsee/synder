@@ -10,7 +10,7 @@ README.pdf
 *.gch
 *.o
 *.a
-db
+db*
 
 doc
 
@@ -20,7 +20,9 @@ big-sample-inputs/*syn
 big-sample-inputs/*gff
 big-sample-inputs/*tab
 
-# my temp file prefix
+# my temp file prefixes
 z*
 x
 y
+g[0-9]
+d[0-9]

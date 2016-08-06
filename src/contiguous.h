@@ -6,6 +6,23 @@
 #include "block.h"
 #include "synmap.h"
 
+#define ANCHORED_L 1
+#define ANCHORED_R 2
+#define BOUND_L    4
+#define BOUND_R    8
+#define UNBOUND_L  16
+#define UNBOUND_R  32
+#define INVERSE    64
+#define F_AA    ANCHORED_L | ANCHORED_R
+#define F_AB    ANCHORED_L | BOUND_R
+#define F_AU    ANCHORED_L | UNBOUND_R
+#define F_BA    BOUND_L    | ANCHORED_R
+#define F_BB    BOUND_L    | BOUND_R
+#define F_BU    BOUND_L    | UNBOUND_R
+#define F_UA    UNBOUND_L  | ANCHORED_R
+#define F_UB    UNBOUND_L  | BOUND_R
+#define F_UU    UNBOUND_L  | UNBOUND_R
+
 #define cmloc(cmap,blk) cmap->map[block->linkid]
 
 // Build contiguous set as adjacency list attached to hash map
@@ -83,6 +100,19 @@ void free_ContiguousMap(ContiguousMap * cmap);
  * @return ContiguousMap* New contiguous map
  */
 ContiguousMap *init_ContiguousMap(size_t size);
+
+/**
+ * @brief Debug printing function
+ *
+ */
+void print_ContiguousMap(ContiguousMap * cmap);
+
+/**
+ * @brief Debug printing function
+ *
+ */
+void print_ContiguousNode(ContiguousNode * cnode);
+
 
 /**
  * @brief Populate a new contiguous map from a synteny db
