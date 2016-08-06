@@ -77,7 +77,7 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
         blk = SGCB(syn,g,i,j);
         this_stop = blk->stop;
         if(j == 0){
-          n[g]++; 
+          n[g] += 2; // Add 2 to break adjacency between contigs
           maximum_stop = 0;
         }
         // If the start is greater than the maximum stop, then the block is in
