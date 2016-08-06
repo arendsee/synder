@@ -61,7 +61,7 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     status = sscanf(line, "$ %u %u %u %u %u %u %u %u %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
                     &tcon_id, &tblk_id, &tstart, &tstop, &strand, &dummy);
-    check_args(line_no, status, 10);
+    check_args(line_no, status, 9);
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %d\n", line_no);
       exit(EXIT_FAILURE);
@@ -98,14 +98,13 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   // Set linkids in ascending order relative to query
   uint linkid = 0; 
   uint gsize, csize;
-  for(int g = 0; g < 2; g++){
-    gsize = SG(synmap, 0)->size;
-    for(int i = 0; i < gsize; i++){
-      csize = SGC(synmap, 0, i)->size;
-      for(int j = 0; j < csize; j++){
-        SGCB(synmap, 0, i, j)->linkid = linkid;
-        linkid++;
-      }
+  gsize = SG(synmap, 0)->size;
+  for(int i = 0; i < gsize; i++){
+    csize = SGC(synmap, 0, i)->size;
+    for(int j = 0; j < csize; j++){
+      SGCB(synmap, 0, i, j)->linkid = linkid;
+      QT_SGCB(synmap, SGCB(synmap, 0, i, j))->linkid = linkid;
+      linkid++;
     }
   }
 
