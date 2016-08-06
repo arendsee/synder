@@ -9,17 +9,16 @@
 #include "contig.h"
 #include "synmap.h"
 
-// A list of lists to store contiguous sets
+// A list of the highest and lowest members of contiguous sets
 typedef struct CSList{
-  struct CSList * down;
-  struct CSList * over;
-  ContiguousNode * cnode; 
+  struct CSList * next;
+  ContiguousNode * lo; 
+  ContiguousNode * hi; 
+  int setid;
 } CSList;
 void free_CSList(CSList * cslist);
-void print_CSList(CSList * cslist, int level);
 void add_cnode_CSList(CSList * cslist, ContiguousNode * cnode);
-CSList * init_down_CSList(ContiguousNode * cnode);
-CSList * init_over_CSList(ContiguousNode * cnode);
+CSList * init_empty_CSList();
 CSList * init_CSList();
 
 
@@ -48,15 +47,9 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
     rc = get_region(SGC(syn, 0, chrid), start, stop);
     contig = rc->contig;
 
-    //Contig * qcon = SGC(syn, 0, chrid);
-
     CSList * cslist = init_CSList();
 
-    /* Add all contig to a list of lists
-     * Each level contains
-     *  1. `over` - pointer to a list of nodes, each holding 1 ContiguousNode object.
-     *  2. `down` - pointer to the next contiguous set
-     */
+    // get list of highest and lowest members of each contiguous set
     for(int i = 0; i < contig->size; i++){
         add_cnode_CSList(cslist, cmap->map[contig->block[i]->linkid]); 
     }
@@ -70,72 +63,46 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
 
 }
 
-CSList * init_CSList(){
+CSList * init_empty_CSList(){
   CSList * cslist = (CSList *)malloc(sizeof(CSList));
-  cslist->cnode = NULL;
-  cslist->down = NULL;
-  cslist->over = NULL;
+  cslist->next = NULL;
+  cslist->hi = NULL;
+  cslist->lo = NULL;
+  cslist->setid = -1; // unset
   return(cslist);
 }
 
-CSList * init_over_CSList(ContiguousNode * cnode){
-  CSList * cslist = init_CSList();
-  cslist->cnode = cnode;
-  return(cslist);
-}
-
-CSList * init_down_CSList(ContiguousNode * cnode){
-  CSList * cslist = init_CSList();
-  cslist->over = init_over_CSList(cnode);
+CSList * init_CSList(ContiguousNode * cnode){
+  CSList * cslist = (CSList *)malloc(sizeof(CSList));
+  cslist->next = NULL;
+  cslist->hi = cnode;
+  cslist->lo = cnode;
+  cslist->setid = cnode->setid;
   return(cslist);
 }
 
 void add_cnode_CSList(CSList * cslist, ContiguousNode * cnode){
-  if(cslist->over != NULL && cslist->over->cnode->setid == cnode->setid){
-    CSList * newlist = init_over_CSList(cnode);
-    newlist->over = cslist->over;
-    cslist->over = newlist;
+  if(cslist->setid == cnode->setid){
+    if(cslist->hi == NULL || cnode->feature->start > cslist->hi->feature->start){
+        cslist->hi = cnode;
+    }
+    if(cslist->lo == NULL || cnode->feature->stop < cslist->lo->feature->stop){
+        cslist->lo = cnode;
+    }
   }
-  else if(cslist->over == NULL){
-    cslist->over = init_over_CSList(cnode);
-  }
-  else if(cslist->down == NULL){
-    cslist->down = init_down_CSList(cnode);
+  else if(cslist->next == NULL){
+    cslist->next = init_CSList(cnode);
   }
   else{
-    add_cnode_CSList(cslist->down, cnode);
+    add_cnode_CSList(cslist->next, cnode);
   }
 }
 
 void free_CSList(CSList * cslist){
-  if(cslist->over != NULL){
-    free_CSList(cslist->over);
-  }
-  if(cslist->down != NULL){
-    free_CSList(cslist->down);
-  }
+  if(cslist->next != NULL)
+    free_CSList(cslist->next);
   free(cslist);
 }
-
-void print_CSList(CSList * cslist, int level){
-  if(cslist->over != NULL){
-    print_CSList(cslist->over, level);
-  }
-  if(cslist->cnode!= NULL){
-    printf(
-      "%i (%u, %u)\n",
-      level,
-      cslist->cnode->feature->start,
-      cslist->cnode->feature->stop
-    );
-  }
-  if(cslist->down != NULL){
-    print_CSList(cslist->down, level++);
-  }
-}
-
-
-
 
 /*
     Block * tblk;

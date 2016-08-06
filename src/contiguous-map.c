@@ -1,17 +1,33 @@
 #include "contiguous-map.h"
 
 // ---- A local utility structure used to build contiguous sets ----
-// INVARIANT: root should never change after initialization
-typedef struct NodeList{
-  struct NodeList * down;
-  struct NodeList * up;
+typedef struct Node{
+  struct Node * down;
   ContiguousNode * cnode; 
-} NodeList;
-NodeList * init_NodeList(ContiguousNode * cnode);
-void print_NodeList(NodeList * node, int level);
-void free_NodeList(NodeList * node);
-NodeList * remove_node_NodeList(NodeList * node);
-void init_down_NodeList(NodeList * node, ContiguousNode * cnode);
+} Node;
+Node * init_node(ContiguousNode * cnode)
+{
+  Node * node = (Node *)malloc(sizeof(Node));
+  node->cnode = cnode;
+  node->down = NULL;
+  return(node);
+}
+void remove_node(Node * node)
+{
+  if(node->down != NULL){
+    Node * tmp = node->down;
+    node->cnode = node->down->cnode;
+    node->down = node->down->down;
+    free(tmp);
+  }
+}
+void free_node(Node * node)
+{
+  if(node->down != NULL)
+    free_node(node->down);
+  free(node);
+}
+// -----------------------------------------------------------------
 
 
 ContiguousMap *populate_contiguous_map(Synmap * syn)
@@ -78,10 +94,10 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
     }
   }
 
-  size_t setid = 0;
+  int setid = 0;
   cmap->map[0]->setid = setid;
-  NodeList * root = init_NodeList(cmap->map[0]);
-  NodeList * node;
+  Node * root = init_node(cmap->map[0]);
+  Node * node;
   ContiguousNode * this_cnode;
   int qdiff, tdiff;
   char this_strand, older_strand;
@@ -109,22 +125,23 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
         // explicit handling for this case.
         break;
       }
+      // If at bottom
+      else if(node->down == NULL){
+        this_cnode->setid = ++setid;
+        node->down = init_node(this_cnode);
+        break;
+      }
       // If definitely not adjacent
       else if(qdiff > 1){
-        node = remove_node_NodeList(node);
-        continue;
+        remove_node(node);
       }
-      // IF at bottom
-      else if(node->down == NULL || node->cnode == NULL){
-        setid++;
-        this_cnode->setid = setid;
-        init_down_NodeList(node, this_cnode);
-        break;
+      else {
+        node = node->down;
       }
     }
   }
 
-  free_NodeList(root);
+  free_node(root);
   free(adjgrp[0]);
   free(adjgrp[1]);
   free(adjgrp);
@@ -181,74 +198,5 @@ void print_ContiguousNode(ContiguousNode * cnode)
   print_Block(cnode->match);
   printf("prev: %p\n", cnode->prev);
   printf("next: %p\n", cnode->next);
-  printf("qblkid=%lu;setid=%lu\n", cnode->qblkid, cnode->setid);
-}
-
-NodeList * init_NodeList(ContiguousNode * cnode)
-{
-  NodeList * node = (NodeList *)malloc(sizeof(NodeList));
-  node->cnode = cnode;
-  node->down = NULL;
-  node->up = NULL;
-  return(node);
-}
-
-void init_down_NodeList(NodeList * node, ContiguousNode * cnode)
-{
-  if(node->cnode == NULL){
-    node->cnode = cnode; 
-  } else {
-    node->down = init_NodeList(cnode);
-    node->down->up = node;
-  }
-}
-
-NodeList * remove_node_NodeList(NodeList * node)
-{
-  NodeList * tmp;
-  if(node->up == NULL){ // is root
-    if(node->down == NULL){
-      node->cnode = NULL;
-    } else {
-      tmp = node->down;
-      if(node->down->down != NULL){
-        node->down->down->up = node;
-      }
-      node->cnode = node->down->cnode;
-      node->down = node->down->down;
-      free(tmp);
-    }
-  } else {
-    tmp = node;
-    node->up->down = node->down;
-    if(node->down != NULL){
-      node->down->up = node->up;
-    }
-    node = node->up;
-    free(tmp);
-  }
-  return node;
-}
-
-void free_NodeList(NodeList * node)
-{
-  if(node->down != NULL){
-    free_NodeList(node->down);
-  }
-  free(node);
-}
-
-void print_NodeList(NodeList * node, int level)
-{
-  if(node->cnode != NULL){
-    printf(
-      "%i (%u, %u)\n",
-      level,
-      node->cnode->feature->start,
-      node->cnode->feature->stop
-    );
-  }
-  if(node->down != NULL){
-    print_NodeList(node->down, level++);
-  }
+  printf("qblkid=%lu;setid=%u\n", cnode->qblkid, cnode->setid);
 }

@@ -25,7 +25,7 @@ typedef struct ContiguousNode {
   struct ContiguousNode *prev;
   struct ContiguousNode *next;
   size_t qblkid;
-  size_t setid;
+  int setid;
 } ContiguousNode;
 
 /**
