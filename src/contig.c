@@ -158,6 +158,52 @@ uint count_overlaps(Contig * con, uint a, uint b)
   return count;
 }
 
+Block * closest_block_below(Contig * con, int x)
+{
+    size_t bounds[2] = {0, con->size - 1};
+    size_t i = con->size / 2;
+    while(true){
+        if(con->by_stop[i]->stop >= x){
+            bounds[1] = i;
+        } else if(con->by_stop[i]->stop < x){
+            bounds[0] = i;
+        }
+        if(bounds[1] - bounds[0] <= 1){
+            break;
+        } else {
+            i = bounds[0] + (bounds[1] - bounds[0]) / 2;
+        }
+    }
+    if(con->by_stop[bounds[0]]->stop > x){
+        return con->by_stop[bounds[0]];
+    } else {
+        return (Block *)NULL;
+    }
+}
+
+Block * closest_block_above(Contig * con, int x)
+{
+    size_t bounds[2] = {0, con->size - 1};
+    size_t i = con->size / 2;
+    while(true){
+        if(con->block[i]->start <= x){
+            bounds[0] = i;
+        } else if(con->block[i]->start > x){
+            bounds[1] = i;
+        }
+        if(bounds[1] - bounds[0] <= 1){
+            break;
+        } else {
+            i = bounds[0] + (bounds[1] - bounds[0]) / 2;
+        }
+    }
+    if(con->block[bounds[1]]->start < x){
+        return(con->block[bounds[1]]);
+    } else {
+        return (Block *)NULL;
+    }
+}
+
 
 void sort_blocks_by_start(Contig * contig)
 {

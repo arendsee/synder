@@ -162,6 +162,22 @@ ContiguousNode * init_ContiguousNode(Synmap * syn, size_t conid, size_t blkid)
   return cnode;  
 }
 
+int get_min(ContiguousNode * cnode){
+    if(cnode->prev == NULL){
+        return cnode->feature->start;
+    } else {
+        return get_min(cnode->prev);
+    }
+}
+
+int get_max(ContiguousNode * cnode){
+    if(cnode->next == NULL){
+        return cnode->feature->stop;
+    } else {
+        return get_max(cnode->next);
+    }
+}
+
 ContiguousMap *init_ContiguousMap(size_t size)
 {
   ContiguousMap *cmap = (ContiguousMap *) malloc(sizeof(ContiguousMap));

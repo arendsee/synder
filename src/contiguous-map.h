@@ -64,6 +64,15 @@ void free_ContiguousMap(ContiguousMap * cmap);
  */
 ContiguousMap *init_ContiguousMap(size_t size);
 
+/**
+ * @brief Get start position of smallest member
+ */
+int get_min(ContiguousNode * cnode);
+
+/**
+ * @brief Get stop position of largest member
+ */
+int get_max(ContiguousNode * cnode);
 
 /**
  * @brief Debug printing function

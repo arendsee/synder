@@ -24,5 +24,6 @@ big-sample-inputs/*tab
 z*
 x
 y
+g
 g[0-9]
 d[0-9]

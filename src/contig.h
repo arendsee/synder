@@ -133,4 +133,10 @@ void sort_blocks_by_start(Contig * contig);
 /** Sort Block objects by stop position */
 void sort_blocks_by_stop(Contig * contig);
 
+/** Find closest block above a given value */
+Block * closest_block_above(Contig * con, int x);
+
+/** Find closest block below a given value */
+Block * closest_block_below(Contig * con, int x);
+
 #endif

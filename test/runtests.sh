@@ -67,7 +67,7 @@ runtest $dir hi     "query downstream of block"
 runtest $dir within "query within block"
 runtest $dir lo     "query upstream of block"
 
-#---------------------------------------------------------------------
+# #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-block"
 announce "\nTesting with synteny map length == 2"
 runtest $dir hi      "query downstream of all blocks"
@@ -134,7 +134,7 @@ runtest $dir between "Between the query intervals"
 
 #---------------------------------------------------------------------
 echo
- 
+
 #---------------------------------------------------------------------
 # valgrind
 
