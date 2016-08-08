@@ -2,6 +2,8 @@
 #define __GLOBAL_H__
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 #ifndef uint
 #define uint unsigned int
@@ -15,6 +17,9 @@
 #define SGCB(syn, gid, cid, bid) syn->genome[(gid)]->contig[(cid)]->block[(bid)]
 #define SGC(syn, gid, cid)       syn->genome[(gid)]->contig[(cid)]
 #define SG(syn, gid)             syn->genome[(gid)]
+
+#define LINE_BUFFER_SIZE 512
+#define NAME_BUFFER_SIZE 128
 
 typedef enum direction { HI = 1, LO = 0 } Direction;
 

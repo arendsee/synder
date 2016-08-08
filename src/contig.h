@@ -1,13 +1,8 @@
 #ifndef __CONTIG_H__
 #define __CONTIG_H__
 
-#include <stdlib.h>
-#include <stdbool.h>
-
 #include "global.h"
-
 #include "block.h"
-
 #include "itree/itree.h"
 #include "itree/search.h"
 
@@ -68,6 +63,8 @@ typedef struct ResultContig{
 ResultContig * init_ResultContig(Contig *, IntervalResult *);
 
 void free_ResultContig(ResultContig *);
+
+void free_partial_ResultContig(ResultContig *);
 
 void print_ResultContig(ResultContig *);
 

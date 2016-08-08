@@ -1,7 +1,6 @@
 #ifndef __CONTIGUOUS_MAP_H__
 #define __CONTIGUOUS_MAP_H__
 
-#include <stdlib.h>
 #include <stdint.h>
 
 #include "global.h"

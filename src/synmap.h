@@ -1,9 +1,6 @@
 #ifndef __SYNMAP_H__
 #define __SYNMAP_H__
 
-#include <stdio.h>
-#include <stdbool.h>
-
 #include "global.h"
 #include "genome.h"
 

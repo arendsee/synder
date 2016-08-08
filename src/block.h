@@ -1,9 +1,6 @@
 #ifndef __BLOCK_H__
 #define __BLOCK_H__
 
-#include <stdlib.h>
-#include <stdbool.h>
-
 #include "global.h"
 
 Block *init_Block(uint, uint);

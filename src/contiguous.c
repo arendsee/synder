@@ -20,7 +20,6 @@ CSList * init_CSList(ContiguousNode * cnode);
 void add_cnode_CSList(CSList * cslist, ContiguousNode * cnode);
 void free_CSList(CSList * cslist);
 
-
 typedef struct BoundResult{
   uint bound;
   int mask; 
@@ -34,29 +33,36 @@ BoundResult * get_si_bound(
   bool inverted
 );
 
+int get_flag(BoundResult * br[2]);
+
 void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
 {
 
   // count total number of unique block-block pairs for hashmap
   ContiguousMap *cmap = populate_contiguous_map(syn);
-
+  // start and stop positions read from input line
   uint bounds[2];
-  uint set_bounds[2]; // Max and min nodes in contiguous set 
-  ContiguousNode * blk_bounds[2]; // Bounds for blocks returned from itree
-
+  // Max and min nodes in current contiguous set
+  uint set_bounds[2]; 
+  // Max and min blocks retrieved from itree. These either
+  ContiguousNode * blk_bounds[2]; 
+  // Search interval boundary information
   BoundResult * bound_results[2];
-
-  CSList *cslist, *root;
-
-  int mask, flag;
-
-  size_t length = 1024;
-  char *line = (char *) malloc(length * sizeof(char));
-  char seqname[128];
+  // List of contiguous sets
+  CSList *cslist;
+  // A pointer to the root node of cslist (needed only for freeing the list)
+  CSList *root;
+  // Does starget strand == '-'?
+  bool inverted;
+  // Name of query input (e.g. AT1G01010)
+  char seqname[NAME_BUFFER_SIZE];
+  // Index of query chromosome
   int chrid;
+  // Row output of itree
   ResultContig * rc;
-  Contig *contig;
-  while (fgets(line, length, intfile) && !feof(intfile)) {
+
+  char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
+  while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
   if (!sscanf
     (line, "%d %*s %*s %d %d %*s %*c %*s %s\n", &chrid, &bounds[LO], &bounds[HI],
      seqname)) {
@@ -64,39 +70,56 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
     continue;
   }
 
-  rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI]);
-  contig = rc->contig;
-
-  cslist = init_empty_CSList();
-  root = cslist;
-
-  bool inverted;
-
-  // get list of highest and lowest members of each contiguous set
-  for(int i = 0; i < contig->size; i++){
-    add_cnode_CSList(cslist, cmap->map[contig->block[i]->linkid]); 
+    rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI]);
+ 
+    cslist = init_empty_CSList();
+    root = cslist;
+ 
+    // get list of highest and lowest members of each contiguous set
+    for(int i = 0; i < rc->contig->size; i++){
+      add_cnode_CSList(cslist, cmap->map[rc->contig->block[i]->linkid]); 
+    }
+ 
+    // Iterate through each contiguous set, for each find search interval(s)
+    for(; cslist != NULL; cslist = cslist->next){
+ 
+      set_bounds[LO] = get_set_bound(cslist->bound[LO], LO);
+      set_bounds[HI] = get_set_bound(cslist->bound[HI], HI);
+ 
+      blk_bounds[LO] = cslist->bound[LO];
+      blk_bounds[HI] = cslist->bound[HI];
+ 
+      inverted = blk_bounds[HI]->match->strand == '-';
+ 
+      bound_results[inverted ^ LO] =
+        get_si_bound(bounds[LO], set_bounds, blk_bounds, LO, inverted);
+      bound_results[inverted ^ HI] =
+        get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
+ 
+      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\n",
+        seqname,
+        blk_bounds[LO]->feature->parent->name,
+        bounds[LO], bounds[HI],
+        blk_bounds[LO]->match->parent->name,
+        bound_results[LO]->bound, bound_results[HI]->bound,
+        get_flag(bound_results));
+ 
+    }
+ 
+    free_partial_ResultContig(rc);
+    free_CSList(root);
   }
 
-  for(; cslist != NULL; cslist = cslist->next){
+  free(line);
+  free_ContiguousMap(cmap);
+}
 
-    set_bounds[LO] = get_set_bound(cslist->bound[LO], LO);
-    set_bounds[HI] = get_set_bound(cslist->bound[HI], HI);
-
-    blk_bounds[LO] = cslist->bound[LO];
-    blk_bounds[HI] = cslist->bound[HI];
-
-    inverted = blk_bounds[HI]->match->strand == '-';
-
-    bound_results[inverted ^ LO] =
-      get_si_bound(bounds[LO], set_bounds, blk_bounds, LO, inverted);
-    bound_results[inverted ^ HI] =
-      get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
-
+int get_flag(BoundResult * br[2]){
     // The HI and LO bounds each have a 4 bit mask describing the overlap
     // state. Since the states are encoded in the odd bits, shifting one
     // mask one bit over and ORing them together, yields a single 8 bit
     // mask fully describing the joint state.
-    mask = ( bound_results[LO]->mask << 1 ) | bound_results[HI]->mask;
+    int mask = ( br[LO]->mask << 1 ) | br[HI]->mask;
 
     // I determine the overlap cases based on this 8 bit mask, Currently I
     // don't use the other bits in the int for anything, but just to be
@@ -109,72 +132,40 @@ void contiguous_query(Synmap * syn, FILE * intfile, bool pblock)
     // TODO: decide on a stable set of flags to return to the user, for now, setting all to -1
     switch(mask & 0xFF){
       case F_AA:
-        flag = -1;
-        break;
+        return -1;
       case F_AB:
-        flag = -1;
-        break;
+        return -1;
       case F_BA:
-        flag = -1;
-        break;
+        return -1;
       case F_BB:
-        flag = -1;
-        break;
+        return -1;
       case F_UA:
-        flag = -1;
-        break;
+        return -1;
       case F_XA:
-        flag = -1;
-        break;
+        return -1;
       case F_AU:
-        flag = -1;
-        break;
+        return -1;
       case F_UU:
-        flag = -1;
-        break;
+        return -1;
       case F_UB:
-        flag = -1;
-        break;
+        return -1;
       case F_BU:
-        flag = -1;
-        break;
+        return -1;
       case F_AX:
-        flag = -1;
-        break;
+        return -1;
       case F_UX:
-        flag = -1;
-        break;
+        return -1;
       case F_BX:
-        flag = -1;
-        break;
+        return -1;
       case F_XB:
-        flag = -1;
-        break;
+        return -1;
       case F_XU:
-        flag = -1;
-        break;
+        return -1;
       case F_XX:
-        flag = -1;
-        break;
+        return -1;
       default:
-        flag = -1;
-        break;
+        return -1;
     }
-
-    printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\n",
-      seqname,
-      blk_bounds[LO]->feature->parent->name,
-      bounds[LO], bounds[HI],
-      blk_bounds[LO]->match->parent->name,
-      bound_results[LO]->bound, bound_results[HI]->bound,
-      flag);
-  }
-  free(rc);
-  free_partial_Contig(contig);
-  free_CSList(root);
-  }
-  free(line);
-  free_ContiguousMap(cmap);
 }
 
 BoundResult * init_BoundResult(uint bound, int mask){
@@ -193,22 +184,14 @@ BoundResult * get_si_bound(
 {
   // Invert orientation mapping to target if search interval is inverted
   Direction vd = inverted ? !d : d;
-
+  // See contiguous.h
+  int mask = 0;
+  // non-zero to ease debugging
+  uint bound = 444444;
   // +1 or -1 values for snapping above or below a point
   int offset = d ? 1 : -1;
   // Invert these values if the search interval is inverted
   offset = inverted ? -1 * offset : offset;
-
-  int mask = 0;
-  uint bound = 444444; // non-zero to ease debugging
-
-  uint pnt_a = blk_bounds[!d]->feature->pos[!d];
-
-  uint pnt_b = blk_bounds[!d]->feature->pos[ d];
-
-  uint pnt_c = blk_bounds[ d]->feature->pos[!d];
-
-  uint pnt_d = blk_bounds[ d]->feature->pos[ d];
 
   // All diagrams are shown for the d=HI case, take the mirror image fr d=LO.
   //
@@ -224,6 +207,12 @@ BoundResult * get_si_bound(
   // Possible snap positions (relative to query)
   //   |x...[===]-----a=======b-----c=======d-----[===]...y|  ...  F===
   //                 ^        ^    ^        ^    ^                ^
+
+  // Positions of a, b, c, and d (as shown above)
+  uint pnt_a = blk_bounds[!d]->feature->pos[!d];
+  uint pnt_b = blk_bounds[!d]->feature->pos[ d];
+  uint pnt_c = blk_bounds[ d]->feature->pos[!d];
+  uint pnt_d = blk_bounds[ d]->feature->pos[ d];
 
 
   // This may occur when there is only one element in the ContiguousSet

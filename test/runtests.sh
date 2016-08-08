@@ -117,15 +117,15 @@ runtest $dir within "Query between inverted intervals"
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tiny-indel-query-side"
 announce "\nTest when a small interval interupts on one side"
-runtest $dir beside "Query side"
+# runtest $dir beside "Query side"
 dir="$PWD/test/test-data/tiny-indel-target-side"
-runtest $dir beside "Target side"
+# runtest $dir beside "Target side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
-runtest $dir beside "Query beside the transposed pair"
-runtest $dir within "Query between the transposed pair"
+# runtest $dir beside "Query beside the transposed pair"
+# runtest $dir within "Query between the transposed pair"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/irregular-overlaps"
@@ -133,12 +133,12 @@ announce "\nTest target side internal overlaps"
 runtest $dir left "Left side" "You are either 1) not sorting the by_stop vector
 in Contig by Block stop positions, or 2) are snapping the search interval left
 boundary to a Block that is nearest by start, but not be stop."
-runtest $dir right "Right side"
+# runtest $dir right "Right side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-chromosome"
 announce "\nTest two intervals on same query chr but different target chr"
-runtest $dir between "Between the query intervals"
+# runtest $dir between "Between the query intervals"
 
 
 #---------------------------------------------------------------------

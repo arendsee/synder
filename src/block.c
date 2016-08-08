@@ -40,7 +40,7 @@ void free_Block(Block * block)
 /** Print all fields in this block (TAB-delimited). */
 void print_Block(Block * block)
 {
-  printf("%u\t%s\t%u\t%u\t%s\t%u\t%u\t%c\n",
+  printf("%lu\t%s\t%u\t%u\t%s\t%u\t%u\t%c\n",
          block->linkid,
          block->parent->name,
          block->pos[0],

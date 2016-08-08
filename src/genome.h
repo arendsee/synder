@@ -1,8 +1,6 @@
 #ifndef __GENOME_H__
 #define __GENOME_H__
 
-#include <stdbool.h>
-
 #include "global.h"
 #include "contig.h"
 

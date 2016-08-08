@@ -1,9 +1,6 @@
 #ifndef __ANALYSIS_H__
 #define __ANALYSIS_H__
 
-#include <stdio.h>
-#include <stdbool.h>
-
 #include "global.h"
 #include "synmap.h"
 #include "contig.h"

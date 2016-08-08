@@ -84,6 +84,16 @@ void free_ResultContig(ResultContig * rc)
   }
 }
 
+void free_partial_ResultContig(ResultContig * rc)
+{
+  if(rc != NULL){
+    if(rc->contig != NULL){
+        free_partial_Contig(rc->contig);
+    }
+    free(rc);
+  }
+}
+
 void print_ResultContig(ResultContig * rc)
 {
     printf("inbetween=%i leftmost=%i rightmost=%i\n", rc->inbetween, rc->leftmost, rc->rightmost);
