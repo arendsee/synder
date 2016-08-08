@@ -59,3 +59,15 @@ void join_IV (IV * self, IA * other){
     memcpy(self->v + self->size, other->v, other->size * sizeof(other->v[0]));
     self->size += other->size;
 }
+
+void merge_IV (IV * self, IV * other){
+    if(self->size + other->size > self->available){
+        self->available = 2 * (self->size + other->size);
+        self->v = (Interval *)realloc(self->v, self->available * sizeof(Interval));
+        if(self->v == NULL){
+            exit(EXIT_FAILURE);
+        }
+    }
+    memcpy(self->v + self->size, other->v, other->size * sizeof(other->v[0]));
+    self->size += other->size;
+}

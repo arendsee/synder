@@ -1,6 +1,7 @@
 CFLAGS=-Wall -g
 CC=gcc
 TARGET=synder
+
 OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o synmap.o io.o analysis.o contiguous-map.o contiguous.o main.o 
 
 ${TARGET}: ${OBJECTS}

@@ -59,13 +59,16 @@ int main(int argc, char *argv[])
     printf("NULL synteny file. Nothing to do ...\n");
     print_help();
   }
-  // Fileter
-  if (args.hitfile) {
-    if (args.cmd != NULL && strcmp(args.cmd, "filter") == 0) {
-      int width = 5000;
-      analysis_filter(syn, args.hitfile, single_advocate, &width);
-    }
-  }
+
+  // // Fileter
+  // if (args.hitfile) {
+  //   if (args.cmd != NULL && strcmp(args.cmd, "filter") == 0) {
+  //     int width = 5000;
+  //     analysis_filter(syn, args.hitfile, single_advocate, &width);
+  //   }
+  // }
+    if (args.hitfile) { printf("Filter function currently unavailable\n"); }
+
   // If no file given by -i, use STDIN, then parse -c options
   if (args.synfile) {
     if (args.intfile == NULL) {

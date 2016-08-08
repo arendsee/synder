@@ -75,7 +75,7 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
       // j := block id
       for (size_t j = 0; j < SGC(syn,g,i)->size; j++){
         blk = SGCB(syn,g,i,j);
-        this_stop = blk->stop;
+        this_stop = blk->pos[1];
         if(j == 0){
           n[g] += 2; // Add 2 to break adjacency between contigs
           maximum_stop = 0;
@@ -83,7 +83,7 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
         // If the start is greater than the maximum stop, then the block is in
         // a new adjacency group. For this to work, Contig->block must be
         // sorted by start. This sort is performed in build_tree.
-        else if(blk->start > maximum_stop){
+        else if(blk->pos[0] > maximum_stop){
             n[g]++;
         }
         if(this_stop > maximum_stop){
@@ -116,9 +116,9 @@ ContiguousMap *populate_contiguous_map(Synmap * syn)
          ((tdiff ==  1 && this_strand == '+') ||
           (tdiff == -1 && this_strand == '-')))
       {
-        this_cnode->setid = setid;
-        this_cnode->prev = node->cnode;
-        node->cnode->next = this_cnode;
+        this_cnode->setid = node->cnode->setid;
+        this_cnode->adj[0] = node->cnode;
+        node->cnode->adj[1] = this_cnode;
         node->cnode = this_cnode;
         // TODO: in strange cases, one node might be adjacent to multiple
         // nodes. By placing a break here, I just take the first. I need
@@ -155,26 +155,18 @@ ContiguousNode * init_ContiguousNode(Synmap * syn, size_t conid, size_t blkid)
 {
   ContiguousNode *cnode = (ContiguousNode *) malloc(sizeof(ContiguousNode));
   cnode->feature = syn->genome[0]->contig[conid]->block[blkid];
-  cnode->next = NULL;
-  cnode->prev = NULL;
-  cnode->match = QT_SGCB(syn, cnode->feature);
+  cnode->adj[0] = NULL;
+  cnode->adj[1] = NULL;
+  cnode->match = cnode->feature->over;
   cnode->qblkid = blkid;
   return cnode;  
 }
 
-int get_min(ContiguousNode * cnode){
-    if(cnode->prev == NULL){
-        return cnode->feature->start;
+uint get_set_bound(ContiguousNode * cnode, Direction d){
+    if(cnode->adj[d] == NULL){
+        return cnode->feature->pos[d];
     } else {
-        return get_min(cnode->prev);
-    }
-}
-
-int get_max(ContiguousNode * cnode){
-    if(cnode->next == NULL){
-        return cnode->feature->stop;
-    } else {
-        return get_max(cnode->next);
+        return get_set_bound(cnode->adj[d], d);
     }
 }
 
@@ -212,7 +204,7 @@ void print_ContiguousNode(ContiguousNode * cnode)
   print_Block(cnode->feature);
   printf("match:\n");
   print_Block(cnode->match);
-  printf("prev: %p\n", cnode->prev);
-  printf("next: %p\n", cnode->next);
+  printf("prev: %p\n", cnode->adj[0]);
+  printf("next: %p\n", cnode->adj[1]);
   printf("qblkid=%lu;setid=%u\n", cnode->qblkid, cnode->setid);
 }

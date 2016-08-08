@@ -4,23 +4,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#ifndef uint
-#define uint unsigned int
-#endif
+#include "global.h"
 
-/** Query interval with directions to matching target*/
-typedef struct {
-  uint start;
-  uint stop;
-  uint oseqid;
-  uint oblkid;
-  uint linkid;
-  size_t startid;
-  size_t stopid;
-  char strand;
-} Block;
-
-Block *init_Block(uint, uint, uint, uint, char);
+Block *init_Block(uint, uint);
 
 void free_Block(Block *);
 

@@ -1,6 +1,7 @@
 #ifndef __SYNMAP_IO_H__
 #define __SYNMAP_IO_H__
 
+#include "global.h"
 #include "synmap.h"
 
 /** Build synteny tree from specially formatted file.

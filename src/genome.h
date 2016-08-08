@@ -3,14 +3,8 @@
 
 #include <stdbool.h>
 
+#include "global.h"
 #include "contig.h"
-
-/** A named set of Contig objects*/
-typedef struct {
-  char *name;
-  size_t size;
-  Contig **contig;
-} Genome;
 
 /** Allocate memory for Genome *name* of size *size*.
  *

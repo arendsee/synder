@@ -26,6 +26,11 @@ emphasize_n(){
     echo -ne $o
 }
 
+# A function to select which parts of the output should be compared
+filter () {
+    cut -f1-7
+}
+
 runtest(){
     dif=$1
     base=$2
@@ -36,7 +41,11 @@ runtest(){
     echo -n "Testing $msg ... "
     $synder -d $dir/map.syn a b $tmp/db 
     $synder -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
-    diff $tmp/a $dir/${base}-exp.txt > /dev/null 
+
+    # Since flags are currently in flux, test only the first 7 columns
+    diff <(cat $tmp/a | filter) \
+         <(cat $dir/${base}-exp.txt | filter) > /dev/null 
+
     if [[ $? == 0 ]]
     then
         total_passed=$(( $total_passed + 1 ))
@@ -47,9 +56,9 @@ runtest(){
         total_failed=$(( $total_failed + 1 ))
         echo "======================================="
         emphasize "expected output:"
-        column -t $dir/${base}-exp.txt
+        cat $dir/${base}-exp.txt | filter | column -t
         emphasize "observed output:"
-        column -t $tmp/a
+        cat $tmp/a | filter | column -t
         emphasize "query gff:"
         column -t $dir/$base.gff
         emphasize "synteny map:"
@@ -60,12 +69,12 @@ runtest(){
     rm -rf $tmp
 }
 
-#---------------------------------------------------------------------
+# #---------------------------------------------------------------------
 dir="$PWD/test/test-data/one-block"
 announce "\nTesting with synteny map length == 1"
-runtest $dir hi     "query downstream of block"
+runtest $dir hi     "query after of block"
 runtest $dir within "query within block"
-runtest $dir lo     "query upstream of block"
+runtest $dir lo     "query before of block"
 
 # #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-block"
@@ -74,7 +83,7 @@ runtest $dir hi      "query downstream of all blocks"
 runtest $dir between "query between two blocks"
 runtest $dir lo      "query upstream of all blocks"
 
-#---------------------------------------------------------------------
+# #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-block"
 announce "\nTesting with 5 adjacent blocks on the same strand"
 runtest $dir a "Extreme left"

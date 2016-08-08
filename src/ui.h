@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "global.h"
+
 /** Parsed command line arguments */
 typedef struct Arguments {
   FILE *synfile;

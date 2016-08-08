@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+
+#include "global.h"
 #include "block.h"
 #include "synmap.h"
 
@@ -11,19 +13,17 @@
  * 
  *
  * Fields:
- * feature - Current object (query block) 
- * match   - Target match of current feature
- * prev    - Previous contiguous node, if any
- * next    - Next contiguous node, if any 
- * qblkid  - Id of feature (index in parent Contig->block** array)
- * setid   - Unique id for the node's contiguous set
+ * feature  - Current object (query block) 
+ * match    - Target match of current feature
+ * adj      - Adjacent ContiguousNodes
+ * qblkid   - Id of feature (index in parent Contig->block** array)
+ * setid    - Unique id for the node's contiguous set
  *
  */
 typedef struct ContiguousNode {
   Block *feature;
   Block *match;
-  struct ContiguousNode *prev;
-  struct ContiguousNode *next;
+  struct ContiguousNode * adj[2];
   size_t qblkid;
   int setid;
 } ContiguousNode;
@@ -65,14 +65,12 @@ void free_ContiguousMap(ContiguousMap * cmap);
 ContiguousMap *init_ContiguousMap(size_t size);
 
 /**
- * @brief Get start position of smallest member
+ * @brief Get smallest or largest value
+ *
+ * @param cnode
+ * @param direction 0 or 1, for finding smallest and largest values, respectively
  */
-int get_min(ContiguousNode * cnode);
-
-/**
- * @brief Get stop position of largest member
- */
-int get_max(ContiguousNode * cnode);
+uint get_set_bound(ContiguousNode * cnode, Direction direction);
 
 /**
  * @brief Debug printing function

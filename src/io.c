@@ -53,6 +53,8 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   uint tcon_id, tblk_id, tstart, tstop;
   char strand;
 
+  Block *qblk, *tblk;
+
   while ((read = getline(&line, &len, synfile)) != EOF) {
     line_no++;
     if (line[0] != '$')
@@ -79,11 +81,20 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       exit(EXIT_FAILURE);
     }
 
-    SGCB(synmap, query, qcon_id, qblk_id) =
-      init_Block(qstart, qstop, tcon_id, tblk_id, strand);
+    qblk = init_Block(qstart, qstop);
+    tblk = init_Block(tstart, tstop);
 
-    SGCB(synmap, target, tcon_id, tblk_id) =
-      init_Block(tstart, tstop, qcon_id, qblk_id, strand);
+    qblk->strand = '+';
+    tblk->strand = strand;
+
+    qblk->parent = SGC(synmap, query,  qcon_id);
+    tblk->parent = SGC(synmap, target, tcon_id);
+
+    qblk->over = tblk;
+    tblk->over = qblk;
+
+    SGCB(synmap, query,  qcon_id, qblk_id) = qblk;
+    SGCB(synmap, target, tcon_id, tblk_id) = tblk;
   }
   free(line);
 
@@ -102,8 +113,9 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   for(int i = 0; i < gsize; i++){
     csize = SGC(synmap, 0, i)->size;
     for(int j = 0; j < csize; j++){
-      SGCB(synmap, 0, i, j)->linkid = linkid;
-      QT_SGCB(synmap, SGCB(synmap, 0, i, j))->linkid = linkid;
+      qblk = SGCB(synmap, 0, i, j);
+      qblk->linkid = linkid;
+      qblk->over->linkid = linkid;
       linkid++;
     }
   }

@@ -4,48 +4,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "global.h"
+
 #include "block.h"
 
 #include "itree/itree.h"
 #include "itree/search.h"
-
-#ifndef uint
-#define uint unsigned int
-#endif
-
-#define NEXT_BLOCK_BYSTART(con, blk) (blk->startid + 1) < con->size ? con->block[blk->startid + 1] : NULL
-
-#define PREV_BLOCK_BYSTOP(con, blk) (blk->stopid > 0) ? con->by_stop[blk->stopid - 1] : NULL
-
-#define GET_RESULT_BLOCK(result, i) (Block*)result->iv->v[(i)].link
-
-#define CB(con, i) (con)->block[(i)]
-
-#define CB_STOP(con, i)  (con)->block[(i)]->stop
-#define CB_START(con, i) (con)->block[(i)]->start
-
-#define CB_STOPID(con, i)  (con)->block[(i)]->stopid
-#define CB_STARTID(con, i) (con)->block[(i)]->startid
-
-/** Contiguous sequence object containing list of Block structures and an
- * interval tree to search them.
- *
- * Fields:
- * - name  - a unique name for this contig (e.g. "Chr1")
- * - size  - number of blocks in the block array
- * - block - array of pointers to Block objects
- * - itree - an IntervalTree that allows log(n)+m search of overlapping intervals
- *
- * */
-typedef struct {
-  char *name;
-  struct IntervalTree *itree;
-  size_t size;
-  Block **block;
-  Block **by_stop;
-  uint start_sorted:1;
-  uint stop_sorted:1;
-} Contig;
 
 /** Allocate memory for a contig and set each field.
  *
@@ -116,7 +80,8 @@ uint anchor(Contig * contig, uint x);
  *
  * Otherwise, return the blocks above and below the input region
  *
- * If there is no block above or below, return NULL
+ * If there is only one flanking interval (i.e., the query is beyond any
+ * syntenic interval), return just the nearest interval.
  *
  * */
 ResultContig *get_region(Contig * contig, uint a, uint b);
@@ -133,10 +98,7 @@ void sort_blocks_by_start(Contig * contig);
 /** Sort Block objects by stop position */
 void sort_blocks_by_stop(Contig * contig);
 
-/** Find closest block above a given value */
-Block * closest_block_above(Contig * con, int x);
-
-/** Find closest block below a given value */
-Block * closest_block_below(Contig * con, int x);
+/** Find closest block above/below a given value */
+Block * closest_block(Contig * con, int x, Direction d);
 
 #endif

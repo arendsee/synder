@@ -4,23 +4,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "global.h"
 #include "genome.h"
-
-#ifndef uint
-#define uint unsigned int
-#endif
-
-#define SGCB(syn, gid, cid, bid) syn->genome[(gid)]->contig[(cid)]->block[(bid)]
-#define SGC(syn, gid, cid)       syn->genome[(gid)]->contig[(cid)]
-#define SG(syn, gid)             syn->genome[(gid)]
-
-#define QT_SGCB(syn, blk) syn->genome[1]->contig[blk->oseqid]->block[blk->oblkid]
-#define QT_SGC(syn, blk)  syn->genome[1]->contig[blk->oseqid]
-
-/** A pair of syntenically linked Genome objects  */
-typedef struct {
-  Genome **genome;
-} Synmap;
 
 /**
  * Allocate memory for a new Synmap.

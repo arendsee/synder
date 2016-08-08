@@ -98,13 +98,13 @@ uint anchor(Contig * contig, uint x)
   uint hi = N - 1;
   uint i = hi / 2;
   while (true) {
-    if (x >= blks[i]->start) {
-      if (i == (N - 1) || x < blks[i + 1]->start)
+    if (x >= blks[i]->pos[0]) {
+      if (i == (N - 1) || x < blks[i + 1]->pos[0])
         return i;
       lo = i;
       i = (i + hi) / 2 + 1;
     } else {
-      if (i == 0 || x > blks[i - 1]->start)
+      if (i == 0 || x > blks[i - 1]->pos[0])
         return i == 0 ? i : i - 1;
       hi = i;
       i = lo + (i - lo) / 2;
@@ -113,13 +113,13 @@ uint anchor(Contig * contig, uint x)
   return i;
 }
 
-// local function
+// Map blocks to the Interval structures used in itree
 IA *ia_from_blocks(Contig * con)
 {
   IA *ia = init_set_IA(con->size);
   for (int i = 0; i < con->size; i++) {
-    ia->v[i].start = con->block[i]->start;
-    ia->v[i].stop = con->block[i]->stop;
+    ia->v[i].start = con->block[i]->pos[0];
+    ia->v[i].stop = con->block[i]->pos[1];
     ia->v[i].link = (void *) con->block[i];
   }
   return ia;
@@ -132,18 +132,53 @@ ResultContig *get_region(Contig * con, uint a, uint b)
     con->itree = build_tree(ia_from_blocks(con));
 
   // Search itree
-  Interval inv = {.start = a,.stop = b };
-  IntervalResult *res = get_interval_overlaps(&inv, con->itree);
+  Interval * inv = init_Interval(a, b);
+  IntervalResult *res = get_interval_overlaps(inv, con->itree);
+  free(inv);
+
+  // itree returns the flanks for queries that overlap nothing. However, I
+  // need all the intervals that overlap these flanks as well.
+  IntervalResult *tmp_a = NULL;
+  IntervalResult *tmp_b = NULL;
+  if(res->inbetween){
+      // If inbetween, itree should have returned the two flanking blocks
+      if(res->iv->size == 2){
+          tmp_a = get_interval_overlaps(&res->iv->v[0], con->itree);
+          tmp_b = get_interval_overlaps(&res->iv->v[1], con->itree);
+          free(res->iv);
+          res->iv = tmp_a->iv;
+          merge_IV(tmp_a->iv, tmp_b->iv);
+      } else {
+          fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
+          exit(EXIT_FAILURE);
+      }
+  }
+  else if(res->leftmost || res->rightmost){
+      if(res->iv->size == 1){
+          tmp_a = get_interval_overlaps(&res->iv->v[0], con->itree);
+          free(res->iv);
+          res->iv = tmp_a->iv;
+      } else {
+          fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
+          exit(EXIT_FAILURE);
+      }
+  }
 
   // Assign returned intervals to Contig
   Contig *contig = init_Contig(con->name, res->iv->size);
   for (int i = 0; i < res->iv->size; i++) {
-    contig->block[i] = GET_RESULT_BLOCK(res, i);
+    contig->block[i] = (Block*)res->iv->v[i].link;
   }
 
   ResultContig * resultcontig = init_ResultContig(contig, res);
 
   free_IntervalResult(res);
+
+  if(tmp_a != NULL)
+    // don't use free_IntervalResult, since iv belongs to res
+    free(tmp_a);
+  if(tmp_b != NULL)
+    free_IntervalResult(tmp_b);
 
   return resultcontig;
 }
@@ -158,60 +193,50 @@ uint count_overlaps(Contig * con, uint a, uint b)
   return count;
 }
 
-Block * closest_block_below(Contig * con, int x)
+Block * closest_block(Contig * con, int x, Direction d)
 {
-    size_t bounds[2] = {0, con->size - 1};
-    size_t i = con->size / 2;
-    while(true){
-        if(con->by_stop[i]->stop >= x){
-            bounds[1] = i;
-        } else if(con->by_stop[i]->stop < x){
-            bounds[0] = i;
-        }
-        if(bounds[1] - bounds[0] <= 1){
-            break;
-        } else {
-            i = bounds[0] + (bounds[1] - bounds[0]) / 2;
-        }
-    }
-    if(con->by_stop[bounds[0]]->stop > x){
-        return con->by_stop[bounds[0]];
-    } else {
-        return (Block *)NULL;
-    }
-}
+  Block ** blks = d ? con->block : con->by_stop;
 
-Block * closest_block_above(Contig * con, int x)
-{
-    size_t bounds[2] = {0, con->size - 1};
-    size_t i = con->size / 2;
-    while(true){
-        if(con->block[i]->start <= x){
-            bounds[0] = i;
-        } else if(con->block[i]->start > x){
-            bounds[1] = i;
-        }
-        if(bounds[1] - bounds[0] <= 1){
-            break;
-        } else {
-            i = bounds[0] + (bounds[1] - bounds[0]) / 2;
-        }
-    }
-    if(con->block[bounds[1]]->start < x){
-        return(con->block[bounds[1]]);
+  size_t b[2]; // bounds
+  b[0] = d ? 0 : con->size - 1;
+  b[1] = d ? con->size - 1 : 0;
+  size_t i = con->size / 2;
+  while(true){
+    if(REL_GT(blks[i]->pos[!d], x, d)){
+      // a valid entry
+      b[d] = i;
     } else {
-        return (Block *)NULL;
+      // an invalid entry
+      b[!d] = i;
     }
-}
 
+    if(b[d] == b[!d] || abs(b[!d] - b[d]) == 1){
+      uint b0 = blks[b[0]]->pos[!d];
+      uint b1 = blks[b[1]]->pos[!d];
+      bool b0_good = REL_GT(b0, x, d);
+      bool b1_good = REL_GT(b1, x, d);
+      if(b0_good && b1_good){
+        return REL_LT(b0, b1, d) ? blks[b[0]] : blks[b[1]];
+      } 
+      else if(b0_good){
+        return blks[b[0]];
+      }
+      else if(b1_good){
+        return blks[b[1]];
+      }
+      else {
+        return (Block*)NULL;
+      }
+    }
+
+    i = b[!d] + (b[d] - b[!d]) / 2;
+  }
+}
 
 void sort_blocks_by_start(Contig * contig)
 {
   if (!contig->start_sorted) {
     qsort(contig->block, contig->size, sizeof(Block *), block_cmp_start);
-    for (int i = 0; i < contig->size; i++) {
-      contig->block[i]->startid = i;
-    }
     contig->start_sorted = true;
   }
 }
@@ -224,9 +249,6 @@ void sort_blocks_by_stop(Contig * contig)
       memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block *));
     }
     qsort(contig->by_stop, contig->size, sizeof(Block *), block_cmp_stop);
-    for (int i = 0; i < contig->size; i++) {
-      contig->by_stop[i]->stopid = i;
-    }
     contig->stop_sorted = true;
   }
 }
