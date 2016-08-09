@@ -1,26 +1,9 @@
 #ifndef __BLOCK_H__
 #define __BLOCK_H__
 
-#include <stdlib.h>
-#include <stdbool.h>
+#include "global.h"
 
-#ifndef uint
-#define uint unsigned int
-#endif
-
-/** Query interval with directions to matching target*/
-typedef struct {
-  uint start;
-  uint stop;
-  uint oseqid;
-  uint oblkid;
-  uint linkid;
-  size_t startid;
-  size_t stopid;
-  char strand;
-} Block;
-
-Block *init_Block(uint, uint, uint, uint, uint, char);
+Block *init_Block(uint, uint);
 
 void free_Block(Block *);
 
@@ -30,13 +13,18 @@ bool overlap(uint, uint, uint, uint);
 
 bool block_overlap(Block *, Block *);
 
-/** compare intervals by stop
- *
- * \todo test sort_contig_by_start and sort_contig_by_stop functions
- */
+/** compare intervals by stop */
 int block_cmp_stop(const void *, const void *);
 
 /** compare intervals by start */
 int block_cmp_start(const void *, const void *);
+
+/**
+ * @brief Get smallest or largest value
+ *
+ * @param block 
+ * @param direction 0 or 1, for finding smallest and largest values, respectively
+ */
+uint get_set_bound(Block * block, Direction direction);
 
 #endif

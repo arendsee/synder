@@ -13,7 +13,7 @@ announce(){
 
 warn(){
     [[ -t 1 ]] && o="\e[1;31m$1\e[0m" || o=$1
-    echo -e $o
+    echo -en $o
 }
 
 emphasize(){
@@ -26,6 +26,11 @@ emphasize_n(){
     echo -ne $o
 }
 
+# A function to select which parts of the output should be compared
+filter () {
+    cut -f1-7 | sort
+}
+
 runtest(){
     dif=$1
     base=$2
@@ -36,45 +41,56 @@ runtest(){
     echo -n "Testing $msg ... "
     $synder -d $dir/map.syn a b $tmp/db 
     $synder -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
-    diff $tmp/a $dir/${base}-exp.txt > /dev/null 
+
+    # Since flags are currently in flux, test only the first 7 columns
+    diff <(cat $tmp/a | filter) \
+         <(cat $dir/${base}-exp.txt | filter) > /dev/null 
+
     if [[ $? == 0 ]]
     then
         total_passed=$(( $total_passed + 1 ))
         echo "OK"
     else
+        echo
         warn "FAIL"
-        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt) && echo
+        echo " (in `basename $dir`/)"
+        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
         total_failed=$(( $total_failed + 1 ))
         echo "======================================="
-        emphasize "expected output:"
-        column -t $dir/${base}-exp.txt
+        emphasize_n "expected output"; echo ": (${base}-exp.txt)"
+        cat $dir/${base}-exp.txt | filter | column -t
         emphasize "observed output:"
-        column -t $tmp/a
-        emphasize "query gff:"
+        cat $tmp/a | filter | column -t
+        emphasize_n "query gff"; echo ": (${base}.gff)"
         column -t $dir/$base.gff
-        emphasize "synteny map:"
+        emphasize_n "synteny map"; echo ": (map.syn)"
         column -t $dir/map.syn
+        echo "See zzz_g and zzz_db"
         echo -e "---------------------------------------\n"
+
+        ln -sf $dir/$base.gff zzz_g 
+        $synder -d $dir/map.syn a b zzz_db
+
     fi
 
     rm -rf $tmp
 }
 
-#---------------------------------------------------------------------
+# #---------------------------------------------------------------------
 dir="$PWD/test/test-data/one-block"
 announce "\nTesting with synteny map length == 1"
-runtest $dir hi     "query downstream of block"
+runtest $dir hi     "query after of block"
 runtest $dir within "query within block"
-runtest $dir lo     "query upstream of block"
+runtest $dir lo     "query before of block"
 
-#---------------------------------------------------------------------
+# #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-block"
 announce "\nTesting with synteny map length == 2"
 runtest $dir hi      "query downstream of all blocks"
 runtest $dir between "query between two blocks"
 runtest $dir lo      "query upstream of all blocks"
 
-#---------------------------------------------------------------------
+# #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-block"
 announce "\nTesting with 5 adjacent blocks on the same strand"
 runtest $dir a "Extreme left"
@@ -102,8 +118,9 @@ runtest $dir over    "Query overlaps inverted interval"
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
-runtest $dir beside "Query next to inverted interval"
-runtest $dir within "Query between inverted intervals"
+runtest $dir beside   "Query next to inverted interval"
+runtest $dir within   "Query between inverted intervals"
+runtest $dir spanning "Query spans inverted intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tiny-indel-query-side"
@@ -131,10 +148,9 @@ dir="$PWD/test/test-data/multi-chromosome"
 announce "\nTest two intervals on same query chr but different target chr"
 runtest $dir between "Between the query intervals"
 
-
 #---------------------------------------------------------------------
 echo
- 
+
 #---------------------------------------------------------------------
 # valgrind
 
@@ -162,7 +178,7 @@ emphasize "$total_passed tests successful out of $total"
 
 if [[ $valgrind_checked == 0 ]]
 then
-    warn "valgrind not found, no memory tests performed"
+    warn "valgrind not found, no memory tests performed\n"
 else
     if [[ $valgrind_exit_status == 0 ]]
     then
@@ -170,13 +186,13 @@ else
         echo " (for synder search of multi-block/c.gff against multi-block/map.syn)"
         rm valgrind.log
     else
-        warn "valgrind failed - see valgrind.log"
+        warn "valgrind failed - see valgrind.log\n"
     fi
 fi
 
 if [[ $total_failed > 0 ]]
 then
-    warn "$total_failed tests failed"
+    warn "$total_failed tests failed\n"
     exit 1
 else
     exit 0

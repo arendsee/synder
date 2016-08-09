@@ -1,16 +1,14 @@
-CFLAGS=-Wall -g -O2
+CFLAGS=-Wall -g
 CC=gcc
 TARGET=synder
-OBJECTS=main.o test.o io.o genome.o analysis.o contig.o interval.o itree.o search.o ia.o iv.o block.o synmap.o ui.o contiguous.o lev.o
+
+OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o synmap.o io.o analysis.o map.o main.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
 
 main.o: main.c
 	${CC} -c ${CFLAGS} main.c
-
-test.o: test.c test.h
-	${CC} -c ${CFLAGS} test.[ch]
 
 io.o: io.c io.h
 	${CC} -c ${CFLAGS} io.[ch]
@@ -33,8 +31,8 @@ synmap.o: synmap.c synmap.h
 ui.o: ui.c ui.h
 	${CC} -c ${CFLAGS} ui.[ch]
 
-contiguous.o: contiguous.c contiguous.h
-	${CC} -c ${CFLAGS} contiguous.[ch]
+map.o: map.c map.h
+	${CC} -c ${CFLAGS} map.[ch]
 
 itree.o: itree/itree.c itree/itree.h
 	${CC} -c ${CFLAGS} itree/itree.[ch]

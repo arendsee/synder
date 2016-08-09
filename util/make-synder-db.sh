@@ -149,14 +149,11 @@ parse() {
     # 11 qblkid - index for interval in a query sequence array
     # 12 tseqid - index for target sequence
     # 13 tblkid - index for interval in a target sequence array
-    # 14 linkid - index for the link between a query and target interval
     cat $input |
         # Append qseqid and qblkid
         append_counts 1 2 3 | 
         # Append tseqid and tblkid
-        append_counts 4 5 6 | 
-        # Append linkid
-        awk '{print $0, linkid++}' > $outtmp
+        append_counts 4 5 6 > $outtmp
     write_side $query 1 9 < $outtmp >  $outdb
     write_side $target 4 11 < $outtmp >> $outdb
     awk '
@@ -169,9 +166,8 @@ parse() {
             tblkid=$12
             tstart=$5
             tstop=$6
-            linkid=$13
             strand=$8
-            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, linkid, strand
+            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, strand
         }
     ' $outtmp |
         sort -k3,3n -k4,4n >> $outdb

@@ -21,10 +21,15 @@ IV * init_IV(size_t);
 
 void print_IV(IV * self);
 
+/** Add one interval to an IV, expanding memory size if needed */
 void add_IV(IV *, Interval);
 
+void free_IV(IV *);
+
+/** Join an IA into an IV */
 void join_IV(IV *, IA *);
 
-void free_IV(IV *);
+/** Join two IV structures */
+void merge_IV(IV *, IV *);
 
 #endif

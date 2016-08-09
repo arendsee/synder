@@ -1,2 +1,2 @@
-right	que	225	275	tar	201	299	.	5
-right	que	225	275	tar	401	499	.	4
+right	que	425	475	tar	201	299	.	5
+right	que	425	475	tar	401	499	.	4

@@ -1,1 +1,1 @@
-lo    que	25	75	tar	25	99	.	6
+lo	que	25	75	tar	0	99	.	6

@@ -1,48 +1,10 @@
 #ifndef __CONTIG_H__
 #define __CONTIG_H__
 
-#include <stdlib.h>
-#include <stdbool.h>
-
+#include "global.h"
 #include "block.h"
-
-#ifndef uint
-#define uint unsigned int
-#endif
-
-#define NEXT_BLOCK_BYSTART(con, blk) (blk->startid + 1) < con->size ? con->block[blk->startid + 1] : NULL
-
-#define PREV_BLOCK_BYSTOP(con, blk) (blk->stopid > 0) ? con->by_stop[blk->stopid - 1] : NULL
-
-#define GET_RESULT_BLOCK(result, i) (Block*)result->iv->v[(i)].link
-
-#define CB(con, i) (con)->block[(i)]
-
-#define CB_STOP(con, i)  (con)->block[(i)]->stop
-#define CB_START(con, i) (con)->block[(i)]->start
-
-#define CB_STOPID(con, i)  (con)->block[(i)]->stopid
-#define CB_STARTID(con, i) (con)->block[(i)]->startid
-
-/** Contiguous sequence object containing list of Block structures and an
- * interval tree to search them.
- *
- * Fields:
- * - name  - a unique name for this contig (e.g. "Chr1")
- * - size  - number of blocks in the block array
- * - block - array of pointers to Block objects
- * - itree - an IntervalTree that allows log(n)+m search of overlapping intervals
- *
- * */
-typedef struct {
-  char *name;
-  struct IntervalTree *itree;
-  size_t size;
-  Block **block;
-  Block **by_stop;
-  uint start_sorted:1;
-  uint stop_sorted:1;
-} Contig;
+#include "itree/itree.h"
+#include "itree/search.h"
 
 /** Allocate memory for a contig and set each field.
  *
@@ -71,8 +33,40 @@ Contig *init_Contig(char *name, size_t size);
  * */
 void free_Contig(Contig * contig);
 
+/** Recursively free all memory EXCEPT blocks
+ *
+ * Like free_Contig but does not free all the Blocks. This is useful for
+ * structures that hold blocks which do not belong to them (i.e. pointers to
+ * blocks held elsewhere).
+ *
+ * @param contig pointer to a contig, may be NULL
+ * */
+void free_partial_Contig(Contig * contig);
+
 /** Recursively print contig. */
 void print_Contig(Contig * contig, bool forward);
+
+/** A wrapper for Contig that includes IntervalResult flags
+ *
+ *  From ResultInterval:
+ *  1. inbetween - query is between (not overlapping) two search intervals
+ *  2. leftmost - query is further left than any interval
+ *  3. rightmost - query is further right than any interval
+ */
+typedef struct ResultContig{
+    Contig * contig;
+    bool inbetween;
+    bool leftmost;
+    bool rightmost;
+} ResultContig;
+
+ResultContig * init_ResultContig(Contig *, IntervalResult *);
+
+void free_ResultContig(ResultContig *);
+
+void free_partial_ResultContig(ResultContig *);
+
+void print_ResultContig(ResultContig *);
 
 /** Find index of downstream Block nearest the query point */
 uint anchor(Contig * contig, uint x);
@@ -83,10 +77,11 @@ uint anchor(Contig * contig, uint x);
  *
  * Otherwise, return the blocks above and below the input region
  *
- * If there is no block above or below, return NULL
+ * If there is only one flanking interval (i.e., the query is beyond any
+ * syntenic interval), return just the nearest interval.
  *
  * */
-Contig *get_region(Contig * contig, uint a, uint b);
+ResultContig *get_region(Contig * contig, uint a, uint b);
 
 /** Given two points, find the number of blocks they overlap */
 uint count_overlaps(Contig * contig, uint a, uint b);
@@ -99,5 +94,8 @@ void sort_blocks_by_start(Contig * contig);
 
 /** Sort Block objects by stop position */
 void sort_blocks_by_stop(Contig * contig);
+
+/** Find closest block above/below a given value */
+Block * closest_block(Contig * con, int x, Direction d);
 
 #endif

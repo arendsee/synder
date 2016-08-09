@@ -1,8 +1,7 @@
 #ifndef __UI_U__
 #define __UI_U__
 
-#include <stdio.h>
-#include <stdbool.h>
+#include "global.h"
 
 /** Parsed command line arguments */
 typedef struct Arguments {
@@ -12,7 +11,6 @@ typedef struct Arguments {
   char *db_filename;
   char *cmd;
   char **pos;
-  bool test;
   bool swap;
 } Arguments;
 

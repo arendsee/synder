@@ -113,54 +113,35 @@ uint count_interval_overlaps_r(Interval * inv, IntervalTree * tree, uint count){
 }
 
 void set_nearest_opposing_interval(IntervalTree * node, IntervalResult * results, Pos pos){
-    /*
-     * Two nodes are CIS if they have the same orientation, e.g. both are left nodes.
-     *
-     *                   a
-     *                /     \
-     *               b       e
-     *              / \     / \
-     *             c   d   f   g
-     *
-     *  c is CIS to b and f
-     *  d is CIS to e and g
-    */
-    #define SET_INITIAL_ORIENTATION \
-      Orientation orientation = node->orientation;
-    #define ASCEND            node = node->parent;
-    #define IS_ROOT           node->orientation == O_ROOT
-    #define IS_CIS            node->orientation == orientation
-    #define SET_EXTREME \
-      if(pos == lo){ results->leftmost = true; } \
-      else { results->rightmost = true; }
-    #define SET_NEAREST_NODE \
-      if(orientation == O_RIGHT) \
-      { add_IV(results->iv, node->by_start->v[0]); } \
-      else if(orientation == O_LEFT) \
-      { add_IV(results->iv, node->by_stop->v[node->by_stop->size - 1]); }
-
-    SET_INITIAL_ORIENTATION 
+    
+    Orientation orientation = node->orientation;
 
     if((pos == hi && orientation == O_LEFT) ||
        (pos == lo && orientation == O_RIGHT))
     {
-        ASCEND    
+        node = node->parent;    
     }
     else {
-        while(!IS_ROOT && IS_CIS){ ASCEND }
-        ASCEND
+        while(node->orientation != O_ROOT && node->orientation == orientation){
+            node = node->parent;
+        }
+        node = node->parent;
     }
 
     if(node == NULL){
-        SET_EXTREME
+      if(pos == lo){
+        results->leftmost = true;
+      } else{
+        results->rightmost = true;
+      }
     } else {
-        SET_NEAREST_NODE 
+        results->inbetween = true;
+        if(orientation == O_RIGHT){
+          add_IV(results->iv, node->by_start->v[0]);
+        } else if(orientation == O_LEFT) {
+          add_IV(results->iv, node->by_stop->v[node->by_stop->size - 1]);
+        }
     }
-
-    #undef ASCEND
-    #undef IS_ROOT
-    #undef IS_CIS
-    #undef SET_EXTREME
 }
 
 void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * results){
@@ -176,7 +157,6 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
             get_point_overlaps_r(point, RIGHT(tree), results);
         } 
         else if(R_SIZE(results) != 0) {
-            results->inbetween = true;
             add_IV(results->iv, LAST_STOP(tree));
             set_nearest_opposing_interval(tree, results, hi);
         }
@@ -193,7 +173,6 @@ void get_point_overlaps_r(uint point, IntervalTree * tree, IntervalResult * resu
             get_point_overlaps_r(point, LEFT(tree), results);
         }
         else if(R_SIZE(results) != 0) {
-            results->inbetween = true;
             add_IV(results->iv, FIRST_START(tree));
             set_nearest_opposing_interval(tree, results, lo);
         }

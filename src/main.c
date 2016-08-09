@@ -8,13 +8,11 @@
 #include "io.h"
 #include "synmap.h"
 #include "analysis.h"
-#include "test.h"
-#include "contiguous.h"
+#include "map.h"
 #include "lev.h"
 
 int main(int argc, char *argv[])
 {
-
 
   Synmap *syn = NULL;
 
@@ -27,12 +25,6 @@ int main(int argc, char *argv[])
   // ------------------------------------------------------------------------
   // Do stuff 
   // ------------------------------------------------------------------------
-
-  if (args.test)
-    test_all();
-
-    /** \todo Replace a system call to the prepare-data.sh script with a raw
-     * synteny file to parser in synmap  */
 
   // Try to build database. Exit afterwards.
   if (args.db_filename) {
@@ -53,7 +45,7 @@ int main(int argc, char *argv[])
     }
   }
   // Converts between gff contig naming conventions (field 1)
-  if (strcmp(args.cmd, "convert") == 0 && args.intfile && args.intfile) {
+  if (args.cmd != NULL && strcmp(args.cmd, "convert") == 0 && args.intfile && args.intfile) {
     convert_seqname(args.synfile, args.intfile, args.swap);
     exit(EXIT_SUCCESS);
   }
@@ -62,31 +54,36 @@ int main(int argc, char *argv[])
     syn = load_Synmap(args.synfile, args.swap);
   }
   // No arguments passed
-  if (!(syn || args.test)) {
-    printf("Nothing to do ...\n");
+  if (syn == NULL) {
+    printf("NULL synteny file. Nothing to do ...\n");
     print_help();
   }
-  // Fileter
-  if (args.hitfile) {
-    if (strcmp(args.cmd, "filter") == 0) {
-      int width = 5000;
-      analysis_filter(syn, args.hitfile, single_advocate, &width);
-    }
-  }
+
+  // // Fileter
+  // if (args.hitfile) {
+  //   if (args.cmd != NULL && strcmp(args.cmd, "filter") == 0) {
+  //     int width = 5000;
+  //     analysis_filter(syn, args.hitfile, single_advocate, &width);
+  //   }
+  // }
+    if (args.hitfile) { printf("Filter function currently unavailable\n"); }
+
   // If no file given by -i, use STDIN, then parse -c options
   if (args.synfile) {
     if (args.intfile == NULL) {
       args.intfile = stdin;
     }
 
-    if (strcmp(args.cmd, "count") == 0) {
+    if (args.cmd == NULL) {
+      printf("Please, give me a command\n");
+    } else if (strcmp(args.cmd, "count") == 0) {
       analysis_count(syn, args.intfile);
     } else if (strcmp(args.cmd, "map") == 0) {
       analysis_map(syn, args.intfile);
     } else if (strcmp(args.cmd, "search") == 0) {
-      contiguous_query(syn, args.intfile, false);
+      find_search_intervals(syn, args.intfile, false);
     } else if (strcmp(args.cmd, "searchblock") == 0) {
-      contiguous_query(syn, args.intfile, true);
+      find_search_intervals(syn, args.intfile, true);
     } else {
       printf("Command '%s' not recognized\n", args.cmd);
       print_help();

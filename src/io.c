@@ -52,17 +52,18 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   uint qcon_id, qblk_id, qstart, qstop;
   uint tcon_id, tblk_id, tstart, tstop;
   char strand;
-  uint link_id;
+
+  Block *qblk, *tblk;
 
   while ((read = getline(&line, &len, synfile)) != EOF) {
     line_no++;
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %u %c %c\n",
+    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
-                    &tcon_id, &tblk_id, &tstart, &tstop, &link_id, &strand, &dummy);
-    check_args(line_no, status, 10);
+                    &tcon_id, &tblk_id, &tstart, &tstop, &strand, &dummy);
+    check_args(line_no, status, 9);
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %d\n", line_no);
       exit(EXIT_FAILURE);
@@ -80,11 +81,20 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       exit(EXIT_FAILURE);
     }
 
-    SGCB(synmap, query, qcon_id, qblk_id) =
-      init_Block(qstart, qstop, tcon_id, tblk_id, link_id, strand);
+    qblk = init_Block(qstart, qstop);
+    tblk = init_Block(tstart, tstop);
 
-    SGCB(synmap, target, tcon_id, tblk_id) =
-      init_Block(tstart, tstop, qcon_id, qblk_id, link_id, strand);
+    qblk->strand = '+';
+    tblk->strand = strand;
+
+    qblk->parent = SGC(synmap, query,  qcon_id);
+    tblk->parent = SGC(synmap, target, tcon_id);
+
+    qblk->over = tblk;
+    tblk->over = qblk;
+
+    SGCB(synmap, query,  qcon_id, qblk_id) = qblk;
+    SGCB(synmap, target, tcon_id, tblk_id) = tblk;
   }
   free(line);
 
@@ -95,6 +105,12 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   }
 
   sort_all_contigs(synmap);
+
+  set_overlap_group(synmap);
+
+  link_adjacent_blocks(synmap);
+
+  link_contiguous_blocks(synmap);
 
   return (synmap);
 }
