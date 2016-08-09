@@ -41,7 +41,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
   uint bounds[2];
   // Max and min nodes in current contiguous set
   uint set_bounds[2]; 
-  // Max and min blocks retrieved from itree. These either
+  // Max and min blocks retrieved from itree.
   Block * blk_bounds[2]; 
   // Search interval boundary information
   SI_Bound * bound_results[2];
@@ -338,10 +338,10 @@ void add_blk_CSList(CSList * cslist, Block * blk){
     cslist->setid = blk->setid;
   }
   else if(cslist->setid == blk->setid){
-    if(cslist->bound[HI] == NULL || blk->over->pos[LO] > cslist->bound[HI]->over->pos[HI]){
+    if(cslist->bound[HI] == NULL || blk->pos[LO] > cslist->bound[HI]->pos[HI]){
         cslist->bound[HI] = blk;
     }
-    if(cslist->bound[LO] == NULL || blk->over->pos[HI] < cslist->bound[LO]->over->pos[LO]){
+    if(cslist->bound[LO] == NULL || blk->pos[HI] < cslist->bound[LO]->pos[LO]){
         cslist->bound[LO] = blk;
     }
   }

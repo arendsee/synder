@@ -28,7 +28,7 @@ emphasize_n(){
 
 # A function to select which parts of the output should be compared
 filter () {
-    cut -f1-7
+    cut -f1-7 | sort
 }
 
 runtest(){
@@ -120,7 +120,7 @@ dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
 runtest $dir beside   "Query next to inverted interval"
 runtest $dir within   "Query between inverted intervals"
-# runtest $dir spanning "Query spans inverted intervals"
+runtest $dir spanning "Query spans inverted intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tiny-indel-query-side"
@@ -133,7 +133,7 @@ runtest $dir beside "Target side"
 dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
 runtest $dir beside "Query beside the transposed pair"
-# runtest $dir within "Query between the transposed pair"
+runtest $dir within "Query between the transposed pair"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/irregular-overlaps"
@@ -141,24 +141,12 @@ announce "\nTest target side internal overlaps"
 runtest $dir left "Left side" "You are either 1) not sorting the by_stop vector
 in Contig by Block stop positions, or 2) are snapping the search interval left
 boundary to a Block that is nearest by start, but not be stop."
-# runtest $dir right "Right side"
+runtest $dir right "Right side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-chromosome"
 announce "\nTest two intervals on same query chr but different target chr"
-# runtest $dir between "Between the query intervals"
-
-
-warn "And the hard ones" ; echo
-    dir="$PWD/test/test-data/two-interval-inversion"
-    announce "\n1: Test when two interval are inverted"
-    runtest $dir spanning "Query spans inverted intervals"
-    dir="$PWD/test/test-data/tandem-transposition"
-    announce "\n2: Test tandem transposition"
-    runtest $dir within "Query between the transposed pair"
-    dir="$PWD/test/test-data/irregular-overlaps"
-    announce "\n3: Test target side internal overlaps"
-    runtest $dir right "Right side"
+runtest $dir between "Between the query intervals"
 
 #---------------------------------------------------------------------
 echo
