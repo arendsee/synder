@@ -203,49 +203,9 @@ uint count_overlaps(Contig * con, uint a, uint b)
   return count;
 }
 
-Block * closest_block(Contig * con, int x, Direction d)
-{
-  Block ** blks = d ? con->block : con->by_stop;
-
-  size_t b[2]; // bounds
-  b[0] = d ? 0 : con->size - 1;
-  b[1] = d ? con->size - 1 : 0;
-  size_t i = con->size / 2;
-  while(true){
-    if(REL_GT(blks[i]->pos[!d], x, d)){
-      // a valid entry
-      b[d] = i;
-    } else {
-      // an invalid entry
-      b[!d] = i;
-    }
-
-    if(b[d] == b[!d] || abs(b[!d] - b[d]) == 1){
-      uint b0 = blks[b[0]]->pos[!d];
-      uint b1 = blks[b[1]]->pos[!d];
-      bool b0_good = REL_GT(b0, x, d);
-      bool b1_good = REL_GT(b1, x, d);
-      if(b0_good && b1_good){
-        return REL_LT(b0, b1, d) ? blks[b[0]] : blks[b[1]];
-      } 
-      else if(b0_good){
-        return blks[b[0]];
-      }
-      else if(b1_good){
-        return blks[b[1]];
-      }
-      else {
-        return (Block*)NULL;
-      }
-    }
-
-    i = b[!d] + (b[d] - b[!d]) / 2;
-  }
-}
-
 void sort_blocks_by_start(Contig * contig)
 {
-  if (!contig->start_sorted) {
+  if (contig != NULL && !contig->start_sorted) {
     qsort(contig->block, contig->size, sizeof(Block *), block_cmp_start);
     contig->start_sorted = true;
   }
@@ -253,7 +213,7 @@ void sort_blocks_by_start(Contig * contig)
 
 void sort_blocks_by_stop(Contig * contig)
 {
-  if (!contig->stop_sorted) {
+  if (contig != NULL && !contig->stop_sorted) {
     if (contig->by_stop == NULL) {
       contig->by_stop = (Block **) malloc(contig->size * sizeof(Block *));
       memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block *));

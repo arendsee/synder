@@ -28,5 +28,13 @@ void print_Synmap(Synmap *, bool forward);
 /** Sort all the blocks in each contig both my start and stop */
 void sort_all_contigs(Synmap * synmap);
 
+/** Set a unique index for each set of overlapping sequences */
+void set_overlap_group(Synmap * syn);
+
+/** Link each node to its adjacent neighbors */
+void link_adjacent_blocks(Synmap * syn);
+
+/** Link each node to its contiguous neighbor */
+void link_contiguous_blocks(Synmap * syn);
 
 #endif

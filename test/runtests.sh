@@ -13,7 +13,7 @@ announce(){
 
 warn(){
     [[ -t 1 ]] && o="\e[1;31m$1\e[0m" || o=$1
-    echo -e $o
+    echo -en $o
 }
 
 emphasize(){
@@ -51,19 +51,26 @@ runtest(){
         total_passed=$(( $total_passed + 1 ))
         echo "OK"
     else
+        echo
         warn "FAIL"
-        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt) && echo
+        echo " (in `basename $dir`/)"
+        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
         total_failed=$(( $total_failed + 1 ))
         echo "======================================="
-        emphasize "expected output:"
+        emphasize_n "expected output"; echo ": (${base}-exp.txt)"
         cat $dir/${base}-exp.txt | filter | column -t
         emphasize "observed output:"
         cat $tmp/a | filter | column -t
-        emphasize "query gff:"
+        emphasize_n "query gff"; echo ": (${base}.gff)"
         column -t $dir/$base.gff
-        emphasize "synteny map:"
+        emphasize_n "synteny map"; echo ": (map.syn)"
         column -t $dir/map.syn
+        echo "See zzz_g and zzz_db"
         echo -e "---------------------------------------\n"
+
+        ln -sf $dir/$base.gff zzz_g 
+        $synder -d $dir/map.syn a b zzz_db
+
     fi
 
     rm -rf $tmp
@@ -111,20 +118,21 @@ runtest $dir over    "Query overlaps inverted interval"
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
-runtest $dir beside "Query next to inverted interval"
-runtest $dir within "Query between inverted intervals"
+runtest $dir beside   "Query next to inverted interval"
+runtest $dir within   "Query between inverted intervals"
+# runtest $dir spanning "Query spans inverted intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tiny-indel-query-side"
 announce "\nTest when a small interval interupts on one side"
-# runtest $dir beside "Query side"
+runtest $dir beside "Query side"
 dir="$PWD/test/test-data/tiny-indel-target-side"
-# runtest $dir beside "Target side"
+runtest $dir beside "Target side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
-# runtest $dir beside "Query beside the transposed pair"
+runtest $dir beside "Query beside the transposed pair"
 # runtest $dir within "Query between the transposed pair"
 
 #---------------------------------------------------------------------
@@ -140,6 +148,17 @@ dir="$PWD/test/test-data/multi-chromosome"
 announce "\nTest two intervals on same query chr but different target chr"
 # runtest $dir between "Between the query intervals"
 
+
+warn "And the hard ones" ; echo
+    dir="$PWD/test/test-data/two-interval-inversion"
+    announce "\n1: Test when two interval are inverted"
+    runtest $dir spanning "Query spans inverted intervals"
+    dir="$PWD/test/test-data/tandem-transposition"
+    announce "\n2: Test tandem transposition"
+    runtest $dir within "Query between the transposed pair"
+    dir="$PWD/test/test-data/irregular-overlaps"
+    announce "\n3: Test target side internal overlaps"
+    runtest $dir right "Right side"
 
 #---------------------------------------------------------------------
 echo
@@ -171,7 +190,7 @@ emphasize "$total_passed tests successful out of $total"
 
 if [[ $valgrind_checked == 0 ]]
 then
-    warn "valgrind not found, no memory tests performed"
+    warn "valgrind not found, no memory tests performed\n"
 else
     if [[ $valgrind_exit_status == 0 ]]
     then
@@ -179,13 +198,13 @@ else
         echo " (for synder search of multi-block/c.gff against multi-block/map.syn)"
         rm valgrind.log
     else
-        warn "valgrind failed - see valgrind.log"
+        warn "valgrind failed - see valgrind.log\n"
     fi
 fi
 
 if [[ $total_failed > 0 ]]
 then
-    warn "$total_failed tests failed"
+    warn "$total_failed tests failed\n"
     exit 1
 else
     exit 0

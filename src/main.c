@@ -8,12 +8,11 @@
 #include "io.h"
 #include "synmap.h"
 #include "analysis.h"
-#include "contiguous.h"
+#include "map.h"
 #include "lev.h"
 
 int main(int argc, char *argv[])
 {
-
 
   Synmap *syn = NULL;
 
@@ -82,9 +81,9 @@ int main(int argc, char *argv[])
     } else if (strcmp(args.cmd, "map") == 0) {
       analysis_map(syn, args.intfile);
     } else if (strcmp(args.cmd, "search") == 0) {
-      contiguous_query(syn, args.intfile, false);
+      find_search_intervals(syn, args.intfile, false);
     } else if (strcmp(args.cmd, "searchblock") == 0) {
-      contiguous_query(syn, args.intfile, true);
+      find_search_intervals(syn, args.intfile, true);
     } else {
       printf("Command '%s' not recognized\n", args.cmd);
       print_help();

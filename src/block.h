@@ -19,4 +19,12 @@ int block_cmp_stop(const void *, const void *);
 /** compare intervals by start */
 int block_cmp_start(const void *, const void *);
 
+/**
+ * @brief Get smallest or largest value
+ *
+ * @param block 
+ * @param direction 0 or 1, for finding smallest and largest values, respectively
+ */
+uint get_set_bound(Block * block, Direction direction);
+
 #endif

@@ -16,13 +16,16 @@
  * */
 Block *init_Block(uint start, uint stop)
 {
-  Block *block   = (Block *) malloc(sizeof(Block));
-  block->pos[0]  = start;
-  block->pos[1]  = stop;
-  block->over    = NULL;
-  block->parent  = NULL;
-  block->linkid  = 0; // linkids will be set by load_synmap
-  block->strand  = '.';
+  Block *block  = (Block *) malloc(sizeof(Block));
+  block->pos[0] = start;
+  block->pos[1] = stop;
+  block->over   = NULL;
+  block->parent = NULL;
+  block->adj[0] = NULL;
+  block->adj[1] = NULL;
+  block->cnr[0] = NULL;
+  block->cnr[1] = NULL;
+  block->strand = '.';
   return (block);
 }
 
@@ -40,8 +43,7 @@ void free_Block(Block * block)
 /** Print all fields in this block (TAB-delimited). */
 void print_Block(Block * block)
 {
-  printf("%lu\t%s\t%u\t%u\t%s\t%u\t%u\t%c\n",
-         block->linkid,
+  printf("%s\t%u\t%u\t%s\t%u\t%u\t%c\n",
          block->parent->name,
          block->pos[0],
          block->pos[1],
@@ -91,4 +93,11 @@ int block_cmp_start(const void *ap, const void *bp)
   Block *a = * (Block **) ap;
   Block *b = * (Block **) bp;
   return (int)(a->pos[0] > b->pos[0]) - (int)(a->pos[0] < b->pos[0]);
+}
+
+uint get_set_bound(Block * blk, Direction d){
+    if(blk->cnr[d] != NULL){
+        return get_set_bound(blk->cnr[d], d);
+    }
+    return blk->pos[d];
 }

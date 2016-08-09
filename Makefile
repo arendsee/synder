@@ -23,6 +23,7 @@ uninstall:
 clean:
 	rm -f ${TARGET}
 	rm -f vgcore.*
+	rm -rf zzz*
 	cd src && ${MAKE} clean
 
 .PHONY: test 

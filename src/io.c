@@ -106,19 +106,11 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
   sort_all_contigs(synmap);
 
-  // Set linkids in ascending order relative to query
-  uint linkid = 0; 
-  uint gsize, csize;
-  gsize = SG(synmap, 0)->size;
-  for(int i = 0; i < gsize; i++){
-    csize = SGC(synmap, 0, i)->size;
-    for(int j = 0; j < csize; j++){
-      qblk = SGCB(synmap, 0, i, j);
-      qblk->linkid = linkid;
-      qblk->over->linkid = linkid;
-      linkid++;
-    }
-  }
+  set_overlap_group(synmap);
+
+  link_adjacent_blocks(synmap);
+
+  link_contiguous_blocks(synmap);
 
   return (synmap);
 }

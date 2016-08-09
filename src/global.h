@@ -13,6 +13,11 @@
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
 #define REL_LE(x, y, d)   ((d) ? (x) <= (y) : (x) >= (y))
 #define REL_GE(x, y, d)   ((d) ? (x) >= (y) : (x) <= (y))
+#define REL_INC(x, d)     ((d) ? (x++) : (x--))
+#define REL_DEC(x, d)     ((d) ? (x--) : (x++))
+#define REL_LO_IDX(c, d)  ((d) ? 0 : c->size - 1)
+#define REL_HI_IDX(c, d)  ((d) ? c->size - 1 : 0)
+#define REL_NEXT(a, i, d) ((d) ? (a)[i+1] : (a)[i-1])
 
 #define SGCB(syn, gid, cid, bid) syn->genome[(gid)]->contig[(cid)]->block[(bid)]
 #define SGC(syn, gid, cid)       syn->genome[(gid)]->contig[(cid)]
@@ -68,7 +73,15 @@ struct Block {
   uint pos[2];
   Block * over;
   Contig * parent;  
-  size_t linkid;
+  Block * adj[2];
+  Block * cnr[2]; // contiguous neighbor
+  size_t setid;
+
+  // grpid holds the id the overlapping intervals on each genome.  It indexed
+  // by linkid. This allows lookup of block adjacency. Two blocks are adjacent
+  // if their setids differ by 1 (if on plus strand) or -1 (if on negative
+  // strand).
+  size_t grpid;
   char strand;
 };
 
