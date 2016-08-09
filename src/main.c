@@ -31,13 +31,29 @@ int main(int argc, char *argv[])
     if (!(args.pos[0] && args.pos[1] && args.pos[2])){
       print_help();
     }
-    char cmd[512];
-    sprintf(cmd,
-            "make-synder-db.sh -a %s -b %s -i %s -d %s",
-            args.pos[0], args.pos[1], args.db_filename, args.pos[2]);
-    
-    int exit_status = system(cmd);
-    if(exit_status != 0){
+
+    char db_args[1024];
+    sprintf(
+        db_args,
+        "-a %s -b %s -i %s -d %s 2> /dev/null",
+        args.pos[0], args.pos[1], args.db_filename, args.pos[2]
+    );
+
+    bool fail = false;
+    char cmd[1024];
+    // Try to find the database script
+    // Search PATH, working directory, and util folder
+    sprintf(cmd, "make-synder-db.sh %s", db_args);
+    if(system(cmd) != 0){
+        sprintf(cmd, "./make-synder-db.sh %s", db_args);
+        if(system(cmd) != 0){
+            sprintf(cmd, "util/make-synder-db.sh %s", db_args);
+            if(system(cmd) != 0){
+                fail = true;
+            }
+        }
+    }
+    if(fail){
         fprintf(stderr, "ERROR: Failed to make synder database\n");
         exit(EXIT_FAILURE);
     } else {
