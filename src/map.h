@@ -7,27 +7,10 @@
 #include "block.h"
 #include "synmap.h"
 
-#define ANCHORED   1  // 0000 0001
-#define BOUND      4  // 0000 0100
-#define UNBOUND   16  // 0001 0000
-#define EXTREME   64  // 0100 0000
-
-#define F_AA   ( ANCHORED  << 1 ) | ANCHORED 
-#define F_AB   ( BOUND     << 1 ) | ANCHORED 
-#define F_AU   ( UNBOUND   << 1 ) | ANCHORED 
-#define F_AX   ( EXTREME   << 1 ) | ANCHORED 
-#define F_BA   ( ANCHORED  << 1 ) | BOUND    
-#define F_BB   ( BOUND     << 1 ) | BOUND    
-#define F_BU   ( UNBOUND   << 1 ) | BOUND    
-#define F_BX   ( EXTREME   << 1 ) | BOUND    
-#define F_UA   ( ANCHORED  << 1 ) | UNBOUND  
-#define F_UB   ( BOUND     << 1 ) | UNBOUND  
-#define F_UU   ( UNBOUND   << 1 ) | UNBOUND  
-#define F_UX   ( EXTREME   << 1 ) | UNBOUND  
-#define F_XA   ( ANCHORED  << 1 ) | EXTREME  
-#define F_XB   ( BOUND     << 1 ) | EXTREME  
-#define F_XU   ( UNBOUND   << 1 ) | EXTREME  
-#define F_XX   ( EXTREME   << 1 ) | EXTREME  
+#define ANCHORED  0
+#define BOUND     1
+#define UNBOUND   2
+#define EXTREME   3
 
 #define cmloc(cmap,blk) cmap->map[block->linkid]
 

@@ -21,7 +21,7 @@ void free_CSList(CSList * cslist);
 
 typedef struct SI_Bound{
   uint bound;
-  int mask; 
+  int flag; 
 } SI_Bound;
 
 SI_Bound * get_si_bound(
@@ -93,13 +93,15 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       bound_results[inverted ^ HI] =
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
  
-      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\n",
+      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
         bounds[LO], bounds[HI],
         blk_bounds[LO]->over->parent->name,
         bound_results[LO]->bound, bound_results[HI]->bound,
-        get_flag(bound_results));
+        bound_results[LO]->flag,
+        bound_results[HI]->flag
+      );
  
     }
  
@@ -110,64 +112,10 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
   free(line);
 }
 
-int get_flag(SI_Bound * br[2]){
-    // The HI and LO bounds each have a 4 bit mask describing the overlap
-    // state. Since the states are encoded in the odd bits, shifting one
-    // mask one bit over and ORing them together, yields a single 8 bit
-    // mask fully describing the joint state.
-    int mask = ( br[LO]->mask << 1 ) | br[HI]->mask;
-
-    // I determine the overlap cases based on this 8 bit mask, Currently I
-    // don't use the other bits in the int for anything, but just to be
-    // safe, I'll AND them out.
-    //
-    // A - anchored
-    // B - bound
-    // U - unbound
-    // X - extreme
-    // TODO: decide on a stable set of flags to return to the user, for now, setting all to -1
-    switch(mask & 0xFF){
-      case F_AA:
-        return -1;
-      case F_AB:
-        return -1;
-      case F_BA:
-        return -1;
-      case F_BB:
-        return -1;
-      case F_UA:
-        return -1;
-      case F_XA:
-        return -1;
-      case F_AU:
-        return -1;
-      case F_UU:
-        return -1;
-      case F_UB:
-        return -1;
-      case F_BU:
-        return -1;
-      case F_AX:
-        return -1;
-      case F_UX:
-        return -1;
-      case F_BX:
-        return -1;
-      case F_XB:
-        return -1;
-      case F_XU:
-        return -1;
-      case F_XX:
-        return -1;
-      default:
-        return -1;
-    }
-}
-
-SI_Bound * init_SI_Bound(uint bound, int mask){
+SI_Bound * init_SI_Bound(uint bound, int flag){
   SI_Bound * br = (SI_Bound *)malloc(sizeof(SI_Bound));
   br->bound = bound;
-  br->mask = mask;
+  br->flag = flag;
   return br;
 }
 
@@ -181,13 +129,9 @@ SI_Bound * get_si_bound(
   // Invert orientation mapping to target if search interval is inverted
   Direction vd = inverted ? !d : d;
   // See contiguous.h
-  int mask = 0;
+  int flag = 0;
   // non-zero to ease debugging
   uint bound = 444444;
-  // +1 or -1 values for snapping above or below a point
-  int offset = d ? 1 : -1;
-  // Invert these values if the search interval is inverted
-  offset = inverted ? -1 * offset : offset;
 
   // All diagrams are shown for the d=HI case, take the mirror image fr d=LO.
   //
@@ -218,8 +162,8 @@ SI_Bound * get_si_bound(
   //   <---q
   // q < x
   if(REL_LT(q, set_bounds[!d], d)){
-    bound = blk_bounds[!d]->over->pos[!vd] - offset;
-    mask |= UNBOUND;
+    bound = blk_bounds[!d]->over->pos[!vd];
+    flag = UNBOUND;
   }
 
   //   |x---[===]-------a=======b...y|   ...    F===
@@ -227,8 +171,8 @@ SI_Bound * get_si_bound(
   //              --q
   // q < a
   else if(REL_LT(q, pnt_a, d)){
-    bound = blk_bounds[!d]->over->pos[!vd] - offset;
-    mask |= BOUND;
+    bound = blk_bounds[!d]->over->pos[!vd];
+    flag = BOUND;
   }
 
   //   |x...a=======b...y|   ...    F===
@@ -237,7 +181,7 @@ SI_Bound * get_si_bound(
   // q < b
   else if(REL_LE(q, pnt_b, d)){
     bound = blk_bounds[!d]->over->pos[vd];
-    mask |= ANCHORED;
+    flag = ANCHORED;
   }
 
   //   |x...a=======b-------c=======d...y|  ...  F===
@@ -247,8 +191,8 @@ SI_Bound * get_si_bound(
   //   (q > b test required since blk_bounds[LO] can equal blk_bounds[HI])
   else if(REL_LT(q, pnt_c, d) && REL_GT(q, pnt_b, d))
   {
-    bound = blk_bounds[d]->over->pos[!vd] - offset;
-    mask |= BOUND;
+    bound = blk_bounds[d]->over->pos[!vd];
+    flag = BOUND;
   }
 
   //   |x...a=======b-------c=======d...y|  ...  F===
@@ -257,7 +201,7 @@ SI_Bound * get_si_bound(
   // q < d
   else if(REL_LE(q, pnt_d, d)){
     bound = blk_bounds[d]->over->pos[vd];
-    mask |= ANCHORED;
+    flag = ANCHORED;
   }
 
   //   |x...a=======b-------c=======d-------[===]...y|  ...  F===
@@ -265,8 +209,8 @@ SI_Bound * get_si_bound(
   //              <----------------------q
   // q < y, (which implies there is a node after d)
   else if(REL_LE(q, set_bounds[d], d)){
-    bound = blk_bounds[d]->cnr[d]->over->pos[!vd] - offset;
-    mask |= BOUND;
+    bound = blk_bounds[d]->cnr[d]->over->pos[!vd];
+    flag = BOUND;
   }
 
   // If none of the above, the bound beyond anything in the contiguous set
@@ -285,8 +229,8 @@ SI_Bound * get_si_bound(
       // q >= F  ***ON QUERY SIDE***
       if(!inverted && REL_GT(q, downstream_blk->over->pos[!d], d)){
         // TODO: This is a weird case, how should I handle it?
-        mask |= ANCHORED;
-        bound = downstream_blk->pos[!d] - offset;
+        flag = ANCHORED;
+        bound = downstream_blk->pos[!d];
       }
 
       //    |x...--a=======b|
@@ -294,8 +238,8 @@ SI_Bound * get_si_bound(
       //                           ^
       //                    <---q
       else {
-        mask |= UNBOUND;
-        bound = downstream_blk->pos[!vd] - offset;
+        flag = UNBOUND;
+        bound = downstream_blk->pos[!vd];
       }
     }
     //    |x...--a=======b|
@@ -303,13 +247,13 @@ SI_Bound * get_si_bound(
     //                    <---q
     // query is further out than ANYTHING in the synteny map
     else {
-      mask |= EXTREME;
+      flag = EXTREME;
       // TODO: Is there a better way to handle unbound extremes?
-      bound = d ? 999999999 : 0;
+      bound = vd ? 999999999 : 0;
     }
   }
 
-  return init_SI_Bound(bound, mask);
+  return init_SI_Bound(bound, flag);
 }
 
 

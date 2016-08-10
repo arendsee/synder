@@ -149,6 +149,21 @@ announce "\nTest two intervals on same query chr but different target chr"
 runtest $dir between "Between the query intervals"
 
 #---------------------------------------------------------------------
+dir="$PWD/test/test-data/inverted-extremes"
+announce "\nExtreme value resulting from an inversion"
+runtest $dir extreme "Between the query intervals, extreme SI"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/deletion"
+announce "\nDeletion tests (adjacent bounds in target)"
+runtest $dir between "Query is inbetween"
+
+# # TODO Find a good way to deal with this case:
+# dir="$PWD/test/test-data/synmap-overlaps"
+# announce "\nsyntenic overlaps"
+# runtest $dir simple "Between the weird"
+
+#---------------------------------------------------------------------
 echo
 
 #---------------------------------------------------------------------
