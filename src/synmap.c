@@ -136,17 +136,13 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
     }
     // --->
     //      <---
-    // If current lo is next to, and not overlapping, current hi
-    else if(REL_LT(lo->pos[d], hi->pos[!d], d) && lo->grpid != hi->grpid){
+    // The current lo is next to, and not overlapping, current hi
+    else {
         hi->adj[!d] = lo;
         if(hi_idx == N)
             break;
         else
             REL_INC(hi_idx, d);
-    }
-    else {
-        fprintf(stderr, "Who are you? You shouldn't be here.\n");
-        break;
     }
   }
 }
