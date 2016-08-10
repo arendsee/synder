@@ -305,7 +305,7 @@ SI_Bound * get_si_bound(
     else {
       mask |= EXTREME;
       // TODO: Is there a better way to handle unbound extremes?
-      bound = d ? 999999999 : 0;
+      bound = vd ? 999999999 : 0;
     }
   }
 
