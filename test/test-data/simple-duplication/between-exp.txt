@@ -1,2 +1,2 @@
-duplicant	que	225	275	tar	201	299	.	0
-duplicant	que	225	275	tar	601	699	.	0
+duplicant	que	225	275	tar	200	300	.	0
+duplicant	que	225	275	tar	600	700	.	0

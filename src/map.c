@@ -184,10 +184,6 @@ SI_Bound * get_si_bound(
   int mask = 0;
   // non-zero to ease debugging
   uint bound = 444444;
-  // +1 or -1 values for snapping above or below a point
-  int offset = d ? 1 : -1;
-  // Invert these values if the search interval is inverted
-  offset = inverted ? -1 * offset : offset;
 
   // All diagrams are shown for the d=HI case, take the mirror image fr d=LO.
   //
@@ -218,7 +214,7 @@ SI_Bound * get_si_bound(
   //   <---q
   // q < x
   if(REL_LT(q, set_bounds[!d], d)){
-    bound = blk_bounds[!d]->over->pos[!vd] - offset;
+    bound = blk_bounds[!d]->over->pos[!vd];
     mask |= UNBOUND;
   }
 
@@ -227,7 +223,7 @@ SI_Bound * get_si_bound(
   //              --q
   // q < a
   else if(REL_LT(q, pnt_a, d)){
-    bound = blk_bounds[!d]->over->pos[!vd] - offset;
+    bound = blk_bounds[!d]->over->pos[!vd];
     mask |= BOUND;
   }
 
@@ -247,7 +243,7 @@ SI_Bound * get_si_bound(
   //   (q > b test required since blk_bounds[LO] can equal blk_bounds[HI])
   else if(REL_LT(q, pnt_c, d) && REL_GT(q, pnt_b, d))
   {
-    bound = blk_bounds[d]->over->pos[!vd] - offset;
+    bound = blk_bounds[d]->over->pos[!vd];
     mask |= BOUND;
   }
 
@@ -265,7 +261,7 @@ SI_Bound * get_si_bound(
   //              <----------------------q
   // q < y, (which implies there is a node after d)
   else if(REL_LE(q, set_bounds[d], d)){
-    bound = blk_bounds[d]->cnr[d]->over->pos[!vd] - offset;
+    bound = blk_bounds[d]->cnr[d]->over->pos[!vd];
     mask |= BOUND;
   }
 
@@ -286,7 +282,7 @@ SI_Bound * get_si_bound(
       if(!inverted && REL_GT(q, downstream_blk->over->pos[!d], d)){
         // TODO: This is a weird case, how should I handle it?
         mask |= ANCHORED;
-        bound = downstream_blk->pos[!d] - offset;
+        bound = downstream_blk->pos[!d];
       }
 
       //    |x...--a=======b|
@@ -295,7 +291,7 @@ SI_Bound * get_si_bound(
       //                    <---q
       else {
         mask |= UNBOUND;
-        bound = downstream_blk->pos[!vd] - offset;
+        bound = downstream_blk->pos[!vd];
       }
     }
     //    |x...--a=======b|

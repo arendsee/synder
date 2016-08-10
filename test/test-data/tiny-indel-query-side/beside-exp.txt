@@ -1,2 +1,2 @@
-beside	que	225	275	tar	201	699	.	5
-beside	que	225	275	samarkand	23671	23699	.	4
+beside	que	225	275	tar	200	700	.	5
+beside	que	225	275	samarkand	23670	23700	.	4
