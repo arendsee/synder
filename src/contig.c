@@ -155,9 +155,11 @@ ResultContig *get_region(Contig * con, uint a, uint b)
       if(res->iv->size == 2){
           tmp_a = get_interval_overlaps(&res->iv->v[0], con->itree);
           tmp_b = get_interval_overlaps(&res->iv->v[1], con->itree);
-          free(res->iv);
+          free_IV(res->iv);
           res->iv = tmp_a->iv;
           merge_IV(tmp_a->iv, tmp_b->iv);
+          free(tmp_a);
+          free_IntervalResult(tmp_b);
       } else {
           fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
           exit(EXIT_FAILURE);
@@ -166,8 +168,9 @@ ResultContig *get_region(Contig * con, uint a, uint b)
   else if(res->leftmost || res->rightmost){
       if(res->iv->size == 1){
           tmp_a = get_interval_overlaps(&res->iv->v[0], con->itree);
-          free(res->iv);
+          free_IV(res->iv);
           res->iv = tmp_a->iv;
+          free(tmp_a);
       } else {
           fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
           exit(EXIT_FAILURE);
@@ -183,12 +186,6 @@ ResultContig *get_region(Contig * con, uint a, uint b)
   ResultContig * resultcontig = init_ResultContig(contig, res);
 
   free_IntervalResult(res);
-
-  if(tmp_a != NULL)
-    // don't use free_IntervalResult, since iv belongs to res
-    free(tmp_a);
-  if(tmp_b != NULL)
-    free_IntervalResult(tmp_b);
 
   return resultcontig;
 }

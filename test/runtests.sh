@@ -166,24 +166,24 @@ runtest $dir between "Query is inbetween"
 #---------------------------------------------------------------------
 echo
 
-#---------------------------------------------------------------------
-# valgrind
-
-valgrind_checked=0
-valgrind_exit_status=1
-if hash valgrind 2> /dev/null; then
-    valgrind_checked=1
-    dir="$PWD/test/test-data/multi-block"
-    tmp=/tmp/synder-$RANDOM
-    mkdir $tmp
-    $synder -d $dir/map.syn a b $tmp/db 
-    valgrind $synder \
-        -i "$PWD/test/test-data/multi-block/c.gff" \
-        -s $tmp/db/a_b.txt \
-        -c search > /dev/null 2> valgrind.log
-    valgrind_exit_status=$?
-    rm -rf tmp
-fi
+# #---------------------------------------------------------------------
+# # valgrind
+#
+# valgrind_checked=0
+# valgrind_exit_status=1
+# if hash valgrind 2> /dev/null; then
+#     valgrind_checked=1
+#     dir="$PWD/test/test-data/multi-block"
+#     tmp=/tmp/synder-$RANDOM
+#     mkdir $tmp
+#     $synder -d $dir/map.syn a b $tmp/db 
+#     valgrind $synder \
+#         -i "$PWD/test/test-data/multi-block/c.gff" \
+#         -s $tmp/db/a_b.txt \
+#         -c search > /dev/null 2> valgrind.log
+#     valgrind_exit_status=$?
+#     rm -rf tmp
+# fi
 
 
 #---------------------------------------------------------------------
@@ -191,19 +191,22 @@ fi
 total=$(( total_passed + total_failed))
 emphasize "$total_passed tests successful out of $total"
 
-if [[ $valgrind_checked == 0 ]]
-then
-    warn "valgrind not found, no memory tests performed\n"
-else
-    if [[ $valgrind_exit_status == 0 ]]
-    then
-        emphasize_n "valgrind pure"
-        echo " (for synder search of multi-block/c.gff against multi-block/map.syn)"
-        rm valgrind.log
-    else
-        warn "valgrind failed - see valgrind.log\n"
-    fi
-fi
+# -------------------------------------------------------------------------
+# The code below does NOT ensure valgrind purity, need to rethink this test
+# -------------------------------------------------------------------------
+# if [[ $valgrind_checked == 0 ]]
+# then
+#     warn "valgrind not found, no memory tests performed\n"
+# else
+#     if [[ $valgrind_exit_status == 0 ]]
+#     then
+#         emphasize_n "valgrind pure"
+#         echo " (for synder search of multi-block/c.gff against multi-block/map.syn)"
+#         rm valgrind.log
+#     else
+#         warn "valgrind failed - see valgrind.log\n"
+#     fi
+# fi
 
 if [[ $total_failed > 0 ]]
 then

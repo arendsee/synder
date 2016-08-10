@@ -26,6 +26,7 @@ Block *init_Block(uint start, uint stop)
   block->cnr[0] = NULL;
   block->cnr[1] = NULL;
   block->strand = '.';
+  block->setid = 888; // arbitrary number to check in debuggin
   return (block);
 }
 

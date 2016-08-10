@@ -187,12 +187,15 @@ void free_node(Node * node)
 void link_contiguous_blocks(Synmap * syn)
 {
   Block * blk;
-  Node * node;
+  Node * node, * root;
   int qdiff, tdiff;
   char this_strand, older_strand;
   size_t setid = 0;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {
-    node = init_node(SGCB(syn, 0, i, 0));
+    blk = SGCB(syn, 0, i, 0);
+    blk->setid = ++setid;
+    node = init_node(blk);
+    root = node;
     for (size_t j = 1; j < SGC(syn,0,i)->size; j++){
       blk = SGCB(syn, 0, i, j);
       this_strand = blk->over->strand;
@@ -230,6 +233,6 @@ void link_contiguous_blocks(Synmap * syn)
         }
       }
     }
-    free_node(node);
+    free_node(root);
   }
 }
