@@ -97,7 +97,8 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
   size_t N = REL_HI_IDX(con, d);
   Block ** lo_blks = d ? con->by_stop : con->block;
   Block ** hi_blks = d ? con->block : con->by_stop;
-  Block * lo, * hi, * lo_next;
+  Block * lo, * hi;
+  Block * lo_next = NULL;
   while(true){
     lo = lo_blks[lo_idx];
     hi = hi_blks[hi_idx];
