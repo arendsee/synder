@@ -14,6 +14,7 @@ REQUIRED ARGUMENTS
   -b name of target organism
   -i name of input sequence
   -d output data directory
+  -z input is 1-based (default, 0-based)
 OPTIONAL ARGUMENTS
   -q query chromosome length file
   -t target chromosome length file
@@ -42,8 +43,9 @@ die-instructively(){
     exit 1
 }
 
+base=0
 query= target= outdir= input= query_gf= target_gf=
-while getopts "ha:b:d:i:t:q:" opt; do
+while getopts "ha:b:d:i:t:q:z" opt; do
     case $opt in
         h)
             print_help
@@ -76,6 +78,12 @@ while getopts "ha:b:d:i:t:q:" opt; do
         d)
             outdir="$OPTARG"
             [[ -d $outdir ]] || mkdir $outdir || die "Cannot access directory '$outdir'"
+            ;;
+        z)
+            base=1
+            ;;
+        ?)
+            die "Unrecognized argument"
             ;;
     esac
 done
@@ -160,12 +168,12 @@ write_side() {
 }
 
 add_chromosome_length() {
-    awk '
+    awk -v base=$base '
         BEGIN{ FS="\t"; OFS="\t" }
         NR == FNR { a[$1] = $2; next }
         $1 == "$" {
             if( $4 in a ) {
-                $0 = $0 "\t" a[$4]
+                $0 = $0 "\t" a[$4] - base
             } else {
                 errmsg = $4 " from synteny file not in scaffold length file" 
                 exit 1
@@ -224,17 +232,18 @@ parse() {
     fi
 
 
-    awk '
+    # Output link data and perform offsets
+    awk -v base=$base '
         {
-            qseqid=$9
-            qblkid=$10
-            qstart=$2
-            qstop=$3
-            tseqid=$11
-            tblkid=$12
-            tstart=$5
-            tstop=$6
-            strand=$8
+            qseqid = $9
+            qblkid = $10
+            qstart = $2   - base
+            qstop  = $3   - base
+            tseqid = $11
+            tblkid = $12
+            tstart = $5   - base
+            tstop  = $6   - base
+            strand = $8
             print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, strand
         }
     ' $outtmp |

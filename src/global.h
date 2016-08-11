@@ -26,7 +26,11 @@
 #define LINE_BUFFER_SIZE 512
 #define NAME_BUFFER_SIZE 128
 
-typedef enum direction { HI = 1, LO = 0 } Direction;
+// A value of 0 or 1 with is added to the starts and stops of all printed intervals
+int global_in_base;
+int global_out_base;
+
+typedef enum direction { LO = 0, HI = 1 } Direction;
 
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;
 
@@ -57,6 +61,7 @@ struct Genome {
  * - length  - total number of bases in the chromosome/scaffold
  * - block   - array of pointers to Block objects sorted by start
  * - by_stop - array of pointers to Block objects sorted by stop
+ * - base    - 0 for 0-based, 1 for 1-based
  */
 struct Contig {
   char *name;
@@ -65,6 +70,7 @@ struct Contig {
   unsigned int length;
   Block **block;
   Block **by_stop;
+  int base;
 };
 
 /** Query interval with directions to matching target

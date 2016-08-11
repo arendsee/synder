@@ -24,6 +24,9 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   uint conid;
   uint contig_length;
 
+  // NOTE: The synteny database files are always 0-based. So subtracting
+  // global_in_base from the intervals is not necessary.
+
   // A dummy variable searched for at the end of each sscanf format sequence.
   // It will be matched only if there are too many arguments.
   char dummy;

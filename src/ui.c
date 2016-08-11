@@ -18,6 +18,8 @@ Arguments create_Arguments()
     .synfile = NULL,
     .intfile = NULL,
     .hitfile = NULL,
+    .in_base = 0,
+    .out_base = 0,
     .db_filename = NULL,
     .cmd = NULL,
     .pos = (char **) malloc(MAX_POS * sizeof(char *))
@@ -78,6 +80,8 @@ void print_help()
          "\t-i \t GFF search interval file, if not provided, uses stdin\n"
          "\t-t \t Switch target and query in synteny database\n"
          "\t-c \t Synder command to run. (See Below)\n"
+         "\t-a \t Input is 1-based\n"
+         "\t-b \t Output is 1-based\n"
          "COMMANDS\n"
          "\tmap\n"
          "\t\t print target intervals overlapping each query interval\n"
@@ -109,7 +113,7 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:ab")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
@@ -140,6 +144,12 @@ Arguments parse_command(int argc, char *argv[])
         break;
       case 'r':
         args.swap = true;
+        break;
+      case 'a':
+        args.in_base = 1;
+        break;
+      case 'b':
+        args.out_base = 1;
         break;
       case '?':
         exit(EXIT_FAILURE);
