@@ -57,7 +57,6 @@ struct Genome {
  * - length  - total number of bases in the chromosome/scaffold
  * - block   - array of pointers to Block objects sorted by start
  * - by_stop - array of pointers to Block objects sorted by stop
- *
  */
 struct Contig {
   char *name;
@@ -78,6 +77,10 @@ struct Contig {
  * - cnr - adjacent members in the Block's contiguous set (may be NULL)
  * - setid - the id of this Block's contiguous set
  * - grpid - an id shared between this Block and all Block's it overlaps
+ *
+ *   NOTE: setid and grpid are both initialized to 0 in init_Block. 0 is
+ *   reserved for an UNSET id. If a 0 value ever appears after synmap is
+ *   initialized, it implies a serious bug.
  */
 struct Block {
   uint pos[2];
@@ -86,11 +89,6 @@ struct Block {
   Block * adj[2];
   Block * cnr[2]; // contiguous neighbor
   size_t setid;
-
-  // grpid holds the id the overlapping intervals on each genome.  It indexed
-  // by linkid. This allows lookup of block adjacency. Two blocks are adjacent
-  // if their setids differ by 1 (if on plus strand) or -1 (if on negative
-  // strand).
   size_t grpid;
   char strand;
 };

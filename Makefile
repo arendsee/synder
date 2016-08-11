@@ -15,6 +15,10 @@ sample:
 	ln -sf db/a_b.txt d
 	./synder -i g -s d -c search
 
+.PHONY: clean-sample
+clean-sample:
+	rm -rf g d db
+
 .PHONY: docs
 docs:
 	doxygen Doxyfile
@@ -33,8 +37,8 @@ uninstall:
 .PHONY: clean
 clean:
 	rm -f ${TARGET}
-	rm -f vgcore.* gmon.out *log tags
-	rm -rf zzz* db
+	rm -f vgcore.* gmon.out *log tags valgrind*
+	rm -rf zzz* db d g
 	cd src && ${MAKE} clean
 
 .PHONY: test 

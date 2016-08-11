@@ -102,6 +102,9 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
         bound_results[LO]->flag,
         bound_results[HI]->flag
       );
+
+      free(bound_results[0]);
+      free(bound_results[1]);
  
     }
  

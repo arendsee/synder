@@ -25,6 +25,8 @@ Block *init_Block(uint start, uint stop)
   block->adj[1] = NULL;
   block->cnr[0] = NULL;
   block->cnr[1] = NULL;
+  block->setid  = 0; // reserve 0 for unset
+  block->grpid  = 0; // reserve 0 for unset
   block->strand = '.';
   return (block);
 }
