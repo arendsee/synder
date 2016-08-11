@@ -17,11 +17,12 @@
  *
  * @param name name of this Contig (e.g. "Chr1")
  * @param size number of Block structs this Contig will hold
+ * @param total sequence length
  *
  * @return pointer to a new Contig
  *
  * */
-Contig *init_Contig(char *name, size_t size);
+Contig *init_Contig(char *name, size_t size, unsigned int length);
 
 /** Recursively free all memory.
  *

@@ -40,7 +40,6 @@ struct Synmap {
   Genome **genome;
 };
 
-
 /** A named set of Contig objects*/
 struct Genome {
   char *name;
@@ -52,23 +51,34 @@ struct Genome {
  * interval tree to search them.
  *
  * Fields:
- * - name  - a unique name for this contig (e.g. "Chr1")
- * - size  - number of blocks in the block array
- * - block - array of pointers to Block objects
- * - itree - an IntervalTree that allows log(n)+m search of overlapping intervals
+ * - name    - a unique name for this contig (e.g. "Chr1")
+ * - itree   - an IntervalTree for log(n)+m search of overlapping intervals
+ * - size    - number of blocks in the block array
+ * - length  - total number of bases in the chromosome/scaffold
+ * - block   - array of pointers to Block objects sorted by start
+ * - by_stop - array of pointers to Block objects sorted by stop
  *
- * */
+ */
 struct Contig {
   char *name;
   struct IntervalTree *itree;
   size_t size;
+  unsigned int length;
   Block **block;
   Block **by_stop;
-  uint start_sorted:1;
-  uint stop_sorted:1;
 };
 
-/** Query interval with directions to matching target*/
+/** Query interval with directions to matching target
+ *
+ * Fields:
+ * - pos - start and stop positions of the interval
+ * - over - pointer to Block on the other genome
+ * - parent - pointer to the Contig containing this Block
+ * - adj - nearest non-overlapping blocks (0 for left block, 1 for right block)
+ * - cnr - adjacent members in the Block's contiguous set (may be NULL)
+ * - setid - the id of this Block's contiguous set
+ * - grpid - an id shared between this Block and all Block's it overlaps
+ */
 struct Block {
   uint pos[2];
   Block * over;

@@ -6,16 +6,15 @@
 
 #include "contig.h"
 
-Contig *init_Contig(char *name, size_t size)
+Contig *init_Contig(char *name, size_t size, uint length)
 {
   Contig *con = (Contig *) malloc(sizeof(Contig));
   con->name = strdup(name);
   con->size = size;
+  con->length = length;
   con->itree = NULL;
   con->block = (Block **) malloc(size * sizeof(Block *));
   con->by_stop = NULL;
-  con->start_sorted = false;
-  con->stop_sorted = false;
   return con;
 }
 
@@ -175,7 +174,7 @@ ResultContig *get_region(Contig * con, uint a, uint b)
   }
 
   // Assign returned intervals to Contig
-  Contig *contig = init_Contig(con->name, res->iv->size);
+  Contig *contig = init_Contig(con->name, res->iv->size, con->length);
   for (int i = 0; i < res->iv->size; i++) {
     contig->block[i] = (Block*)res->iv->v[i].link;
   }
@@ -205,20 +204,18 @@ uint count_overlaps(Contig * con, uint a, uint b)
 
 void sort_blocks_by_start(Contig * contig)
 {
-  if (contig != NULL && !contig->start_sorted) {
+  if (contig != NULL) {
     qsort(contig->block, contig->size, sizeof(Block *), block_cmp_start);
-    contig->start_sorted = true;
   }
 }
 
 void sort_blocks_by_stop(Contig * contig)
 {
-  if (contig != NULL && !contig->stop_sorted) {
+  if (contig != NULL) {
     if (contig->by_stop == NULL) {
       contig->by_stop = (Block **) malloc(contig->size * sizeof(Block *));
       memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block *));
     }
     qsort(contig->by_stop, contig->size, sizeof(Block *), block_cmp_stop);
-    contig->stop_sorted = true;
   }
 }

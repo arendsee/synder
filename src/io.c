@@ -19,7 +19,10 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   size_t len = 0;
   ssize_t read;
   char seqid[128];
-  uint ncontigs, nblocks, id;
+  uint ncontigs;
+  uint nblocks;
+  uint conid;
+  uint contig_length;
 
   // A dummy variable searched for at the end of each sscanf format sequence.
   // It will be matched only if there are too many arguments.
@@ -35,9 +38,9 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       } else if (line[0] == '@') {
         break;
       } else if (line[0] == '$') {
-        status = sscanf(line, "$ %u %u %s %c\n", &id, &nblocks, seqid, &dummy);
-        check_args(line_no, status, 3);
-        SGC(synmap, loc, id) = init_Contig(seqid, nblocks);
+        status = sscanf(line, "$ %u %u %s %u %c\n", &conid, &nblocks, seqid, &contig_length, &dummy);
+        check_args(line_no, status, 4);
+        SGC(synmap, loc, conid) = init_Contig(seqid, nblocks, contig_length);
         unloaded_blocks += nblocks;
       } else {
         fprintf(stderr, "Incorrect file format, line %d\n", line_no);

@@ -9,7 +9,7 @@
 #include "ui.h"
 #include "version.h"
 
-#define MAX_POS 3
+#define MAX_POS 5
 
 /** contains all legal arguments from all subcommands */
 Arguments create_Arguments()
@@ -69,7 +69,7 @@ void print_version()
 void print_help()
 {
   printf("USAGE\n"
-         "  synder -d <SYNTENY_FILE> <QUERY> <TARGET> <DB_DIR>\n"
+         "  synder -d <SYNTENY_FILE> <QUERY> <TARGET> <DB_DIR> <TARGET_GF> <QUERY_GF>\n"
          "  synder [-t -i <GFF_FILE>] -s <SYNTENY_DB> -c <COMMAND>\n"
          "  synder -f <GFF_FILE> -s <SYNTENY_DB> -c <COMMAND>\n"
          " \n"
