@@ -37,10 +37,9 @@ void sort_all_contigs(Synmap * synmap)
 }
 
 void set_overlap_group(Synmap * syn){
-  sort_all_contigs(syn);
 
   // Holds current overlapping group id
-  size_t grpid = 0;
+  size_t grpid = 1;
   // Needed for determining overlaps and thus setids
   size_t maximum_stop = 0;
   // The stop position of the current interval
@@ -187,11 +186,13 @@ void free_node(Node * node)
 void link_contiguous_blocks(Synmap * syn)
 {
   Block * blk;
-  Node * node, * root;
+  Node * node;
+  Node * root;
   int qdiff, tdiff;
   char this_strand, older_strand;
   size_t setid = 0;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {
+    // Initialize the first block in the scaffold
     blk = SGCB(syn, 0, i, 0);
     blk->setid = ++setid;
     node = init_node(blk);

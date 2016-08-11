@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "global.h"
 #include "ui.h"
 #include "io.h"
 #include "synmap.h"
@@ -22,6 +23,9 @@ int main(int argc, char *argv[])
 
   Arguments args = parse_command(argc, argv);
 
+  global_in_base = args.in_base;
+  global_out_base = args.out_base;
+
   // ------------------------------------------------------------------------
   // Do stuff 
   // ------------------------------------------------------------------------
@@ -32,11 +36,20 @@ int main(int argc, char *argv[])
       print_help();
     }
 
+    // TODO: Find a more elegant argument parsing approach
     char db_args[1024];
     sprintf(
         db_args,
-        "-a %s -b %s -i %s -d %s 2> /dev/null",
-        args.pos[0], args.pos[1], args.db_filename, args.pos[2]
+        "%s -a %s -b %s -i %s -d %s %s %s %s %s",
+        global_in_base == 1 ? " -z " : "",
+        args.pos[0],
+        args.pos[1],
+        args.db_filename,
+        args.pos[2],
+        args.pos[3] != NULL ? "-t" : "",
+        args.pos[3] != NULL ? args.pos[3] : "",
+        args.pos[4] != NULL ? "-q" : "",
+        args.pos[4] != NULL ? args.pos[4] : ""
     );
 
     bool fail = false;
@@ -55,6 +68,7 @@ int main(int argc, char *argv[])
     }
     if(fail){
         fprintf(stderr, "ERROR: Failed to make synder database\n");
+        fprintf(stderr, "%s\n", cmd);
         exit(EXIT_FAILURE);
     } else {
         exit(EXIT_SUCCESS);

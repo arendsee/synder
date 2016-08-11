@@ -5,6 +5,8 @@ tags
 
 *.log
 
+gmon.out
+
 README.pdf
 
 *.gch

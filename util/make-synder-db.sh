@@ -1,5 +1,6 @@
 #!/bin/bash
 set -u
+set -e
 
 # ============================================================================
 # Parse Arguments
@@ -13,6 +14,10 @@ REQUIRED ARGUMENTS
   -b name of target organism
   -i name of input sequence
   -d output data directory
+  -z input is 1-based (default, 0-based)
+OPTIONAL ARGUMENTS
+  -q query chromosome length file
+  -t target chromosome length file
 INPUT FORMAT
   qseqid qstart qend tseqid tstart tend score strand
 Where:
@@ -38,8 +43,9 @@ die-instructively(){
     exit 1
 }
 
-query= target= outdir= input=
-while getopts "ha:b:d:i:" opt; do
+base=0
+query= target= outdir= input= query_gf= target_gf=
+while getopts "ha:b:d:i:t:q:z" opt; do
     case $opt in
         h)
             print_help
@@ -55,9 +61,29 @@ while getopts "ha:b:d:i:" opt; do
                 die "Cannot read input file '$input'"
             fi
             ;;
+        q)
+            query_gf="$OPTARG" 
+            if [[ ! -f "$query_gf" ]]
+            then
+                die "Cannot read query genome length file '$query_gf'"
+            fi
+            ;;
+        t)
+            target_gf="$OPTARG" 
+            if [[ ! -f "$target_gf" ]]
+            then
+                die "Cannot read target genome length file '$target_gf'"
+            fi
+            ;;
         d)
             outdir="$OPTARG"
             [[ -d $outdir ]] || mkdir $outdir || die "Cannot access directory '$outdir'"
+            ;;
+        z)
+            base=1
+            ;;
+        ?)
+            die "Unrecognized argument"
             ;;
     esac
 done
@@ -104,21 +130,25 @@ sort -k${1},${1} -k${2},${2}n -k${3},${3}n | awk -v NC=$1 '
 # example below, the name species is Arabidopsis_thaliana and it has 7
 # chromosomes.
 #
-# The lines beginning with '$' contain three columns: 1) the contig id, 2) the
-# number of intervals on the contig, and 3) the name of the contig.
+# The lines beginning with '$' contain four columns:
+#  1) contig id
+#  2) number of intervals on the contig
+#  3) name of the contig
+#  4) contig length
 #
 # An '@' sign terminates the species entry
 #
 # Example:
-# >	Arabidopsis_thaliana	7
-# $	0	283	chloroplast
-# $	1	60721	Chr1
-# $	2	37435	Chr2
-# $	3	44834	Chr3
-# $	4	33059	Chr4
-# $	5	53222	Chr5
-# $	6	8	mitochondrion
+# >  Arabidopsis_thaliana  7
+# $  0  60721  Chr1   30427671
+# $  1  37435  Chr2   19698289
+# $  2  44834  Chr3   23459830
+# $  3  33059  Chr4   18585056
+# $  4  53222  Chr5   26975502
+# $  5      8  ChrM     366924
+# $  6    283  ChrC     154478
 # @
+
 write_side() {
     awk -v seqname=$1 -v namecol=$2 -v idcol=$3 '
         BEGIN{ OFS="\t" }
@@ -135,6 +165,34 @@ write_side() {
             print "@"
         }
     '
+}
+
+add_chromosome_length() {
+    awk -v base=$base '
+        BEGIN{ FS="\t"; OFS="\t" }
+        NR == FNR { a[$1] = $2; next }
+        $1 == "$" {
+            if( $4 in a ) {
+                $0 = $0 "\t" a[$4] - base
+            } else {
+                errmsg = $4 " from synteny file not in scaffold length file" 
+                exit 1
+            }
+        }
+        { print }
+        END{
+            if(errmsg){
+                print errmsg > "/dev/stderr" 
+            }
+        }
+    ' $1 /dev/stdin
+}
+
+add_default_chromosome_length() {
+    awk '
+        $1 == "$" { $0 = $0 "\t" 999999999 }
+        { print }
+    ' /dev/stdin
 }
 
 parse() {
@@ -154,19 +212,38 @@ parse() {
         append_counts 1 2 3 | 
         # Append tseqid and tblkid
         append_counts 4 5 6 > $outtmp
-    write_side $query 1 9 < $outtmp >  $outdb
-    write_side $target 4 11 < $outtmp >> $outdb
-    awk '
+
+    if [[ -r $query_gf ]]
+    then
+        write_side $query 1 9 < $outtmp |
+            add_chromosome_length $query_gf > $outdb
+    else
+        write_side $query 1 9 < $outtmp |
+            add_default_chromosome_length > $outdb
+    fi
+
+    if [[ -r $target_gf ]]
+    then
+        write_side $target 4 11 < $outtmp |
+            add_chromosome_length $target_gf >> $outdb
+    else
+        write_side $target 4 11 < $outtmp |
+            add_default_chromosome_length >> $outdb
+    fi
+
+
+    # Output link data and perform offsets
+    awk -v base=$base '
         {
-            qseqid=$9
-            qblkid=$10
-            qstart=$2
-            qstop=$3
-            tseqid=$11
-            tblkid=$12
-            tstart=$5
-            tstop=$6
-            strand=$8
+            qseqid = $9
+            qblkid = $10
+            qstart = $2   - base
+            qstop  = $3   - base
+            tseqid = $11
+            tblkid = $12
+            tstart = $5   - base
+            tstop  = $6   - base
+            strand = $8
             print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, strand
         }
     ' $outtmp |

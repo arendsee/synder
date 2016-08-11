@@ -26,7 +26,11 @@
 #define LINE_BUFFER_SIZE 512
 #define NAME_BUFFER_SIZE 128
 
-typedef enum direction { HI = 1, LO = 0 } Direction;
+// A value of 0 or 1 with is added to the starts and stops of all printed intervals
+int global_in_base;
+int global_out_base;
+
+typedef enum direction { LO = 0, HI = 1 } Direction;
 
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;
 
@@ -40,7 +44,6 @@ struct Synmap {
   Genome **genome;
 };
 
-
 /** A named set of Contig objects*/
 struct Genome {
   char *name;
@@ -52,23 +55,39 @@ struct Genome {
  * interval tree to search them.
  *
  * Fields:
- * - name  - a unique name for this contig (e.g. "Chr1")
- * - size  - number of blocks in the block array
- * - block - array of pointers to Block objects
- * - itree - an IntervalTree that allows log(n)+m search of overlapping intervals
- *
- * */
+ * - name    - a unique name for this contig (e.g. "Chr1")
+ * - itree   - an IntervalTree for log(n)+m search of overlapping intervals
+ * - size    - number of blocks in the block array
+ * - length  - total number of bases in the chromosome/scaffold
+ * - block   - array of pointers to Block objects sorted by start
+ * - by_stop - array of pointers to Block objects sorted by stop
+ * - base    - 0 for 0-based, 1 for 1-based
+ */
 struct Contig {
   char *name;
   struct IntervalTree *itree;
   size_t size;
+  unsigned int length;
   Block **block;
   Block **by_stop;
-  uint start_sorted:1;
-  uint stop_sorted:1;
+  int base;
 };
 
-/** Query interval with directions to matching target*/
+/** Query interval with directions to matching target
+ *
+ * Fields:
+ * - pos - start and stop positions of the interval
+ * - over - pointer to Block on the other genome
+ * - parent - pointer to the Contig containing this Block
+ * - adj - nearest non-overlapping blocks (0 for left block, 1 for right block)
+ * - cnr - adjacent members in the Block's contiguous set (may be NULL)
+ * - setid - the id of this Block's contiguous set
+ * - grpid - an id shared between this Block and all Block's it overlaps
+ *
+ *   NOTE: setid and grpid are both initialized to 0 in init_Block. 0 is
+ *   reserved for an UNSET id. If a 0 value ever appears after synmap is
+ *   initialized, it implies a serious bug.
+ */
 struct Block {
   uint pos[2];
   Block * over;
@@ -76,11 +95,6 @@ struct Block {
   Block * adj[2];
   Block * cnr[2]; // contiguous neighbor
   size_t setid;
-
-  // grpid holds the id the overlapping intervals on each genome.  It indexed
-  // by linkid. This allows lookup of block adjacency. Two blocks are adjacent
-  // if their setids differ by 1 (if on plus strand) or -1 (if on negative
-  // strand).
   size_t grpid;
   char strand;
 };

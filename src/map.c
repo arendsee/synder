@@ -60,12 +60,15 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
 
   char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
   while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
-  if (!sscanf
-    (line, "%d %*s %*s %d %d %*s %*c %*s %s\n", &chrid, &bounds[LO], &bounds[HI],
-     seqname)) {
-    printf("invalid input\n");
-    continue;
-  }
+    if (!sscanf(line,
+                "%d %*s %*s %d %d %*s %*c %*s %s\n",
+                &chrid, &bounds[LO], &bounds[HI], seqname))
+    {
+      printf("invalid input\n");
+      exit(EXIT_FAILURE);
+    }
+    bounds[LO] -= global_in_base;
+    bounds[HI] -= global_in_base;
 
     rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI]);
  
@@ -96,9 +99,11 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
-        bounds[LO], bounds[HI],
+        bounds[LO] + global_out_base,
+        bounds[HI] + global_out_base,
         blk_bounds[LO]->over->parent->name,
-        bound_results[LO]->bound, bound_results[HI]->bound,
+        bound_results[LO]->bound + global_out_base,
+        bound_results[HI]->bound + global_out_base,
         bound_results[LO]->flag,
         bound_results[HI]->flag
       );
@@ -251,8 +256,7 @@ SI_Bound * get_si_bound(
     // query is further out than ANYTHING in the synteny map
     else {
       flag = EXTREME;
-      // TODO: Is there a better way to handle unbound extremes?
-      bound = vd ? 999999999 : 0;
+      bound = vd ? blk_bounds[d]->over->parent->length : 0;
     }
   }
 

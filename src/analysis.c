@@ -7,7 +7,11 @@ void analysis_count(Synmap * syn, FILE * intfile)
   int chrid, start, stop;
   while ((fscanf(intfile,
                  "%d %*s %*s %d %d %*s %*c %*s %s\n",
-                 &chrid, &start, &stop, seqname)) != EOF) {
+                 &chrid, &start, &stop, seqname)) != EOF)
+  {
+    start -= global_in_base;
+    stop  -= global_in_base;
+
     // contig.c::count_overlaps ->
     //   itree/search.c::count_interval_overlaps ->
     //   itree/search.c::count_interval_overlaps_r
@@ -27,7 +31,10 @@ void analysis_map(Synmap * syn, FILE * intfile)
   bool missing;
   while ((fscanf(intfile,
                  "%d %*s %*s %d %d %*s %*c %*s %s\n",
-                 &chrid, &start, &stop, seqname)) != EOF) {
+                 &chrid, &start, &stop, seqname)) != EOF)
+  {
+    start -= global_in_base;
+    stop  -= global_in_base;
 
     rc = get_region(SGC(syn, 0, chrid), start, stop);
     contigs = rc->contig;
@@ -39,7 +46,12 @@ void analysis_map(Synmap * syn, FILE * intfile)
         tcon = qblk->over->parent;
         tblk = qblk->over;
         printf("%s %s %u %u %d\n",
-               seqname, tcon->name, tblk->pos[0], tblk->pos[1], missing);
+               seqname,
+               tcon->name,
+               tblk->pos[0] + global_out_base,
+               tblk->pos[1] + global_out_base,
+               missing
+        );
       }
     }
 
