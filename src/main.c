@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     char db_args[1024];
     sprintf(
         db_args,
-        "%s -a %s -b %s -i %s -d %s %s %s %s %s",
+        "%s -a %s -b %s -i %s -d %s %s %s %s %s 2> /dev/null",
         global_in_base == 1 ? " -z " : "",
         args.pos[0],
         args.pos[1],

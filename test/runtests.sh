@@ -47,45 +47,51 @@ runtest(){
     mkdir $tmp
     echo -n "Testing $msg ... "
     $synder -d $dir/map.syn a b $tmp/db 
-    if [[ $out_base == 1 ]]
-    then
-        $synder -b -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
-        diff <(cat $tmp/a | filter) \
-             <(cat $dir/${base}-exp.txt | base_one_filter) > /dev/null 
-    else
-        $synder -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
-        diff <(cat $tmp/a | filter) \
-             <(cat $dir/${base}-exp.txt | filter) > /dev/null 
-    fi
-
     if [[ $? == 0 ]]
     then
-        total_passed=$(( $total_passed + 1 ))
-        echo "OK"
+        if [[ $out_base == 1 ]]
+        then
+            $synder -b -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
+            diff <(cat $tmp/a | filter) \
+                 <(cat $dir/${base}-exp.txt | base_one_filter) > /dev/null 
+        else
+            $synder -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
+            diff <(cat $tmp/a | filter) \
+                 <(cat $dir/${base}-exp.txt | filter) > /dev/null 
+        fi
+
+        if [[ $? == 0 ]]
+        then
+            total_passed=$(( $total_passed + 1 ))
+            echo "OK"
+        else
+            echo
+            warn "FAIL"
+            echo " (in `basename $dir`/)"
+            [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
+            total_failed=$(( $total_failed + 1 ))
+            echo "======================================="
+            emphasize_n "expected output"; echo ": (${base}-exp.txt)"
+            cat $dir/${base}-exp.txt | filter | column -t
+            emphasize "observed output:"
+            cat $tmp/a | filter | column -t
+            emphasize_n "query gff"; echo ": (${base}.gff)"
+            column -t $dir/$base.gff
+            emphasize_n "synteny map"; echo ": (map.syn)"
+            column -t $dir/map.syn
+            echo "See zzz_g and zzz_db"
+            echo -e "---------------------------------------\n"
+
+            ln -sf $dir/$base.gff zzz_g 
+            $synder -d $dir/map.syn a b zzz_db
+
+        fi
+
+        rm -rf $tmp
     else
-        echo
-        warn "FAIL"
-        echo " (in `basename $dir`/)"
-        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
         total_failed=$(( $total_failed + 1 ))
-        echo "======================================="
-        emphasize_n "expected output"; echo ": (${base}-exp.txt)"
-        cat $dir/${base}-exp.txt | filter | column -t
-        emphasize "observed output:"
-        cat $tmp/a | filter | column -t
-        emphasize_n "query gff"; echo ": (${base}.gff)"
-        column -t $dir/$base.gff
-        emphasize_n "synteny map"; echo ": (map.syn)"
-        column -t $dir/map.syn
-        echo "See zzz_g and zzz_db"
-        echo -e "---------------------------------------\n"
-
-        ln -sf $dir/$base.gff zzz_g 
-        $synder -d $dir/map.syn a b zzz_db
-
+        warn "FAILED - Could not build database\n"
     fi
-
-    rm -rf $tmp
 }
 
 #---------------------------------------------------------------------
@@ -105,70 +111,70 @@ runtest $dir lo      "query upstream of all blocks"
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-block"
 announce "\nTesting with 5 adjacent blocks on the same strand"
-runtest $dir a "Extreme left"
-runtest $dir b "Inbetween two adjacent blocks"
-runtest $dir c "Starts inbetween adjacent blocks"
-runtest $dir d "Stops inbetween adjacent blocks"
-runtest $dir e "Inbetween two adjacent blocks"
-runtest $dir f "Starts before block 3, ends after block 3"
-runtest $dir g "Starts in block 2, ends after block 3"
-runtest $dir h "Starts before block 2, ends after block 3"
-runtest $dir i "Starts in block 2, ends in block 2"
-runtest $dir j "Extreme right"
+runtest $dir a "extreme left"
+runtest $dir b "inbetween two adjacent blocks"
+runtest $dir c "starts inbetween adjacent blocks"
+runtest $dir d "stops inbetween adjacent blocks"
+runtest $dir e "inbetween two adjacent blocks"
+runtest $dir f "starts before block 3, ends after block 3"
+runtest $dir g "starts in block 2, ends after block 3"
+runtest $dir h "starts before block 2, ends after block 3"
+runtest $dir i "starts in block 2, ends in block 2"
+runtest $dir j "extreme right"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/simple-duplication"
 announce "\nTest simple tandem duplication"
-runtest $dir between "Query starts between the duplicated intervals"
+runtest $dir between "query starts between the duplicated intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/one-interval-inversion"
 announce "\nTest when a single interval is inverted"
-runtest $dir between "Query next to inverted interval"
-runtest $dir over    "Query overlaps inverted interval"
+runtest $dir between "query next to inverted interval"
+runtest $dir over    "query overlaps inverted interval"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
-runtest $dir beside   "Query next to inverted interval"
-runtest $dir within   "Query between inverted intervals"
-runtest $dir spanning "Query spans inverted intervals"
+runtest $dir beside   "query next to inverted interval"
+runtest $dir within   "query between inverted intervals"
+runtest $dir spanning "query spans inverted intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tiny-indel-query-side"
 announce "\nTest when a small interval interupts on one side"
-runtest $dir beside "Query side"
+runtest $dir beside "query side"
 dir="$PWD/test/test-data/tiny-indel-target-side"
-runtest $dir beside "Target side"
+runtest $dir beside "target side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
-runtest $dir beside "Query beside the transposed pair"
-runtest $dir within "Query between the transposed pair"
+runtest $dir beside "query beside the transposed pair"
+runtest $dir within "query between the transposed pair"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/irregular-overlaps"
 announce "\nTest target side internal overlaps"
-runtest $dir left "Left side" "You are either 1) not sorting the by_stop vector
+runtest $dir left "left side" "You are either 1) not sorting the by_stop vector
 in Contig by Block stop positions, or 2) are snapping the search interval left
 boundary to a Block that is nearest by start, but not be stop."
-runtest $dir right "Right side"
+runtest $dir right "right side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-chromosome"
 announce "\nTest two intervals on same query chr but different target chr"
-runtest $dir between "Between the query intervals"
+runtest $dir between "between the query intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/inverted-extremes"
 announce "\nExtreme value resulting from an inversion"
-runtest $dir extreme "Between the query intervals, extreme SI"
+runtest $dir extreme "between the query intervals, extreme SI"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/deletion"
 announce "\nDeletion tests (adjacent bounds in target)"
-runtest $dir between "Query is inbetween"
+runtest $dir between "query is inbetween"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/off-by-one"
@@ -178,10 +184,10 @@ runtest $dir a "overlap of 1"
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/unassembled"
 announce "\nMappings beyond the edges of target scaffold"
-runtest $dir lo "Query is below scaffold"
+runtest $dir lo "query is below scaffold"
 
 out_base=1
-runtest $dir lo "Test with 1-base"
+runtest $dir lo "test with 1-base"
 
 # # # TODO Find a good way to deal with this case:
 # # dir="$PWD/test/test-data/synmap-overlaps"
