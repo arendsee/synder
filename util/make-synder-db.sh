@@ -168,12 +168,12 @@ write_side() {
 }
 
 add_chromosome_length() {
-    awk -v base=$base '
+    awk '
         BEGIN{ FS="\t"; OFS="\t" }
         NR == FNR { a[$1] = $2; next }
         $1 == "$" {
             if( $4 in a ) {
-                $0 = $0 "\t" a[$4] - base
+                $0 = $0 "\t" a[$4]
             } else {
                 errmsg = $4 " from synteny file not in scaffold length file" 
                 exit 1
@@ -190,7 +190,7 @@ add_chromosome_length() {
 
 add_default_chromosome_length() {
     awk '
-        $1 == "$" { $0 = $0 "\t" 999999999 }
+        $1 == "$" { $0 = $0 "\t" 1000000000 }
         { print }
     ' /dev/stdin
 }
