@@ -229,27 +229,13 @@ SI_Bound * get_si_bound(
     Block * downstream_blk = blk_bounds[d]->over->adj[vd];
  
     // adjacent block on TARGET side exists
+    //    |x...--a=======b|
+    //    |x...--c=======d|  ...  F===
+    //                           ^
+    //                    <---q
     if(downstream_blk != NULL){
-
-      //    |x...--a=======b|
-      //    |x...--c=======d|  ...  F===
-      //                           ^
-      //                  <-----------q
-      // q >= F  ***ON QUERY SIDE***
-      if(!inverted && REL_GT(q, downstream_blk->over->pos[!d], d)){
-        // TODO: This is a weird case, how should I handle it?
-        flag = ANCHORED;
-        bound = downstream_blk->pos[!d];
-      }
-
-      //    |x...--a=======b|
-      //    |x...--c=======d|  ...  F===
-      //                           ^
-      //                    <---q
-      else {
-        flag = UNBOUND;
-        bound = downstream_blk->pos[!vd];
-      }
+      flag = UNBOUND;
+      bound = downstream_blk->pos[!vd];
     }
     //    |x...--a=======b|
     //    |x...--c=======d|  ...  THE_END
