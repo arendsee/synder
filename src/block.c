@@ -28,7 +28,6 @@ Block *init_Block(uint start, uint stop)
   block->setid  = 0; // reserve 0 for unset
   block->grpid  = 0; // reserve 0 for unset
   block->strand = '.';
-  block->setid = 888; // arbitrary number to check in debuggin
   return (block);
 }
 
