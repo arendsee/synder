@@ -256,7 +256,7 @@ SI_Bound * get_si_bound(
     // query is further out than ANYTHING in the synteny map
     else {
       flag = EXTREME;
-      bound = vd ? blk_bounds[d]->over->parent->length : 0;
+      bound = vd ? blk_bounds[d]->over->parent->length - 1 : 0;
     }
   }
 
