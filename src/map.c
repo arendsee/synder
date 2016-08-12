@@ -96,7 +96,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       bound_results[inverted ^ HI] =
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
  
-      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\t%i\n",
+      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t%c\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
         bounds[LO] + global_out_base,
@@ -104,6 +104,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
         blk_bounds[LO]->over->parent->name,
         bound_results[LO]->bound + global_out_base,
         bound_results[HI]->bound + global_out_base,
+        blk_bounds[LO]->over->strand,
         bound_results[LO]->flag,
         bound_results[HI]->flag
       );
