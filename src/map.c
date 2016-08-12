@@ -96,7 +96,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       bound_results[inverted ^ HI] =
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
  
-      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t.\t%i\t%i\n",
+      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t%c\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
         bounds[LO] + global_out_base,
@@ -104,6 +104,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
         blk_bounds[LO]->over->parent->name,
         bound_results[LO]->bound + global_out_base,
         bound_results[HI]->bound + global_out_base,
+        blk_bounds[LO]->over->strand,
         bound_results[LO]->flag,
         bound_results[HI]->flag
       );
@@ -228,27 +229,13 @@ SI_Bound * get_si_bound(
     Block * downstream_blk = blk_bounds[d]->over->adj[vd];
  
     // adjacent block on TARGET side exists
+    //    |x...--a=======b|
+    //    |x...--c=======d|  ...  F===
+    //                           ^
+    //                    <---q
     if(downstream_blk != NULL){
-
-      //    |x...--a=======b|
-      //    |x...--c=======d|  ...  F===
-      //                           ^
-      //                  <-----------q
-      // q >= F  ***ON QUERY SIDE***
-      if(!inverted && REL_GT(q, downstream_blk->over->pos[!d], d)){
-        // TODO: This is a weird case, how should I handle it?
-        flag = ANCHORED;
-        bound = downstream_blk->pos[!d];
-      }
-
-      //    |x...--a=======b|
-      //    |x...--c=======d|  ...  F===
-      //                           ^
-      //                    <---q
-      else {
-        flag = UNBOUND;
-        bound = downstream_blk->pos[!vd];
-      }
+      flag = UNBOUND;
+      bound = downstream_blk->pos[!vd];
     }
     //    |x...--a=======b|
     //    |x...--c=======d|  ...  THE_END

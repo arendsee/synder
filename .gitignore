@@ -7,6 +7,8 @@ tags
 
 gmon.out
 
+*.un~
+
 README.pdf
 
 *.gch
