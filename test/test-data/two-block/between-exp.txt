@@ -1,1 +1,1 @@
-between	que	225	275	tar	1200	1300	.	0
+between	que	225	275	tar	1200	1300	+	1	1

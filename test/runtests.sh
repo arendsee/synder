@@ -29,10 +29,10 @@ emphasize_n(){
 # A function to select which parts of the output should be compared
 # Since flags are currently in flux, test only the first 7 columns
 filter () {
-    cut -f1-7 | sort
+   sort
 }
 base_one_filter () {
-    awk -v OFS="\t" '{print $1,$2,$3+1,$4+1,$5,$6+1,$7+1}' | sort
+    awk -v OFS="\t" '{print $1,$2,$3+1,$4+1,$5,$6+1,$7+1,$8,$9,$10}' | sort
 }
 
 out_base=0
@@ -70,9 +70,9 @@ runtest(){
         total_failed=$(( $total_failed + 1 ))
         echo "======================================="
         emphasize_n "expected output"; echo ": (${base}-exp.txt)"
-        cat $dir/${base}-exp.txt | exp_filter | column -t
+        cat $dir/${base}-exp.txt | filter | column -t
         emphasize "observed output:"
-        cat $tmp/a | out_filter | column -t
+        cat $tmp/a | filter | column -t
         emphasize_n "query gff"; echo ": (${base}.gff)"
         column -t $dir/$base.gff
         emphasize_n "synteny map"; echo ": (map.syn)"
@@ -171,6 +171,11 @@ announce "\nDeletion tests (adjacent bounds in target)"
 runtest $dir between "Query is inbetween"
 
 #---------------------------------------------------------------------
+dir="$PWD/test/test-data/off-by-one"
+announce "\nTest overlap edge cases"
+runtest $dir a "overlap of 1"
+
+#---------------------------------------------------------------------
 dir="$PWD/test/test-data/unassembled"
 announce "\nMappings beyond the edges of target scaffold"
 runtest $dir lo "Query is below scaffold"
@@ -178,10 +183,10 @@ runtest $dir lo "Query is below scaffold"
 out_base=1
 runtest $dir lo "Test with 1-base"
 
-# # TODO Find a good way to deal with this case:
-# dir="$PWD/test/test-data/synmap-overlaps"
-# announce "\nsyntenic overlaps"
-# runtest $dir simple "Between the weird"
+# # # TODO Find a good way to deal with this case:
+# # dir="$PWD/test/test-data/synmap-overlaps"
+# # announce "\nsyntenic overlaps"
+# # runtest $dir simple "Between the weird"
 
 #---------------------------------------------------------------------
 echo

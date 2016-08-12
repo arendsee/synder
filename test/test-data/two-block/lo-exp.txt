@@ -1,1 +1,1 @@
-lo	que	1	10	tar	0	1100	.	6
+lo	que	1	10	tar	0	1100	+	3	2
