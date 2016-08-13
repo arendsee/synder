@@ -1,1 +1,1 @@
-spanning	que	275	625	tar	200	700	-	2	2
+spanning	que	275	625	tar	200	700	-	2	2	0

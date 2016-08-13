@@ -1,2 +1,2 @@
-within	que	425	475	tar	200	300	+	2	2
-within	que	425	475	tar	600	700	+	2	2
+within	que	425	475	tar	200	300	+	2	2	1
+within	que	425	475	tar	600	700	+	2	2	1

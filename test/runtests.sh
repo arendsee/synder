@@ -32,7 +32,7 @@ filter () {
    sort
 }
 base_one_filter () {
-    awk -v OFS="\t" '{print $1,$2,$3+1,$4+1,$5,$6+1,$7+1,$8,$9,$10}' | sort
+    awk -v OFS="\t" '{print $1,$2,$3+1,$4+1,$5,$6+1,$7+1,$8,$9,$10,$11}' | sort
 }
 
 out_base=0
@@ -189,10 +189,10 @@ runtest $dir lo "query is below scaffold"
 out_base=1
 runtest $dir lo "test with 1-base"
 
-# # # TODO Find a good way to deal with this case:
-# # dir="$PWD/test/test-data/synmap-overlaps"
-# # announce "\nsyntenic overlaps"
-# # runtest $dir simple "Between the weird"
+# # TODO Find a good way to deal with this case:
+# dir="$PWD/test/test-data/synmap-overlaps"
+# announce "\nsyntenic overlaps"
+# runtest $dir simple "Between the weird"
 
 #---------------------------------------------------------------------
 echo
