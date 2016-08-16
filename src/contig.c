@@ -69,7 +69,7 @@ ResultContig * init_ResultContig(Contig * contig, IntervalResult * ir)
   rc->contig        = contig;
   rc->inbetween     = ir->inbetween;
   rc->leftmost      = ir->leftmost;
-  rc->rightmost     = ir->leftmost;
+  rc->rightmost     = ir->rightmost;
   return rc;
 }
 

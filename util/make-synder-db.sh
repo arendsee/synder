@@ -14,10 +14,11 @@ REQUIRED ARGUMENTS
   -b name of target organism
   -i name of input sequence
   -d output data directory
-  -z input is 1-based (default, 0-based)
 OPTIONAL ARGUMENTS
   -q query chromosome length file
   -t target chromosome length file
+  -x start is 1-based
+  -y stop is 1-based
 INPUT FORMAT
   qseqid qstart qend tseqid tstart tend score strand
 Where:
@@ -43,9 +44,10 @@ die-instructively(){
     exit 1
 }
 
-base=0
+start_base=0
+stop_base=0
 query= target= outdir= input= query_gf= target_gf=
-while getopts "ha:b:d:i:t:q:z" opt; do
+while getopts "ha:b:d:i:t:q:xy" opt; do
     case $opt in
         h)
             print_help
@@ -79,8 +81,11 @@ while getopts "ha:b:d:i:t:q:z" opt; do
             outdir="$OPTARG"
             [[ -d $outdir ]] || mkdir $outdir || die "Cannot access directory '$outdir'"
             ;;
-        z)
-            base=1
+        x)
+            start_base=1
+            ;;
+        y)
+            stop_base=1
             ;;
         ?)
             die "Unrecognized argument"
@@ -233,16 +238,16 @@ parse() {
 
 
     # Output link data and perform offsets
-    awk -v base=$base '
+    awk -v start_base=$start_base -v stop_base=$stop_base '
         {
             qseqid = $9
             qblkid = $10
-            qstart = $2   - base
-            qstop  = $3   - base
+            qstart = $2   - start_base
+            qstop  = $3   - stop_base
             tseqid = $11
             tblkid = $12
-            tstart = $5   - base
-            tstop  = $6   - base
+            tstart = $5   - start_base
+            tstop  = $6   - stop_base
             strand = $8
             print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, strand
         }

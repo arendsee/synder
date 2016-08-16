@@ -67,8 +67,8 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       printf("invalid input\n");
       exit(EXIT_FAILURE);
     }
-    bounds[LO] -= global_in_base;
-    bounds[HI] -= global_in_base;
+    bounds[LO] -= global_in_start;
+    bounds[HI] -= global_in_stop;
 
     rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI]);
  
@@ -96,17 +96,18 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       bound_results[inverted ^ HI] =
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
  
-      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t%c\t%i\t%i\n",
+      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t%c\t%i\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
-        bounds[LO] + global_out_base,
-        bounds[HI] + global_out_base,
+        bounds[LO] + global_out_start,
+        bounds[HI] + global_out_stop,
         blk_bounds[LO]->over->parent->name,
-        bound_results[LO]->bound + global_out_base,
-        bound_results[HI]->bound + global_out_base,
+        bound_results[LO]->bound + global_out_start,
+        bound_results[HI]->bound + global_out_stop,
         blk_bounds[LO]->over->strand,
         bound_results[LO]->flag,
-        bound_results[HI]->flag
+        bound_results[HI]->flag,
+        rc->inbetween || rc->leftmost || rc->rightmost
       );
 
       free(bound_results[0]);
@@ -242,8 +243,8 @@ SI_Bound * get_si_bound(
     //                    <---q
     // query is further out than ANYTHING in the synteny map
     else {
-      flag = EXTREME;
       bound = vd ? blk_bounds[d]->over->parent->length - 1 : 0;
+      flag = blk_bounds[d]->over->pos[vd] == bound ? BEYOND : EXTREME;
     }
   }
 

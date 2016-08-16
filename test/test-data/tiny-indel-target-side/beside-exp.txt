@@ -1,2 +1,2 @@
-beside	que	225	275	tar	200	589	+	2	2
-beside	que	225	275	tar	599	700	+	2	2
+beside	que	225	275	tar	200	589	+	2	2	1
+beside	que	225	275	tar	599	700	+	2	2	1

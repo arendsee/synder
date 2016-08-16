@@ -1,1 +1,1 @@
-deleted	que	225	275	tar	1100	1101	+	1	1
+deleted	que	225	275	tar	1100	1101	+	1	1	1

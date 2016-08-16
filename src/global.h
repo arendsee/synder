@@ -27,8 +27,10 @@
 #define NAME_BUFFER_SIZE 128
 
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
-int global_in_base;
-int global_out_base;
+int global_in_start;
+int global_in_stop;
+int global_out_start;
+int global_out_stop;
 
 typedef enum direction { LO = 0, HI = 1 } Direction;
 

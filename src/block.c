@@ -28,7 +28,6 @@ Block *init_Block(uint start, uint stop)
   block->setid  = 0; // reserve 0 for unset
   block->grpid  = 0; // reserve 0 for unset
   block->strand = '.';
-  block->setid = 888; // arbitrary number to check in debuggin
   return (block);
 }
 
@@ -48,11 +47,11 @@ void print_Block(Block * block)
 {
   printf("%s\t%u\t%u\t%s\t%u\t%u\t%c\n",
          block->parent->name,
-         block->pos[0] + global_out_base,
-         block->pos[1] + global_out_base,
+         block->pos[0] + global_out_start,
+         block->pos[1] + global_out_stop,
          block->over->parent->name,
-         block->over->pos[0] + global_out_base,
-         block->over->pos[1] + global_out_base,
+         block->over->pos[0] + global_out_start,
+         block->over->pos[1] + global_out_stop,
          block->strand
   );
 }

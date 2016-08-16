@@ -1,2 +1,2 @@
-beside	que	225	275	tar	200	700	+	2	2
-beside	que	225	275	samarkand	23670	23700	+	2	2
+beside	que	225	275	tar	200	700	+	2	2	1
+beside	que	225	275	samarkand	23670	23700	+	2	2	1
