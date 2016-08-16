@@ -28,8 +28,8 @@ void print_Synmap(Synmap * synmap, bool forward)
 
 void sort_all_contigs(Synmap * synmap)
 {
-  for (int genid = 0; genid < 2; genid++) {
-    for (int conid = 0; conid < SG(synmap, genid)->size; conid++) {
+  for (size_t genid = 0; genid < 2; genid++) {
+    for (size_t conid = 0; conid < SG(synmap, genid)->size; conid++) {
       sort_blocks_by_start(SGC(synmap, genid, conid));
       sort_blocks_by_stop(SGC(synmap, genid, conid));
     }
@@ -49,7 +49,7 @@ void set_overlap_group(Synmap * syn){
 
   // Loop through target and query genomes
   // g := genome id (0 is query, 1 is target)
-  for (int g = 0; g <= 1; g++){
+  for (size_t g = 0; g <= 1; g++){
     // Loop through each contig in the query genome
     // i := contig id
     for (size_t i = 0; i < SG(syn,g)->size; i++) {
@@ -147,7 +147,7 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
   }
 }
 void link_adjacent_blocks(Synmap * syn){
-  for (int genid = 0; genid <= 1; genid++){
+  for (size_t genid = 0; genid <= 1; genid++){
     for (size_t conid = 0; conid < SG(syn, genid)->size; conid++) {
       link_adjacent_blocks_directed(SGC(syn, genid, conid), HI);
       link_adjacent_blocks_directed(SGC(syn, genid, conid), LO);
@@ -188,7 +188,7 @@ void link_contiguous_blocks(Synmap * syn)
   Block * blk;
   Node * node;
   Node * root;
-  int qdiff, tdiff;
+  size_t qdiff, tdiff;
   char this_strand, older_strand;
   size_t setid = 0;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {

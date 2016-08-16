@@ -1,19 +1,17 @@
 #ifndef __INTERVAL_H__
 #define __INTERVAL_H__
 
-#ifndef uint
-#define uint unsigned int
-#endif
+#include <stdlib.h>
 
 /** the eponymous structure */
 typedef struct {
-    uint start;
-    uint stop;
+    size_t start;
+    size_t stop;
     void * link; /* a pointer to arbitrary related data */
 } Interval;
 
 /** initialize Interval with start and stop, but set link to NULL */
-Interval * init_Interval(uint start, uint stop);
+Interval * init_Interval(size_t start, size_t stop);
 
 void print_Interval(Interval *);
 
@@ -27,7 +25,7 @@ int cmp_stop(const void *, const void *);
 int cmp_start(const void *, const void *);
 
 /** find position of point A relative to interval B (see Pos) */
-Pos point_overlap(uint A, Interval * B);
+Pos point_overlap(size_t A, Interval * B);
 
 /** find position of interval A relative to interval B (see Pos) */
 Pos interval_overlap(Interval *, Interval *);

@@ -5,10 +5,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#ifndef uint
-#define uint unsigned int
-#endif
-
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
 #define REL_LE(x, y, d)   ((d) ? (x) <= (y) : (x) >= (y))
@@ -69,7 +65,7 @@ struct Contig {
   char *name;
   struct IntervalTree *itree;
   size_t size;
-  unsigned int length;
+  size_t length;
   Block **block;
   Block **by_stop;
   int base;
@@ -91,7 +87,7 @@ struct Contig {
  *   initialized, it implies a serious bug.
  */
 struct Block {
-  uint pos[2];
+  size_t pos[2];
   Block * over;
   Contig * parent;  
   Block * adj[2];

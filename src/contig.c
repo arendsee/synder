@@ -6,7 +6,7 @@
 
 #include "contig.h"
 
-Contig *init_Contig(char *name, size_t size, uint length)
+Contig *init_Contig(char *name, size_t size, size_t length)
 {
   Contig *con = (Contig *) malloc(sizeof(Contig));
   con->name = strdup(name);
@@ -21,7 +21,7 @@ Contig *init_Contig(char *name, size_t size, uint length)
 void free_Contig(Contig * contig)
 {
   if (contig != NULL) {
-    for (int i = 0; i < contig->size; i++) {
+    for (size_t i = 0; i < contig->size; i++) {
       if (contig->block[i] != NULL)
         free_Block(contig->block[i]);
     }
@@ -53,11 +53,11 @@ void print_Contig(Contig * contig, bool forward)
 {
   printf("%lu\t%s\n", contig->size, contig->name);
   if(forward){
-    for (int i = 0; i < contig->size; i++) {
+    for (size_t i = 0; i < contig->size; i++) {
       print_Block(contig->block[i]);
     }
   } else {
-    for (int i = 0; i < contig->size; i++) {
+    for (size_t i = 0; i < contig->size; i++) {
       print_Block(contig->by_stop[i]);
     }
   }
@@ -99,13 +99,13 @@ void print_ResultContig(ResultContig * rc)
     print_Contig(rc->contig, true);
 }
 
-uint anchor(Contig * contig, uint x)
+size_t anchor(Contig * contig, size_t x)
 {
   Block **blks = contig->block;
-  uint N = contig->size;
-  uint lo = 0;
-  uint hi = N - 1;
-  uint i = hi / 2;
+  size_t N = contig->size;
+  size_t lo = 0;
+  size_t hi = N - 1;
+  size_t i = hi / 2;
   while (true) {
     if (x >= blks[i]->pos[0]) {
       if (i == (N - 1) || x < blks[i + 1]->pos[0])
@@ -126,7 +126,7 @@ uint anchor(Contig * contig, uint x)
 IA *ia_from_blocks(Contig * con)
 {
   IA *ia = init_set_IA(con->size);
-  for (int i = 0; i < con->size; i++) {
+  for (size_t i = 0; i < con->size; i++) {
     ia->v[i].start = con->block[i]->pos[0];
     ia->v[i].stop = con->block[i]->pos[1];
     ia->v[i].link = (void *) con->block[i];
@@ -134,7 +134,7 @@ IA *ia_from_blocks(Contig * con)
   return ia;
 }
 
-ResultContig *get_region(Contig * con, uint a, uint b)
+ResultContig *get_region(Contig * con, size_t a, size_t b)
 {
   // Build itree if necessary
   if (con->itree == NULL)
@@ -178,7 +178,7 @@ ResultContig *get_region(Contig * con, uint a, uint b)
 
   // Assign returned intervals to Contig
   Contig *contig = init_Contig(con->name, res->iv->size, con->length);
-  for (int i = 0; i < res->iv->size; i++) {
+  for (size_t i = 0; i < res->iv->size; i++) {
     contig->block[i] = (Block*)res->iv->v[i].link;
   }
 
@@ -189,12 +189,12 @@ ResultContig *get_region(Contig * con, uint a, uint b)
   return resultcontig;
 }
 
-uint count_overlaps(Contig * con, uint a, uint b)
+size_t count_overlaps(Contig * con, size_t a, size_t b)
 {
   if (con->itree == NULL)
     con->itree = build_tree(ia_from_blocks(con));
   Interval *inv = init_Interval(a, b);
-  uint count = count_interval_overlaps(inv, con->itree);
+  size_t count = count_interval_overlaps(inv, con->itree);
   free(inv);
   return count;
 }

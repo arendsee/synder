@@ -48,7 +48,7 @@ void convert_seqname(FILE * synfile, FILE * intfile, int swap)
         }
 
       } else {
-        fprintf(stderr, "Incorrect file format, line %d\n", line_no);
+        fprintf(stderr, "Incorrect file format, line %u\n", line_no);
         exit(EXIT_FAILURE);
       }
     }
@@ -57,7 +57,7 @@ void convert_seqname(FILE * synfile, FILE * intfile, int swap)
   current = root;
 
   char seqname[128];
-  int start, end;
+  size_t start, end;
   char strand;
   char attribute[512];
   size_t length = 1024;
@@ -66,7 +66,7 @@ void convert_seqname(FILE * synfile, FILE * intfile, int swap)
   // Actual conversion
   while (fgets(nline, length, intfile) && !feof(intfile)) {
     if (!sscanf
-        (nline, "%s %*s %*s %d %d %*s %c %*s %s\n", seqname, &start, &end,
+        (nline, "%s %*s %*s %zu %zu %*s %c %*s %s\n", seqname, &start, &end,
          &strand, attribute)) {
       continue;
     }
@@ -135,7 +135,7 @@ void convert_seqname(FILE * synfile, FILE * intfile, int swap)
     root = newRoot;
 
     // print new name
-    printf("%u\t.\t.\t%d\t%d\t.\t%c\t.\t%s\n", min_idx, start, end, strand,
+    printf("%d\t.\t.\t%zu\t%zu\t.\t%c\t.\t%s\n", min_idx, start, end, strand,
            attribute);
 
   }

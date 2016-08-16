@@ -31,7 +31,7 @@ void free_IV(IV * self){
 
 void print_IV(IV * self){
     for(size_t i = 0; i < self->size; i++){
-        printf("(%u, %u) ", self->v[i].start, self->v[i].stop); 
+        printf("(%zu, %zu) ", self->v[i].start, self->v[i].stop); 
     }
     printf("\n");
 }

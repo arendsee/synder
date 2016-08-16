@@ -8,10 +8,6 @@
 #include "interval.h"
 #include "itree.h"
 
-#ifndef uint
-#define uint unsigned int
-#endif
-
 #define LAST_STOP(tree)   tree->by_stop->v[tree->by_stop->size-1]
 #define FIRST_START(tree) tree->by_start->v[0]
 
@@ -45,7 +41,7 @@ typedef struct {
  * @param pnt a point position on the IntervalTree
  * @param tree an IntervalTree
  */
-uint count_point_overlaps(uint pnt, IntervalTree * tree);
+size_t count_point_overlaps(size_t pnt, IntervalTree * tree);
 
 
 /** Count the number of query-side intervals that overlap a search interval
@@ -53,7 +49,7 @@ uint count_point_overlaps(uint pnt, IntervalTree * tree);
  * @param interval an interval on the IntervalTree
  * @param tree an IntervalTree
  */
-uint count_interval_overlaps(Interval * interval, IntervalTree * tree);
+size_t count_interval_overlaps(Interval * interval, IntervalTree * tree);
 
 
 /** Allocate memory and set defaults for an IntervalResults struct */
@@ -71,7 +67,7 @@ void print_IntervalResult(IntervalResult *);
  *
  * See notes on get_point_overlaps
  */
-IntervalResult * get_point_overlaps(uint, IntervalTree *);
+IntervalResult * get_point_overlaps(size_t, IntervalTree *);
 
 /** Retrieve all target intervals overlapping a query interval
  *

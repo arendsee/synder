@@ -40,11 +40,11 @@ void analysis_map(Synmap * syn, FILE * gff_file);
  */
 // typedef struct {
 //   size_t qseqid;
-//   uint qstart;
-//   uint qstop;
+//   size_t qstart;
+//   size_t qstop;
 //   size_t tseqid;
-//   uint tstart;
-//   uint tstop;
+//   size_t tstart;
+//   size_t tstop;
 // } Link;
 
 /** Identifies syntenic links that agree with the syntenic database

@@ -14,7 +14,7 @@
  * @return pointer to new Block
  *
  * */
-Block *init_Block(uint start, uint stop)
+Block *init_Block(size_t start, size_t stop)
 {
   Block *block  = (Block *) malloc(sizeof(Block));
   block->pos[0] = start;
@@ -45,7 +45,7 @@ void free_Block(Block * block)
 /** Print all fields in this block (TAB-delimited). */
 void print_Block(Block * block)
 {
-  printf("%s\t%u\t%u\t%s\t%u\t%u\t%c\n",
+  printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\n",
          block->parent->name,
          block->pos[0] + global_out_start,
          block->pos[1] + global_out_stop,
@@ -66,7 +66,7 @@ void print_Block(Block * block)
  *
  * @return TRUE if the intervals overlap
  */
-bool overlap(uint a1, uint a2, uint b1, uint b2)
+bool overlap(size_t a1, size_t a2, size_t b1, size_t b2)
 {
   return a1 <= b2 && a2 >= b1;
 }
@@ -97,7 +97,7 @@ int block_cmp_start(const void *ap, const void *bp)
   return (int)(a->pos[0] > b->pos[0]) - (int)(a->pos[0] < b->pos[0]);
 }
 
-uint get_set_bound(Block * blk, Direction d){
+size_t get_set_bound(Block * blk, Direction d){
     if(blk->cnr[d] != NULL){
         return get_set_bound(blk->cnr[d], d);
     }

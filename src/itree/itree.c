@@ -15,7 +15,7 @@ void print_IntervalTree_verbosity_1(IntervalTree * n, int depth, char pos);
 void print_IntervalTree_verbosity_2(IntervalTree * n, int depth, char pos);
 void print_IntervalTree_verbosity_3(IntervalTree * n, int depth, char pos);
 void print_IntervalTree_r(IntervalTree * n, int depth, char pos, int verbosity);
-uint get_center(IA *);
+size_t get_center(IA *);
 
 
 IntervalTree * init_IntervalTree(){
@@ -66,7 +66,7 @@ IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation o
     int npos[] = {0, 0, 0};
 
     /* iterate over intervals classifying and counting each */
-    for(int i = 0; i < intervals->size; i++){
+    for(size_t i = 0; i < intervals->size; i++){
         pos[i] = point_overlap(tree->center, &intervals->v[i]);
         npos[pos[i]]++;
     }
@@ -135,26 +135,26 @@ IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation o
  * If the intervals are sorted, it also favors (but doesn't guarantee) a
  * balanced tree.
  */
-uint get_center(IA * intr){
+size_t get_center(IA * intr){
     // get the central index
     size_t i = intr->size / 2;
     // get the center point on this index
-    uint x = (intr->v[i].stop - intr->v[i].start) / 2 + intr->v[i].start;
+    size_t x = (intr->v[i].stop - intr->v[i].start) / 2 + intr->v[i].start;
     return x;
 }
 
 /* write tree and center */
 void print_IntervalTree_verbosity_1(IntervalTree * n, int depth, char pos){
-    printf("%*d - %c%d\n", depth * 2, depth, pos, n->center);
+    printf("%*d - %c%zu\n", depth * 2, depth, pos, n->center);
 }
 
 /* write tree, center, and start-sorted */
 void print_IntervalTree_verbosity_2(IntervalTree * n, int depth, char pos){
-    printf("%*d   %*s\t%c%d:",
+    printf("%*d   %*s\t%c%zu:",
            depth * 2, depth, 
            10 - depth * 2, "", pos, n->center);
-    for(int i = 0; i < n->by_start->size; i++){
-        printf("(%u,%u) ",
+    for(size_t i = 0; i < n->by_start->size; i++){
+        printf("(%zu,%zu) ",
                n->by_start->v[i].start,
                n->by_start->v[i].stop);
     }
@@ -164,11 +164,11 @@ void print_IntervalTree_verbosity_2(IntervalTree * n, int depth, char pos){
 /* write start- and stop-sorted vectors for each node */
 void print_IntervalTree_verbosity_3(IntervalTree * n, int depth, char pos){
     print_IntervalTree_verbosity_1(n, depth, pos);
-    for(int i = 0; i < n->by_start->size; i++){
-        printf("\t\t(%u,%u) ",
+    for(size_t i = 0; i < n->by_start->size; i++){
+        printf("\t\t(%zu,%zu) ",
                n->by_start->v[i].start,
                n->by_start->v[i].stop);
-        printf("(%u,%u)\n",
+        printf("(%zu,%zu)\n",
                n->by_stop->v[i].start,
                n->by_stop->v[i].stop);
     }
