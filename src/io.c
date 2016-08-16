@@ -72,6 +72,11 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     check_args(line_no, status, 9);
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %d\n", line_no);
+      fprintf(stderr, "offending line:\n%s\n", line);
+      exit(EXIT_FAILURE);
+    }
+    if (SGC(synmap, 1, tcon_id)->length <= tstop) {
+      fprintf(stderr, "stop must be less than contig length on line %d\n", line_no);
       exit(EXIT_FAILURE);
     }
     // don't exceed the specified number of Contig in Genome
