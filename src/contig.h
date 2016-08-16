@@ -22,7 +22,7 @@
  * @return pointer to a new Contig
  *
  * */
-Contig *init_Contig(char *name, size_t size, unsigned int length);
+Contig *init_Contig(char *name, size_t size, size_t length);
 
 /** Recursively free all memory.
  *
@@ -70,7 +70,7 @@ void free_partial_ResultContig(ResultContig *);
 void print_ResultContig(ResultContig *);
 
 /** Find index of downstream Block nearest the query point */
-uint anchor(Contig * contig, uint x);
+size_t anchor(Contig * contig, size_t x);
 
 /** Given two points, find all blocks overlapping or flanking them
  *
@@ -82,10 +82,10 @@ uint anchor(Contig * contig, uint x);
  * syntenic interval), return just the nearest interval.
  *
  * */
-ResultContig *get_region(Contig * contig, uint a, uint b);
+ResultContig *get_region(Contig * contig, size_t a, size_t b);
 
 /** Given two points, find the number of blocks they overlap */
-uint count_overlaps(Contig * contig, uint a, uint b);
+size_t count_overlaps(Contig * contig, size_t a, size_t b);
 
 // /** Get intervals flanking input interval */
 // Contig * get_flanks(Contig * contig, size_t n, bool left);
@@ -97,6 +97,6 @@ void sort_blocks_by_start(Contig * contig);
 void sort_blocks_by_stop(Contig * contig);
 
 /** Find closest block above/below a given value */
-Block * closest_block(Contig * con, int x, Direction d);
+Block * closest_block(Contig * con, size_t x, Direction d);
 
 #endif

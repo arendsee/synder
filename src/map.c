@@ -12,7 +12,7 @@
 typedef struct CSList{
   struct CSList * next;
   Block * bound[2]; 
-  int setid;
+  size_t setid;
 } CSList;
 CSList * init_empty_CSList();
 CSList * init_CSList(Block * blk);
@@ -20,13 +20,13 @@ void add_blk_CSList(CSList * cslist, Block * blk);
 void free_CSList(CSList * cslist);
 
 typedef struct SI_Bound{
-  uint bound;
+  size_t bound;
   int flag; 
 } SI_Bound;
 
 SI_Bound * get_si_bound(
-  uint q,
-  uint set_bounds[2],
+  size_t q,
+  size_t set_bounds[2],
   Block * blk_bounds[2],
   Direction d,
   bool inverted
@@ -38,9 +38,9 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
 {
 
   // start and stop positions read from input line
-  uint bounds[2];
+  size_t bounds[2];
   // Max and min nodes in current contiguous set
-  uint set_bounds[2]; 
+  size_t set_bounds[2]; 
   // Max and min blocks retrieved from itree.
   Block * blk_bounds[2]; 
   // Search interval boundary information
@@ -54,19 +54,20 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
   // Name of query input (e.g. AT1G01010)
   char seqname[NAME_BUFFER_SIZE];
   // Index of query chromosome
-  int chrid;
+  size_t chrid;
   // Row output of itree
   ResultContig * rc;
 
   char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
   while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
     if (!sscanf(line,
-                "%d %*s %*s %d %d %*s %*c %*s %s\n",
+                "%zu %*s %*s %zu %zu %*s %*c %*s %s\n",
                 &chrid, &bounds[LO], &bounds[HI], seqname))
     {
       printf("invalid input\n");
       exit(EXIT_FAILURE);
     }
+    check_in_offset(bounds[LO], bounds[HI]);
     bounds[LO] -= global_in_start;
     bounds[HI] -= global_in_stop;
 
@@ -76,7 +77,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
     root = cslist;
  
     // get list of highest and lowest members of each contiguous set
-    for(int i = 0; i < rc->contig->size; i++){
+    for(size_t i = 0; i < rc->contig->size; i++){
       add_blk_CSList(cslist, rc->contig->block[i]); 
     }
  
@@ -96,7 +97,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       bound_results[inverted ^ HI] =
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
  
-      printf("%s\t%s\t%i\t%i\t%s\t%i\t%i\t%c\t%i\t%i\t%i\n",
+      printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%i\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
         bounds[LO] + global_out_start,
@@ -122,7 +123,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
   free(line);
 }
 
-SI_Bound * init_SI_Bound(uint bound, int flag){
+SI_Bound * init_SI_Bound(size_t bound, int flag){
   SI_Bound * br = (SI_Bound *)malloc(sizeof(SI_Bound));
   br->bound = bound;
   br->flag = flag;
@@ -130,8 +131,8 @@ SI_Bound * init_SI_Bound(uint bound, int flag){
 }
 
 SI_Bound * get_si_bound(
-  uint q,
-  uint set_bounds[2],
+  size_t q,
+  size_t set_bounds[2],
   Block * blk_bounds[2],
   Direction d,
   bool inverted)
@@ -141,7 +142,7 @@ SI_Bound * get_si_bound(
   // See contiguous.h
   int flag = 0;
   // non-zero to ease debugging
-  uint bound = 444444;
+  size_t bound = 444444;
 
   // All diagrams are shown for the d=HI case, take the mirror image fr d=LO.
   //
@@ -159,10 +160,10 @@ SI_Bound * get_si_bound(
   //                 ^        ^    ^        ^    ^                ^
 
   // Positions of a, b, c, and d (as shown above)
-  uint pnt_a = blk_bounds[!d]->pos[!d];
-  uint pnt_b = blk_bounds[!d]->pos[ d];
-  uint pnt_c = blk_bounds[ d]->pos[!d];
-  uint pnt_d = blk_bounds[ d]->pos[ d];
+  size_t pnt_a = blk_bounds[!d]->pos[!d];
+  size_t pnt_b = blk_bounds[!d]->pos[ d];
+  size_t pnt_c = blk_bounds[ d]->pos[!d];
+  size_t pnt_d = blk_bounds[ d]->pos[ d];
 
 
   // This may occur when there is only one element in the ContiguousSet
@@ -257,6 +258,7 @@ CSList * init_empty_CSList(){
   cslist->next = NULL;
   cslist->bound[LO] = NULL;
   cslist->bound[HI] = NULL;
+  cslist->setid = 0; // value reserved for null
   return(cslist);
 }
 
@@ -271,7 +273,11 @@ CSList * init_CSList(Block * blk){
 
 void add_blk_CSList(CSList * cslist, Block * blk){
   // first entry of empty CSList
-  if(cslist->bound[LO] == NULL && cslist->bound[HI] == NULL){
+  if(blk == NULL){
+    fprintf(stderr, "I got a null block\n");
+    exit(EXIT_FAILURE);
+  }
+  else if(cslist->bound[LO] == NULL && cslist->bound[HI] == NULL){
     cslist->bound[LO] = blk;
     cslist->bound[HI] = blk;
     cslist->setid = blk->setid;

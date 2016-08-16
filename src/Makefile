@@ -1,11 +1,15 @@
 CFLAGS=-Wall -g -std=gnu99
+# CFLAGS=-Wall -g -std=gnu99 -m64
 CC=gcc
 TARGET=synder
 
-OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o synmap.o io.o analysis.o map.o main.o
+OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o synmap.o io.o analysis.o map.o main.o global.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
+
+global.o: global.c global.h
+	${CC} -c ${CFLAGS} global.[ch]
 
 main.o: main.c
 	${CC} -c ${CFLAGS} main.c

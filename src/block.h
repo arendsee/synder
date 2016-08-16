@@ -3,13 +3,13 @@
 
 #include "global.h"
 
-Block *init_Block(uint, uint);
+Block *init_Block(size_t, size_t);
 
 void free_Block(Block *);
 
 void print_Block(Block *);
 
-bool overlap(uint, uint, uint, uint);
+bool overlap(size_t, size_t, size_t, size_t);
 
 bool block_overlap(Block *, Block *);
 
@@ -25,6 +25,6 @@ int block_cmp_start(const void *, const void *);
  * @param block 
  * @param direction 0 or 1, for finding smallest and largest values, respectively
  */
-uint get_set_bound(Block * block, Direction direction);
+size_t get_set_bound(Block * block, Direction direction);
 
 #endif

@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
   // // Fileter
   // if (args.hitfile) {
   //   if (args.cmd != NULL && strcmp(args.cmd, "filter") == 0) {
-  //     int width = 5000;
+  //     size_t width = 5000;
   //     analysis_filter(syn, args.hitfile, single_advocate, &width);
   //   }
   // }

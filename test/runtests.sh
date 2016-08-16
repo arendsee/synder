@@ -65,6 +65,14 @@ runtest(){
         db_cmd="$db_cmd $qgen"
     fi
 
+    exp=$tmp/b
+    if [[ $out_base == 1 ]]
+    then
+        cat $dir/${base}-exp.txt | filter_plus_one > $exp
+    else
+        cat $dir/${base}-exp.txt | filter > $exp
+    fi
+
     # Build database
     $db_cmd
 
@@ -76,36 +84,36 @@ runtest(){
         echo $db_cmd
     else
 
+        ln -sf $dir/$base.gff  g 
+        ln -sf $tmp/db/a_b.txt d
+        ln -sf $exp            e
+
         synder_cmd=$synder
 
         [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
+        synder_cmd="$synder_cmd -i $dir/$base.gff"
+        synder_cmd="$synder_cmd -s $tmp/db/a_b.txt"
+        synder_cmd="$synder_cmd -c search"
 
-        obs=$tmp/a
-
-        $synder_cmd \
-            -i $dir/$base.gff \
-            -s $tmp/db/a_b.txt \
-            -c search | filter > $obs
-
+        $synder_cmd 2>&1 > $tmp/o
         if [[ $? != 0 ]]
         then
-            echo "Synder terminated with non-zero status:"
+            warn "Synder terminated with non-zero status:\n"
             echo $synder_cmd
+            exit
         fi
 
-        exp=$tmp/b
-        if [[ $out_base == 1 ]]
-        then
-            cat $dir/${base}-exp.txt | filter_plus_one > $exp
-        else
-            cat $dir/${base}-exp.txt | filter > $exp
-        fi
+        ln -sf $tmp/o o
+
+        obs=$tmp/a
+        $synder_cmd | filter > $obs
 
         diff $obs $exp > /dev/null 
 
         if [[ $? == 0 ]]
         then
             total_passed=$(( $total_passed + 1 ))
+            rm -rf g e o d $tmp
             echo "OK"
         else
             echo
@@ -125,12 +133,7 @@ runtest(){
             echo "See zzz_g and zzz_db"
             echo -e "---------------------------------------\n"
 
-            ln -sf $dir/$base.gff zzz_g 
-            rm -rf zzz_db
-            mv $tmp/db zzz_db
-
         fi
-        rm -rf $tmp
     fi
 }
 

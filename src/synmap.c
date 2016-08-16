@@ -6,6 +6,7 @@
 Synmap *init_Synmap()
 {
   Synmap *syn = (Synmap *) malloc(sizeof(Synmap));
+  syn->size = 2;
   syn->genome = (Genome **) malloc(2 * sizeof(Genome *));
   return (syn);
 }
@@ -28,8 +29,8 @@ void print_Synmap(Synmap * synmap, bool forward)
 
 void sort_all_contigs(Synmap * synmap)
 {
-  for (int genid = 0; genid < 2; genid++) {
-    for (int conid = 0; conid < SG(synmap, genid)->size; conid++) {
+  for (size_t genid = 0; genid < 2; genid++) {
+    for (size_t conid = 0; conid < SG(synmap, genid)->size; conid++) {
       sort_blocks_by_start(SGC(synmap, genid, conid));
       sort_blocks_by_stop(SGC(synmap, genid, conid));
     }
@@ -49,7 +50,7 @@ void set_overlap_group(Synmap * syn){
 
   // Loop through target and query genomes
   // g := genome id (0 is query, 1 is target)
-  for (int g = 0; g <= 1; g++){
+  for (size_t g = 0; g <= 1; g++){
     // Loop through each contig in the query genome
     // i := contig id
     for (size_t i = 0; i < SG(syn,g)->size; i++) {
@@ -147,7 +148,7 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
   }
 }
 void link_adjacent_blocks(Synmap * syn){
-  for (int genid = 0; genid <= 1; genid++){
+  for (size_t genid = 0; genid <= 1; genid++){
     for (size_t conid = 0; conid < SG(syn, genid)->size; conid++) {
       link_adjacent_blocks_directed(SGC(syn, genid, conid), HI);
       link_adjacent_blocks_directed(SGC(syn, genid, conid), LO);
@@ -188,13 +189,14 @@ void link_contiguous_blocks(Synmap * syn)
   Block * blk;
   Node * node;
   Node * root;
-  int qdiff, tdiff;
+  size_t qdiff, tdiff;
   char this_strand, older_strand;
   size_t setid = 0;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {
     // Initialize the first block in the scaffold
     blk = SGCB(syn, 0, i, 0);
     blk->setid = ++setid;
+    blk->over->setid = blk->setid;
     node = init_node(blk);
     root = node;
     for (size_t j = 1; j < SGC(syn,0,i)->size; j++){
@@ -211,9 +213,16 @@ void link_contiguous_blocks(Synmap * syn)
             (tdiff == -1 && this_strand == '-')))
         {
           blk->setid = node->blk->setid;
+          blk->over->setid = blk->setid;
+
           blk->cnr[0] = node->blk;
+          blk->over->cnr[0] = node->blk->over;
+
           node->blk->cnr[1] = blk;
+          node->blk->over->cnr[1] = blk->over;
+
           node->blk = blk;
+
           // TODO: in strange cases, one node might be adjacent to multiple
           // nodes. By placing a break here, I just take the first. I need
           // explicit handling for this case.
@@ -222,6 +231,7 @@ void link_contiguous_blocks(Synmap * syn)
         // If at bottom
         else if(node->down == NULL){
           blk->setid = ++setid;
+          blk->over->setid = blk->setid;
           node->down = init_node(blk);
           break;
         }
@@ -236,4 +246,29 @@ void link_contiguous_blocks(Synmap * syn)
     }
     free_node(root);
   }
+}
+
+void validate_synmap(Synmap * syn){
+    size_t gid, cid, bid;
+    Contig * con;
+    Block  * blk;
+    assert(syn->size == 2);
+    for(gid = 0; gid < syn->size; gid++){
+        for(cid = 0; cid < SG(syn, gid)->size; cid++){
+            con = SGC(syn, gid, cid);
+            for(bid = 0; bid < con->size; bid++){
+                blk = con->block[bid];
+                assert(blk->pos[1] < con->length);
+                assert(blk->setid == blk->over->setid);
+                assert(blk->setid != 0);
+                assert(blk->grpid != 0);
+                if(blk->cnr[1] != NULL){
+                    assert(blk->grpid != blk->cnr[1]->grpid);
+                    assert(blk->setid == blk->cnr[1]->setid);
+                    assert(blk->cnr[1]->over->cnr[0] != NULL);
+                    assert(blk->cnr[1]->over->cnr[0]->over == blk);
+                }
+            }
+        }
+    }
 }

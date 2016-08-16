@@ -2,7 +2,7 @@
 
 #include "io.h"
 
-void check_args(int line_no, int nargs, int correct_nargs);
+void check_args(size_t line_no, size_t nargs, size_t correct_nargs);
 
 Synmap *load_Synmap(FILE * synfile, int swap)
 {
@@ -12,17 +12,17 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
   int query = swap;
   int target = !swap;
-  int line_no = 0;
-  int unloaded_blocks = 0;
+  size_t line_no = 0;
+  size_t unloaded_blocks = 0;
   int status;
   char *line = NULL;
   size_t len = 0;
   ssize_t read;
   char seqid[128];
-  uint ncontigs;
-  uint nblocks;
-  uint conid;
-  uint contig_length;
+  size_t ncontigs;
+  size_t nblocks;
+  size_t conid;
+  size_t contig_length;
 
   // NOTE: The synteny database files are always 0-based. So subtracting
   // global_in_base from the intervals is not necessary.
@@ -33,20 +33,20 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   for (int i = 0; i < 2; i++) {
     while ((read = getline(&line, &len, synfile)) != EOF) {
       line_no++;
-      int loc = i == query ? 0 : 1;
+      size_t loc = i == query ? 0 : 1;
       if (line[0] == '>') {
-        status = sscanf(line, "> %s %u %c", seqid, &ncontigs, &dummy);
+        status = sscanf(line, "> %s %zu %c", seqid, &ncontigs, &dummy);
         check_args(line_no, status, 2);
         SG(synmap, loc) = init_Genome(seqid, ncontigs);
       } else if (line[0] == '@') {
         break;
       } else if (line[0] == '$') {
-        status = sscanf(line, "$ %u %u %s %u %c\n", &conid, &nblocks, seqid, &contig_length, &dummy);
+        status = sscanf(line, "$ %zu %zu %s %zu %c\n", &conid, &nblocks, seqid, &contig_length, &dummy);
         check_args(line_no, status, 4);
         SGC(synmap, loc, conid) = init_Contig(seqid, nblocks, contig_length);
         unloaded_blocks += nblocks;
       } else {
-        fprintf(stderr, "Incorrect file format, line %d\n", line_no);
+        fprintf(stderr, "Incorrect file format, line %zu\n", line_no);
         fprintf(stderr, "Offending line:\n%s", line);
         exit(EXIT_FAILURE);
       }
@@ -55,8 +55,8 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
 
   line_no = 0;
-  uint qcon_id, qblk_id, qstart, qstop;
-  uint tcon_id, tblk_id, tstart, tstop;
+  size_t qcon_id, qblk_id, qstart, qstop;
+  size_t tcon_id, tblk_id, tstart, tstop;
   char strand;
 
   Block *qblk, *tblk;
@@ -66,18 +66,18 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %u %u %u %u %u %u %u %u %c %c\n",
+    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
                     &tcon_id, &tblk_id, &tstart, &tstop, &strand, &dummy);
     check_args(line_no, status, 9);
     if (qstart > qstop || tstart > tstop) {
-      fprintf(stderr, "start must be less than stop on line %d\n", line_no);
+      fprintf(stderr, "start must be less than stop on line %zu\n", line_no);
       fprintf(stderr, "offending line:\n%s\n", line);
       exit(EXIT_FAILURE);
     }
     if (SGC(synmap, 1, tcon_id)->length <= tstop) {
-      fprintf(stderr, "stop must be less than contig length on line %d\n", line_no);
-      fprintf(stderr, "conid=%u blkid=%u pos=(%u, %u) conlen=%u\n",
+      fprintf(stderr, "stop must be less than contig length on line %zu\n", line_no);
+      fprintf(stderr, "conid=%zu blkid=%zu pos=(%zu, %zu) conlen=%zu\n",
         tcon_id, tblk_id, tstart, tstop, SGC(synmap, 1, tcon_id)->length); 
       fprintf(stderr, "offending line:\n%s\n", line);
       exit(EXIT_FAILURE);
@@ -126,18 +126,20 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
   link_contiguous_blocks(synmap);
 
+  validate_synmap(synmap);
+
   return (synmap);
 }
 
-void check_args(int line_no, int nargs, int correct_nargs)
+void check_args(size_t line_no, size_t nargs, size_t correct_nargs)
 {
   if (nargs < correct_nargs) {
-    fprintf(stderr, "Either too few fields on input line %d,", line_no);
+    fprintf(stderr, "Either too few fields on input line %zu,", line_no);
     fprintf(stderr, "or they are of the wrong type\n");
-    fprintf(stderr, "Found %d arguments, expected %d.\n", nargs, correct_nargs);
+    fprintf(stderr, "Found %zu arguments, expected %zu.\n", nargs, correct_nargs);
     exit(EXIT_FAILURE);
   } else if (nargs > correct_nargs) {
-    fprintf(stderr, "Too many fields on input line %d\n", line_no);
+    fprintf(stderr, "Too many fields on input line %zu\n", line_no);
     exit(EXIT_FAILURE);
   }
 }

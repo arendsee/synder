@@ -5,10 +5,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#ifndef uint
-#define uint unsigned int
-#endif
-
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
 #define REL_LE(x, y, d)   ((d) ? (x) <= (y) : (x) >= (y))
@@ -32,6 +28,14 @@ int global_in_stop;
 int global_out_start;
 int global_out_stop;
 
+/**
+ * If the input is truly 0-based, but the user says it is 1-based, we can get
+ * an overflow if we subtract 1 from 0 (and of course our output will be
+ * incorrect). This function checks whether all start and stop positions are
+ * greater than 0 if 1-based.
+ */
+void check_in_offset(size_t start, size_t stop);
+
 typedef enum direction { LO = 0, HI = 1 } Direction;
 
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;
@@ -43,6 +47,7 @@ typedef struct Block Block;
 
 /** A pair of syntenically linked Genome objects  */
 struct Synmap {
+  size_t size; // should always be 2
   Genome **genome;
 };
 
@@ -69,7 +74,7 @@ struct Contig {
   char *name;
   struct IntervalTree *itree;
   size_t size;
-  unsigned int length;
+  size_t length;
   Block **block;
   Block **by_stop;
   int base;
@@ -91,7 +96,7 @@ struct Contig {
  *   initialized, it implies a serious bug.
  */
 struct Block {
-  uint pos[2];
+  size_t pos[2];
   Block * over;
   Contig * parent;  
   Block * adj[2];

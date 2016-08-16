@@ -3,7 +3,7 @@
 
 #include "interval.h"
 
-Interval * init_Interval(uint start, uint stop){
+Interval * init_Interval(size_t start, size_t stop){
     Interval * inv = (Interval*)malloc(sizeof(Interval));
     inv->start = start;
     inv->stop = stop;
@@ -12,7 +12,7 @@ Interval * init_Interval(uint start, uint stop){
 }
 
 void print_Interval(Interval * interval){
-    printf("%u %u\n", interval->start, interval->stop);
+    printf("%zu %zu\n", interval->start, interval->stop);
 }
 
 int cmp_stop(const void *ap, const void *bp){
@@ -27,7 +27,7 @@ int cmp_start(const void *ap, const void *bp){
     return((a.start > b.start) - (b.start > a.start));
 }
 
-Pos point_overlap(uint a, Interval * b){
+Pos point_overlap(size_t a, Interval * b){
     if(a < b->start){
         return lo;
     }
