@@ -7,8 +7,8 @@ OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
 
-global.c: global.c
-	${CC} -c ${CFLAGS} global.c
+global.o: global.c global.h
+	${CC} -c ${CFLAGS} global.[ch]
 
 main.o: main.c
 	${CC} -c ${CFLAGS} main.c

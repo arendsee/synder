@@ -273,7 +273,11 @@ CSList * init_CSList(Block * blk){
 
 void add_blk_CSList(CSList * cslist, Block * blk){
   // first entry of empty CSList
-  if(cslist->bound[LO] == NULL && cslist->bound[HI] == NULL){
+  if(blk == NULL){
+    fprintf(stderr, "I got a null block\n");
+    exit(EXIT_FAILURE);
+  }
+  else if(cslist->bound[LO] == NULL && cslist->bound[HI] == NULL){
     cslist->bound[LO] = blk;
     cslist->bound[HI] = blk;
     cslist->setid = blk->setid;

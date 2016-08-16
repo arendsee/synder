@@ -196,6 +196,7 @@ void link_contiguous_blocks(Synmap * syn)
     // Initialize the first block in the scaffold
     blk = SGCB(syn, 0, i, 0);
     blk->setid = ++setid;
+    blk->over->setid = blk->setid;
     node = init_node(blk);
     root = node;
     for (size_t j = 1; j < SGC(syn,0,i)->size; j++){
@@ -212,9 +213,16 @@ void link_contiguous_blocks(Synmap * syn)
             (tdiff == -1 && this_strand == '-')))
         {
           blk->setid = node->blk->setid;
+          blk->over->setid = blk->setid;
+
           blk->cnr[0] = node->blk;
+          blk->over->cnr[0] = node->blk->over;
+
           node->blk->cnr[1] = blk;
+          node->blk->over->cnr[1] = blk->over;
+
           node->blk = blk;
+
           // TODO: in strange cases, one node might be adjacent to multiple
           // nodes. By placing a break here, I just take the first. I need
           // explicit handling for this case.
@@ -223,6 +231,7 @@ void link_contiguous_blocks(Synmap * syn)
         // If at bottom
         else if(node->down == NULL){
           blk->setid = ++setid;
+          blk->over->setid = blk->setid;
           node->down = init_node(blk);
           break;
         }
@@ -253,9 +262,11 @@ void validate_synmap(Synmap * syn){
                 assert(blk->setid == blk->over->setid);
                 assert(blk->setid != 0);
                 assert(blk->grpid != 0);
-                if(blk->cnr[0] != NULL){
-                    assert(blk->grpid != blk->cnr[0]->grpid);
-                    assert(blk->setid == blk->cnr[0]->setid);
+                if(blk->cnr[1] != NULL){
+                    assert(blk->grpid != blk->cnr[1]->grpid);
+                    assert(blk->setid == blk->cnr[1]->setid);
+                    assert(blk->cnr[1]->over->cnr[0] != NULL);
+                    assert(blk->cnr[1]->over->cnr[0]->over == blk);
                 }
             }
         }
