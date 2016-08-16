@@ -67,6 +67,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       printf("invalid input\n");
       exit(EXIT_FAILURE);
     }
+    check_in_offset(bounds[LO], bounds[HI]);
     bounds[LO] -= global_in_start;
     bounds[HI] -= global_in_stop;
 

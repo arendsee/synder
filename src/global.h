@@ -28,6 +28,14 @@ int global_in_stop;
 int global_out_start;
 int global_out_stop;
 
+/**
+ * If the input is truly 0-based, but the user says it is 1-based, we can get
+ * an overflow if we subtract 1 from 0 (and of course our output will be
+ * incorrect). This function checks whether all start and stop positions are
+ * greater than 0 if 1-based.
+ */
+void check_in_offset(size_t start, size_t stop);
+
 typedef enum direction { LO = 0, HI = 1 } Direction;
 
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;
@@ -39,6 +47,7 @@ typedef struct Block Block;
 
 /** A pair of syntenically linked Genome objects  */
 struct Synmap {
+  size_t size; // should always be 2
   Genome **genome;
 };
 

@@ -9,6 +9,7 @@ void analysis_count(Synmap * syn, FILE * intfile)
                  "%zu %*s %*s %zu %zu %*s %*c %*s %s\n",
                  &chrid, &start, &stop, seqname)) != EOF)
   {
+    check_in_offset(start, stop);
     start -= global_in_start;
     stop  -= global_in_stop;
 
@@ -33,6 +34,7 @@ void analysis_map(Synmap * syn, FILE * intfile)
                  "%zu %*s %*s %zu %zu %*s %*c %*s %s\n",
                  &chrid, &start, &stop, seqname)) != EOF)
   {
+    check_in_offset(start, stop);
     start -= global_in_start;
     stop  -= global_in_stop;
 

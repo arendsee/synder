@@ -6,6 +6,7 @@
 Synmap *init_Synmap()
 {
   Synmap *syn = (Synmap *) malloc(sizeof(Synmap));
+  syn->size = 2;
   syn->genome = (Genome **) malloc(2 * sizeof(Genome *));
   return (syn);
 }
@@ -236,4 +237,27 @@ void link_contiguous_blocks(Synmap * syn)
     }
     free_node(root);
   }
+}
+
+void validate_synmap(Synmap * syn){
+    size_t gid, cid, bid;
+    Contig * con;
+    Block  * blk;
+    assert(syn->size == 2);
+    for(gid = 0; gid < syn->size; gid++){
+        for(cid = 0; cid < SG(syn, gid)->size; cid++){
+            con = SGC(syn, gid, cid);
+            for(bid = 0; bid < con->size; bid++){
+                blk = con->block[bid];
+                assert(blk->pos[1] < con->length);
+                assert(blk->setid == blk->over->setid);
+                assert(blk->setid != 0);
+                assert(blk->grpid != 0);
+                if(blk->cnr[0] != NULL){
+                    assert(blk->grpid != blk->cnr[0]->grpid);
+                    assert(blk->setid == blk->cnr[0]->setid);
+                }
+            }
+        }
+    }
 }

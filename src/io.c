@@ -126,6 +126,8 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
   link_contiguous_blocks(synmap);
 
+  validate_synmap(synmap);
+
   return (synmap);
 }
 
