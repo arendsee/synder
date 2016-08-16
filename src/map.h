@@ -11,6 +11,7 @@
 #define BOUND     1
 #define UNBOUND   2
 #define EXTREME   3
+#define BEYOND    4
 
 #define cmloc(cmap,blk) cmap->map[block->linkid]
 

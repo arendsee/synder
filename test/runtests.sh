@@ -33,7 +33,7 @@ filter () {
 }
 
 filter_plus_one () {
-   awk '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | sort
+   awk -v OFS="\t" '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | sort
 }
 
 runtest(){
@@ -115,9 +115,9 @@ runtest(){
             total_failed=$(( $total_failed + 1 ))
             echo "======================================="
             emphasize_n "expected output"; echo ": (${base}-exp.txt)"
-            cat $exp | column -t
+            cat $exp
             emphasize "observed output:"
-            cat $obs | column -t
+            cat $obs
             emphasize_n "query gff"; echo ": (${base}.gff)"
             column -t $dir/$base.gff
             emphasize_n "synteny map"; echo ": (map.syn)"
