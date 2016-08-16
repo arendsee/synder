@@ -32,13 +32,16 @@ filter () {
    sort
 }
 
-out_base=0
+filter_plus_one () {
+   awk '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | sort
+}
 
 runtest(){
     dif=$1
     base=$2
     msg=$3
     errmsg=${4:-0}
+    out_base=${5:-0}
 
     # Write output to this folder, if all goes well, it will be deleted
     tmp=/tmp/synder-$RANDOM$RANDOM
@@ -77,15 +80,28 @@ runtest(){
 
         [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b"
 
-        $synder_cmd -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
+        obs=$tmp/a
+
+        $synder_cmd \
+            -i $dir/$base.gff \
+            -s $tmp/db/a_b.txt \
+            -c search | filter > $obs
+
         if [[ $? != 0 ]]
         then
             echo "Synder terminated with non-zero status:"
             echo $synder_cmd
         fi
 
-        diff <(cat $tmp/a | filter) \
-             <(cat $dir/${base}-exp.txt | filter) > /dev/null 
+        exp=$tmp/b
+        if [[ $out_base == 1 ]]
+        then
+            cat $dir/${base}-exp.txt | filter_plus_one > $exp
+        else
+            cat $dir/${base}-exp.txt | filter > $exp
+        fi
+
+        diff $obs $exp > /dev/null 
 
         if [[ $? == 0 ]]
         then
@@ -99,9 +115,9 @@ runtest(){
             total_failed=$(( $total_failed + 1 ))
             echo "======================================="
             emphasize_n "expected output"; echo ": (${base}-exp.txt)"
-            cat $dir/${base}-exp.txt | filter | column -t
+            cat $exp | column -t
             emphasize "observed output:"
-            cat $tmp/a | filter | column -t
+            cat $obs | column -t
             emphasize_n "query gff"; echo ": (${base}.gff)"
             column -t $dir/$base.gff
             emphasize_n "synteny map"; echo ": (map.syn)"
@@ -205,21 +221,21 @@ dir="$PWD/test/test-data/off-by-one"
 announce "\nTest overlap edge cases"
 runtest $dir a "overlap of 1"
 
-#---------------------------------------------------------------------
-dir="$PWD/test/test-data/unassembled"
-announce "\nMappings beyond the edges of target scaffold"
-# runtest $dir lo "query is below scaffold"
-# runtest $dir adj-lo "query is just below the scaffold"
-# runtest $dir adj-hi "query is just above the scaffold"
-runtest $dir hi "query is above the scaffold"
-
-# out_base=1
-# runtest $dir lo "test with 1-base"
-
+# #---------------------------------------------------------------------
 # # TODO Find a good way to deal with this case:
 # dir="$PWD/test/test-data/synmap-overlaps"
 # announce "\nsyntenic overlaps"
 # runtest $dir simple "Between the weird"
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/unassembled"
+announce "\nMappings beyond the edges of target scaffold"
+runtest $dir lo "query is below scaffold"
+runtest $dir adj-lo "query is just below the scaffold"
+runtest $dir adj-hi "query is just above the scaffold"
+runtest $dir hi "query is above the scaffold"
+
+runtest $dir lo "test with 1-base" 0 1
 
 #---------------------------------------------------------------------
 echo
