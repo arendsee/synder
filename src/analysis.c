@@ -9,8 +9,8 @@ void analysis_count(Synmap * syn, FILE * intfile)
                  "%d %*s %*s %d %d %*s %*c %*s %s\n",
                  &chrid, &start, &stop, seqname)) != EOF)
   {
-    start -= global_in_base;
-    stop  -= global_in_base;
+    start -= global_in_start;
+    stop  -= global_in_stop;
 
     // contig.c::count_overlaps ->
     //   itree/search.c::count_interval_overlaps ->
@@ -33,8 +33,8 @@ void analysis_map(Synmap * syn, FILE * intfile)
                  "%d %*s %*s %d %d %*s %*c %*s %s\n",
                  &chrid, &start, &stop, seqname)) != EOF)
   {
-    start -= global_in_base;
-    stop  -= global_in_base;
+    start -= global_in_start;
+    stop  -= global_in_stop;
 
     rc = get_region(SGC(syn, 0, chrid), start, stop);
     contigs = rc->contig;
@@ -48,8 +48,8 @@ void analysis_map(Synmap * syn, FILE * intfile)
         printf("%s %s %u %u %d\n",
                seqname,
                tcon->name,
-               tblk->pos[0] + global_out_base,
-               tblk->pos[1] + global_out_base,
+               tblk->pos[0] + global_out_start,
+               tblk->pos[1] + global_out_stop,
                missing
         );
       }

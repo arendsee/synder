@@ -23,8 +23,10 @@ int main(int argc, char *argv[])
 
   Arguments args = parse_command(argc, argv);
 
-  global_in_base = args.in_base;
-  global_out_base = args.out_base;
+  global_in_start  = (args.offsets[0] == '1');
+  global_in_stop   = (args.offsets[1] == '1');
+  global_out_start = (args.offsets[2] == '1');
+  global_out_stop  = (args.offsets[3] == '1');
 
   // ------------------------------------------------------------------------
   // Do stuff 
@@ -40,8 +42,9 @@ int main(int argc, char *argv[])
     char db_args[1024];
     sprintf(
         db_args,
-        "%s -a %s -b %s -i %s -d %s %s %s %s %s 2> /dev/null",
-        global_in_base == 1 ? " -z " : "",
+        "%s %s -a %s -b %s -i %s -d %s %s %s %s %s 2> /dev/null",
+        global_in_start == 1 ? " -x " : "",
+        global_in_stop  == 1 ? " -y " : "",
         args.pos[0],
         args.pos[1],
         args.db_filename,

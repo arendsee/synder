@@ -18,8 +18,7 @@ Arguments create_Arguments()
     .synfile = NULL,
     .intfile = NULL,
     .hitfile = NULL,
-    .in_base = 0,
-    .out_base = 0,
+    .offsets = "0000",
     .db_filename = NULL,
     .cmd = NULL,
     .pos = (char **) malloc(MAX_POS * sizeof(char *))
@@ -80,8 +79,7 @@ void print_help()
          "\t-i \t GFF search interval file, if not provided, uses stdin\n"
          "\t-t \t Switch target and query in synteny database\n"
          "\t-c \t Synder command to run. (See Below)\n"
-         "\t-a \t Input is 1-based\n"
-         "\t-b \t Output is 1-based\n"
+         "\t-b \t Start and stop offsets for input and output (e.g. 1100)\n"
          "COMMANDS\n"
          "\tmap\n"
          "\t\t print target intervals overlapping each query interval\n"
@@ -96,12 +94,12 @@ void print_help()
          "\tconvert\n"
          "\t\t convert names in provided gff file to match names in synteny db\n"
          "EXAMPLES\n"
-         "  synder -d a-b.syn a b db\n"
-         "  synder -i a.gff   -s db/a_b.txt -c map\n"
-         "  synder -i a.gff   -s db/a_b.txt -c count\n"
-         "  synder -i a.gff   -s db/a_b.txt -c search\n"
-         "  synder -i a.gff   -s db/a_b.txt -c convert -t\n"
-         "  synder -f hits.syn -s db/a_b.txt -c filter\n"
+         "  synder -b 1100 -d a-b.syn a b db\n"
+         "  synder -b 1111 -i a.gff   -s db/a_b.txt -c map\n"
+         "  synder -b 1111 -i a.gff   -s db/a_b.txt -c count\n"
+         "  synder -b 1111 -i a.gff   -s db/a_b.txt -c search\n"
+         "  synder -b 1111 -i a.gff   -s db/a_b.txt -c convert -t\n"
+         "  synder -b 1111 -f hits.syn -s db/a_b.txt -c filter\n"
   );
   exit(EXIT_SUCCESS);
 }
@@ -113,7 +111,7 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:ab")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:b:")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
@@ -145,11 +143,8 @@ Arguments parse_command(int argc, char *argv[])
       case 'r':
         args.swap = true;
         break;
-      case 'a':
-        args.in_base = 1;
-        break;
       case 'b':
-        args.out_base = 1;
+        strncpy(args.offsets, optarg, 5);
         break;
       case '?':
         exit(EXIT_FAILURE);

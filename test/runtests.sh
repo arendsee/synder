@@ -78,7 +78,7 @@ runtest(){
 
         synder_cmd=$synder
 
-        [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b"
+        [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
 
         obs=$tmp/a
 
