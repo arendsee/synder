@@ -31,34 +31,61 @@ emphasize_n(){
 filter () {
    sort
 }
-base_one_filter () {
-    awk -v OFS="\t" '{print $1,$2,$3+1,$4+1,$5,$6+1,$7+1,$8,$9,$10,$11}' | sort
-}
 
 out_base=0
-one_base_synder="$synder -b"
 
 runtest(){
     dif=$1
     base=$2
     msg=$3
     errmsg=${4:-0}
+
+    # Write output to this folder, if all goes well, it will be deleted
     tmp=/tmp/synder-$RANDOM$RANDOM
     mkdir $tmp
+
     echo -n "Testing $msg ... "
-    $synder -d $dir/map.syn a b $tmp/db 
-    if [[ $? == 0 ]]
+
+    # Default synder database building command
+    db_cmd="$synder -d $dir/map.syn a b $tmp/db"
+
+    # Query genome length file
+    tgen=$dir/tgen.tab
+    # Target genome length file
+    qgen=$dir/qgen.tab
+
+    # If the length files are given, add to db command
+    if [[ -f $tgen ]]; then
+        db_cmd="$db_cmd $tgen"
+    fi
+    if [[ -f $tgen && -f $qgen ]]; then
+        db_cmd="$db_cmd $qgen"
+    fi
+
+    # Build database
+    $db_cmd
+
+    if [[ $? != 0 ]]
     then
-        if [[ $out_base == 1 ]]
+        total_failed=$(( $total_failed + 1 ))
+        warn "FAILED - Could not build database\n"
+        echo "failed command:"
+        echo $db_cmd
+    else
+
+        synder_cmd=$synder
+
+        [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b"
+
+        $synder_cmd -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
+        if [[ $? != 0 ]]
         then
-            $synder -b -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
-            diff <(cat $tmp/a | filter) \
-                 <(cat $dir/${base}-exp.txt | base_one_filter) > /dev/null 
-        else
-            $synder -i $dir/$base.gff -s $tmp/db/a_b.txt -c search > $tmp/a
-            diff <(cat $tmp/a | filter) \
-                 <(cat $dir/${base}-exp.txt | filter) > /dev/null 
+            echo "Synder terminated with non-zero status:"
+            echo $synder_cmd
         fi
+
+        diff <(cat $tmp/a | filter) \
+             <(cat $dir/${base}-exp.txt | filter) > /dev/null 
 
         if [[ $? == 0 ]]
         then
@@ -83,14 +110,11 @@ runtest(){
             echo -e "---------------------------------------\n"
 
             ln -sf $dir/$base.gff zzz_g 
-            $synder -d $dir/map.syn a b zzz_db
+            rm -rf zzz_db
+            mv $tmp/db zzz_db
 
         fi
-
         rm -rf $tmp
-    else
-        total_failed=$(( $total_failed + 1 ))
-        warn "FAILED - Could not build database\n"
     fi
 }
 
@@ -184,10 +208,13 @@ runtest $dir a "overlap of 1"
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/unassembled"
 announce "\nMappings beyond the edges of target scaffold"
-runtest $dir lo "query is below scaffold"
+# runtest $dir lo "query is below scaffold"
+# runtest $dir adj-lo "query is just below the scaffold"
+# runtest $dir adj-hi "query is just above the scaffold"
+runtest $dir hi "query is above the scaffold"
 
-out_base=1
-runtest $dir lo "test with 1-base"
+# out_base=1
+# runtest $dir lo "test with 1-base"
 
 # # TODO Find a good way to deal with this case:
 # dir="$PWD/test/test-data/synmap-overlaps"
