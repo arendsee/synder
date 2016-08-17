@@ -258,7 +258,12 @@ void validate_synmap(Synmap * syn){
             con = SGC(syn, gid, cid);
             for(bid = 0; bid < con->size; bid++){
                 blk = con->block[bid];
-                assert(blk->pos[1] < con->length);
+                // assert(blk->pos[1] < con->length);
+                if(!(blk->pos[1] < con->length)){
+                    fprintf(stderr,
+                            "WARNING: stop greater than contig length: %zu vs %zu\n",
+                            blk->pos[1], con->length);
+                }
                 assert(blk->setid == blk->over->setid);
                 assert(blk->setid != 0);
                 assert(blk->grpid != 0);
