@@ -32,7 +32,7 @@ block.o: block.c block.h
 synmap.o: synmap.c synmap.h
 	${CC} -c ${CFLAGS} synmap.[ch]
 
-ui.o: ui.c ui.h
+ui.o: ui.c ui.h version.h
 	${CC} -c ${CFLAGS} ui.[ch]
 
 map.o: map.c map.h
