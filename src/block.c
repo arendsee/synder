@@ -25,6 +25,7 @@ Block *init_Block(size_t start, size_t stop)
   block->adj[1] = NULL;
   block->cnr[0] = NULL;
   block->cnr[1] = NULL;
+  block->score  = -1; // unset default value (real scores are positive)
   block->setid  = 0; // reserve 0 for unset
   block->grpid  = 0; // reserve 0 for unset
   block->strand = '.';

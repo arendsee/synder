@@ -101,6 +101,7 @@ struct Block {
   Contig * parent;  
   Block * adj[2];
   Block * cnr[2]; // contiguous neighbor
+  float score;
   size_t setid;
   size_t grpid;
   char strand;

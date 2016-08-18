@@ -57,6 +57,7 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   line_no = 0;
   size_t qcon_id, qblk_id, qstart, qstop;
   size_t tcon_id, tblk_id, tstart, tstop;
+  float score;
   char strand;
 
   Block *qblk, *tblk;
@@ -66,10 +67,10 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %c %c\n",
+    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %f %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
-                    &tcon_id, &tblk_id, &tstart, &tstop, &strand, &dummy);
-    check_args(line_no, status, 9);
+                    &tcon_id, &tblk_id, &tstart, &tstop, &score, &strand, &dummy);
+    check_args(line_no, status, 10);
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %zu\n", line_no);
       fprintf(stderr, "offending line:\n%s\n", line);
@@ -100,6 +101,9 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
     qblk->strand = '+';
     tblk->strand = strand;
+
+    qblk->score = score;
+    tblk->score = score;
 
     qblk->parent = SGC(synmap, query,  qcon_id);
     tblk->parent = SGC(synmap, target, tcon_id);

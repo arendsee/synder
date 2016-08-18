@@ -265,6 +265,7 @@ void validate_synmap(Synmap * syn){
                             blk->pos[1], con->length);
                 }
                 assert(blk->setid == blk->over->setid);
+                assert(blk->score == blk->over->score);
                 assert(blk->setid != 0);
                 assert(blk->grpid != 0);
                 if(blk->cnr[1] != NULL){

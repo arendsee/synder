@@ -122,9 +122,10 @@ One table with the following fields:
 
 # TODO list
 
- - [ ] Add strand awareness to contiguity rules (so all contiguous sets are elements on the same strand)
- - [ ] Determine direction of SI for `flag = {1, 2, 3}` based on strand
- - [ ] Snap search space boundaries for `flag = {1, 2, 3, 4, 5}` to nearest block on target side
+ - [x] Add strand awareness to contiguity rules (so all contiguous sets are elements on the same strand)
+ - [x] Determine direction of SI based on strand
+ - [x] Snap search space boundaries for to nearest block on target side
  - [ ] Merge two blocks if they overlap on both the target and query sides
  - [ ] Merge overlapping search intervals
+ - [ ] Do not make extra-chromosomal hits break contiguous blocks
  - [ ] If query interval is between two blocks on the query side, and if the homologs of the two blocks overlap on the target, set the search space length to 0 (the point inbetween the overlaps)
