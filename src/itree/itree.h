@@ -17,7 +17,7 @@ typedef enum orientation {
 /** An interval tree data structure for log(n) searches for overlapping intervals */
 typedef struct IntervalTree {
     // the center position for this node
-    size_t center;
+    long center;
     // all intervals that overlap the center, sorted by start position
     IA * by_start;
     // all intervals that overlap the center, sorted by stop position

@@ -2,6 +2,7 @@
 #define __MAP_H__
 
 #include <stdint.h>
+#include <math.h>
 
 #include "global.h"
 #include "block.h"
@@ -29,5 +30,7 @@
  * 
  */
 void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock);
+
+float calculate_score(long start, long stop, Block * blk);
 
 #endif

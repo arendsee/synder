@@ -14,6 +14,8 @@
 #define REL_LO_IDX(c, d)  ((d) ? 0 : c->size - 1)
 #define REL_HI_IDX(c, d)  ((d) ? c->size - 1 : 0)
 #define REL_NEXT(a, i, d) ((d) ? (a)[i+1] : (a)[i-1])
+#define REL_ADD(a, b, d)  ((d) ? (a) + (b) : (a) - (b))
+#define REL_SUB(a, b, d)  ((d) ? (a) - (b) : (a) + (b))
 
 #define SGCB(syn, gid, cid, bid) syn->genome[(gid)]->contig[(cid)]->block[(bid)]
 #define SGC(syn, gid, cid)       syn->genome[(gid)]->contig[(cid)]
@@ -74,7 +76,7 @@ struct Contig {
   char *name;
   struct IntervalTree *itree;
   size_t size;
-  size_t length;
+  long length;
   Block **block;
   Block **by_stop;
   int base;
@@ -96,7 +98,7 @@ struct Contig {
  *   initialized, it implies a serious bug.
  */
 struct Block {
-  size_t pos[2];
+  long pos[2];
   Block * over;
   Contig * parent;  
   Block * adj[2];

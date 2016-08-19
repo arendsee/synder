@@ -4,9 +4,10 @@ void analysis_count(Synmap * syn, FILE * intfile)
 {
   char seqname[128];
   size_t count;
-  size_t chrid, start, stop;
+  size_t chrid;
+  long start, stop;
   while ((fscanf(intfile,
-                 "%zu %*s %*s %zu %zu %*s %*c %*s %s\n",
+                 "%zu %*s %*s %li %li %*s %*c %*s %s\n",
                  &chrid, &start, &stop, seqname)) != EOF)
   {
     check_in_offset(start, stop);
@@ -24,7 +25,8 @@ void analysis_count(Synmap * syn, FILE * intfile)
 void analysis_map(Synmap * syn, FILE * intfile)
 {
   char seqname[128];
-  size_t chrid, start, stop;
+  size_t chrid;
+  long start, stop;
   ResultContig * rc;
   Contig *contigs;
   Contig *tcon;

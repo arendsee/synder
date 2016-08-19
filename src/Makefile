@@ -1,4 +1,4 @@
-CFLAGS=-Wall -g -std=gnu99
+CFLAGS=-Wall -g -std=gnu99 -lm
 # CFLAGS=-Wall -g -std=gnu99 -m64
 CC=gcc
 TARGET=synder

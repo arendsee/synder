@@ -7,17 +7,17 @@
 #include "search.h"
 #include "iv.h"
 
-size_t count_interval_overlaps_r(Interval *, IntervalTree *, size_t);
-size_t count_point_overlaps_r(size_t, IntervalTree *, size_t);
+long count_interval_overlaps_r(Interval *, IntervalTree *, long);
+long count_point_overlaps_r(long, IntervalTree *, long);
 
 IntervalResult * get_interval_overlaps_r(Interval *, IntervalTree *, IntervalResult *);
-void get_point_overlaps_r(size_t, IntervalTree *, IntervalResult *);
+void get_point_overlaps_r(long, IntervalTree *, IntervalResult *);
 
-size_t count_interval_overlaps(Interval * inv, IntervalTree * tree){
+long count_interval_overlaps(Interval * inv, IntervalTree * tree){
     return count_interval_overlaps_r(inv, tree, 0);
 }
 
-size_t count_point_overlaps(size_t point, IntervalTree * tree){
+long count_point_overlaps(long point, IntervalTree * tree){
     return count_point_overlaps_r(point, tree, 0);
 }
 
@@ -43,7 +43,7 @@ void free_IntervalResult(IntervalResult * res){
     }
 }
 
-IntervalResult * get_point_overlaps(size_t point, IntervalTree * tree){
+IntervalResult * get_point_overlaps(long point, IntervalTree * tree){
     IntervalResult * res = init_IntervalResult();
     res->iv = init_IV(IV_INITIAL_SIZE); 
     get_point_overlaps_r(point, tree, res);
@@ -57,7 +57,7 @@ IntervalResult * get_interval_overlaps(Interval * inv, IntervalTree * tree){
     return res;
 }
 
-size_t count_point_overlaps_r(size_t point, IntervalTree * tree, size_t count){
+long count_point_overlaps_r(long point, IntervalTree * tree, long count){
     if(point >= tree->center) {
         for(long long i = T_SIZE(tree) - 1; i >= 0 ; i--){
             if(point <= T_STOP_STOP(tree, i)){
@@ -83,7 +83,7 @@ size_t count_point_overlaps_r(size_t point, IntervalTree * tree, size_t count){
     return count;
 }
 
-size_t count_interval_overlaps_r(Interval * inv, IntervalTree * tree, size_t count){
+long count_interval_overlaps_r(Interval * inv, IntervalTree * tree, long count){
     if(tree == NULL)
         return count;
     switch(point_overlap(tree->center, inv)){
@@ -144,7 +144,7 @@ void set_nearest_opposing_interval(IntervalTree * node, IntervalResult * results
     }
 }
 
-void get_point_overlaps_r(size_t point, IntervalTree * tree, IntervalResult * results){
+void get_point_overlaps_r(long point, IntervalTree * tree, IntervalResult * results){
     if(point >= tree->center) {
         for(long long i = T_SIZE(tree) - 1; i >= 0 ; i--){
             if(point <= T_STOP_STOP(tree, i)){

@@ -55,8 +55,8 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
 
   line_no = 0;
-  size_t qcon_id, qblk_id, qstart, qstop;
-  size_t tcon_id, tblk_id, tstart, tstop;
+  size_t qcon_id, qblk_id, tcon_id, tblk_id;
+  long qstart, qstop, tstart, tstop;
   float score;
   char strand;
 

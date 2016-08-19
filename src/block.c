@@ -14,7 +14,7 @@
  * @return pointer to new Block
  *
  * */
-Block *init_Block(size_t start, size_t stop)
+Block *init_Block(long start, long stop)
 {
   Block *block  = (Block *) malloc(sizeof(Block));
   block->pos[0] = start;
@@ -67,7 +67,7 @@ void print_Block(Block * block)
  *
  * @return TRUE if the intervals overlap
  */
-bool overlap(size_t a1, size_t a2, size_t b1, size_t b2)
+bool overlap(long a1, long a2, long b1, long b2)
 {
   return a1 <= b2 && a2 >= b1;
 }
@@ -98,7 +98,7 @@ int block_cmp_start(const void *ap, const void *bp)
   return (int)(a->pos[0] > b->pos[0]) - (int)(a->pos[0] < b->pos[0]);
 }
 
-size_t get_set_bound(Block * blk, Direction d){
+long get_set_bound(Block * blk, Direction d){
     if(blk->cnr[d] != NULL){
         return get_set_bound(blk->cnr[d], d);
     }

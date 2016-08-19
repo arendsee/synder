@@ -29,11 +29,11 @@ emphasize_n(){
 # A function to select which parts of the output should be compared
 # Since flags are currently in flux, test only the first 7 columns
 filter () {
-   sort
+    sort | cut -f1-8,10-12
 }
 
 filter_plus_one () {
-   awk -v OFS="\t" '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | sort
+    awk -v OFS="\t" '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | filter
 }
 
 runtest(){

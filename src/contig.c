@@ -6,7 +6,7 @@
 
 #include "contig.h"
 
-Contig *init_Contig(char *name, size_t size, size_t length)
+Contig *init_Contig(char *name, size_t size, long length)
 {
   Contig *con = (Contig *) malloc(sizeof(Contig));
   con->name = strdup(name);
@@ -99,29 +99,6 @@ void print_ResultContig(ResultContig * rc)
     print_Contig(rc->contig, true);
 }
 
-size_t anchor(Contig * contig, size_t x)
-{
-  Block **blks = contig->block;
-  size_t N = contig->size;
-  size_t lo = 0;
-  size_t hi = N - 1;
-  size_t i = hi / 2;
-  while (true) {
-    if (x >= blks[i]->pos[0]) {
-      if (i == (N - 1) || x < blks[i + 1]->pos[0])
-        return i;
-      lo = i;
-      i = (i + hi) / 2 + 1;
-    } else {
-      if (i == 0 || x > blks[i - 1]->pos[0])
-        return i == 0 ? i : i - 1;
-      hi = i;
-      i = lo + (i - lo) / 2;
-    }
-  }
-  return i;
-}
-
 // Map blocks to the Interval structures used in itree
 IA *ia_from_blocks(Contig * con)
 {
@@ -134,7 +111,7 @@ IA *ia_from_blocks(Contig * con)
   return ia;
 }
 
-ResultContig *get_region(Contig * con, size_t a, size_t b)
+ResultContig *get_region(Contig * con, long a, long b)
 {
   // Build itree if necessary
   if (con->itree == NULL)
@@ -189,12 +166,12 @@ ResultContig *get_region(Contig * con, size_t a, size_t b)
   return resultcontig;
 }
 
-size_t count_overlaps(Contig * con, size_t a, size_t b)
+long count_overlaps(Contig * con, long a, long b)
 {
   if (con->itree == NULL)
     con->itree = build_tree(ia_from_blocks(con));
   Interval *inv = init_Interval(a, b);
-  size_t count = count_interval_overlaps(inv, con->itree);
+  long count = count_interval_overlaps(inv, con->itree);
   free(inv);
   return count;
 }

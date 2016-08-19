@@ -42,9 +42,9 @@ void set_overlap_group(Synmap * syn){
   // Holds current overlapping group id
   size_t grpid = 1;
   // Needed for determining overlaps and thus setids
-  size_t maximum_stop = 0;
+  long maximum_stop = 0;
   // The stop position of the current interval
-  size_t this_stop = 0;
+  long this_stop = 0;
   // Block temporary holder
   Block * blk;
 
@@ -189,7 +189,7 @@ void link_contiguous_blocks(Synmap * syn)
   Block * blk;
   Node * node;
   Node * root;
-  size_t qdiff, tdiff;
+  long qdiff, tdiff;
   char this_strand, older_strand;
   size_t setid = 0;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {
@@ -203,8 +203,8 @@ void link_contiguous_blocks(Synmap * syn)
       blk = SGCB(syn, 0, i, j);
       this_strand = blk->over->strand;
       while(true){
-        qdiff = blk->grpid - node->blk->grpid;
-        tdiff = blk->over->grpid - node->blk->over->grpid;
+        qdiff = (long) blk->grpid       - (long) node->blk->grpid;
+        tdiff = (long) blk->over->grpid - (long) node->blk->over->grpid;
         older_strand = node->blk->over->strand;
         // If adjacent
         if((qdiff == 1) &&
