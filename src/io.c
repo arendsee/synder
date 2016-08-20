@@ -61,6 +61,7 @@ Synmap *load_Synmap(FILE * synfile, int swap)
   char strand;
 
   Block *qblk, *tblk;
+  Contig *tcon, *qcon;
 
   while ((read = getline(&line, &len, synfile)) != EOF) {
     line_no++;
@@ -71,15 +72,19 @@ Synmap *load_Synmap(FILE * synfile, int swap)
                     &qcon_id, &qblk_id, &qstart, &qstop,
                     &tcon_id, &tblk_id, &tstart, &tstop, &score, &strand, &dummy);
     check_args(line_no, status, 10);
+
+    qcon = SGC(synmap, query, qcon_id);
+    tcon = SGC(synmap, target, tcon_id);
+
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %zu\n", line_no);
       fprintf(stderr, "offending line:\n%s\n", line);
       exit(EXIT_FAILURE);
     }
-    if (SGC(synmap, 1, tcon_id)->length <= tstop) {
+    if (tcon->length <= tstop) {
       fprintf(stderr, "stop must be less than contig length on line %zu\n", line_no);
       fprintf(stderr, "conid=%zu blkid=%zu pos=(%zu, %zu) conlen=%zu\n",
-        tcon_id, tblk_id, tstart, tstop, SGC(synmap, 1, tcon_id)->length); 
+        tcon_id, tblk_id, tstart, tstop, tcon->length); 
       fprintf(stderr, "offending line:\n%s\n", line);
       exit(EXIT_FAILURE);
     }
@@ -90,29 +95,18 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       exit(EXIT_FAILURE);
     }
     // don't exceed the specified size of the Contig block arrays
-    if (qblk_id >= SGC(synmap, query, qcon_id)->size ||
-        tblk_id >= SGC(synmap, target, tcon_id)->size) {
+    if (qblk_id >= qcon->size ||
+        tblk_id >= tcon->size) {
       fprintf(stderr, "too few blocks specified\n");
       exit(EXIT_FAILURE);
     }
 
-    qblk = init_Block(qstart, qstop);
-    tblk = init_Block(tstart, tstop);
+    qblk = &qcon->block[qblk_id];
+    tblk = &tcon->block[tblk_id];
 
-    qblk->strand = '+';
-    tblk->strand = strand;
+    set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk);
+    set_Block(tblk, tstart, tstop, score, strand, tcon, qblk);
 
-    qblk->score = score;
-    tblk->score = score;
-
-    qblk->parent = SGC(synmap, query,  qcon_id);
-    tblk->parent = SGC(synmap, target, tcon_id);
-
-    qblk->over = tblk;
-    tblk->over = qblk;
-
-    SGCB(synmap, query,  qcon_id, qblk_id) = qblk;
-    SGCB(synmap, target, tcon_id, tblk_id) = tblk;
   }
   free(line);
 
@@ -122,7 +116,7 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     exit(EXIT_FAILURE);
   }
 
-  sort_all_contigs(synmap);
+  link_four_corners__set_head_and_tail(synmap);
 
   set_overlap_group(synmap);
 

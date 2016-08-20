@@ -5,6 +5,17 @@
 
 Block *init_Block(long, long);
 
+/** A convenience function for setting some of the variables in Block */
+void set_Block(
+    Block*  block,
+    long    start,
+    long    stop,
+    float   score,
+    char    strand,
+    Contig* parent,
+    Block*  over
+);
+
 void free_Block(Block *);
 
 void print_Block(Block *);

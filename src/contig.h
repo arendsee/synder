@@ -16,12 +16,11 @@
  * initialized.
  *
  * @param name name of this Contig (e.g. "Chr1")
- * @param size number of Block structs this Contig will hold
  * @param total sequence length
  *
  * @return pointer to a new Contig
  *
- * */
+ */
 Contig *init_Contig(char *name, size_t size, long length);
 
 /** Recursively free all memory.
@@ -31,7 +30,7 @@ Contig *init_Contig(char *name, size_t size, long length);
  * If the Contig has an IntervalTree defined, it will free it with free_IntervalTree.
  *
  * @param contig pointer to a contig, may be NULL
- * */
+ */
 void free_Contig(Contig * contig);
 
 /** Recursively free all memory EXCEPT blocks
@@ -41,7 +40,7 @@ void free_Contig(Contig * contig);
  * blocks held elsewhere).
  *
  * @param contig pointer to a contig, may be NULL
- * */
+ */
 void free_partial_Contig(Contig * contig);
 
 /** Recursively print contig. */
@@ -49,13 +48,19 @@ void print_Contig(Contig * contig, bool forward);
 
 /** A wrapper for Contig that includes IntervalResult flags
  *
- *  From ResultInterval:
- *  1. inbetween - query is between (not overlapping) two search intervals
- *  2. leftmost - query is further left than any interval
- *  3. rightmost - query is further right than any interval
+ * Fields
+ *  - contig - a pointer to the original Contig
+ *  - size   - number of elements in block
+ *  - block  - pointer to selection of Block structs in Contig
+ *  - flags
+ *    1. inbetween - query is between (not overlapping) two search intervals
+ *    2. leftmost  - query is further left than any interval
+ *    3. rightmost - query is further right than any interval
  */
 typedef struct ResultContig{
     Contig * contig;
+    size_t size;
+    Block ** block;
     bool inbetween;
     bool leftmost;
     bool rightmost;
@@ -64,8 +69,6 @@ typedef struct ResultContig{
 ResultContig * init_ResultContig(Contig *, IntervalResult *);
 
 void free_ResultContig(ResultContig *);
-
-void free_partial_ResultContig(ResultContig *);
 
 void print_ResultContig(ResultContig *);
 
@@ -87,11 +90,8 @@ long count_overlaps(Contig * contig, long a, long b);
 // /** Get intervals flanking input interval */
 // Contig * get_flanks(Contig * contig, long n, bool left);
 
-/** Sort Block objects by start position */
-void sort_blocks_by_start(Contig * contig);
-
-/** Sort Block objects by stop position */
-void sort_blocks_by_stop(Contig * contig);
+/** Sort Block objects */
+void sort_blocks(Contig * contig, bool by_stop);
 
 /** Find closest block above/below a given value */
 Block * closest_block(Contig * con, long x, Direction d);

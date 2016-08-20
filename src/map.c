@@ -74,34 +74,36 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
     bounds[HI] -= global_in_stop;
 
     rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI]);
- 
+
     cslist = init_empty_CSList();
     root = cslist;
- 
+
     // get list of highest and lowest members of each contiguous set
-    for(size_t i = 0; i < rc->contig->size; i++){
-      add_blk_CSList(cslist, rc->contig->block[i]); 
+    for(size_t i = 0; i < rc->size; i++){
+      add_blk_CSList(cslist, rc->block[i]); 
     }
- 
-    // Iterate through each contiguous set, for each find search interval(s)
+
+    // Iterate through each contiguous set, for each find the search interval
+    // For each contiguous set, there is exactly one search interval.
     for(; cslist != NULL; cslist = cslist->next){
- 
+
       set_bounds[LO] = get_set_bound(cslist->bound[LO], LO);
       set_bounds[HI] = get_set_bound(cslist->bound[HI], HI);
- 
+
       blk_bounds[LO] = cslist->bound[LO];
       blk_bounds[HI] = cslist->bound[HI];
- 
+
       inverted = blk_bounds[HI]->over->strand == '-';
- 
+
+      score = calculate_score(bounds[LO], bounds[HI], blk_bounds[LO]) +
+              calculate_target_score(bounds[LO], bounds[HI], blk_bounds);
+
       bound_results[inverted ^ LO] =
         get_si_bound(bounds[LO], set_bounds, blk_bounds, LO, inverted);
       bound_results[inverted ^ HI] =
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
 
 
-      score = calculate_score(bounds[LO], bounds[HI], blk_bounds[LO]);
- 
       printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%f\t%i\t%i\t%i\n",
         seqname,
         blk_bounds[LO]->parent->name,
@@ -121,8 +123,8 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       free(bound_results[1]);
 
     }
- 
-    free_partial_ResultContig(rc);
+
+    free_ResultContig(rc);
     free_CSList(root);
   }
 
@@ -302,6 +304,14 @@ float _flank_area(long near, long far, float k){
         return (1 / k) * ( exp(-1 * k * near) - exp(-1 * k * far) );
     }
     return 0;
+}
+
+// This function is a wrapper for calculate_score. It maps the query position
+// on the query scaffold to the most likely position in the given contiguous
+// set.
+float calculate_target_score(long a1, long a2, Block * bounds[2]){
+    // This is a stub
+    return 0; 
 }
 
 float calculate_score(long a1, long a2, Block * blk){

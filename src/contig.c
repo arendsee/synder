@@ -8,42 +8,28 @@
 
 Contig *init_Contig(char *name, size_t size, long length)
 {
-  Contig *con = (Contig *) malloc(sizeof(Contig));
-  con->name = strdup(name);
-  con->size = size;
-  con->length = length;
-  con->itree = NULL;
-  con->block = (Block **) malloc(size * sizeof(Block *));
-  con->by_stop = NULL;
+  Contig *con  = (Contig *) malloc(sizeof(Contig));
+  con->name    = strdup(name);
+  con->length  = length;
+  con->size    = size;
+  con->block   = (Block *) calloc(size, sizeof(Block));
+  con->head[0] = NULL;
+  con->head[1] = NULL;
+  con->tail[0] = NULL;
+  con->tail[1] = NULL;
+  con->itree   = NULL;
   return con;
 }
 
 void free_Contig(Contig * contig)
 {
   if (contig != NULL) {
-    for (size_t i = 0; i < contig->size; i++) {
-      if (contig->block[i] != NULL)
-        free_Block(contig->block[i]);
+    if(contig->block){
+        free(contig->block);
     }
-    if (contig->itree != NULL)
+    if (contig->itree != NULL){
       free_IntervalTree(contig->itree);
-    if (contig->by_stop != NULL)
-      free(contig->by_stop);
-    free(contig->block);
-    free(contig->name);
-    free(contig);
-  }
-}
-
-void free_partial_Contig(Contig * contig)
-{
-  if (contig != NULL) {
-    if (contig->itree != NULL)
-      free_IntervalTree(contig->itree);
-    if (contig->by_stop != NULL)
-      free(contig->by_stop);
-    if(contig->block != NULL)
-      free(contig->block);
+    }
     free(contig->name);
     free(contig);
   }
@@ -52,61 +38,66 @@ void free_partial_Contig(Contig * contig)
 void print_Contig(Contig * contig, bool forward)
 {
   printf("%lu\t%s\n", contig->size, contig->name);
-  if(forward){
-    for (size_t i = 0; i < contig->size; i++) {
-      print_Block(contig->block[i]);
-    }
-  } else {
-    for (size_t i = 0; i < contig->size; i++) {
-      print_Block(contig->by_stop[i]);
-    }
+  Block * blk = contig->head[!forward];
+  Corner d = forward ? NEXT_START : NEXT_STOP;
+  for(; blk != NULL; blk = blk->cor[d]){
+    print_Block(blk);
   }
 }
 
 ResultContig * init_ResultContig(Contig * contig, IntervalResult * ir)
 {
   ResultContig * rc = (ResultContig *)malloc(sizeof(ResultContig));
+  rc->size          = ir->iv->size;
+  rc->block         = (Block **)malloc(rc->size * sizeof(Block*));
   rc->contig        = contig;
   rc->inbetween     = ir->inbetween;
   rc->leftmost      = ir->leftmost;
   rc->rightmost     = ir->rightmost;
+  for (size_t i = 0; i < rc->size; i++) {
+    rc->block[i] = (Block*)ir->iv->v[i].link;
+  }
   return rc;
 }
 
 void free_ResultContig(ResultContig * rc)
 {
   if(rc != NULL){
-    if(rc->contig != NULL){
-        free_Contig(rc->contig);
+    if(rc->block != NULL){
+        free(rc->block);
     }
     free(rc);
   }
 }
 
-void free_partial_ResultContig(ResultContig * rc)
-{
-  if(rc != NULL){
-    if(rc->contig != NULL){
-        free_partial_Contig(rc->contig);
-    }
-    free(rc);
-  }
-}
-
+/*
 void print_ResultContig(ResultContig * rc)
 {
     printf("inbetween=%i leftmost=%i rightmost=%i\n", rc->inbetween, rc->leftmost, rc->rightmost);
     print_Contig(rc->contig, true);
 }
+*/
 
 // Map blocks to the Interval structures used in itree
 IA *ia_from_blocks(Contig * con)
 {
-  IA *ia = init_set_IA(con->size);
-  for (size_t i = 0; i < con->size; i++) {
-    ia->v[i].start = con->block[i]->pos[0];
-    ia->v[i].stop = con->block[i]->pos[1];
-    ia->v[i].link = (void *) con->block[i];
+  Block * blk = con->head[0];
+
+  // Count the number of blks in the linked list
+  // Since blocks can be deleted, we cannot just use con->size
+  size_t n = 0;
+  for(; blk != NULL; blk = blk->cor[1]){ n++; }
+
+  IA *ia = init_set_IA(n);
+  // Array index for ia->v array of intervals
+  size_t i = 0;
+  // Reset blk, since was wound to NULL above
+  blk = con->head[0];
+  // Map the Block list to the new IA structure
+  for (; blk != NULL; blk = blk->cor[1], i++) {
+    ia->v[i].start = blk->pos[0];
+    ia->v[i].stop  = blk->pos[1];
+    ia->v[i].link  = (void *) blk;
   }
   return ia;
 }
@@ -153,13 +144,7 @@ ResultContig *get_region(Contig * con, long a, long b)
       }
   }
 
-  // Assign returned intervals to Contig
-  Contig *contig = init_Contig(con->name, res->iv->size, con->length);
-  for (size_t i = 0; i < res->iv->size; i++) {
-    contig->block[i] = (Block*)res->iv->v[i].link;
-  }
-
-  ResultContig * resultcontig = init_ResultContig(contig, res);
+  ResultContig * resultcontig = init_ResultContig(con, res);
 
   free_IntervalResult(res);
 
@@ -176,20 +161,15 @@ long count_overlaps(Contig * con, long a, long b)
   return count;
 }
 
-void sort_blocks_by_start(Contig * contig)
+void sort_blocks(Contig * contig, bool by_stop)
 {
-  if (contig != NULL) {
-    qsort(contig->block, contig->size, sizeof(Block *), block_cmp_start);
-  }
-}
-
-void sort_blocks_by_stop(Contig * contig)
-{
-  if (contig != NULL) {
-    if (contig->by_stop == NULL) {
-      contig->by_stop = (Block **) malloc(contig->size * sizeof(Block *));
-      memcpy(contig->by_stop, contig->block, contig->size * sizeof(Block *));
+  if (contig != NULL && contig->block != NULL) {
+    if(by_stop) {
+        qsort(contig->block, contig->size, sizeof(Block *), block_cmp_stop);
+    } else {
+        qsort(contig->block, contig->size, sizeof(Block *), block_cmp_start);
     }
-    qsort(contig->by_stop, contig->size, sizeof(Block *), block_cmp_stop);
+  } else {
+    fprintf(stderr, "Contig or contig block not defined\n");
   }
 }

@@ -27,12 +27,29 @@ void print_Synmap(Synmap * synmap, bool forward)
   print_Genome(SG(synmap, 1), forward);
 }
 
-void sort_all_contigs(Synmap * synmap)
-{
-  for (size_t genid = 0; genid < 2; genid++) {
-    for (size_t conid = 0; conid < SG(synmap, genid)->size; conid++) {
-      sort_blocks_by_start(SGC(synmap, genid, conid));
-      sort_blocks_by_stop(SGC(synmap, genid, conid));
+void link_four_corners__set_head_and_tail(Synmap * syn){
+  Contig * con;
+  size_t N;
+  for (size_t g = 0; g <= 1; g++){
+    for (size_t c = 0; c < SG(syn,g)->size; c++) {
+      con = SGC(syn, g, c); 
+      N = con->size;
+      // sort by stop
+      sort_blocks(con, true);
+      con->head[1] = &con->block[0];
+      con->tail[1] = &con->block[N-1];
+      for(size_t i = 0; i < N; i++){
+        con->block[i].cor[PREV_STOP] = (i == 0)     ? NULL : &con->block[i-1];
+        con->block[i].cor[NEXT_STOP] = (i == N - 1) ? NULL : &con->block[i+1];
+      }
+      // sort by start
+      sort_blocks(con, false);
+      con->head[0] = &con->block[0];
+      con->tail[0] = &con->block[N-1];
+      for(size_t i = 0; i < N; i++){
+        con->block[i].cor[PREV_START] = (i == 0)     ? NULL : &con->block[i-1];
+        con->block[i].cor[NEXT_START] = (i == N - 1) ? NULL : &con->block[i+1];
+      }
     }
   }
 }
@@ -45,20 +62,19 @@ void set_overlap_group(Synmap * syn){
   long maximum_stop = 0;
   // The stop position of the current interval
   long this_stop = 0;
-  // Block temporary holder
+  // Current Block in linked list
   Block * blk;
 
   // Loop through target and query genomes
   // g := genome id (0 is query, 1 is target)
-  for (size_t g = 0; g <= 1; g++){
+  for(size_t g = 0; g <= 1; g++){
     // Loop through each contig in the query genome
     // i := contig id
-    for (size_t i = 0; i < SG(syn,g)->size; i++) {
+    for(size_t i = 0; i < SG(syn,g)->size; i++) {
       maximum_stop = 0;
-      // Loop though each block in current contig
-      // j := block id
-      for (size_t j = 0; j < SGC(syn,g,i)->size; j++){
-        blk = SGCB(syn,g,i,j);
+      // Loop through each Block in the linked list
+      blk = SGC(syn,g,i)->head[0];
+      for(; blk != NULL; blk = blk->cor[1]){
         this_stop = blk->pos[1];
         // If the start is greater than the maximum stop, then the block is in
         // a new adjacency group. For this to work, Contig->block must be
@@ -71,6 +87,7 @@ void set_overlap_group(Synmap * syn){
         }
         blk->grpid = grpid;
       }
+
       // increment to break adjacency between contigs and genomes
       grpid++;
     }
@@ -91,25 +108,28 @@ void set_overlap_group(Synmap * syn){
 // d->adj := (a, e)
 // e->adj := (d, NULL)
 void link_adjacent_blocks_directed(Contig * con, Direction d){
-  size_t hi_idx = REL_LO_IDX(con, d); // downstream blocks
-  size_t lo_idx = hi_idx;             // upstream blocks
-  // 0 or (con->size - 1)
-  size_t N = REL_HI_IDX(con, d);
-  Block ** lo_blks = d ? con->by_stop : con->block;
-  Block ** hi_blks = d ? con->block : con->by_stop;
-  Block * lo, * hi;
-  Block * lo_next = NULL;
-  while(true){
-    lo = lo_blks[lo_idx];
-    hi = hi_blks[hi_idx];
-    if(lo_idx != N){
-      lo_next = REL_NEXT(lo_blks, lo_idx, d);
-    }
+  // In diagrams:
+  // <--- indicates a hi block
+  // ---> indicates a lo block
+  // All diagrams and comments relative to the d==HI direction
 
-    // In diagrams:
-    // <--- indicates a hi block
-    // ---> indicates a lo block
-    // All diagrams are relative to the d==HI direction
+  Block * lo = con->head[ d]; // first elements by stop
+  Block * hi = con->head[!d]; // first elements by start
+
+  // Transformed indices for Block->cor
+  // ----------------------------------
+  // a   b          c   d
+  // <--->   <--->  <--->
+  //   a - previous element by start
+  //   b - previous element by stop
+  //   c - next element by start
+  //   d - next element by stop
+  //int idx_a = (!d * 2) + !d  // - 0
+  //int idx_b = ( d * 2) + !d  // - 2
+  int idx_c = (!d * 2) +  d;  // - 1
+  int idx_d = ( d * 2) +  d;  // - 3
+  
+  while(hi != NULL){
 
     //       ---> 
     // <---
@@ -117,33 +137,29 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
     // --->
     //   <---
     // This should should occur only at the beginning
-    if(REL_LT(hi->pos[!d], lo->pos[d], d)){
-        hi->adj[!d] = NULL;
-        if(hi_idx == N)
-            break;
-        else
-            REL_INC(hi_idx, d);
+    if(hi->pos[!d] <= lo->pos[d])
+    {
+      hi->adj[!d] = NULL;
+      hi = hi->cor[idx_c];
     }
+
     //  lo     next
     // ---->  ---->
-    //               <--- 
-    // If next is closer, and overlapping the hi, increment lo
-    // So you increment lo until it is adjacent to the current hi
-    else if(REL_LT(lo_next->pos[d], hi->pos[!d], d) &&
-            lo_next->grpid != hi->grpid)
+    //               <---
+    // If next is closer, and not overlapping the hi, increment lo
+    // You increment lo until it is adjacent to the current hi
+    else if(lo->cor[idx_d]->pos[d] < hi->cor[idx_c]->pos[!d])
     {
-        if(lo_idx != N)
-            REL_INC(lo_idx, d);
+      lo = lo->cor[idx_d];
     }
+
     // --->
     //      <---
     // The current lo is next to, and not overlapping, current hi
-    else {
-        hi->adj[!d] = lo;
-        if(hi_idx == N)
-            break;
-        else
-            REL_INC(hi_idx, d);
+    else
+    {
+      hi->adj[!d] = lo;
+      hi = hi->cor[idx_c];
     }
   }
 }
@@ -194,18 +210,27 @@ void link_contiguous_blocks(Synmap * syn)
   size_t setid = 0;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {
     // Initialize the first block in the scaffold
-    blk = SGCB(syn, 0, i, 0);
+    blk = SGC(syn, 0, i)->head[0]; 
     blk->setid = ++setid;
     blk->over->setid = blk->setid;
     node = init_node(blk);
     root = node;
-    for (size_t j = 1; j < SGC(syn,0,i)->size; j++){
-      blk = SGCB(syn, 0, i, j);
+    for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1]){
       this_strand = blk->over->strand;
       while(true){
+        // qdiff and tdiff describe the adjacency of blocks relative to the
+        // query are target contigs, respectively. Cases:
+        // ---
+        // diff <= -2 : blocks are not adjacent
+        // diff == -1 : blocks are adjacent on reverse strand
+        // diff ==  0 : blocks overlap
+        // diff ==  1 : blocks are adjacent
+        // diff >=  2 : blocks are not adjacent
         qdiff = (long) blk->grpid       - (long) node->blk->grpid;
         tdiff = (long) blk->over->grpid - (long) node->blk->over->grpid;
+
         older_strand = node->blk->over->strand;
+
         // If adjacent
         if((qdiff == 1) &&
            (this_strand == older_strand) &&
@@ -248,16 +273,17 @@ void link_contiguous_blocks(Synmap * syn)
   }
 }
 
+// TODO extend validatation to corners and the other new stuff
 void validate_synmap(Synmap * syn){
-    size_t gid, cid, bid;
+    size_t gid, cid;
     Contig * con;
     Block  * blk;
     assert(syn->size == 2);
     for(gid = 0; gid < syn->size; gid++){
         for(cid = 0; cid < SG(syn, gid)->size; cid++){
             con = SGC(syn, gid, cid);
-            for(bid = 0; bid < con->size; bid++){
-                blk = con->block[bid];
+            blk = con->head[0];
+            for(; blk != NULL; blk = blk->cor[1]){
                 // assert(blk->pos[1] < con->length);
                 if(!(blk->pos[1] < con->length)){
                     fprintf(stderr,
