@@ -116,7 +116,9 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     exit(EXIT_FAILURE);
   }
 
-  link_four_corners__set_head_and_tail(synmap);
+  link_four_corners(synmap);
+
+  set_head_and_tail(synmap);
 
   set_overlap_group(synmap);
 

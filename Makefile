@@ -38,7 +38,7 @@ uninstall:
 clean:
 	rm -f ${TARGET}
 	rm -f vgcore.* gmon.out *log tags valgrind*
-	rm -rf zzz* db d g
+	rm -rf zzz* db d e g
 	cd src && ${MAKE} clean
 
 .PHONY: test 

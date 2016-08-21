@@ -91,7 +91,7 @@ long count_overlaps(Contig * contig, long a, long b);
 // Contig * get_flanks(Contig * contig, long n, bool left);
 
 /** Sort Block objects */
-void sort_blocks(Contig * contig, bool by_stop);
+void sort_blocks(Block ** block, size_t size, bool by_stop);
 
 /** Find closest block above/below a given value */
 Block * closest_block(Contig * con, long x, Direction d);

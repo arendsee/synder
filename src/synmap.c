@@ -27,31 +27,61 @@ void print_Synmap(Synmap * synmap, bool forward)
   print_Genome(SG(synmap, 1), forward);
 }
 
-void link_four_corners__set_head_and_tail(Synmap * syn){
-  Contig * con;
-  size_t N;
-  for (size_t g = 0; g <= 1; g++){
-    for (size_t c = 0; c < SG(syn,g)->size; c++) {
-      con = SGC(syn, g, c); 
-      N = con->size;
-      // sort by stop
-      sort_blocks(con, true);
-      con->head[1] = &con->block[0];
-      con->tail[1] = &con->block[N-1];
-      for(size_t i = 0; i < N; i++){
-        con->block[i].cor[PREV_STOP] = (i == 0)     ? NULL : &con->block[i-1];
-        con->block[i].cor[NEXT_STOP] = (i == N - 1) ? NULL : &con->block[i+1];
-      }
-      // sort by start
-      sort_blocks(con, false);
-      con->head[0] = &con->block[0];
-      con->tail[0] = &con->block[N-1];
-      for(size_t i = 0; i < N; i++){
-        con->block[i].cor[PREV_START] = (i == 0)     ? NULL : &con->block[i-1];
-        con->block[i].cor[NEXT_START] = (i == N - 1) ? NULL : &con->block[i+1];
-      }
+void link_four_corners(Synmap* syn)
+{
+    Contig* con;
+    size_t N;
+    for (size_t g = 0; g <= 1; g++) {
+        for (size_t c = 0; c < SG(syn, g)->size; c++) {
+            con = SGC(syn, g, c);
+            N = con->size;
+
+            Block ** blocks = (Block **)malloc(N * sizeof(Block *));
+            for(size_t i = 0; i < N; i++){
+                blocks[i] = &con->block[i];
+            }
+            
+            // sort by stop
+            sort_blocks(blocks, N, true);
+            for (size_t i = 0; i < N; i++) {
+                blocks[i]->cor[PREV_STOP] = (i == 0)     ? NULL : blocks[i - 1];
+                blocks[i]->cor[NEXT_STOP] = (i == N - 1) ? NULL : blocks[i + 1];
+            }
+            // sort by start
+            sort_blocks(blocks, N, false);
+            for (size_t i = 0; i < N; i++) {
+                blocks[i]->cor[PREV_START] = (i == 0)     ? NULL : blocks[i - 1];
+                blocks[i]->cor[NEXT_START] = (i == N - 1) ? NULL : blocks[i + 1];
+            }
+
+            free(blocks);
+        }
     }
-  }
+}
+
+void set_head_and_tail(Synmap * syn){
+    Contig * con;
+    for(size_t g = 0; g < 2; g++){
+        for(size_t c = 0; c < SG(syn, g)->size; c++){
+            con = SGC(syn, g, c); 
+            con->head[1] = &con->block[0];
+            con->head[0] = &con->block[0];
+            con->tail[0] = &con->block[con->size-1];
+            con->tail[1] = &con->block[con->size-1];
+            while(con->head[1]->cor[PREV_STOP] != NULL) {
+                con->head[1] = con->head[1]->cor[PREV_STOP];
+            }
+            while(con->head[0]->cor[PREV_START] != NULL) {
+                con->head[0] = con->head[0]->cor[PREV_START];
+            }
+            while(con->tail[0]->cor[NEXT_START] != NULL) {
+                con->tail[0] = con->tail[0]->cor[NEXT_STOP];
+            }
+            while(con->tail[1]->cor[NEXT_STOP] != NULL) {
+                con->tail[1] = con->tail[1]->cor[NEXT_STOP];
+            }
+        }
+    }
 }
 
 void set_overlap_group(Synmap * syn){
@@ -113,8 +143,20 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
   // ---> indicates a lo block
   // All diagrams and comments relative to the d==HI direction
 
-  Block * lo = con->head[ d]; // first elements by stop
-  Block * hi = con->head[!d]; // first elements by start
+  if(con->head[d] == NULL || con->head[!d] == NULL){
+    fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
+    exit(EXIT_FAILURE);
+  }
+
+  Block *lo, *hi;
+
+  if(d){
+      lo = con->head[1]; // first element by stop
+      hi = con->head[0]; // first element by start
+  } else {
+      lo = con->tail[0]; // last element by start
+      hi = con->tail[1]; // last element by stop
+  }
 
   // Transformed indices for Block->cor
   // ----------------------------------
@@ -137,7 +179,7 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
     // --->
     //   <---
     // This should should occur only at the beginning
-    if(hi->pos[!d] <= lo->pos[d])
+    if(REL_LE(hi->pos[!d], lo->pos[d], d))
     {
       hi->adj[!d] = NULL;
       hi = hi->cor[idx_c];
@@ -148,7 +190,7 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
     //               <---
     // If next is closer, and not overlapping the hi, increment lo
     // You increment lo until it is adjacent to the current hi
-    else if(lo->cor[idx_d]->pos[d] < hi->cor[idx_c]->pos[!d])
+    else if(REL_LT(lo->cor[idx_d]->pos[d], hi->pos[!d], d))
     {
       lo = lo->cor[idx_d];
     }
@@ -276,6 +318,7 @@ void link_contiguous_blocks(Synmap * syn)
 // TODO extend validatation to corners and the other new stuff
 void validate_synmap(Synmap * syn){
     size_t gid, cid;
+    size_t nblks;
     Contig * con;
     Block  * blk;
     assert(syn->size == 2);
@@ -283,13 +326,14 @@ void validate_synmap(Synmap * syn){
         for(cid = 0; cid < SG(syn, gid)->size; cid++){
             con = SGC(syn, gid, cid);
             blk = con->head[0];
+            nblks = 0;
             for(; blk != NULL; blk = blk->cor[1]){
-                // assert(blk->pos[1] < con->length);
                 if(!(blk->pos[1] < con->length)){
                     fprintf(stderr,
                             "WARNING: stop greater than contig length: %zu vs %zu\n",
                             blk->pos[1], con->length);
                 }
+                nblks++;
                 assert(blk->setid == blk->over->setid);
                 assert(blk->score == blk->over->score);
                 assert(blk->setid != 0);
@@ -300,7 +344,24 @@ void validate_synmap(Synmap * syn){
                     assert(blk->cnr[1]->over->cnr[0] != NULL);
                     assert(blk->cnr[1]->over->cnr[0]->over == blk);
                 }
+                if(blk->cor[NEXT_START] != NULL){
+                    assert(blk->pos[0] <= blk->cor[NEXT_START]->pos[0]);
+                    assert(blk->cor[NEXT_START]->cor[PREV_START] != NULL);
+                    assert(blk == blk->cor[NEXT_START]->cor[PREV_START]);
+                }
+                if(blk->cor[NEXT_STOP] != NULL){
+                    assert(blk->pos[1] <= blk->cor[NEXT_STOP]->pos[1]);
+                    assert(blk->cor[NEXT_STOP]->cor[PREV_STOP] != NULL);
+                    assert(blk == blk->cor[NEXT_STOP]->cor[PREV_STOP]);
+                }
+                if(blk->cor[PREV_START] != NULL){
+                    assert(blk->cor[PREV_START]->cor[NEXT_START] != NULL);
+                }
+                if(blk->cor[PREV_STOP] != NULL){
+                    assert(blk->cor[PREV_STOP]->cor[NEXT_STOP] != NULL);
+                }
             }
+            assert(nblks <= con->size);
         }
     }
 }

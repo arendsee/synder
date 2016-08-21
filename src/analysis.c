@@ -28,8 +28,6 @@ void analysis_map(Synmap * syn, FILE * intfile)
   size_t chrid;
   long start, stop;
   ResultContig * rc;
-  Contig *contigs;
-  Contig *tcon;
   Block *qblk, *tblk;
   bool missing;
   while ((fscanf(intfile,
@@ -41,17 +39,15 @@ void analysis_map(Synmap * syn, FILE * intfile)
     stop  -= global_in_stop;
 
     rc = get_region(SGC(syn, 0, chrid), start, stop);
-    contigs = rc->contig;
     missing = rc->inbetween || rc->leftmost || rc->rightmost;
 
-    for (size_t i = 0; i < contigs->size; i++) {
-      qblk = contigs->block[i];
+    for (size_t i = 0; i < rc->size; i++) {
+      qblk = rc->block[i];
       if (qblk != NULL) {
-        tcon = qblk->over->parent;
         tblk = qblk->over;
         printf("%s %s %zu %zu %d\n",
                seqname,
-               tcon->name,
+               tblk->parent->name,
                tblk->pos[0] + global_out_start,
                tblk->pos[1] + global_out_stop,
                missing
@@ -60,8 +56,5 @@ void analysis_map(Synmap * syn, FILE * intfile)
     }
 
     free(rc);
-    free(contigs->name);
-    free(contigs->block);
-    free(contigs);
   }
 }

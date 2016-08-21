@@ -1,6 +1,34 @@
 #!/usr/bin/env bash
 set -u
 
+usage (){
+cat << EOF
+Test the final output of synder
+OPTIONAL ARGUMENTS
+  -h  print this help message
+  -x  die on first failure 
+  -d  print full debugging info and link input file (g), database file (d),
+      observed (o) and expected (e) files to the working directory.
+EOF
+    exit 0
+}
+
+die_on_failure=0
+debug=0
+while getopts "hdx" opt; do
+    case $opt in
+        h)
+            usage ;;
+        d) 
+            debug=1 ;;
+        x)
+            die_on_failure=1 ;;
+        ?)
+            echo "Illegal arguments"
+            exit 1
+    esac 
+done
+
 synder=$PWD/synder
 
 total_passed=0
@@ -84,10 +112,6 @@ runtest(){
         echo $db_cmd
     else
 
-        ln -sf $dir/$base.gff  g 
-        ln -sf $tmp/db/a_b.txt d
-        ln -sf $exp            e
-
         synder_cmd=$synder
 
         [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
@@ -100,12 +124,19 @@ runtest(){
         then
             warn "Synder terminated with non-zero status:\n"
             echo $synder_cmd
-            exit
+            exit 1
         fi
 
-        ln -sf $tmp/o o
+        obs=$tmp/o
 
-        obs=$tmp/a
+        if [[ $debug -eq 1 ]]
+        then
+            ln -sf $dir/$base.gff  g 
+            ln -sf $exp            e
+            ln -sf $obs            o
+            ln -sf $tmp/db/a_b.txt d
+        fi
+
         $synder_cmd | filter > $obs
 
         diff $obs $exp > /dev/null 
@@ -130,8 +161,17 @@ runtest(){
             column -t $dir/$base.gff
             emphasize_n "synteny map"; echo ": (map.syn)"
             column -t $dir/map.syn
-            echo "See zzz_g and zzz_db"
+            if [[ $debug == 1 ]]
+            then
+                echo "See input (g), observed and expected output (o,e) and database (d)."
+                echo "Synder database command:"
+                echo $db_cmd
+                echo "Synder command:"
+                echo $synder_cmd
+            fi
             echo -e "---------------------------------------\n"
+
+            [[ $die_on_failure -eq 1 ]] && exit 1
 
         fi
     fi

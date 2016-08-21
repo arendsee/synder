@@ -161,15 +161,11 @@ long count_overlaps(Contig * con, long a, long b)
   return count;
 }
 
-void sort_blocks(Contig * contig, bool by_stop)
+void sort_blocks(Block ** blocks, size_t size, bool by_stop)
 {
-  if (contig != NULL && contig->block != NULL) {
     if(by_stop) {
-        qsort(contig->block, contig->size, sizeof(Block *), block_cmp_stop);
+        qsort(blocks, size, sizeof(Block *), block_cmp_stop);
     } else {
-        qsort(contig->block, contig->size, sizeof(Block *), block_cmp_start);
+        qsort(blocks, size, sizeof(Block *), block_cmp_start);
     }
-  } else {
-    fprintf(stderr, "Contig or contig block not defined\n");
-  }
 }
