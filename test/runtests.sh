@@ -157,8 +157,8 @@ runtest(){
         synder_cmd=$synder
 
         [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
-        synder_cmd="$synder_cmd -i g"
-        synder_cmd="$synder_cmd -s d"
+        synder_cmd="$synder_cmd -i $gff"
+        synder_cmd="$synder_cmd -s $tdb"
         synder_cmd="$synder_cmd -c search"
 
         # command for loading into gdb
@@ -209,7 +209,7 @@ runtest(){
                 [[ $die_on_failure -eq 1 ]] && exit 1
             else
                 # clear all temporary files
-                rm -rf x g e o d v /tmp/synder-*
+                rm -rf x g e o d v c m /tmp/synder-*
                 total_passed=$(( $total_passed + 1 ))
                 echo "OK"
             fi

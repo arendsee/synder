@@ -48,7 +48,14 @@ clean:
 # * links valgrind output
 .PHONY: dtest
 dtest:
-	./test/runtests.sh -xdmo `tty`
+	./test/runtests.sh -xdo `tty`
+	# Compile ctags, no worries if it fails
+	ctags . 2> /dev/null
+
+.PHONY: dclean
+dclean:
+	rm -f vgcore.* gmon.out *log valgrind*
+	rm -rf zzz* db d e g x c o m v z gdb.txt
 
 
 # Runs the sample data, linking files for review
