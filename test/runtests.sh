@@ -1,39 +1,6 @@
 #!/usr/bin/env bash
 set -u
 
-usage (){
-cat << EOF
-Test the final output of synder
-OPTIONAL ARGUMENTS
-  -h  print this help message
-  -x  die on first failure 
-  -d  print full debugging info and link input file (g), database file (d),
-      observed (o) and expected (e) files to the working directory.
-EOF
-    exit 0
-}
-
-die_on_failure=0
-debug=0
-while getopts "hdx" opt; do
-    case $opt in
-        h)
-            usage ;;
-        d) 
-            debug=1 ;;
-        x)
-            die_on_failure=1 ;;
-        ?)
-            echo "Illegal arguments"
-            exit 1
-    esac 
-done
-
-synder=$PWD/synder
-
-total_passed=0
-total_failed=0
-
 announce(){
     [[ -t 1 ]] && o="\e[1;33m$1\e[0m" || o=$1
     echo -e $o
@@ -54,6 +21,60 @@ emphasize_n(){
     echo -ne $o
 }
 
+usage (){
+cat << EOF
+Test the final output of synder
+OPTIONAL ARGUMENTS
+  -h  print this help message
+  -x  die on first failure 
+  -d  print full debugging info and link input file (g), database file (d),
+      observed (o) and expected (e) files to the working directory.
+  -v  verbose
+  -o  redirect gdb output to this file (or tty)
+  -m  test memory with valgrind
+EOF
+    exit 0
+}
+
+die_on_failure=0
+debug=0
+valgrind=0
+verbose=0
+gdb_out="none"
+while getopts "hdxvmo:" opt; do
+    case $opt in
+        h)
+            usage ;;
+        d) 
+            debug=1 ;;
+        x)
+            die_on_failure=1 ;;
+        v)
+            verbose=1 ;;
+        o)
+            gdb_out=$OPTARG
+            ;;
+        m)
+            if [[ ! -z `type -P valgrind` ]]
+            then
+                valgrind=1
+            else
+                warn "Valgrind not found"   
+            fi
+            ;;
+        ?)
+            echo "Illegal arguments"
+            exit 1
+    esac 
+done
+
+synder=$PWD/synder
+
+total_passed=0
+total_failed=0
+valgrind_checked=0
+valgrind_exit_status=0
+
 # A function to select which parts of the output should be compared
 # Since flags are currently in flux, test only the first 7 columns
 filter () {
@@ -64,21 +85,32 @@ filter_plus_one () {
     awk -v OFS="\t" '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | filter
 }
 
+# This variable will be set for each set of test
+# It specifies where the input files can be found
+dir=
 runtest(){
-    dif=$1
-    base=$2
-    msg=$3
-    errmsg=${4:-0}
-    out_base=${5:-0}
+    base=$1
+    msg=$2
+    errmsg=${3:-0}
+    out_base=${4:-0}
 
     # Write output to this folder, if all goes well, it will be deleted
     tmp=/tmp/synder-$RANDOM$RANDOM
-    mkdir $tmp
+    mkdir -p $tmp/db
+
+    # initialize temporary files
+    gff=$dir/$base.gff
+    map=$dir/map.syn
+    val=$tmp/v
+    cmd=$tmp/c
+    obs=$tmp/o
+    exp=$tmp/e
+    tdb=$tmp/db/a_b.txt
 
     echo -n "Testing $msg ... "
 
     # Default synder database building command
-    db_cmd="$synder -d $dir/map.syn a b $tmp/db"
+    db_cmd="$synder -d $map a b $tmp/db"
 
     # Query genome length file
     tgen=$dir/tgen.tab
@@ -93,7 +125,6 @@ runtest(){
         db_cmd="$db_cmd $qgen"
     fi
 
-    exp=$tmp/b
     if [[ $out_base == 1 ]]
     then
         cat $dir/${base}-exp.txt | filter_plus_one > $exp
@@ -112,14 +143,47 @@ runtest(){
         echo $db_cmd
     else
 
+        if [[ $debug -eq 1 ]]
+        then
+            ln -sf $gff  g 
+            ln -sf $map  m
+            ln -sf $exp  e
+            ln -sf $obs  o
+            ln -sf $tdb  d
+            ln -sf $val  v
+            ln -sf $cmd  c
+        fi
+
         synder_cmd=$synder
 
         [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
-        synder_cmd="$synder_cmd -i $dir/$base.gff"
-        synder_cmd="$synder_cmd -s $tmp/db/a_b.txt"
+        synder_cmd="$synder_cmd -i g"
+        synder_cmd="$synder_cmd -s d"
         synder_cmd="$synder_cmd -c search"
 
-        $synder_cmd 2>&1 > $tmp/o
+        # command for loading into gdb
+        echo "set args $synder_cmd"  >  $cmd
+        echo "source .gdb_cmds"     >> $cmd
+        if [[ $gdb_out != "none" ]]
+        then
+            echo "set logging off"           >> $cmd
+            echo "set logging file $gdb_out" >> $cmd
+            echo "set logging redirect on"   >> $cmd
+            echo "set logging on"            >> $cmd
+            echo "gdb -tui --command c" > x
+            chmod 755 x
+        fi
+
+        # Ensure all input files are readable
+        for f in $gff $exp $map $tdb;
+        do
+            if [[ ! -r "$f" ]]
+            then
+                warn "Input file $f not readable"
+            fi
+        done
+
+        $synder_cmd 2>&1 > $obs
         if [[ $? != 0 ]]
         then
             warn "Synder terminated with non-zero status:\n"
@@ -127,27 +191,29 @@ runtest(){
             exit 1
         fi
 
-        obs=$tmp/o
-
-        if [[ $debug -eq 1 ]]
-        then
-            ln -sf $dir/$base.gff  g 
-            ln -sf $exp            e
-            ln -sf $obs            o
-            ln -sf $tmp/db/a_b.txt d
-        fi
-
         $synder_cmd | filter > $obs
+
+        if [[ $valgrind -eq 1 ]]
+        then
+            valgrind $synder_cmd > /dev/null 2> $val
+            valgrind_exit_status=$?
+        fi
 
         diff $obs $exp > /dev/null 
 
         if [[ $? == 0 ]]
         then
-            total_passed=$(( $total_passed + 1 ))
-            rm -rf g e o d $tmp
-            echo "OK"
+            if [[ $valgrind -eq 1  &&  $valgrind_exit_status -ne 0 ]]
+            then
+                warn "memory bug"
+                [[ $die_on_failure -eq 1 ]] && exit 1
+            else
+                # clear all temporary files
+                rm -rf x g e o d v /tmp/synder-*
+                total_passed=$(( $total_passed + 1 ))
+                echo "OK"
+            fi
         else
-            echo
             warn "FAIL"
             echo " (in `basename $dir`/)"
             [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
@@ -158,12 +224,17 @@ runtest(){
             emphasize "observed output:"
             cat $obs
             emphasize_n "query gff"; echo ": (${base}.gff)"
-            column -t $dir/$base.gff
+            column -t $gff
             emphasize_n "synteny map"; echo ": (map.syn)"
-            column -t $dir/map.syn
-            if [[ $debug == 1 ]]
+            column -t $map
+            if [[ $debug -eq 1 && $verbose -eq 1 ]]
             then
-                echo "See input (g), observed and expected output (o,e) and database (d)."
+                echo "Debugging files:"
+                echo " * g - input GFF file"
+                echo " * o - observed output"
+                echo " * e - expected output"
+                echo " * d - database"
+                echo " * v - valgrind report (if valgrind is present)"
                 echo "Synder database command:"
                 echo $db_cmd
                 echo "Synder command:"
@@ -180,144 +251,111 @@ runtest(){
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/one-block"
 announce "\nTesting with synteny map length == 1"
-runtest $dir hi     "query after of block"
-runtest $dir within "query within block"
-runtest $dir lo     "query before of block"
+runtest hi     "query after of block"
+runtest within "query within block"
+runtest lo     "query before of block"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-block"
 announce "\nTesting with synteny map length == 2"
-runtest $dir hi      "query downstream of all blocks"
-runtest $dir between "query between two blocks"
-runtest $dir lo      "query upstream of all blocks"
+runtest hi      "query downstream of all blocks"
+runtest between "query between two blocks"
+runtest lo      "query upstream of all blocks"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-block"
 announce "\nTesting with 5 adjacent blocks on the same strand"
-runtest $dir a "extreme left"
-runtest $dir b "inbetween two adjacent blocks"
-runtest $dir c "starts inbetween adjacent blocks"
-runtest $dir d "stops inbetween adjacent blocks"
-runtest $dir e "inbetween two adjacent blocks"
-runtest $dir f "starts before block 3, ends after block 3"
-runtest $dir g "starts in block 2, ends after block 3"
-runtest $dir h "starts before block 2, ends after block 3"
-runtest $dir i "starts in block 2, ends in block 2"
-runtest $dir j "extreme right"
+runtest a "extreme left"
+runtest b "inbetween two adjacent blocks"
+runtest c "starts inbetween adjacent blocks"
+runtest d "stops inbetween adjacent blocks"
+runtest e "inbetween two adjacent blocks"
+runtest f "starts before block 3, ends after block 3"
+runtest g "starts in block 2, ends after block 3"
+runtest h "starts before block 2, ends after block 3"
+runtest i "starts in block 2, ends in block 2"
+runtest j "extreme right"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/simple-duplication"
 announce "\nTest simple tandem duplication"
-runtest $dir between "query starts between the duplicated intervals"
+runtest between "query starts between the duplicated intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/one-interval-inversion"
 announce "\nTest when a single interval is inverted"
-runtest $dir between "query next to inverted interval"
-runtest $dir over    "query overlaps inverted interval"
+runtest between "query next to inverted interval"
+runtest over    "query overlaps inverted interval"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
-runtest $dir beside   "query next to inverted interval"
-runtest $dir within   "query between inverted intervals"
-runtest $dir spanning "query spans inverted intervals"
+runtest beside   "query next to inverted interval"
+runtest within   "query between inverted intervals"
+runtest spanning "query spans inverted intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tiny-indel-query-side"
 announce "\nTest when a small interval interupts on one side"
-runtest $dir beside "query side"
+runtest beside "query side"
 dir="$PWD/test/test-data/tiny-indel-target-side"
-runtest $dir beside "target side"
+runtest beside "target side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
-runtest $dir beside "query beside the transposed pair"
-runtest $dir within "query between the transposed pair"
+runtest beside "query beside the transposed pair"
+runtest within "query between the transposed pair"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/irregular-overlaps"
 announce "\nTest target side internal overlaps"
-runtest $dir left "left side" "You are either 1) not sorting the by_stop vector
+runtest left "left side" "You are either 1) not sorting the by_stop vector
 in Contig by Block stop positions, or 2) are snapping the search interval left
 boundary to a Block that is nearest by start, but not be stop."
-runtest $dir right "right side"
+runtest right "right side"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/multi-chromosome"
 announce "\nTest two intervals on same query chr but different target chr"
-runtest $dir between "between the query intervals"
+runtest between "between the query intervals"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/inverted-extremes"
 announce "\nExtreme value resulting from an inversion"
-runtest $dir extreme "between the query intervals, extreme SI"
+runtest extreme "between the query intervals, extreme SI"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/deletion"
 announce "\nDeletion tests (adjacent bounds in target)"
-runtest $dir between "query is inbetween"
+runtest between "query is inbetween"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/off-by-one"
 announce "\nTest overlap edge cases"
-runtest $dir a "overlap of 1"
+runtest a "overlap of 1"
 
 # #---------------------------------------------------------------------
 # # TODO Find a good way to deal with this case:
 # dir="$PWD/test/test-data/synmap-overlaps"
 # announce "\nsyntenic overlaps"
-# runtest $dir simple "Between the weird"
+# runtest simple "Between the weird"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/unassembled"
 announce "\nMappings beyond the edges of target scaffold"
-runtest $dir lo "query is below scaffold"
-runtest $dir adj-lo "query is just below the scaffold"
-runtest $dir adj-hi "query is just above the scaffold"
-runtest $dir hi "query is above the scaffold"
+runtest lo "query is below scaffold"
+runtest adj-lo "query is just below the scaffold"
+runtest adj-hi "query is just above the scaffold"
+runtest hi "query is above the scaffold"
 
-runtest $dir lo "test with 1-base" 0 1
+runtest lo "test with 1-base" 0 1
 
 #---------------------------------------------------------------------
 echo
 
-# valgrind tests
-valgrind_checked=0
-valgrind_exit_status=
-test-valgrind () {
-    if hash valgrind 2> /dev/null; then
-        valgrind_checked=1
-        make sample 2>&1 > /dev/null
-        valgrind --leak-check=full $synder \
-            -i g -s d -c search > /dev/null 2> valgrind.log
-        valgrind_exit_status=$?
-        make clean-sample 2>&1 > /dev/null
-    fi
-}
-
-
-#=====================================================================
-echo
-
 total=$(( total_passed + total_failed))
 emphasize "$total_passed tests successful out of $total"
-
-test-valgrind
-if [[ $valgrind_checked == 0 ]]
-then
-    warn "valgrind not found, no memory tests performed\n"
-else
-    if [[ $valgrind_exit_status == 0 ]]
-    then
-        emphasize_n "valgrind pure"
-        echo " (for synder search of multi-block/c.gff against multi-block/map.syn)"
-        rm valgrind.log
-    else
-        warn "valgrind failed - see valgrind.log\n"
-    fi
-fi
 
 if [[ $total_failed > 0 ]]
 then
