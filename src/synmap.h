@@ -26,10 +26,10 @@ void free_Synmap(Synmap *);
 void print_Synmap(Synmap *, bool forward);
 
 /** Link blocks by next and prev stop and next and prev start */
-void link_four_corners(Synmap * syn);
+void link_block_corners(Synmap * syn);
 
 /** Link Contig to first and last blocks*/
-void set_head_and_tail(Synmap * syn);
+void set_contig_corners(Synmap * syn);
 
 /** Set a unique index for each set of overlapping sequences */
 void set_overlap_group(Synmap * syn);

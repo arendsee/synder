@@ -8,7 +8,7 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 {
   assert(synfile != NULL);
 
-  Synmap *synmap = init_Synmap();
+  Synmap *syn = init_Synmap();
 
   int query = swap;
   int target = !swap;
@@ -37,13 +37,13 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       if (line[0] == '>') {
         status = sscanf(line, "> %s %zu %c", seqid, &ncontigs, &dummy);
         check_args(line_no, status, 2);
-        SG(synmap, loc) = init_Genome(seqid, ncontigs);
+        SG(syn, loc) = init_Genome(seqid, ncontigs);
       } else if (line[0] == '@') {
         break;
       } else if (line[0] == '$') {
         status = sscanf(line, "$ %zu %zu %s %zu %c\n", &conid, &nblocks, seqid, &contig_length, &dummy);
         check_args(line_no, status, 4);
-        SGC(synmap, loc, conid) = init_Contig(seqid, nblocks, contig_length);
+        SGC(syn, loc, conid) = init_Contig(seqid, nblocks, contig_length);
         unloaded_blocks += nblocks;
       } else {
         fprintf(stderr, "Incorrect file format, line %zu\n", line_no);
@@ -73,8 +73,8 @@ Synmap *load_Synmap(FILE * synfile, int swap)
                     &tcon_id, &tblk_id, &tstart, &tstop, &score, &strand, &dummy);
     check_args(line_no, status, 10);
 
-    qcon = SGC(synmap, query, qcon_id);
-    tcon = SGC(synmap, target, tcon_id);
+    qcon = SGC(syn, query, qcon_id);
+    tcon = SGC(syn, target, tcon_id);
 
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %zu\n", line_no);
@@ -89,8 +89,8 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       exit(EXIT_FAILURE);
     }
     // don't exceed the specified number of Contig in Genome
-    if (qcon_id >= SG(synmap, query)->size
-        || tcon_id >= SG(synmap, target)->size) {
+    if (qcon_id >= SG(syn, query)->size
+        || tcon_id >= SG(syn, target)->size) {
       fprintf(stderr, "too few contigs specified\n");
       exit(EXIT_FAILURE);
     }
@@ -116,19 +116,19 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     exit(EXIT_FAILURE);
   }
 
-  link_four_corners(synmap);
+  link_block_corners(syn);
 
-  set_head_and_tail(synmap);
+  set_contig_corners(syn);
 
-  set_overlap_group(synmap);
+  set_overlap_group(syn);
 
-  link_adjacent_blocks(synmap);
+  link_adjacent_blocks(syn);
 
-  link_contiguous_blocks(synmap);
+  link_contiguous_blocks(syn);
 
-  validate_synmap(synmap);
+  validate_synmap(syn);
 
-  return (synmap);
+  return (syn);
 }
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs)

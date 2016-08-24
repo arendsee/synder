@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <strings.h>
+#include <string.h>
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
@@ -43,9 +43,17 @@ typedef enum direction { LO = 0, HI = 1 } Direction;
 
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;
 
+typedef enum corner {
+    PREV_START = 0,
+    NEXT_START = 1,
+    PREV_STOP  = 2,
+    NEXT_STOP  = 3
+} Corner;
+
 typedef struct Synmap Synmap;
 typedef struct Genome Genome;
 typedef struct Contig Contig;
+typedef struct ContiguousSet ContiguousSet;
 typedef struct Block Block;
 
 /** A pair of syntenically linked Genome objects  */
@@ -66,26 +74,33 @@ struct Genome {
  *
  * Fields:
  * - name    - a unique name for this contig (e.g. "Chr1")
- * - itree   - an IntervalTree for log(n)+m search of overlapping intervals
- * - root    - first Block in linked list
+ * - idx     - a unique index between 0 and (Genome->size - 1)
  * - length  - total number of bases in the chromosome/scaffold
+ * - cor     - four terminal Blocks 
+ *   [0] first by start
+ *   [1] last by start
+ *   [2] first by stop
+ *   [3] last by stop
+ * - size    - total number of Blocks in Contig (including deleted ones)
+ * - block   - memory pool for all Block structs
+ * - itree   - an IntervalTree for log(n)+m search of overlapping intervals
  */
 struct Contig {
   char * name;
+  size_t idx;
   long length;
+  Block * cor[4];
   size_t size;
-  Block * head[2]; // 0 head by start, 1 head by stop
-  Block * tail[2]; // 0 tail be start, 1 tail by stop
   Block * block;
   struct IntervalTree * itree;
 };
 
-typedef enum corner {
-    PREV_START = 0,
-    NEXT_START = 1,
-    PREV_STOP  = 2,
-    NEXT_STOP  = 3
-} Corner;
+/** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
+struct ContiguousSet {
+    long bounds[2];
+    ContiguousSet * cor[4];
+    ContiguousSet * over;
+};
 
 /** Query interval with directions to matching target
  *
@@ -96,7 +111,7 @@ typedef enum corner {
  * - corner - prev and next by start and stop
  * - adj - nearest non-overlapping blocks (0 for left block, 1 for right block)
  * - cnr - adjacent members in the Block's contiguous set (may be NULL)
- * - setid - the id of this Block's contiguous set
+ * - set - pointer to this Block's ContiguousSet
  * - grpid - an id shared between this Block and all Block's it overlaps
  *
  * next and prev used when you need to just iterate through all the block, they
@@ -109,16 +124,17 @@ typedef enum corner {
  *   initialized, it implies a serious bug.
  */
 struct Block {
-  long pos[2];     // start and stop positions
-  Contig * parent; // Contig parent
-  Block * over;    // homologous block in other genome
-  Block * cor[4];  // next and prev elements by start and stop
-  Block * adj[2];  // adjacent non-overlapping block
-  Block * cnr[2];  // adjacent block in contiguous set
-  float score;     // score provided by synteny program
-  size_t setid;    // contiguous set id
-  size_t grpid;    // overlapping group id;
-  char strand;     // strand [+-.]
+  long pos[2];       // start and stop positions
+  Contig * parent;   // Contig parent
+  Block * over;      // homologous block in other genome
+  Block * cor[4];    // next and prev elements by start and stop
+  Block * adj[2];    // adjacent non-overlapping block
+  Block * cnr[2];    // adjacent block in contiguous set
+  float score;       // score provided by synteny program
+  //ContiguousSet set; // contiguous set id
+  size_t setid; // maybe temporary
+  size_t grpid;      // overlapping group id;
+  char strand;       // strand [+-.]
 };
 
 #endif

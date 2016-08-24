@@ -27,7 +27,7 @@ void print_Synmap(Synmap * synmap, bool forward)
   print_Genome(SG(synmap, 1), forward);
 }
 
-void link_four_corners(Synmap* syn)
+void link_block_corners(Synmap* syn)
 {
     Contig* con;
     size_t N;
@@ -59,26 +59,26 @@ void link_four_corners(Synmap* syn)
     }
 }
 
-void set_head_and_tail(Synmap * syn){
+void set_contig_corners(Synmap * syn){
     Contig * con;
     for(size_t g = 0; g < 2; g++){
         for(size_t c = 0; c < SG(syn, g)->size; c++){
             con = SGC(syn, g, c); 
-            con->head[1] = &con->block[0];
-            con->head[0] = &con->block[0];
-            con->tail[0] = &con->block[con->size-1];
-            con->tail[1] = &con->block[con->size-1];
-            while(con->head[1]->cor[PREV_STOP] != NULL) {
-                con->head[1] = con->head[1]->cor[PREV_STOP];
+            con->cor[1] = &con->block[0];
+            con->cor[0] = &con->block[0];
+            con->cor[2] = &con->block[con->size-1];
+            con->cor[3] = &con->block[con->size-1];
+            while(con->cor[1]->cor[PREV_STOP] != NULL) {
+                con->cor[1] = con->cor[1]->cor[PREV_STOP];
             }
-            while(con->head[0]->cor[PREV_START] != NULL) {
-                con->head[0] = con->head[0]->cor[PREV_START];
+            while(con->cor[0]->cor[PREV_START] != NULL) {
+                con->cor[0] = con->cor[0]->cor[PREV_START];
             }
-            while(con->tail[0]->cor[NEXT_START] != NULL) {
-                con->tail[0] = con->tail[0]->cor[NEXT_STOP];
+            while(con->cor[2]->cor[NEXT_START] != NULL) {
+                con->cor[2] = con->cor[2]->cor[NEXT_STOP];
             }
-            while(con->tail[1]->cor[NEXT_STOP] != NULL) {
-                con->tail[1] = con->tail[1]->cor[NEXT_STOP];
+            while(con->cor[3]->cor[NEXT_STOP] != NULL) {
+                con->cor[3] = con->cor[3]->cor[NEXT_STOP];
             }
         }
     }
@@ -103,7 +103,7 @@ void set_overlap_group(Synmap * syn){
     for(size_t i = 0; i < SG(syn,g)->size; i++) {
       maximum_stop = 0;
       // Loop through each Block in the linked list
-      blk = SGC(syn,g,i)->head[0];
+      blk = SGC(syn,g,i)->cor[0];
       for(; blk != NULL; blk = blk->cor[1]){
         this_stop = blk->pos[1];
         // If the start is greater than the maximum stop, then the block is in
@@ -117,7 +117,6 @@ void set_overlap_group(Synmap * syn){
         }
         blk->grpid = grpid;
       }
-
       // increment to break adjacency between contigs and genomes
       grpid++;
     }
@@ -143,19 +142,9 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
   // ---> indicates a lo block
   // All diagrams and comments relative to the d==HI direction
 
-  if(con->head[d] == NULL || con->head[!d] == NULL){
+  if(con->cor[d] == NULL || con->cor[!d] == NULL){
     fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
     exit(EXIT_FAILURE);
-  }
-
-  Block *lo, *hi;
-
-  if(d){
-      lo = con->head[1]; // first element by stop
-      hi = con->head[0]; // first element by start
-  } else {
-      lo = con->tail[0]; // last element by start
-      hi = con->tail[1]; // last element by stop
   }
 
   // Transformed indices for Block->cor
@@ -166,10 +155,15 @@ void link_adjacent_blocks_directed(Contig * con, Direction d){
   //   b - previous element by stop
   //   c - next element by start
   //   d - next element by stop
-  //int idx_a = (!d * 2) + !d  // - 0
-  //int idx_b = ( d * 2) + !d  // - 2
+  int idx_a = (!d * 2) + !d;  // - 0
+  // int idx_b = ( d * 2) + !d;  // - 2
   int idx_c = (!d * 2) +  d;  // - 1
   int idx_d = ( d * 2) +  d;  // - 3
+
+  Block *lo, *hi;
+
+  lo = con->cor[idx_c]; // first element by stop
+  hi = con->cor[idx_a]; // first element by start
   
   while(hi != NULL){
 
@@ -222,17 +216,18 @@ typedef struct Node{
 Node * init_node(Block * blk)
 {
   Node * node = (Node *)malloc(sizeof(Node));
-  node->blk = blk;
-  node->down = NULL;
+  node->down  = NULL;
+  node->blk   = blk;
   return(node);
 }
 void remove_node(Node * node)
 {
   if(node->down != NULL){
     Node * tmp = node->down;
-    node->blk = node->down->blk;
-    node->down = node->down->down;
+    memcpy(node, node->down, sizeof(Node));
     free(tmp);
+  } else {
+    node->blk = NULL;
   }
 }
 void free_node(Node * node)
@@ -244,15 +239,19 @@ void free_node(Node * node)
 
 void link_contiguous_blocks(Synmap * syn)
 {
+
+  int cutoff = 0;
+
   Block * blk;
   Node * node;
   Node * root;
   long qdiff, tdiff;
   char this_strand, older_strand;
   size_t setid = 0;
+  bool same_target;
   for (size_t i = 0; i < SG(syn,0)->size; i++) {
     // Initialize the first block in the scaffold
-    blk = SGC(syn, 0, i)->head[0]; 
+    blk = SGC(syn, 0, i)->cor[0]; 
     blk->setid = ++setid;
     blk->over->setid = blk->setid;
     node = init_node(blk);
@@ -272,12 +271,42 @@ void link_contiguous_blocks(Synmap * syn)
         tdiff = (long) blk->over->grpid - (long) node->blk->over->grpid;
 
         older_strand = node->blk->over->strand;
+        same_target = blk->over->parent != node->blk->over->parent;
 
-        // If adjacent
-        if((qdiff == 1) &&
-           (this_strand == older_strand) &&
-           ((tdiff ==  1 && this_strand == '+') ||
-            (tdiff == -1 && this_strand == '-')))
+        // If contiguous
+        if(
+              // query blocks are contiguous
+              (
+                  // query blocks are adjacent
+                  (qdiff == 1) ||
+                  // fewer than cutoff blocks with different targets separate them
+                  (same_target && qdiff < cutoff && qdiff != 0)
+              ) &&
+              // targets are contiguous
+              (
+                  // target intervals are on the same strand
+                  this_strand == older_strand &&
+                  // target intervals are not overlapping 
+                  tdiff != 0 &&
+                  (
+                      // targets are immediately adjacent
+                      (
+                          (tdiff ==  1 && this_strand == '+')  ||
+                          (tdiff == -1 && this_strand == '-')
+                      ) ||
+                      // targets are close enough
+                      (
+                          // target stuff is in the right direction
+                          (
+                              (tdiff > 0 && this_strand == '+') ||
+                              (tdiff < 0 && this_strand == '-') 
+                          )
+                          && // score is acceptable
+                          ((abs(tdiff) + qdiff - 2) <= cutoff)
+                      )
+                  )
+              )
+          )
         {
           blk->setid = node->blk->setid;
           blk->over->setid = blk->setid;
@@ -290,9 +319,6 @@ void link_contiguous_blocks(Synmap * syn)
 
           node->blk = blk;
 
-          // TODO: in strange cases, one node might be adjacent to multiple
-          // nodes. By placing a break here, I just take the first. I need
-          // explicit handling for this case.
           break;
         }
         // If at bottom
@@ -303,7 +329,7 @@ void link_contiguous_blocks(Synmap * syn)
           break;
         }
         // If definitely not adjacent
-        else if(qdiff > 1){
+        else if((qdiff - 1) > cutoff){
           remove_node(node);
         }
         else {
@@ -325,7 +351,7 @@ void validate_synmap(Synmap * syn){
     for(gid = 0; gid < syn->size; gid++){
         for(cid = 0; cid < SG(syn, gid)->size; cid++){
             con = SGC(syn, gid, cid);
-            blk = con->head[0];
+            blk = con->cor[0];
             nblks = 0;
             for(; blk != NULL; blk = blk->cor[1]){
                 if(!(blk->pos[1] < con->length)){

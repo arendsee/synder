@@ -13,11 +13,11 @@ Contig *init_Contig(char *name, size_t size, long length)
   con->length  = length;
   con->size    = size;
   con->block   = (Block *) calloc(size, sizeof(Block));
-  con->head[0] = NULL;
-  con->head[1] = NULL;
-  con->tail[0] = NULL;
-  con->tail[1] = NULL;
   con->itree   = NULL;
+  con->cor[0]  = NULL;
+  con->cor[1]  = NULL;
+  con->cor[2]  = NULL;
+  con->cor[3]  = NULL;
   return con;
 }
 
@@ -38,7 +38,7 @@ void free_Contig(Contig * contig)
 void print_Contig(Contig * contig, bool forward)
 {
   printf("%lu\t%s\n", contig->size, contig->name);
-  Block * blk = contig->head[!forward];
+  Block * blk = contig->cor[!forward];
   Corner d = forward ? NEXT_START : NEXT_STOP;
   for(; blk != NULL; blk = blk->cor[d]){
     print_Block(blk);
@@ -81,7 +81,7 @@ void print_ResultContig(ResultContig * rc)
 // Map blocks to the Interval structures used in itree
 IA *ia_from_blocks(Contig * con)
 {
-  Block * blk = con->head[0];
+  Block * blk = con->cor[0];
 
   // Count the number of blks in the linked list
   // Since blocks can be deleted, we cannot just use con->size
@@ -92,7 +92,7 @@ IA *ia_from_blocks(Contig * con)
   // Array index for ia->v array of intervals
   size_t i = 0;
   // Reset blk, since was wound to NULL above
-  blk = con->head[0];
+  blk = con->cor[0];
   // Map the Block list to the new IA structure
   for (; blk != NULL; blk = blk->cor[1], i++) {
     ia->v[i].start = blk->pos[0];

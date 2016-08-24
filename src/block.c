@@ -60,11 +60,11 @@ void delete_Block_directed(Block* block, Direction d)
     int idx_c = (!d * 2) +  d; // - 1
     int idx_d = ( d * 2) +  d; // - 3
 
-    if (block == block->parent->head[d])
-        block->parent->head[d] = block->cor[idx_d];
+    if (block == block->parent->cor[d])
+        block->parent->cor[d] = block->cor[idx_d];
 
-    if (block == block->parent->tail[d])
-        block->parent->tail[d] = block->cor[idx_b];
+    if (block == block->parent->cor[2 + d])
+        block->parent->cor[2 + d] = block->cor[2 + idx_b];
 
     if (block->cor[idx_a] != NULL)
         block->cor[idx_a]->cor[idx_c] = block->cor[idx_c];
