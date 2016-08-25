@@ -11,6 +11,7 @@ break -function find_search_intervals
 set print repeats 100
 
 define ps
+    dont-repeat
     print "--------------------------------------------"
     if $argc == 0
         print *syn
@@ -24,20 +25,39 @@ define ps
         print *syn->genome[$arg0]->contig[$arg1]
     end
 end
+document ps
+    Print synmap, args = [0,1,2]
+end
 
 define pb
+    dont-repeat
     print "--------------------------------------------"
     print *blk
 end
+document pb
+    Print block, no args
+end
+
 define pbp
+    dont-repeat
     print "--------------------------------------------"
     print *blk->parent
 end
+document pbp
+    Print block parent
+end
+
 define pbo
+    dont-repeat
     print "--------------------------------------------"
     print *blk->over
 end
+document pbo
+    Print block's homolog
+end
+
 define pb-cor
+    dont-repeat
     print "--------------------------------------------"
     print "prev start"
     print *blk->cor[0]
@@ -48,18 +68,32 @@ define pb-cor
     print "next stop"
     print *blk->cor[3]
 end
+document pb-cor
+    Print block's 4 corners
+end
+
 define pb-adj
+    dont-repeat
     print "--------------------------------------------"
     print *blk->adj[0]
     print *blk->adj[1]
 end
+document pb-adj
+    Print block's adj pair
+end
+
 define pb-cnr
+    dont-repeat
     print "--------------------------------------------"
     print *blk->cnr[0]
     print *blk->cnr[1]
 end
+document pb-adj
+    Print block's contiguous neighbors
+end
 
 define psv
+    dont-repeat
     print "--------------------------------------------"
     if $argc == 1
         if $arg0 == 0
@@ -78,8 +112,12 @@ define psv
 
     end
 end
+document psv
+    Print synmap recursively args = [012]
+end
 
 define pcb
+   dont-repeat
    print "--------------------------------------------"
    print "---print all blocks---"
    set $i = (int)syn->genome[$arg0]->size - 1
@@ -92,15 +130,23 @@ define pcb
        set $i= $i - 1
    end
 end
+document pcb
+    Print all blocks in genome, args=[01]
+end
 
 define pc
+    dont-repeat
     print "--------------------------------------------"
     print *con
     print *con->cor[0]
     print *con->cor[1]
 end
+document pc
+    Print contig corners 0 and 1
+end
 
 define pnode
+    dont-repeat
     print "--------------------------------------------"
     if $argc == 0
         print *node 
@@ -110,8 +156,8 @@ define pnode
         print  node->blk->over->parent->name
         print *node->blk->over
     end
-    if $argc > 0
-        if $arg1 == 1
+    if $argc == 1
+        if $arg0 == 1
             print *node->down 
             print  node->down->blk->parent->name
             print *node->down->blk
@@ -119,7 +165,7 @@ define pnode
             print  node->blk->over->parent->name
             print *node->blk->over
         end
-        if $arg1 == 2
+        if $arg0 == 2
             print *node->down->down 
             print  node->down->down->blk->parent->name
             print *node->down->down->blk
@@ -127,7 +173,7 @@ define pnode
             print  node->down->down->blk->over->parent->name
             print *node->down->down->blk->over
         end
-        if $arg1 == 3
+        if $arg0 == 3
             print *node->down->down->down 
             print  node->down->down->down->blk->parent->name
             print *node->down->down->down->blk
@@ -136,4 +182,7 @@ define pnode
             print *node->down->down->down->blk->over
         end
     end
+end
+document pnode
+    Recursively print Node to [0123] levels down
 end

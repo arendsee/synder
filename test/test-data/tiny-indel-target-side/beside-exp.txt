@@ -1,2 +1,0 @@
-beside	que	225	275	tar	200	589	+	100	2	2	1
-beside	que	225	275	tar	599	700	+	100	2	2	1

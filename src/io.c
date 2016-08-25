@@ -1,10 +1,11 @@
 #include <assert.h>
 
+#include "global.h"
 #include "io.h"
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs);
 
-Synmap *load_Synmap(FILE * synfile, int swap)
+Synmap *load_Synmap(FILE * synfile, int swap, long k)
 {
   assert(synfile != NULL);
 
@@ -124,7 +125,7 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
   link_adjacent_blocks(syn);
 
-  link_contiguous_blocks(syn);
+  link_contiguous_blocks(syn, k);
 
   validate_synmap(syn);
 

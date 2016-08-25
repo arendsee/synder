@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
   }
   // Load synteny db 
   if (args.synfile) {
-    syn = load_Synmap(args.synfile, args.swap);
+    syn = load_Synmap(args.synfile, args.swap, args.k);
   }
   // No arguments passed
   if (syn == NULL) {

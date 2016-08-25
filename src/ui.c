@@ -19,6 +19,7 @@ Arguments create_Arguments()
     .intfile = NULL,
     .hitfile = NULL,
     .offsets = "0000",
+    .k = 0,
     .db_filename = NULL,
     .cmd = NULL,
     .pos = (char **) malloc(MAX_POS * sizeof(char *))
@@ -80,6 +81,7 @@ void print_help()
          "\t-t \t Switch target and query in synteny database\n"
          "\t-c \t Synder command to run. (See Below)\n"
          "\t-b \t Start and stop offsets for input and output (e.g. 1100)\n"
+         "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"
          "COMMANDS\n"
          "\tmap\n"
          "\t\t print target intervals overlapping each query interval\n"
@@ -111,7 +113,7 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:b:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:b:k:")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
@@ -145,6 +147,16 @@ Arguments parse_command(int argc, char *argv[])
         break;
       case 'b':
         strncpy(args.offsets, optarg, 5);
+        break;
+      case 'k':
+        errno = 0;
+        long k = strtol(optarg, NULL, 0);
+        // see errno docs
+        if((errno == ERANGE && (k == LONG_MAX || k == LONG_MIN)) || (errno != 0 && k == 0))
+        {
+            perror("In argument -k NUM, NUM must be an integer");
+        }
+        args.k = k;
         break;
       case '?':
         exit(EXIT_FAILURE);

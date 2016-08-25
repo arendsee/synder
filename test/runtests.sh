@@ -88,6 +88,8 @@ filter_plus_one () {
 # This variable will be set for each set of test
 # It specifies where the input files can be found
 dir=
+arg=
+exp_ext=exp
 runtest(){
     base=$1
     msg=$2
@@ -127,9 +129,9 @@ runtest(){
 
     if [[ $out_base == 1 ]]
     then
-        cat $dir/${base}-exp.txt | filter_plus_one > $exp
+        cat $dir/${base}-${exp_ext}.txt | filter_plus_one > $exp
     else
-        cat $dir/${base}-exp.txt | filter > $exp
+        cat $dir/${base}-${exp_ext}.txt | filter > $exp
     fi
 
     # Build database
@@ -160,10 +162,11 @@ runtest(){
         synder_cmd="$synder_cmd -i $gff"
         synder_cmd="$synder_cmd -s $tdb"
         synder_cmd="$synder_cmd -c search"
+        synder_cmd="$synder_cmd $arg"
 
         # command for loading into gdb
         echo "set args $synder_cmd"  >  $cmd
-        echo "source .gdb_cmds"     >> $cmd
+        echo "source .cmds.gdb"     >> $cmd
         if [[ $gdb_out != "none" ]]
         then
             echo "set logging off"           >> $cmd
@@ -246,6 +249,9 @@ runtest(){
 
         fi
     fi
+
+    # Reset all values
+    gff= map= exp= obs= tdb= val= cmd=
 }
 
 #---------------------------------------------------------------------
@@ -295,13 +301,6 @@ runtest within   "query between inverted intervals"
 runtest spanning "query spans inverted intervals"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/tiny-indel-query-side"
-announce "\nTest when a small interval interupts on one side"
-runtest beside "query side"
-dir="$PWD/test/test-data/tiny-indel-target-side"
-runtest beside "target side"
-
-#---------------------------------------------------------------------
 dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
 runtest beside "query beside the transposed pair"
@@ -316,9 +315,9 @@ boundary to a Block that is nearest by start, but not be stop."
 runtest right "right side"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/multi-chromosome"
-announce "\nTest two intervals on same query chr but different target chr"
-runtest between "between the query intervals"
+dir="$PWD/test/test-data/off-by-one"
+announce "\nTest overlap edge cases"
+runtest a "overlap of 1"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/inverted-extremes"
@@ -330,16 +329,80 @@ dir="$PWD/test/test-data/deletion"
 announce "\nDeletion tests (adjacent bounds in target)"
 runtest between "query is inbetween"
 
-#---------------------------------------------------------------------
-dir="$PWD/test/test-data/off-by-one"
-announce "\nTest overlap edge cases"
-runtest a "overlap of 1"
 
-# #---------------------------------------------------------------------
-# # TODO Find a good way to deal with this case:
-# dir="$PWD/test/test-data/synmap-overlaps"
-# announce "\nsyntenic overlaps"
-# runtest simple "Between the weird"
+#---------------------------------------------------------------------
+announce "\nTest multi-chromosome cases when k=0"
+arg=" -k 0 "
+#  T   =====[---->
+#        |
+#  Q   =====   <->   =====
+#                      |
+#  T           <----]=====
+dir="$PWD/test/test-data/interruptions/multi-chromosome"
+runtest between "interuption between query intervals"
+#  T   =====[-------------]=====   
+#        |                   |     
+#  Q   ===== <->   =====   =====   
+#                    |
+#  T        ===[--]=====
+#            |  
+#  Q        === 
+dir="$PWD/test/test-data/interruptions/one-query-side"
+runtest beside "query side"
+# T             ===    ===
+#                |      | 
+# Q    =====[--]===    ===[--]=====
+#        |                      |
+# T    =====   <-->           =====
+dir="$PWD/test/test-data/interruptions/two-target-side"
+runtest beside "target side"
+arg=" -k 1 "
+runtest beside "target side, k=1 (should be the same)"
+# T    =====                      =====
+#        |                          |
+# Q    =====   ===== <--> =====   =====
+#                |          |
+# T            =====[----]=====        
+dir="$PWD/test/test-data/interruptions/two-query-side"
+ark=" -k 0 "
+runtest between "between two interior query-side intervals (k=0)"
+
+#---------------------------------------------------------------------
+announce "\nTest multi-chromosome cases when k=2"
+arg=" -k 2 "
+exp_ext='exp-k2'
+#  T   =====[-------------]=====   
+#        |                   |     
+#  Q   ===== <->   =====   =====   
+#                    |
+#  T        ===[--]=====
+#            |  
+#  Q        === 
+dir="$PWD/test/test-data/interruptions/one-query-side"
+runtest beside "query side"
+#           [----------------]
+# T             ===    ===
+#                |      | 
+# Q    =====    ===    ===    =====
+#        |                      |
+# T    =====   <-->           =====
+dir="$PWD/test/test-data/interruptions/two-target-side"
+runtest beside "target side"
+# T    =====[--------------------]=====
+#        |                          |
+# Q    =====   ===== <--> =====   =====
+#                |          |
+# T            =====[----]=====        
+dir="$PWD/test/test-data/interruptions/two-query-side"
+runtest between "between two interior query-side intervals (k=2)"
+
+arg=        # reset to default
+exp_ext=exp # reset to default
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/synmap-overlaps"
+announce "\nsyntenic overlaps"
+runtest simple "Between the weird"
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/unassembled"

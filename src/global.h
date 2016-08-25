@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
+#include <limits.h>
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))

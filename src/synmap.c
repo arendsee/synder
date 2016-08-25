@@ -237,11 +237,8 @@ void free_node(Node * node)
   free(node);
 }
 
-void link_contiguous_blocks(Synmap * syn)
+void link_contiguous_blocks(Synmap * syn, long k)
 {
-
-  int cutoff = 0;
-
   Block * blk;
   Node * node;
   Node * root;
@@ -271,7 +268,7 @@ void link_contiguous_blocks(Synmap * syn)
         tdiff = (long) blk->over->grpid - (long) node->blk->over->grpid;
 
         older_strand = node->blk->over->strand;
-        same_target = blk->over->parent != node->blk->over->parent;
+        same_target = blk->over->parent == node->blk->over->parent;
 
         // If contiguous
         if(
@@ -280,7 +277,7 @@ void link_contiguous_blocks(Synmap * syn)
                   // query blocks are adjacent
                   (qdiff == 1) ||
                   // fewer than cutoff blocks with different targets separate them
-                  (same_target && qdiff < cutoff && qdiff != 0)
+                  (same_target && (qdiff-1) < k && qdiff != 0)
               ) &&
               // targets are contiguous
               (
@@ -302,7 +299,7 @@ void link_contiguous_blocks(Synmap * syn)
                               (tdiff < 0 && this_strand == '-') 
                           )
                           && // score is acceptable
-                          ((abs(tdiff) + qdiff - 2) <= cutoff)
+                          ((abs(tdiff) + qdiff - 2) <= k)
                       )
                   )
               )
@@ -329,7 +326,7 @@ void link_contiguous_blocks(Synmap * syn)
           break;
         }
         // If definitely not adjacent
-        else if((qdiff - 1) > cutoff){
+        else if((qdiff - 1) > k){
           remove_node(node);
         }
         else {

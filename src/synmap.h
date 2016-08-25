@@ -38,7 +38,7 @@ void set_overlap_group(Synmap * syn);
 void link_adjacent_blocks(Synmap * syn);
 
 /** Link each node to its contiguous neighbor */
-void link_contiguous_blocks(Synmap * syn);
+void link_contiguous_blocks(Synmap * syn, long k);
 
 /** Checks invariants - dies if anything goes wrong */
 void validate_synmap(Synmap * syn);
