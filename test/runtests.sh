@@ -89,12 +89,14 @@ filter_plus_one () {
 # It specifies where the input files can be found
 dir=
 arg=
-exp_ext=exp
+exp_ext=
 runtest(){
     base=$1
     msg=$2
     errmsg=${3:-0}
     out_base=${4:-0}
+
+    [[ -z $exp_ext ]] && exp_ext=exp
 
     # Write output to this folder, if all goes well, it will be deleted
     tmp=/tmp/synder-$RANDOM$RANDOM
@@ -152,8 +154,8 @@ runtest(){
             ln -sf $exp  e
             ln -sf $obs  o
             ln -sf $tdb  d
-            ln -sf $val  v
             ln -sf $cmd  c
+            [[ $valgrind -eq 1 ]] && ln -sf $val v
         fi
 
         synder_cmd=$synder
@@ -238,12 +240,15 @@ runtest(){
                 echo " * e - expected output"
                 echo " * d - database"
                 echo " * v - valgrind report (if valgrind is present)"
+                echo " * s - synmap dump"
                 echo "Synder database command:"
                 echo $db_cmd
                 echo "Synder command:"
                 echo $synder_cmd
             fi
             echo -e "---------------------------------------\n"
+
+            $synder_cmd -D > /dev/null 2> s
 
             [[ $die_on_failure -eq 1 ]] && exit 1
 
@@ -329,6 +334,14 @@ dir="$PWD/test/test-data/deletion"
 announce "\nDeletion tests (adjacent bounds in target)"
 runtest between "query is inbetween"
 
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/unassembled"
+announce "\nMappings beyond the edges of target scaffold"
+runtest lo "query is below scaffold"
+runtest adj-lo "query is just below the scaffold"
+runtest adj-hi "query is just above the scaffold"
+runtest hi "query is above the scaffold"
+runtest lo "test with 1-base" 0 1
 
 #---------------------------------------------------------------------
 announce "\nTest multi-chromosome cases when k=0"
@@ -368,6 +381,16 @@ ark=" -k 0 "
 runtest between "between two interior query-side intervals (k=0)"
 
 #---------------------------------------------------------------------
+args=' -k 4 ' 
+exp_ext=
+announce "\nConfirm two-scaffold systems are unaffected by k"
+dir="$PWD/test/test-data/tandem-transposition"
+runtest beside "query beside the transposed pair"
+runtest within "query between the transposed pair"
+dir="$PWD/test/test-data/simple-duplication"
+runtest between "query starts between the duplicated intervals"
+
+#---------------------------------------------------------------------
 announce "\nTest multi-chromosome cases when k=2"
 arg=" -k 2 "
 exp_ext='exp-k2'
@@ -400,19 +423,10 @@ arg=        # reset to default
 exp_ext=exp # reset to default
 
 #---------------------------------------------------------------------
+args= exp_ext=
 dir="$PWD/test/test-data/synmap-overlaps"
 announce "\nsyntenic overlaps"
 runtest simple "Between the weird"
-
-#---------------------------------------------------------------------
-dir="$PWD/test/test-data/unassembled"
-announce "\nMappings beyond the edges of target scaffold"
-runtest lo "query is below scaffold"
-runtest adj-lo "query is just below the scaffold"
-runtest adj-hi "query is just above the scaffold"
-runtest hi "query is above the scaffold"
-
-runtest lo "test with 1-base" 0 1
 
 #---------------------------------------------------------------------
 echo

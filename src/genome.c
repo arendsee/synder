@@ -27,7 +27,7 @@ void free_Genome(Genome * genome)
 
 void print_Genome(Genome * genome, bool forward)
 {
-  printf(">\t%s\t%lu\n", genome->name, genome->size);
+  fprintf(stderr, ">%s size=%lu\n", genome->name, genome->size);
   for (size_t i = 0; i < genome->size; i++) {
     print_Contig(genome->contig[i], forward);
   }

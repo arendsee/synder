@@ -46,10 +46,10 @@ typedef enum direction { LO = 0, HI = 1 } Direction;
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;
 
 typedef enum corner {
-    PREV_START = 0,
-    NEXT_START = 1,
-    PREV_STOP  = 2,
-    NEXT_STOP  = 3
+    PREV_START = 0,   // previous element as ordered by start
+    NEXT_START = 1,   // next element as ordered by start
+    PREV_STOP  = 2,   // previous element as ordered by stop
+    NEXT_STOP  = 3    // next element as ordered by stop
 } Corner;
 
 typedef struct Synmap Synmap;

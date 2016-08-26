@@ -1,5 +1,7 @@
 file synder
 
+fs next
+
 break -function load_Synmap
 break -function link_block_corners
 break -function set_contig_corners

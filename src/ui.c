@@ -15,14 +15,15 @@
 Arguments create_Arguments()
 {
   Arguments args = {
-    .synfile = NULL,
-    .intfile = NULL,
-    .hitfile = NULL,
-    .offsets = "0000",
-    .k = 0,
+    .synfile     = NULL,
+    .intfile     = NULL,
+    .hitfile     = NULL,
+    .offsets     = "0000",
+    .k           = 0,
     .db_filename = NULL,
-    .cmd = NULL,
-    .pos = (char **) malloc(MAX_POS * sizeof(char *))
+    .cmd         = NULL,
+    .debug       = false,
+    .pos         = (char **) malloc(MAX_POS * sizeof(char *))
   };
   memset(args.pos, 0, MAX_POS * sizeof(char *));
   return args;
@@ -51,7 +52,12 @@ void close_Arguments(Arguments arg)
 
 void print_args(Arguments args)
 {
-  printf("stub\n");
+  printf(
+      "arguments: k=%ld offsets=%s cmd=%s\n",
+      args.k,
+      args.offsets,
+      args.cmd
+  );
 }
 
 void check_file(FILE * fp, char *name)
@@ -82,6 +88,7 @@ void print_help()
          "\t-c \t Synder command to run. (See Below)\n"
          "\t-b \t Start and stop offsets for input and output (e.g. 1100)\n"
          "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"
+         "\t-D \t Print debug info\n"
          "COMMANDS\n"
          "\tmap\n"
          "\t\t print target intervals overlapping each query interval\n"
@@ -113,13 +120,16 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  while ((opt = getopt(argc, argv, "hvrd:s:i:c:f:b:k:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrDd:s:i:c:f:b:k:")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
         break;
       case 'v':
         print_version();
+        break;
+      case 'D':
+        args.debug = true;
         break;
       case 'd':
         temp = fopen(optarg, "r");

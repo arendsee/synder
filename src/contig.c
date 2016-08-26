@@ -37,11 +37,21 @@ void free_Contig(Contig * contig)
 
 void print_Contig(Contig * contig, bool forward)
 {
-  printf("%lu\t%s\n", contig->size, contig->name);
+  fprintf(
+      stderr,
+      "$ %s size=%lu length=%lu cor=[%p,%p,%p,%p]\n",
+      contig->name,
+      contig->size,
+      contig->length,
+      contig->cor[0],
+      contig->cor[1],
+      contig->cor[2],
+      contig->cor[3]
+  ); 
   Block * blk = contig->cor[!forward];
   Corner d = forward ? NEXT_START : NEXT_STOP;
   for(; blk != NULL; blk = blk->cor[d]){
-    print_Block(blk);
+    print_verbose_Block(blk);
   }
 }
 

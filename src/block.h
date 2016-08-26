@@ -18,7 +18,11 @@ void set_Block(
 
 void free_Block(Block *);
 
+/** A clean TAB-delimited output suitable for giving to the user */
 void print_Block(Block *);
+
+/** A diagnostic function designed for use in synmap dumps */
+void print_verbose_Block(Block *);
 
 bool overlap(long, long, long, long);
 

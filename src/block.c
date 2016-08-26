@@ -101,7 +101,6 @@ void delete_Block(Block* block)
     }
 }
 
-/** Print all fields in this block (TAB-delimited). */
 void print_Block(Block* block)
 {
     printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\n",
@@ -112,6 +111,59 @@ void print_Block(Block* block)
         block->over->pos[0] + global_out_start,
         block->over->pos[1] + global_out_stop,
         block->strand);
+}
+
+void print_verbose_Block(Block* block)
+{
+    fprintf(
+        stderr,
+        "$ %p setid=%zu score=%f\n",
+        block,
+        block->setid,
+        block->score
+    );
+    fprintf(
+        stderr,
+        "  Q parent=%s pos(%zu, %zu, %c) grpid=%zu\n",
+        block->parent->name,
+        block->pos[0],
+        block->pos[1],
+        block->strand,
+        block->grpid
+    );
+    fprintf(
+        stderr,
+        "  T parent=%s pos(%zu, %zu, %c) grpid=%zu\n",
+        block->over->parent->name,
+        block->over->pos[0],
+        block->over->pos[1],
+        block->strand,
+        block->over->grpid
+    );
+    fprintf(
+        stderr,
+        "  Qlinks\n    * cor=[%p,%p,%p,%p]\n    * adj=[%p,%p]\n    * cnr=[%p,%p]\n",
+        block->cor[0],
+        block->cor[1],
+        block->cor[2],
+        block->cor[3],
+        block->adj[0],
+        block->adj[1],
+        block->cnr[0],
+        block->cnr[1]
+    );
+    fprintf(
+        stderr,
+        "  Tlinks\n    * cor=[%p,%p,%p,%p]\n    * adj=[%p,%p]\n    * cnr=[%p,%p]\n",
+        block->over->cor[0],
+        block->over->cor[1],
+        block->over->cor[2],
+        block->over->cor[3],
+        block->over->adj[0],
+        block->over->adj[1],
+        block->over->cnr[0],
+        block->over->cnr[1]
+    );
 }
 
 /**
