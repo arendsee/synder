@@ -13,7 +13,8 @@ void set_Block(
     float   score,
     char    strand,
     Contig* parent,
-    Block*  over
+    Block*  over,
+    size_t  linkid
 );
 
 void free_Block(Block *);

@@ -5,20 +5,23 @@
 
 /** Initialize values in a block */
 void set_Block(
-    Block* block,
-    long start,
-    long stop,
-    float score,
-    char strand,
+    Block*  block,
+    long    start,
+    long    stop,
+    float   score,
+    char    strand,
     Contig* parent,
-    Block* over)
+    Block*  over,
+    size_t  linkid
+)
 {
     block->pos[0] = start;
     block->pos[1] = stop;
-    block->score = score;
+    block->score  = score;
     block->strand = strand;
     block->parent = parent;
-    block->over = over;
+    block->over   = over;
+    block->linkid = linkid;
 }
 
 /** Allocate memory for a block and set each field.
@@ -113,57 +116,55 @@ void print_Block(Block* block)
         block->strand);
 }
 
-void print_verbose_Block(Block* block)
+// if block is NULL, "-"
+// else string of size_t
+void link_str(char * s, Block * b){
+    if(b == NULL) {
+        strcpy(s, "-");
+    }
+    else{
+        sprintf(s, "%zu", b->linkid);
+    }
+}
+void print_verbose_Block_(Block* block, char side)
 {
     fprintf(
         stderr,
-        "$ %p setid=%zu score=%f\n",
-        block,
-        block->setid,
-        block->score
-    );
-    fprintf(
-        stderr,
-        "  Q parent=%s pos(%zu, %zu, %c) grpid=%zu\n",
+        "  %c-%zu parent=%s pos(%zu, %zu, %c) grpid=%zu addr=%p\n",
+        side,
+        block->linkid,
         block->parent->name,
         block->pos[0],
         block->pos[1],
         block->strand,
-        block->grpid
+        block->grpid,
+        block
     );
+    char c0[32], c1[32], c2[32], c3[32], a0[32], a1[32], r0[32], r1[32];
+    link_str(c0, block->cor[0]);
+    link_str(c1, block->cor[1]);
+    link_str(c2, block->cor[2]);
+    link_str(c3, block->cor[3]);
+    link_str(a0, block->adj[0]);
+    link_str(a1, block->adj[1]);
+    link_str(r0, block->cnr[0]);
+    link_str(r1, block->cnr[1]);
     fprintf(
         stderr,
-        "  T parent=%s pos(%zu, %zu, %c) grpid=%zu\n",
-        block->over->parent->name,
-        block->over->pos[0],
-        block->over->pos[1],
-        block->strand,
-        block->over->grpid
+        "  %clinks\n    * cor=[%s,%s,%s,%s]\n    * adj=[%s,%s]\n    * cnr=[%s,%s]\n",
+        side, c0, c1, c2, c3, a0, a1, r0, r1
     );
+}
+void print_verbose_Block(Block* block)
+{
     fprintf(
         stderr,
-        "  Qlinks\n    * cor=[%p,%p,%p,%p]\n    * adj=[%p,%p]\n    * cnr=[%p,%p]\n",
-        block->cor[0],
-        block->cor[1],
-        block->cor[2],
-        block->cor[3],
-        block->adj[0],
-        block->adj[1],
-        block->cnr[0],
-        block->cnr[1]
+        "$ setid=%zu score=%f\n",
+        block->setid,
+        block->score
     );
-    fprintf(
-        stderr,
-        "  Tlinks\n    * cor=[%p,%p,%p,%p]\n    * adj=[%p,%p]\n    * cnr=[%p,%p]\n",
-        block->over->cor[0],
-        block->over->cor[1],
-        block->over->cor[2],
-        block->over->cor[3],
-        block->over->adj[0],
-        block->over->adj[1],
-        block->over->cnr[0],
-        block->over->cnr[1]
-    );
+    print_verbose_Block_(block, 'Q');
+    print_verbose_Block_(block->over, 'T');
 }
 
 /**

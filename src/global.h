@@ -126,17 +126,18 @@ struct ContiguousSet {
  *   initialized, it implies a serious bug.
  */
 struct Block {
-  long pos[2];       // start and stop positions
-  Contig * parent;   // Contig parent
-  Block * over;      // homologous block in other genome
-  Block * cor[4];    // next and prev elements by start and stop
-  Block * adj[2];    // adjacent non-overlapping block
-  Block * cnr[2];    // adjacent block in contiguous set
-  float score;       // score provided by synteny program
+  Contig *parent; // Contig parent
+  Block  *over;   // homologous block in other genome
+  Block  *cor[4]; // next and prev elements by start and stop
+  Block  *adj[2]; // adjacent non-overlapping block
+  Block  *cnr[2]; // adjacent block in contiguous set
+  long   pos[2];  // start and stop positions
+  float  score;   // score provided by synteny program
+  size_t grpid;   // overlapping group id;
+  char   strand;  // strand [+-.]
+  size_t setid;   // maybe temporary
+  size_t linkid;  // maybe temporary
   //ContiguousSet set; // contiguous set id
-  size_t setid; // maybe temporary
-  size_t grpid;      // overlapping group id;
-  char strand;       // strand [+-.]
 };
 
 #endif

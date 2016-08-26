@@ -39,14 +39,14 @@ void print_Contig(Contig * contig, bool forward)
 {
   fprintf(
       stderr,
-      "$ %s size=%lu length=%lu cor=[%p,%p,%p,%p]\n",
+      "$ %s size=%lu length=%lu cor=[%zu,%zu,%zu,%zu]\n",
       contig->name,
       contig->size,
       contig->length,
-      contig->cor[0],
-      contig->cor[1],
-      contig->cor[2],
-      contig->cor[3]
+      contig->cor[0]->linkid,
+      contig->cor[1]->linkid,
+      contig->cor[2]->linkid,
+      contig->cor[3]->linkid
   ); 
   Block * blk = contig->cor[!forward];
   Corner d = forward ? NEXT_START : NEXT_STOP;

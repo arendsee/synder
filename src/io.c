@@ -105,8 +105,8 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k)
     qblk = &qcon->block[qblk_id];
     tblk = &tcon->block[tblk_id];
 
-    set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk);
-    set_Block(tblk, tstart, tstop, score, strand, tcon, qblk);
+    set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk, 2 * line_no);
+    set_Block(tblk, tstart, tstop, score, strand, tcon, qblk, 2 * line_no + 1);
 
   }
   free(line);

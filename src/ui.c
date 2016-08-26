@@ -52,7 +52,8 @@ void close_Arguments(Arguments arg)
 
 void print_args(Arguments args)
 {
-  printf(
+  fprintf(
+      stderr,
       "arguments: k=%ld offsets=%s cmd=%s\n",
       args.k,
       args.offsets,

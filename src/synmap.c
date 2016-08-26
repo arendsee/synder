@@ -298,7 +298,6 @@ void link_contiguous_blocks(Synmap* syn, long k)
     char ats, bts;
     long aqg, atg, bqg, btg;
     Contig *atc, *btc, *aqc, *bqc;
-    Direction d;
 
     setid = 0;
     for (size_t i = 0; i < SG(syn, 0)->size; i++) {
@@ -383,21 +382,20 @@ void link_contiguous_blocks(Synmap* syn, long k)
                             (tdiff < 0 && bts == '-')
                         ) &&
                         // no cis jumpers
-                        there_is_no_conflict(blk_a->over, blk_b->over)
+                        there_is_no_conflict(blk_a->over, blk_b->over) &&
+                        there_is_no_conflict(blk_a, blk_b)
                     )
                     {
-
-                    d = blk_b->over->strand == '+';
 
                     // homologous blocks must have same setid
                     blk_b->setid       = blk_a->setid;
                     blk_b->over->setid = blk_a->setid;
 
                     // link the contiguous blocks on both sides
-                    blk_b->cnr[!d]       = blk_a;
-                    blk_a->cnr[d]        = blk_b;
-                    blk_b->over->cnr[!d] = blk_a->over;
-                    blk_a->over->cnr[d]  = blk_b->over;
+                    blk_b->cnr[0]       = blk_a;
+                    blk_a->cnr[1]       = blk_b;
+                    blk_b->over->cnr[0] = blk_a->over;
+                    blk_a->over->cnr[1] = blk_b->over;
 
                     // set node head to the new Block
                     node->blk = blk_b;

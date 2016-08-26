@@ -87,9 +87,7 @@ filter_plus_one () {
 
 # This variable will be set for each set of test
 # It specifies where the input files can be found
-dir=
-arg=
-exp_ext=
+dir= arg= exp_ext=
 runtest(){
     base=$1
     msg=$2
@@ -105,11 +103,11 @@ runtest(){
     # initialize temporary files
     gff=$dir/$base.gff
     map=$dir/map.syn
-    val=$tmp/v
     cmd=$tmp/c
     obs=$tmp/o
     exp=$tmp/e
     tdb=$tmp/db/a_b.txt
+    log=$tmp/err
 
     echo -n "Testing $msg ... "
 
@@ -155,7 +153,7 @@ runtest(){
             ln -sf $obs  o
             ln -sf $tdb  d
             ln -sf $cmd  c
-            [[ $valgrind -eq 1 ]] && ln -sf $val v
+            ln -sf $log  r
         fi
 
         synder_cmd=$synder
@@ -188,20 +186,23 @@ runtest(){
             fi
         done
 
-        $synder_cmd 2>&1 > $obs
+        if [[ $valgrind -eq 1 ]]
+        then
+            valgrind $synder_cmd -D > $obs 2> $log
+            valgrind_exit_status=$?
+            wait
+        else
+            $synder_cmd > $obs 2> $log
+        fi
+
+        filter < $obs > $tmp/z && mv $tmp/z $obs
+
+        $synder_cmd -D > /dev/null 2> s
         if [[ $? != 0 ]]
         then
             warn "Synder terminated with non-zero status:\n"
             echo $synder_cmd
             exit 1
-        fi
-
-        $synder_cmd | filter > $obs
-
-        if [[ $valgrind -eq 1 ]]
-        then
-            valgrind $synder_cmd > /dev/null 2> $val
-            valgrind_exit_status=$?
         fi
 
         diff $obs $exp > /dev/null 
@@ -214,7 +215,7 @@ runtest(){
                 [[ $die_on_failure -eq 1 ]] && exit 1
             else
                 # clear all temporary files
-                rm -rf x g e o d v c m /tmp/synder-*
+                rm -rf [a-z] /tmp/synder-*
                 total_passed=$(( $total_passed + 1 ))
                 echo "OK"
             fi
@@ -248,15 +249,13 @@ runtest(){
             fi
             echo -e "---------------------------------------\n"
 
-            $synder_cmd -D > /dev/null 2> s
-
             [[ $die_on_failure -eq 1 ]] && exit 1
 
         fi
     fi
 
     # Reset all values
-    gff= map= exp= obs= tdb= val= cmd=
+    gff= map= exp= obs= tdb= cmd= log=
 }
 
 #---------------------------------------------------------------------
@@ -286,6 +285,7 @@ runtest g "starts in block 2, ends after block 3"
 runtest h "starts before block 2, ends after block 3"
 runtest i "starts in block 2, ends in block 2"
 runtest j "extreme right"
+
 
 #---------------------------------------------------------------------
 dir="$PWD/test/test-data/simple-duplication"
@@ -353,17 +353,17 @@ arg=" -k 0 "
 #  T           <----]=====
 dir="$PWD/test/test-data/interruptions/multi-chromosome"
 runtest between "interuption between query intervals"
-#  T   =====[-------------]=====   
-#        |                   |     
-#  Q   ===== <->   =====   =====   
+#  T   =====[-------------]=====
+#        |                   |
+#  Q   ===== <->   =====   =====
 #                    |
 #  T        ===[--]=====
-#            |  
-#  Q        === 
+#            |
+#  Q        ===
 dir="$PWD/test/test-data/interruptions/one-query-side"
 runtest beside "query side"
 # T             ===    ===
-#                |      | 
+#                |      |
 # Q    =====[--]===    ===[--]=====
 #        |                      |
 # T    =====   <-->           =====
@@ -375,13 +375,13 @@ runtest beside "target side, k=1 (should be the same)"
 #        |                          |
 # Q    =====   ===== <--> =====   =====
 #                |          |
-# T            =====[----]=====        
+# T            =====[----]=====
 dir="$PWD/test/test-data/interruptions/two-query-side"
 ark=" -k 0 "
 runtest between "between two interior query-side intervals (k=0)"
 
 #---------------------------------------------------------------------
-args=' -k 4 ' 
+args=' -k 4 '
 exp_ext=
 announce "\nConfirm two-scaffold systems are unaffected by k"
 dir="$PWD/test/test-data/tandem-transposition"
@@ -394,18 +394,18 @@ runtest between "query starts between the duplicated intervals"
 announce "\nTest multi-chromosome cases when k=2"
 arg=" -k 2 "
 exp_ext='exp-k2'
-#  T   =====[-------------]=====   
-#        |                   |     
-#  Q   ===== <->   =====   =====   
+#  T   =====[-------------]=====
+#        |                   |
+#  Q   ===== <->   =====   =====
 #                    |
 #  T        ===[--]=====
-#            |  
-#  Q        === 
+#            |
+#  Q        ===
 dir="$PWD/test/test-data/interruptions/one-query-side"
 runtest beside "query side"
 #           [----------------]
 # T             ===    ===
-#                |      | 
+#                |      |
 # Q    =====    ===    ===    =====
 #        |                      |
 # T    =====   <-->           =====
@@ -415,7 +415,7 @@ runtest beside "target side"
 #        |                          |
 # Q    =====   ===== <--> =====   =====
 #                |          |
-# T            =====[----]=====        
+# T            =====[----]=====
 dir="$PWD/test/test-data/interruptions/two-query-side"
 runtest between "between two interior query-side intervals (k=2)"
 
