@@ -298,14 +298,23 @@ void link_contiguous_blocks(Synmap* syn, long k)
 
 }
 
-// TODO extend validatation to corners and the other new stuff
 void validate_synmap(Synmap* syn)
 {
-    size_t gid, cid;
-    size_t nblks;
-    Contig* con;
-    Block* blk;
-    assert(syn->size == 2);
+    #define ASSERT(t) if(!(t)){                                            \
+                        is_good=false;                                     \
+                        if(blk != NULL)                                    \
+                            fprintf(stderr, "%zu:%zu ", gid, blk->linkid); \
+                        fprintf(stderr, "Assert failed: `" #t "`\n");      \
+                      }
+
+    size_t  gid     = 0;
+    size_t  cid     = 0;
+    size_t  nblks   = 0;
+    Contig* con     = NULL;
+    Block*  blk     = NULL;
+    bool    is_good = true;
+
+    ASSERT(syn->size == 2)
     for (gid = 0; gid < syn->size; gid++) {
         for (cid = 0; cid < SG(syn, gid)->size; cid++) {
             con = SGC(syn, gid, cid);
@@ -320,43 +329,47 @@ void validate_synmap(Synmap* syn)
 
                 nblks++;
 
-                assert(blk->over != NULL);
-                assert(blk->cset != NULL);
-
-                assert(blk == blk->over->over);
-                assert(blk->cset->id == blk->over->cset->id);
-                assert(blk->cset->over == blk->over->cset);
-                assert(blk->score == blk->over->score);
+                ASSERT(blk->over != NULL);
+                ASSERT(blk->cset != NULL);
+                ASSERT(blk == blk->over->over);
+                ASSERT(blk->cset->id == blk->over->cset->id);
+                ASSERT(blk->cset->over == blk->over->cset);
+                ASSERT(blk->score == blk->over->score);
 
                 // grpid == 0 only if unset
-                assert(blk->grpid != 0);
+                ASSERT(blk->grpid != 0);
 
                 if (blk->cnr[1] != NULL) {
-                    assert(blk->grpid != blk->cnr[1]->grpid);
-                    assert(blk->cset == blk->cnr[1]->cset);
-                    assert(blk->cnr[1]->over->cnr[0] != NULL);
-                    assert(blk->cnr[1]->over->cnr[0]->over == blk);
+                    ASSERT(blk->grpid != blk->cnr[1]->grpid);
+                    ASSERT(blk->cset == blk->cnr[1]->cset);
+                    ASSERT(blk->cnr[1]->over->cnr[0] != NULL);
+                    ASSERT(blk->cnr[1]->over->cnr[0]->over == blk);
                 }
                 if (blk->cor[NEXT_START] != NULL) {
-                    assert(blk->pos[0] <= blk->cor[NEXT_START]->pos[0]);
-                    assert(blk->cor[NEXT_START]->cor[PREV_START] != NULL);
-                    assert(blk == blk->cor[NEXT_START]->cor[PREV_START]);
+                    ASSERT(blk->pos[0] <= blk->cor[NEXT_START]->pos[0]);
+                    ASSERT(blk->cor[NEXT_START]->cor[PREV_START] != NULL);
+                    ASSERT(blk == blk->cor[NEXT_START]->cor[PREV_START]);
                 }
                 if (blk->cor[NEXT_STOP] != NULL) {
-                    assert(blk->pos[1] <= blk->cor[NEXT_STOP]->pos[1]);
-                    assert(blk->cor[NEXT_STOP]->cor[PREV_STOP] != NULL);
-                    assert(blk == blk->cor[NEXT_STOP]->cor[PREV_STOP]);
+                    ASSERT(blk->pos[1] <= blk->cor[NEXT_STOP]->pos[1]);
+                    ASSERT(blk->cor[NEXT_STOP]->cor[PREV_STOP] != NULL);
+                    ASSERT(blk == blk->cor[NEXT_STOP]->cor[PREV_STOP]);
                 }
                 if (blk->cor[PREV_START] != NULL) {
-                    assert(blk->cor[PREV_START]->cor[NEXT_START] != NULL);
+                    ASSERT(blk->cor[PREV_START]->cor[NEXT_START] != NULL);
                 }
                 if (blk->cor[PREV_STOP] != NULL) {
-                    assert(blk->cor[PREV_STOP]->cor[NEXT_STOP] != NULL);
+                    ASSERT(blk->cor[PREV_STOP]->cor[NEXT_STOP] != NULL);
                 }
             }
             // blocks may be deleted, so nblks == con->size may not hold
             // however no blocks should ever be added
-            assert(nblks <= con->size);
+            ASSERT(nblks <= con->size);
         }
     }
+    if(! is_good){
+        print_Synmap(syn, true);
+        exit(EXIT_FAILURE);
+    }
+    #undef vprint
 }
