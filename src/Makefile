@@ -4,7 +4,7 @@ CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99 -lm
 CC=gcc
 TARGET=synder
 
-OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o synmap.o io.o analysis.o map.o main.o global.o
+OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o contiguous_set.o synmap.o io.o analysis.o map.o main.o global.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
@@ -32,6 +32,9 @@ block.o: block.c block.h
 
 synmap.o: synmap.c synmap.h
 	${CC} -c ${CFLAGS} synmap.[ch]
+
+contiguous_set.o: contiguous_set.c contiguous_set.h
+	${CC} -c ${CFLAGS} contiguous_set.[ch]
 
 ui.o: ui.c ui.h version.h
 	${CC} -c ${CFLAGS} ui.[ch]

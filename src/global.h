@@ -7,6 +7,9 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <assert.h>
+
+
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
@@ -85,23 +88,34 @@ struct Genome {
  *   [3] last by stop
  * - size    - total number of Blocks in Contig (including deleted ones)
  * - block   - memory pool for all Block structs
- * - itree   - an IntervalTree for log(n)+m search of overlapping intervals
+ * - itree   - an IntervalTree for log(n)+m search of overlapping intervals (Blocks)
+ * - ctree   - an IntervalTree for searching ContiguousSets
  */
 struct Contig {
   char * name;
   size_t idx;
+  // handle Blocks
   long length;
   Block * cor[4];
   size_t size;
   Block * block;
   struct IntervalTree * itree;
+  // handle ContiguousSets
+  ContiguousSet * cset;
+  struct IntervalTree * ctree;
 };
 
 /** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
 struct ContiguousSet {
     long bounds[2];
-    ContiguousSet * cor[4];
+    size_t size;
+    Contig * parent;
+    ContiguousSet * next;
+    ContiguousSet * prev;
     ContiguousSet * over;
+    char strand;
+    size_t id; // mostly for debugging
+    Block * ends[2];
 };
 
 /** Query interval with directions to matching target
@@ -126,18 +140,17 @@ struct ContiguousSet {
  *   initialized, it implies a serious bug.
  */
 struct Block {
-  Contig *parent; // Contig parent
-  Block  *over;   // homologous block in other genome
-  Block  *cor[4]; // next and prev elements by start and stop
-  Block  *adj[2]; // adjacent non-overlapping block
-  Block  *cnr[2]; // adjacent block in contiguous set
-  long   pos[2];  // start and stop positions
-  float  score;   // score provided by synteny program
-  size_t grpid;   // overlapping group id;
-  char   strand;  // strand [+-.]
-  size_t setid;   // maybe temporary
-  size_t linkid;  // maybe temporary
-  //ContiguousSet set; // contiguous set id
+  Contig        *parent; // Contig parent
+  Block         *over;   // homologous block in other genome
+  Block         *cor[4]; // next and prev elements by start and stop
+  Block         *adj[2]; // adjacent non-overlapping block
+  Block         *cnr[2]; // adjacent block in contiguous set
+  ContiguousSet *cset;   // contiguous set id
+  long          pos[2];  // start and stop positions
+  float         score;   // score provided by synteny program
+  size_t        grpid;   // overlapping group id;
+  char          strand;  // strand [+-.]
+  size_t        linkid;  // a unique block id used mostly for debugging
 };
 
 #endif

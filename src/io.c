@@ -105,8 +105,8 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k)
     qblk = &qcon->block[qblk_id];
     tblk = &tcon->block[tblk_id];
 
-    set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk, 2 * line_no);
-    set_Block(tblk, tstart, tstop, score, strand, tcon, qblk, 2 * line_no + 1);
+    set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk, line_no);
+    set_Block(tblk, tstart, tstop, score, strand, tcon, qblk, line_no);
 
   }
   free(line);
@@ -117,15 +117,14 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k)
     exit(EXIT_FAILURE);
   }
 
+  // The following must be run in order
   link_block_corners(syn);
-
   set_contig_corners(syn);
-
   set_overlap_group(syn);
-
   link_adjacent_blocks(syn);
-
   link_contiguous_blocks(syn, k);
+
+  print_Synmap(syn, true);
 
   validate_synmap(syn);
 

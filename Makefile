@@ -38,7 +38,7 @@ docs:
 clean:
 	rm -f ${TARGET}
 	rm -f vgcore.* gmon.out *log tags valgrind*
-	rm -rf zzz* db d e g x c o m v z gdb.txt
+	rm -rf zzz* db [a-z] gdb.txt
 	cd src && ${MAKE} clean
 
 
@@ -55,7 +55,7 @@ dtest:
 .PHONY: dclean
 dclean:
 	rm -f vgcore.* gmon.out *log valgrind*
-	rm -rf zzz* db r s d e g x c o m v z gdb.txt
+	rm -rf zzz* db [a-z] gdb.txt
 
 
 # Runs the sample data, linking files for review

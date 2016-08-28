@@ -12,7 +12,7 @@
 typedef struct CSList{
   struct CSList * next;
   Block * bound[2]; 
-  size_t setid;
+  ContiguousSet * cset;
 } CSList;
 CSList * init_empty_CSList();
 CSList * init_CSList(Block * blk);
@@ -373,11 +373,11 @@ float calculate_score(long a1, long a2, Block * blk){
 
 
 CSList * init_empty_CSList(){
-  CSList * cslist = (CSList *)malloc(sizeof(CSList));
-  cslist->next = NULL;
+  CSList * cslist   = (CSList *)malloc(sizeof(CSList));
+  cslist->next      = NULL;
   cslist->bound[LO] = NULL;
   cslist->bound[HI] = NULL;
-  cslist->setid = 0; // value reserved for null
+  cslist->cset      = NULL;
   return(cslist);
 }
 
@@ -386,7 +386,7 @@ CSList * init_CSList(Block * blk){
   cslist->next = NULL;
   cslist->bound[LO] = blk;
   cslist->bound[HI] = blk;
-  cslist->setid = blk->setid;
+  cslist->cset = blk->cset;
   return(cslist);
 }
 
@@ -399,9 +399,9 @@ void add_blk_CSList(CSList * cslist, Block * blk){
   else if(cslist->bound[LO] == NULL && cslist->bound[HI] == NULL){
     cslist->bound[LO] = blk;
     cslist->bound[HI] = blk;
-    cslist->setid = blk->setid;
+    cslist->cset = blk->cset;
   }
-  else if(cslist->setid == blk->setid){
+  else if(cslist->cset == blk->cset){
     if(cslist->bound[HI] == NULL || blk->pos[LO] > cslist->bound[HI]->pos[HI]){
         cslist->bound[HI] = blk;
     }

@@ -1,7 +1,10 @@
 #include <assert.h>
 #include <errno.h>
 
+#include "global.h"
 #include "synmap.h"
+#include "contiguous_set.h"
+
 
 Synmap* init_Synmap()
 {
@@ -21,7 +24,8 @@ void free_Synmap(Synmap* synmap)
     }
 }
 
-void print_Synmap(Synmap* synmap, bool forward) {
+void print_Synmap(Synmap* synmap, bool forward)
+{
     // only print the query Genome, the print_verbose_Block function will print
     // the target information as well
     fprintf(
@@ -135,18 +139,6 @@ void set_overlap_group(Synmap* syn)
     }
 }
 
-// Link blocks to nearest non-overlapping up and downstream blocks
-// For example, given these for blocks:
-//  |---a---|
-//            |--b--|
-//             |----c----|
-//                     |---d---|
-//                               |---e---|
-// a->adj := (NULL, b)
-// b->adj := (a, e)
-// c->adj := (a, e)
-// d->adj := (a, e)
-// e->adj := (d, NULL)
 void link_adjacent_blocks_directed(Contig* con, Direction d)
 {
     // In diagrams:
@@ -220,14 +212,14 @@ void link_adjacent_blocks(Synmap* syn)
 
 // ---- A local utility structure used to build contiguous sets ----
 typedef struct Node {
-    struct Node* down;
-    Block* blk;
+    struct Node * down;
+    ContiguousSet * cset;
 } Node;
 Node* init_node(Block* blk)
 {
     Node* node = (Node*)malloc(sizeof(Node));
     node->down = NULL;
-    node->blk  = blk;
+    node->cset = init_ContiguousSet(blk);
     return (node);
 }
 void remove_node(Node* node)
@@ -237,7 +229,7 @@ void remove_node(Node* node)
         memcpy(node, node->down, sizeof(Node));
         free(tmp);
     } else {
-        node->blk = NULL;
+        node->cset = NULL;
     }
 }
 void free_node(Node* node)
@@ -247,180 +239,43 @@ void free_node(Node* node)
     free(node);
 }
 
-// Determine if any non-overlapping target elements mapping to query exist
-// between TARGET blocks a and b
-bool there_is_no_conflict(Block * a, Block * b){
-    /* If any interval maps to a region in )a,b(, and to any region on the query, return false
-     *       a            z           b
-     * T  <=====>       <===>      <=====>
-     *       |            |           |
-     *       |            |           |
-     * Q  <=====>       <===>      <=====>
-     *              **Conflict!**
-     *
-     *       a            z           b
-     * T  <=====>       <===>      <=====>
-     *       |            \           |
-     *       |             -----------|---------\
-     * Q  <=====>                  <=====>     <===>
-     *                                     **Conflict!**
-     *
-     * Q2               <===>
-     *       a            |           b
-     * T  <=====>       <===>      <=====>
-     *       |            z           |
-     *       |                        |
-     * Q  <=====>                  <=====>
-     *             **No Conflict**
-     */
-    int up = (a->strand == '+') ? NEXT_START : PREV_STOP;
-    for(Block * x = a; x != b; x = x->cor[up]){
-        if (x == NULL){
-            fprintf(stderr, "Foul magic in __func__:__LINE__");
-        }
-        if (
-               ! block_overlap(x, a) &&
-               ! block_overlap(x, b) &&
-               x->over->parent == a->over->parent
-           )
-           return false;
-    }
-    return true;
-}
-
 void link_contiguous_blocks(Synmap* syn, long k)
 {
-    Block *blk_a, *blk_b;
+
+    Block *blk;
     Node* node;
     Node* root;
-    long qdiff, tdiff, demerits;
-    size_t setid;
-    char ats, bts;
-    long aqg, atg, bqg, btg;
-    Contig *atc, *btc, *aqc, *bqc;
+    bool block_added;
 
-    setid = 0;
     for (size_t i = 0; i < SG(syn, 0)->size; i++) {
-        // setids are 1-based; 0 is reserved for unset elements
-        setid++;
-        // Initialize the first block in the scaffold
-        blk_b              = SGC(syn, 0, i)->cor[0];
-        blk_b->setid       = setid;
-        blk_b->over->setid = setid;
-        node               = init_node(blk_b);
-        root               = node;
-        for (blk_b = blk_b->cor[1]; blk_b != NULL; blk_b = blk_b->cor[1]) {
 
-            // interval variables for new query
-            bqc =       blk_b->parent;
-            bqg = (long)blk_b->grpid;
-            // three interval variables for new target
-            btc =       blk_b->over->parent;
-            btg = (long)blk_b->over->grpid;
-            bts =       blk_b->over->strand;
+        // Initialize the first block in the scaffold
+        blk  = SGC(syn, 0, i)->cor[0];
+        node = init_node(blk);
+        root = node;
+        for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1]) {
 
             while (true) {
 
-                // labeled a since it is a previously seen node
-                blk_a = node->blk;
+                block_added = add_block_to_ContiguousSet(node->cset, blk, k);
 
-                // interval variables for previous query 
-                aqc =       blk_a->parent;
-                aqg = (long)blk_a->grpid;
-                // three interval variables for previously seen target
-                atc =       blk_a->over->parent;
-                atg = (long)blk_a->over->grpid;
-                ats =       blk_a->over->strand;
-
-                // qdiff and tdiff describe the adjacency of blocks relative to the
-                // query are target contigs, respectively. Cases:
-                // ---
-                // diff <= -2 : blocks are not adjacent
-                // diff == -1 : blocks are adjacent on reverse strand
-                // diff ==  0 : blocks overlap
-                // diff ==  1 : blocks are adjacent
-                // diff >=  2 : blocks are not adjacent
-                qdiff    = bqg - aqg;
-                tdiff    = btg - atg;
-                demerits = abs(tdiff) + qdiff - 2;
-
-                // Determine whether two blocks are contiguous
-                //
-                // Each block consists of query and target intervals
-                //
-                // Let these 4 resulting intervals be aq, at, bq and bt
-                //
-                // Each interval is defined by 3 variables:
-                //   1. s - target strand
-                //   2. c - target chromosome/scaffold name
-                //   3. g - non-overlapping group id
-                //
-                // I will identify each of these variables by appending [scg] to the
-                // interval name, e.g. ats or bqg.
-                //
-                // The blocks are contiguous if and only if all of the following are true
-                //   1. aqs == bqs
-                //   2. ats == bts
-                //   3. aqc == bqc
-                //   4. atc == btc
-                //
-                //   #1 will always be true, since strand is relative to query.
-                if (
-                        // non-overlapping
-                        qdiff    != 0   &&
-                        tdiff    != 0   &&
-                        // same target strand
-                        bts      == ats &&
-                        // same scaffolds
-                        aqc      == bqc &&
-                        atc      == btc &&
-                        // within an acceptable distance
-                        demerits <= k   &&
-                        (
-                            // going in the right direction
-                            (tdiff > 0 && bts == '+') ||
-                            (tdiff < 0 && bts == '-')
-                        ) &&
-                        // no cis jumpers
-                        there_is_no_conflict(blk_a->over, blk_b->over) &&
-                        there_is_no_conflict(blk_a, blk_b)
-                    )
-                    {
-
-                    // homologous blocks must have same setid
-                    blk_b->setid       = blk_a->setid;
-                    blk_b->over->setid = blk_a->setid;
-
-                    // link the contiguous blocks on both sides
-                    blk_b->cnr[0]       = blk_a;
-                    blk_a->cnr[1]       = blk_b;
-                    blk_b->over->cnr[0] = blk_a->over;
-                    blk_a->over->cnr[1] = blk_b->over;
-
-                    // set node head to the new Block
-                    node->blk = blk_b;
-
-                    // we are finished with blk_b
+                // if block has joined a set
+                if (block_added){
+                    // break and process next block
                     break;
                 }
-
-                // if at bottom of the Node list
+                // if we reach the bottom of the Node list
                 else if (node->down == NULL) {
-                    // blk_b is the first node in a new contiguous set
-                    setid++;
-                    blk_b->setid       = setid;
-                    blk_b->over->setid = setid;
-                    node->down         = init_node(blk_b);
+                    // begin new contiguous set
+                    node->down = init_node(blk);
                     break;
                 }
-
-                // if definitely not adjacent
-                else if ((qdiff - 1) > k) {
-                    // we are done with this node
+                // if this node is done
+                else if (strictly_forbidden(node->cset->ends[1], blk, k)) {
+                    // remove it, exposing the next Node 
                     remove_node(node);
                 }
-
-                // Otherwise
+                // otherwise
                 else {
                     // descend to the next Node
                     node = node->down;
@@ -429,6 +284,18 @@ void link_contiguous_blocks(Synmap* syn, long k)
         }
         free_node(root);
     }
+
+    // TODO: remove this, I don't really need the id
+    ContiguousSet * cset;
+    size_t setid = 0;
+    for (size_t i = 0; i < SG(syn, 0)->size; i++) {
+        for(cset = SGC(syn, 0, i)->cset; cset != NULL; cset = cset->next){
+            setid++;
+            cset->id       = setid;
+            cset->over->id = setid;
+        }
+    }
+
 }
 
 // TODO extend validatation to corners and the other new stuff
@@ -450,14 +317,23 @@ void validate_synmap(Synmap* syn)
                         "WARNING: stop greater than contig length: %zu vs %zu\n",
                         blk->pos[1], con->length);
                 }
+
                 nblks++;
-                assert(blk->setid == blk->over->setid);
+
+                assert(blk->over != NULL);
+                assert(blk->cset != NULL);
+
+                assert(blk == blk->over->over);
+                assert(blk->cset->id == blk->over->cset->id);
+                assert(blk->cset->over == blk->over->cset);
                 assert(blk->score == blk->over->score);
-                assert(blk->setid != 0);
+
+                // grpid == 0 only if unset
                 assert(blk->grpid != 0);
+
                 if (blk->cnr[1] != NULL) {
                     assert(blk->grpid != blk->cnr[1]->grpid);
-                    assert(blk->setid == blk->cnr[1]->setid);
+                    assert(blk->cset == blk->cnr[1]->cset);
                     assert(blk->cnr[1]->over->cnr[0] != NULL);
                     assert(blk->cnr[1]->over->cnr[0]->over == blk);
                 }
@@ -478,6 +354,8 @@ void validate_synmap(Synmap* syn)
                     assert(blk->cor[PREV_STOP]->cor[NEXT_STOP] != NULL);
                 }
             }
+            // blocks may be deleted, so nblks == con->size may not hold
+            // however no blocks should ever be added
             assert(nblks <= con->size);
         }
     }

@@ -160,7 +160,7 @@ void print_verbose_Block(Block* block)
     fprintf(
         stderr,
         "$ setid=%zu score=%f\n",
-        block->setid,
+        block->cset->id,
         block->score
     );
     print_verbose_Block_(block, 'Q');

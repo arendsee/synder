@@ -18,6 +18,8 @@ Contig *init_Contig(char *name, size_t size, long length)
   con->cor[1]  = NULL;
   con->cor[2]  = NULL;
   con->cor[3]  = NULL;
+  con->cset    = NULL;
+  con->ctree   = NULL;
   return con;
 }
 
