@@ -32,6 +32,14 @@ void print_verbose_Block(Block * blk);
 
 bool overlap(long, long, long, long);
 
+long overlap_length_ll(long a1, long a2, long b1, long b2);
+
+long overlap_length(Block * a, Block * b);
+
+void delete_Block(Block* block);
+
+void merge_block_a_into_b(Block * a, Block * b);
+
 bool block_overlap(Block *, Block *);
 
 /** compare intervals by stop */

@@ -1,0 +1,21 @@
+Cases:
+
+ 1. interrupted target
+ 2. interrupted query (side)
+ 3. interrupted both sides (side)
+ 4. interrupted query (between)
+
+ [x] write tests for 3rd gen cases 1-3
+ [x] debug contiguous set builder for cases 1-3
+ [x] implement contiguous_set structures
+ [x] write tests for case 4
+ [x] debug contiguous set builder for case 4
+ [x] write tests for dedicated double-overlapper test
+ [x] implement double-overlapper merging
+ [ ] add score transforms to positive additive
+ [ ] implement target side scoring
+ [ ] implement score thresholding
+ [ ] implement contiguous set scoring
+ [ ] write test code for scores
+ [ ] test against fagin
+ [ ] merge into Win code

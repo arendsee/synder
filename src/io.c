@@ -119,6 +119,7 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k)
   link_block_corners(syn);
   set_contig_corners(syn);
   set_overlap_group(syn);
+  merge_all_doubly_overlapping_blocks(syn);
   link_adjacent_blocks(syn);
   link_contiguous_blocks(syn, k);
 

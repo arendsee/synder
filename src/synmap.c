@@ -136,6 +136,7 @@ void set_overlap_group(Synmap* syn)
     }
 }
 
+
 void link_adjacent_blocks_directed(Contig* con, Direction d)
 {
     // In diagrams:
@@ -207,6 +208,16 @@ void link_adjacent_blocks(Synmap* syn)
     }
 }
 
+void merge_all_doubly_overlapping_blocks(Synmap * syn)
+{
+    Contig * con;
+    for(size_t i = 0; i < SG(syn, 0)->size; i++){
+        con = SGC(syn, 0, i);
+        merge_doubly_overlapping_blocks(con);
+    }
+}
+
+
 // ---- A local utility structure used to build contiguous sets ----
 typedef struct Node {
     struct Node * down;
@@ -239,16 +250,21 @@ void free_node(Node* node)
 void link_contiguous_blocks(Synmap* syn, long k)
 {
 
+    Contig * con;
     Block *blk;
     Node* node;
     Node* root;
     bool block_added;
+    size_t setid = 0;
 
     for (size_t i = 0; i < SG(syn, 0)->size; i++) {
-
+        // The current Contig
+        con = SGC(syn, 0, i);
         // Initialize the first block in the scaffold
-        blk  = SGC(syn, 0, i)->cor[0];
+        blk  = con->cor[0];
+        // A container for the nascent ContiguousSets
         node = init_node(blk);
+        // For returning after descent, since Node has no prev
         root = node;
         for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1]) {
             while (true) {
@@ -280,35 +296,29 @@ void link_contiguous_blocks(Synmap* syn, long k)
             node = root;
         }
         free_node(root);
-    }
 
-    // TODO: remove this, I don't really need the id
-    ContiguousSet * cset;
-    size_t setid = 0;
-    for (size_t i = 0; i < SG(syn, 0)->size; i++) {
-        cset = SGC(syn, 0, i)->cset;
-        // rewind - will remove it in production code
-        while(cset->prev != NULL){
-            cset = cset->prev;
+        // rewind - TODO - build the csets so this isn't necessary
+        while(con->cset->prev != NULL){
+            con->cset = con->cset->prev;
         }
-        SGC(syn, 0, i)->cset = cset;
-        for(; cset != NULL; cset = cset->next){
+        // TODO - remove setids. I don't use them for anything but debugging
+        for(ContiguousSet * cset = con->cset; cset != NULL; cset = cset->next){
             setid++;
-            cset->id       = setid;
+            cset->id = setid;
             cset->over->id = setid;
         }
     }
-
 }
 
 void validate_synmap(Synmap* syn)
 {
-    #define ASSERT(t) if(!(t)){                                            \
-                        is_good=false;                                     \
-                        if(blk != NULL)                                    \
-                            fprintf(stderr, "%zu:%zu ", gid, blk->linkid); \
-                        fprintf(stderr, "Assert failed: `" #t "`\n");      \
-                      }
+    #define ASSERT(t)                                        \
+        if(!(t)){                                            \
+          is_good=false;                                     \
+          if(blk != NULL)                                    \
+              fprintf(stderr, "%zu:%zu ", gid, blk->linkid); \
+          fprintf(stderr, "Assert failed: `" #t "`\n");      \
+        }
 
     size_t  gid     = 0;
     size_t  cid     = 0;
@@ -321,6 +331,12 @@ void validate_synmap(Synmap* syn)
     for (gid = 0; gid < syn->size; gid++) {
         for (cid = 0; cid < SG(syn, gid)->size; cid++) {
             con = SGC(syn, gid, cid);
+
+            ASSERT(con->cor[0] != NULL);
+            ASSERT(con->cor[1] != NULL);
+            ASSERT(con->cor[2] != NULL);
+            ASSERT(con->cor[3] != NULL);
+
             blk = con->cor[0];
             nblks = 0;
             for (; blk != NULL; blk = blk->cor[1]) {

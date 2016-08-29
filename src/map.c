@@ -265,21 +265,6 @@ SI_Bound * get_si_bound(
 }
 
 
-long _overlap_length(long a1, long a2, long b1, long b2){
-    // If the intervals overlap
-    if(a1 <= b2 && b1 <= a2){
-        // Find the lower bound of the overlapping region
-        long a = a1 > b1 ? a1 : b1; 
-        // Find the upper bound of the overlapping region
-        long b = a2 > b2 ? b2 : a2;
-        // Return the overlapping interval length
-        return b - a + 1;
-    }
-    else{
-        return 0;
-    }
-}
-
 // Arguments:
 //  near - the distance from the block to the expected near end of the query
 //  far  - the distance from the block to the expected far end of the query
@@ -360,7 +345,7 @@ float calculate_score(long a1, long a2, Block * blk){
         //             b1    |     b1
         //             |-----|         overlapping interval
         //             i1    i2
-               _overlap_length(a1, a2, b1, b2);
+               overlap_length_ll(a1, a2, b1, b2);
 
         // NOTE: I am kind of adding length to area here, but it actually
         // works. `_flank_area` returns the area of a segment of the base

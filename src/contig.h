@@ -44,6 +44,8 @@ void free_Contig(Contig * contig);
  */
 void free_partial_Contig(Contig * contig);
 
+void merge_doubly_overlapping_blocks(Contig * contig);
+
 /** Recursively print contig. */
 void print_Contig(Contig * contig, bool forward);
 

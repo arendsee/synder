@@ -43,62 +43,98 @@ Block* init_Block(long start, long stop)
  * The block is not freed, since it is assumed the memory is in a memory pool
  * managed by a Contig object.
  */
-void delete_Block_directed(Block* block, Direction d)
+void delete_Block_(Block* block)
 {
-    // TODO - double check this logic
-
-    // Transformed indices for Block->cor
-    // ----------------------------------
-    // a   b          c   d
-    // <--->   <--->  <--->
-    //   a - previous element by start
-    //   b - previous element by stop
-    //   c - next element by start
-    //   d - next element by stop
-    int idx_a = (!d * 2) + !d; // - 0
-    int idx_b = ( d * 2) + !d; // - 2
-    int idx_c = (!d * 2) +  d; // - 1
-    int idx_d = ( d * 2) +  d; // - 3
-
-    if (block == block->parent->cor[d])
-        block->parent->cor[d] = block->cor[idx_d];
-
-    if (block == block->parent->cor[2 + d])
-        block->parent->cor[2 + d] = block->cor[2 + idx_b];
-
-    if (block->cor[idx_a] != NULL)
-        block->cor[idx_a]->cor[idx_c] = block->cor[idx_c];
-
-    if (block->cor[idx_b] != NULL)
-        block->cor[idx_b]->cor[idx_d] = block->cor[idx_d];
-
-    if (block->cnr[d] != NULL)
-        block->cnr[d]->cnr[!d] = block->cnr[!d];
-
-    if (block->adj[d] != NULL) {
-        // Normally we link block->adj[1]->adj[0] to block->cor[PREV_STOP], but
-        // in the case below, we need to link to NEXT_STOP instead:
-        //                    <====>   block->adj[1]
-        // i+1       <=====>           block->cor[NEXT_STOP]
-        // i         <=====>           block
-        // i-1     <====>              block->cor[PREV_STOP]
-        if (block->cor[idx_d]->pos[d] == block->cor[idx_c]->pos[d]) {
-            block->adj[d]->adj[!d] = block->cor[idx_d];
-        } else {
-            block->adj[d]->adj[!d] = block->cor[idx_c];
+    int r;
+    for(int i = 0; i < 4; i++){
+        r = (i % 2 == 0) ? (i + 1) : (i - 1);
+        if (block == block->parent->cor[i]){
+            block->parent->cor[i] = block->cor[r];
+        }
+        if (block->cor[i] != NULL){
+            block->cor[i]->cor[r] = block->cor[r];
         }
     }
+
+    for(int i = 0; i < 2; i++){
+        if (block->cnr[i] != NULL){
+            block->cnr[i]->cnr[!i] = block->cnr[!i];
+        }
+        if (block->adj[i] != NULL) {
+            // Normally we link block->adj[1]->adj[0] to block->cor[PREV_STOP], but
+            // in the case below, we need to link to NEXT_STOP instead:
+            //                    <====>   block->adj[1]
+            // i+1       <=====>           block->cor[NEXT_STOP]
+            // i         <=====>           block
+            // i-1     <====>              block->cor[PREV_STOP]
+            r = (block->cor[3*i]->pos[i] < block->adj[i]->pos[!i]) ? 3*i : i+1;
+            block->adj[i]->adj[!i] = block->cor[r];
+            block->cor[r]->adj[i]  = block->adj[i];
+        }
+    }
+
+    // wipe memory: unnecessary, but will ease debugging
+    memset(block, 0, sizeof(Block));
 }
+
 void delete_Block(Block* block)
 {
-    delete_Block_directed(block, LO);
-    delete_Block_directed(block, HI);
+    if(block->over != NULL)
+        delete_Block_(block->over);
+    if(block != NULL)
+        delete_Block_(block);
+}
 
-    // set this to prevent delection of homolog from looping
-    block->parent = NULL;
-    if (block->over->parent != NULL) {
-        delete_Block(block->over);
+long overlap_length_ll(long a1, long a2, long b1, long b2){
+    // If the intervals overlap
+    if(a1 <= b2 && b1 <= a2){
+        // Find the lower bound of the overlapping region
+        long a = a1 > b1 ? a1 : b1; 
+        // Find the upper bound of the overlapping region
+        long b = a2 > b2 ? b2 : a2;
+        // Return the overlapping interval length
+        return b - a + 1;
     }
+    else{
+        return 0;
+    }
+}
+
+long overlap_length(Block * a, Block * b){
+    return overlap_length_ll(
+        a->pos[0],
+        a->pos[1],
+        b->pos[0],
+        b->pos[1]
+    );
+}
+
+
+void merge_block_a_into_b(Block * a, Block * b){
+
+    // 1. reasign b->score to weighted average of a->score and b->score
+
+    long olen = overlap_length(a, b);
+    long al = a->pos[1] - a->pos[0] + 1;
+    long bl = b->pos[1] - b->pos[0] + 1;
+    float score =
+        ((float)(al - olen) / (al)) * a->score +
+        ((float)(bl - olen) / (bl)) * b->score +
+        olen * (a->score / al + b->score / bl) / 2;
+
+    b->score = score;
+    b->over->score = score;
+        
+    // 2. reasign b->pos to union of a->pos and b->pos
+
+    b->pos[0] = b->pos[0] < a->pos[0] ? b->pos[0] : a->pos[0];
+    b->pos[1] = b->pos[1] > a->pos[1] ? b->pos[1] : a->pos[1];
+    b->over->pos[0] = b->over->pos[0] < a->over->pos[0] ? b->over->pos[0] : a->over->pos[0];
+    b->over->pos[1] = b->over->pos[1] > a->over->pos[1] ? b->over->pos[1] : a->over->pos[1];
+
+    // 3. delete a, this will automatically relink
+
+    delete_Block(a);
 }
 
 void print_Block(Block* block)

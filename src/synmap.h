@@ -42,6 +42,13 @@ void set_contig_corners(Synmap * syn);
  */
 void set_overlap_group(Synmap * syn);
 
+/** Merge blocks that overlap on both query and target sides
+ *
+ * For now, I will use a weighted average for the merged Block score.
+ *
+ */
+void merge_all_doubly_overlapping_blocks(Synmap * syn);
+
 /** Link each node to its adjacent neighbors
  *
  * Requires previous run of set_overlap_group
