@@ -1,7 +1,3 @@
-#include "string.h"
-#include "stdlib.h"
-#include "stdio.h"
-
 #include "genome.h"
 
 Genome *init_Genome(char *name, size_t size)

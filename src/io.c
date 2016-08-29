@@ -1,5 +1,3 @@
-#include <assert.h>
-
 #include "global.h"
 #include "io.h"
 

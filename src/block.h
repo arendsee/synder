@@ -22,8 +22,13 @@ void free_Block(Block *);
 /** A clean TAB-delimited output suitable for giving to the user */
 void print_Block(Block *);
 
-/** A diagnostic function designed for use in synmap dumps */
-void print_verbose_Block(Block *);
+/** A diagnostic function designed for use in synmap dumps
+ *
+ * This function prints the homologous pair of blocks, not just the the input
+ * block.
+ *
+ */
+void print_verbose_Block(Block * blk);
 
 bool overlap(long, long, long, long);
 

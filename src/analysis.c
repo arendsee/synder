@@ -38,7 +38,7 @@ void analysis_map(Synmap * syn, FILE * intfile)
     start -= global_in_start;
     stop  -= global_in_stop;
 
-    rc = get_region(SGC(syn, 0, chrid), start, stop);
+    rc = get_region(SGC(syn, 0, chrid), start, stop, false);
     missing = rc->inbetween || rc->leftmost || rc->rightmost;
 
     for (size_t i = 0; i < rc->size; i++) {

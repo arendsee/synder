@@ -1,6 +1,7 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -22,6 +23,9 @@
 #define REL_NEXT(a, i, d) ((d) ? (a)[i+1] : (a)[i-1])
 #define REL_ADD(a, b, d)  ((d) ? (a) + (b) : (a) - (b))
 #define REL_SUB(a, b, d)  ((d) ? (a) - (b) : (a) + (b))
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 #define SGCB(syn, gid, cid, bid) syn->genome[(gid)]->contig[(cid)]->block[(bid)]
 #define SGC(syn, gid, cid)       syn->genome[(gid)]->contig[(cid)]

@@ -6,6 +6,31 @@ bool blocks_conflict(Block * a, Block * b);
 
 ContiguousSet * init_ContiguousSet_side_(Block * blk);
 
+void free_ContiguousSet(ContiguousSet * cset){
+    if(cset->prev != NULL){
+        cset->prev->next = cset->next;
+    }
+
+    if(cset->next != NULL){
+        cset->next->prev = cset->prev;
+    }
+
+    if(cset->over != NULL){
+        cset->over->over = NULL;
+        free_ContiguousSet(cset->over);
+    }
+
+    if(cset->parent->cset == cset){
+        cset->parent->cset = cset->prev != NULL ? cset->prev : cset->next;
+    }
+
+    if(cset->parent->ctree != NULL){
+        free_IntervalTree(cset->parent->ctree);
+        cset->parent->ctree = NULL;
+    }
+
+    free(cset);
+}
 
 ContiguousSet * init_ContiguousSet_side_(Block * blk){
     if(blk != NULL){

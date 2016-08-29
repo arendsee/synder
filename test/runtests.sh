@@ -27,28 +27,34 @@ Test the final output of synder
 OPTIONAL ARGUMENTS
   -h  print this help message
   -x  die on first failure 
+  -m  test memory with valgrind
   -d  print full debugging info and link input file (g), database file (d),
       observed (o) and expected (e) files to the working directory.
   -v  verbose
   -o  redirect gdb output to this file (or tty)
-  -m  test memory with valgrind
+  -a  archive all results
 EOF
     exit 0
 }
 
-die_on_failure=0
+die_on_fail=0
 debug=0
 valgrind=0
 verbose=0
+archive=0
 gdb_out="none"
-while getopts "hdxvmo:" opt; do
+while getopts "hdxvma:o:" opt; do
     case $opt in
         h)
             usage ;;
+        a)
+            archive=$OPTARG
+            mkdir -p $archive
+            ;;
         d) 
             debug=1 ;;
         x)
-            die_on_failure=1 ;;
+            die_on_fail=1 ;;
         v)
             verbose=1 ;;
         o)
@@ -73,7 +79,10 @@ synder=$PWD/synder
 total_passed=0
 total_failed=0
 valgrind_checked=0
-valgrind_exit_status=0
+valgrind_exit_status=1
+synder_db_exit_status=1
+synder_exit_status=1
+diff_exit_status=1
 
 # A function to select which parts of the output should be compared
 # Since flags are currently in flux, test only the first 7 columns
@@ -87,32 +96,38 @@ filter_plus_one () {
 
 # This variable will be set for each set of test
 # It specifies where the input files can be found
-dir= arg= exp_ext=
+dir= arg= exp_ext= test_num=0
 runtest(){
     base=$1
     msg=$2
     errmsg=${3:-0}
     out_base=${4:-0}
 
-    [[ -z $exp_ext ]] && exp_ext=exp
-
-    # Write output to this folder, if all goes well, it will be deleted
-    tmp=/tmp/synder-$RANDOM$RANDOM
-    mkdir -p $tmp/db
-
-    # initialize temporary files
-    gff=$dir/$base.gff
-    map=$dir/map.syn
-    cmd=$tmp/c
-    obs=$tmp/o
-    exp=$tmp/e
-    tdb=$tmp/db/a_b.txt
-    log=$tmp/err
-
     echo -n "Testing $msg ... "
 
+    fail=0
+
+    [[ -z $exp_ext ]] && exp_ext=exp
+
+    # initialize temporary files
+    gff=input.gff
+    map=synteny-map.tab
+    gdbcmd=.gdb_cmd
+    obs=observed-output
+    exp=expected-output
+    val=valgrind-log
+    db=db
+    tdb=$db/a_b.txt
+    log=error-log
+    run=run
+    gdb=gdb
+    syn=synmap.txt
+
+    cp $dir/$base.gff $gff
+    cp $dir/map.syn   $map
+
     # Default synder database building command
-    db_cmd="$synder -d $map a b $tmp/db"
+    db_cmd="$synder -d $map a b $db"
 
     # Query genome length file
     tgen=$dir/tgen.tab
@@ -120,10 +135,13 @@ runtest(){
     qgen=$dir/qgen.tab
 
     # If the length files are given, add to db command
-    if [[ -f $tgen ]]; then
+    if [[ -f $tgen ]]
+    then
         db_cmd="$db_cmd $tgen"
     fi
-    if [[ -f $tgen && -f $qgen ]]; then
+
+    if [[ -f $tgen && -f $qgen ]]
+    then
         db_cmd="$db_cmd $qgen"
     fi
 
@@ -136,25 +154,13 @@ runtest(){
 
     # Build database
     $db_cmd
+    synder_db_exit_status=$?
 
-    if [[ $? != 0 ]]
+    if [[ $synder_db_exit_status != 0 ]]
     then
-        total_failed=$(( $total_failed + 1 ))
-        warn "FAILED - Could not build database\n"
-        echo "failed command:"
-        echo $db_cmd
+        fail=1
+        warn "database:"
     else
-
-        if [[ $debug -eq 1 ]]
-        then
-            ln -sf $gff  g 
-            ln -sf $map  m
-            ln -sf $exp  e
-            ln -sf $obs  o
-            ln -sf $tdb  d
-            ln -sf $cmd  c
-            ln -sf $log  r
-        fi
 
         synder_cmd=$synder
 
@@ -165,16 +171,17 @@ runtest(){
         synder_cmd="$synder_cmd $arg"
 
         # command for loading into gdb
-        echo "set args $synder_cmd"  >  $cmd
-        echo "source .cmds.gdb"     >> $cmd
+        echo "set args $synder_cmd"  >  $gdbcmd
+        echo "source $PWD/.cmds.gdb" >> $gdbcmd
+        echo "file $PWD/synder"      >> $gdbcmd
         if [[ $gdb_out != "none" ]]
         then
-            echo "set logging off"           >> $cmd
-            echo "set logging file $gdb_out" >> $cmd
-            echo "set logging redirect on"   >> $cmd
-            echo "set logging on"            >> $cmd
-            echo "gdb -tui --command c" > x
-            chmod 755 x
+            echo "set logging off"                   >> $gdbcmd
+            echo "set logging file $gdb_out"         >> $gdbcmd
+            echo "set logging redirect on"           >> $gdbcmd
+            echo "set logging on"                    >> $gdbcmd
+            echo "gdb -tui --command $gdbcmd -d $PWD" > $gdb
+            chmod 755 $gdb
         fi
 
         # Ensure all input files are readable
@@ -182,49 +189,56 @@ runtest(){
         do
             if [[ ! -r "$f" ]]
             then
-                warn "Input file $f not readable"
+                warn "input:"
+                fail=1
             fi
         done
 
+        $synder_cmd > $obs 2> $log
+        synder_exit_status=$?
+
         if [[ $valgrind -eq 1 ]]
         then
-            valgrind $synder_cmd -D > $obs 2> $log
+            # append valgrind messages to any synder error messages
+            valgrind --leak-check=full $synder_cmd > $obs 2> $val
+            grep "ERROR SUMMARY: 0 errors" $val > /dev/null
             valgrind_exit_status=$?
-            wait
-        else
-            $synder_cmd > $obs 2> $log
-        fi
-
-        filter < $obs > $tmp/z && mv $tmp/z $obs
-
-        $synder_cmd -D > /dev/null 2> s
-        if [[ $? != 0 ]]
-        then
-            warn "Synder terminated with non-zero status:\n"
-            echo $synder_cmd
-            exit 1
-        fi
-
-        diff $obs $exp > /dev/null 
-
-        if [[ $? == 0 ]]
-        then
-            if [[ $valgrind -eq 1  &&  $valgrind_exit_status -ne 0 ]]
+            if [[ $valgrind_exit_status -ne 0 ]]
             then
-                warn "memory bug"
-                [[ $die_on_failure -eq 1 ]] && exit 1
-            else
-                # clear all temporary files
-                rm -rf [a-z] /tmp/synder-*
-                total_passed=$(( $total_passed + 1 ))
-                echo "OK"
+                warn "valgrind:"
+                fail=1
             fi
-        else
-            warn "FAIL"
-            echo " (in `basename $dir`/)"
+        fi
+
+        $synder_cmd -D > /dev/null 2> $syn
+        if [[ $? -ne 0 ]]
+        then
+            if [[ $valgrind_exit_status -eq 0 || $synder_exit_status -eq 0 ]]
+            then
+                warn "dump:"
+                synder_exit_status=1
+                fail=1
+            fi
+        fi
+
+        if [[ $synder_exit_status != 0 ]]
+        then
+            warn "runtime:"
+            fail=1
+        fi
+
+        filter < $obs > /tmp/z && mv /tmp/z $obs
+        diff $exp $obs 2> /dev/null
+        diff_exit_status=$?
+
+        if [[ $fail -eq 0 && $diff_exit_status -ne 0 ]]
+        then
+            warn "logic:"
+            fail=1
             [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
             total_failed=$(( $total_failed + 1 ))
             echo "======================================="
+            emphasize_n "test directory"; echo ": `basename $dir`"
             emphasize_n "expected output"; echo ": (${base}-exp.txt)"
             cat $exp
             emphasize "observed output:"
@@ -239,23 +253,54 @@ runtest(){
                 echo " * g - input GFF file"
                 echo " * o - observed output"
                 echo " * e - expected output"
-                echo " * d - database"
-                echo " * v - valgrind report (if valgrind is present)"
+                echo " * d - database directory"
+                echo " * v - valgrind log (empty on success)"
+                echo " * l - error log (synder STDERR output)"
                 echo " * s - synmap dump"
+                echo " * c - gdb command"
+                echo " * x - initialize gdb"
+                echo " * r - run the command that failed"
                 echo "Synder database command:"
                 echo $db_cmd
                 echo "Synder command:"
                 echo $synder_cmd
             fi
             echo -e "---------------------------------------\n"
-
-            [[ $die_on_failure -eq 1 ]] && exit 1
-
         fi
     fi
 
+    if [[ -d $archive ]]
+    then
+        test_num=$(( test_num + 1 ))
+        if [[ $fail -eq 1 ]]
+        then
+            arch="$archive/${test_num}_F_`basename $dir`"
+        else
+            arch="$archive/${test_num}_P_`basename $dir`"
+        fi
+        [[ -d $arch ]] && rm -rf $arch
+        mkdir -p $arch
+        mv $gff $map $gdbcmd $obs $exp $val $syn $db $log $run $gdb $arch 2> /dev/null
+        echo $synder_cmd > $arch/$run
+        chmod 755 $arch/$run
+    fi
+
+    # clear all temporary files
+    rm -rf $gff $map $gdbcmd $obs $exp $val $db $log $gdb
+
+    if [[ $fail -eq 0 ]]
+    then
+        echo "OK"
+        total_passed=$(( $total_passed + 1 ))
+    else
+        warn "FAIL\n"
+        total_failed=$(( $total_failed + 1 ))
+        [[ $die_on_fail -eq 0 ]] || exit 1
+    fi
+
     # Reset all values
-    gff= map= exp= obs= tdb= cmd= log=
+    gff= map= cmd= obs= exp= val= db= tdb= log=
+
 }
 
 #---------------------------------------------------------------------
@@ -418,6 +463,20 @@ runtest beside "target side"
 # T            =====[----]=====
 dir="$PWD/test/test-data/interruptions/two-query-side"
 runtest between "between two interior query-side intervals (k=2)"
+# T    =====[------------------------------------]=====
+#        |                                          |
+# Q    =====   =====   ===== <--> =====   =====   =====
+#                |       |          |       |
+# T            =====[----|----------|----]=====
+#                        |          |
+#                      =====[----]=====
+dir="$PWD/test/test-data/interruptions/nested"
+arg=" -k 4 "
+exp_ext="exp-k4"
+runtest between "query nested two pairs of interrupting intervals (k=4)"
+arg=" -k 3 "
+exp_ext="exp-k3"
+runtest between "query nested two pairs of interrupting intervals (k=3)"
 
 arg=        # reset to default
 exp_ext=exp # reset to default

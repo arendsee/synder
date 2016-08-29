@@ -3,9 +3,23 @@
 
 #include "global.h"
 #include "block.h"
+#include "itree/itree.h"
 
 
 ContiguousSet * init_ContiguousSet(Block * blk);
+
+void print_ContiguousSet(ContiguousSet * cset);
+
+/** Cleanly free a single Contiguous set
+ *
+ * This function preserves the ContiguousSet linked list
+ *  - contig->end are reset, if needed
+ *  - ContiguousSet->next and ContiguousSet->prev are relinked
+ *  - ContiguousSet->over is freed as well
+ *  - Free the parent ContiguousSet IntervalTree, since it will become corrupt
+ *
+ */
+void free_ContiguousSet(ContiguousSet * cset);
 
 bool add_block_to_ContiguousSet(ContiguousSet * cset, Block * blk, long k);
 

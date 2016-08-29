@@ -1,9 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "map.h"
 #include "contig.h"
 #include "synmap.h"
@@ -17,6 +11,7 @@ typedef struct CSList{
 CSList * init_empty_CSList();
 CSList * init_CSList(Block * blk);
 void add_blk_CSList(CSList * cslist, Block * blk);
+void add_cset_CSList(CSList * cslist, ContiguousSet * cset, long bounds[2]);
 void free_CSList(CSList * cslist);
 
 typedef struct SI_Bound{
@@ -57,6 +52,8 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
   size_t chrid;
   // Row output of itree
   ResultContig * rc;
+  // Row output of ctree
+  ResultContig * crc;
   // Search interval score
   float score;
 
@@ -73,7 +70,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
     bounds[LO] -= global_in_start;
     bounds[HI] -= global_in_stop;
 
-    rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI]);
+    rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI], false);
 
     cslist = init_empty_CSList();
     root = cslist;
@@ -81,6 +78,13 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
     // get list of highest and lowest members of each contiguous set
     for(size_t i = 0; i < rc->size; i++){
       add_blk_CSList(cslist, rc->block[i]); 
+    }
+
+    crc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI], true);
+    if(! (crc->inbetween || crc->leftmost || crc->rightmost) ){
+        for(size_t i = 0; i < crc->size; i++){
+          add_cset_CSList(cslist, crc->cset[i], bounds); 
+        }
     }
 
     // Iterate through each contiguous set, for each find the search interval
@@ -388,6 +392,41 @@ CSList * init_CSList(Block * blk){
   cslist->bound[HI] = blk;
   cslist->cset = blk->cset;
   return(cslist);
+}
+
+void add_cset_CSList(CSList * cslist, ContiguousSet * cset, long bounds[2]){
+    if(cset == NULL){
+        // do nothing
+    }
+    else if(cset == cslist->cset){
+        // do nothing
+    }
+    else if(cslist->next == NULL){
+        cslist->next = init_empty_CSList();
+        cslist       = cslist->next;
+        cslist->cset = cset;
+
+        long lo = LONG_MIN;
+        long hi = LONG_MAX;
+        Block * blk = cset->ends[0];
+        // blk should never be NULL
+        assert(blk != NULL);
+        // if ContiguousSet is valid, ends[0] should have no prev
+        assert(blk->cnr[0] == NULL);
+        for(; blk != NULL; blk = blk->cnr[1]){
+            if(blk->pos[0] <= bounds[0] && blk->pos[0] >= lo){
+                cslist->bound[LO] = blk;
+                lo = blk->pos[0];
+            }
+            if(blk->pos[1] >= bounds[1] && blk->pos[1] <= hi){
+                cslist->bound[HI] = blk;
+                hi = blk->pos[1];
+            }
+        }
+    }
+    else{
+        add_cset_CSList(cslist->next, cset, bounds);
+    }
 }
 
 void add_blk_CSList(CSList * cslist, Block * blk){

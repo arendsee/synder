@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "block.h"
 
 /** Initialize values in a block */

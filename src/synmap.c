@@ -1,6 +1,3 @@
-#include <assert.h>
-#include <errno.h>
-
 #include "global.h"
 #include "synmap.h"
 #include "contiguous_set.h"
@@ -254,7 +251,6 @@ void link_contiguous_blocks(Synmap* syn, long k)
         node = init_node(blk);
         root = node;
         for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1]) {
-
             while (true) {
 
                 block_added = add_block_to_ContiguousSet(node->cset, blk, k);
@@ -281,6 +277,7 @@ void link_contiguous_blocks(Synmap* syn, long k)
                     node = node->down;
                 }
             }
+            node = root;
         }
         free_node(root);
     }
@@ -289,7 +286,13 @@ void link_contiguous_blocks(Synmap* syn, long k)
     ContiguousSet * cset;
     size_t setid = 0;
     for (size_t i = 0; i < SG(syn, 0)->size; i++) {
-        for(cset = SGC(syn, 0, i)->cset; cset != NULL; cset = cset->next){
+        cset = SGC(syn, 0, i)->cset;
+        // rewind - will remove it in production code
+        while(cset->prev != NULL){
+            cset = cset->prev;
+        }
+        SGC(syn, 0, i)->cset = cset;
+        for(; cset != NULL; cset = cset->next){
             setid++;
             cset->id       = setid;
             cset->over->id = setid;

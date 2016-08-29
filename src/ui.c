@@ -1,11 +1,7 @@
 #define _GNU_SOURCE
 #include <getopt.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
-
+#include "global.h"
 #include "ui.h"
 #include "version.h"
 

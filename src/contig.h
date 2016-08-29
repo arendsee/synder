@@ -5,6 +5,7 @@
 #include "block.h"
 #include "itree/itree.h"
 #include "itree/search.h"
+#include "contiguous_set.h"
 
 /** Allocate memory for a contig and set each field.
  *
@@ -61,12 +62,13 @@ typedef struct ResultContig{
     Contig * contig;
     size_t size;
     Block ** block;
+    ContiguousSet ** cset;
     bool inbetween;
     bool leftmost;
     bool rightmost;
 } ResultContig;
 
-ResultContig * init_ResultContig(Contig *, IntervalResult *);
+ResultContig * init_ResultContig(Contig *, IntervalResult *, bool is_cset);
 
 void free_ResultContig(ResultContig *);
 
@@ -82,7 +84,7 @@ void print_ResultContig(ResultContig *);
  * syntenic interval), return just the nearest interval.
  *
  * */
-ResultContig *get_region(Contig * contig, long a, long b);
+ResultContig *get_region(Contig * contig, long a, long b, bool is_cset);
 
 /** Given two points, find the number of blocks they overlap */
 long count_overlaps(Contig * contig, long a, long b);

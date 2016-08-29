@@ -37,8 +37,8 @@ docs:
 .PHONY: clean
 clean:
 	rm -f ${TARGET}
-	rm -f vgcore.* gmon.out *log tags valgrind*
-	rm -rf zzz* db [a-z] gdb.txt
+	rm -f vgcore.* gmon.out *log valgrind*
+	rm -rf zzz* db [a-z] gdb.txt ark
 	cd src && ${MAKE} clean
 
 
@@ -48,14 +48,22 @@ clean:
 # * links valgrind output
 .PHONY: dtest
 dtest:
-	./test/runtests.sh -xdmo log 
-	# Compile ctags, no worries if it fails
-	ctags . 2> /dev/null
+	rm -rf ark
+	mkdir ark
+	./test/runtests.sh -mdv -o log -a ark | tee ark/log
+
+# Same as above, but does not test memory
+.PHONY: dtest-leak
+dtest-leak:
+	rm -rf ark
+	mkdir ark
+	./test/runtests.sh -dv -o log -a ark | tee ark/log
 
 .PHONY: dclean
 dclean:
 	rm -f vgcore.* gmon.out *log valgrind*
-	rm -rf zzz* db [a-z] gdb.txt
+	rm -rf zzz* db [a-z] gdb.txt ark
+	rm -f expected-output gdb input.gff observed-output synteny-map.tab
 
 
 # Runs the sample data, linking files for review

@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "global.h"
 #include "ui.h"
 #include "io.h"
@@ -88,6 +82,7 @@ int main(int argc, char *argv[])
     if(syn != NULL && args.debug){
         print_args(args);
         print_Synmap(syn, true); 
+        exit(EXIT_SUCCESS);
     }
   }
   // No arguments passed
@@ -130,8 +125,8 @@ int main(int argc, char *argv[])
   // Clean up
   // ------------------------------------------------------------------------
 
-  if (syn != NULL)
-    free_Synmap(syn);
+  // if (syn != NULL)
+  //   free_Synmap(syn);
   close_Arguments(args);
 
   return (EXIT_SUCCESS);
