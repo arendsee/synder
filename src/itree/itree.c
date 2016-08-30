@@ -15,7 +15,7 @@ void print_IntervalTree_verbosity_1(IntervalTree * n, int depth, char pos);
 void print_IntervalTree_verbosity_2(IntervalTree * n, int depth, char pos);
 void print_IntervalTree_verbosity_3(IntervalTree * n, int depth, char pos);
 void print_IntervalTree_r(IntervalTree * n, int depth, char pos, int verbosity);
-size_t get_center(IA *);
+long get_center(IA *);
 
 
 IntervalTree * init_IntervalTree(){
@@ -135,11 +135,11 @@ IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation o
  * If the intervals are sorted, it also favors (but doesn't guarantee) a
  * balanced tree.
  */
-size_t get_center(IA * intr){
+long get_center(IA * intr){
     // get the central index
-    size_t i = intr->size / 2;
+    long i = intr->size / 2;
     // get the center point on this index
-    size_t x = (intr->v[i].stop - intr->v[i].start) / 2 + intr->v[i].start;
+    long x = (intr->v[i].stop - intr->v[i].start) / 2 + intr->v[i].start;
     return x;
 }
 

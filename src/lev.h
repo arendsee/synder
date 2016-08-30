@@ -1,7 +1,6 @@
 #ifndef __LEV_H__
 #define __LEV_H__
 
-#include <string.h>
 #include <stdint.h>
 
 #include "global.h"

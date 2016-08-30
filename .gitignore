@@ -1,5 +1,7 @@
 synder
 
+ark/
+
 # ctags file used internally by some editors
 tags
 
@@ -24,12 +26,8 @@ big-sample-inputs/*syn
 big-sample-inputs/*gff
 big-sample-inputs/*tab
 
-# my temp file prefixes
+# my temporary files
 z*
-x
-y
-g
-e
-d
-g[0-9]
-d[0-9]
+[a-z]
+g[0-9]*
+d[0-9]*

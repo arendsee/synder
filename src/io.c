@@ -1,14 +1,13 @@
-#include <assert.h>
-
+#include "global.h"
 #include "io.h"
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs);
 
-Synmap *load_Synmap(FILE * synfile, int swap)
+Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
 {
   assert(synfile != NULL);
 
-  Synmap *synmap = init_Synmap();
+  Synmap *syn = init_Synmap();
 
   int query = swap;
   int target = !swap;
@@ -37,13 +36,13 @@ Synmap *load_Synmap(FILE * synfile, int swap)
       if (line[0] == '>') {
         status = sscanf(line, "> %s %zu %c", seqid, &ncontigs, &dummy);
         check_args(line_no, status, 2);
-        SG(synmap, loc) = init_Genome(seqid, ncontigs);
+        SG(syn, loc) = init_Genome(seqid, ncontigs);
       } else if (line[0] == '@') {
         break;
       } else if (line[0] == '$') {
         status = sscanf(line, "$ %zu %zu %s %zu %c\n", &conid, &nblocks, seqid, &contig_length, &dummy);
         check_args(line_no, status, 4);
-        SGC(synmap, loc, conid) = init_Contig(seqid, nblocks, contig_length);
+        SGC(syn, loc, conid) = init_Contig(seqid, nblocks, contig_length);
         unloaded_blocks += nblocks;
       } else {
         fprintf(stderr, "Incorrect file format, line %zu\n", line_no);
@@ -55,60 +54,78 @@ Synmap *load_Synmap(FILE * synfile, int swap)
 
 
   line_no = 0;
-  size_t qcon_id, qblk_id, qstart, qstop;
-  size_t tcon_id, tblk_id, tstart, tstop;
+  size_t qcon_id, qblk_id, tcon_id, tblk_id;
+  long qstart, qstop, tstart, tstop;
+  float score;
   char strand;
 
   Block *qblk, *tblk;
+  Contig *tcon, *qcon;
 
   while ((read = getline(&line, &len, synfile)) != EOF) {
     line_no++;
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %c %c\n",
+    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %f %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
-                    &tcon_id, &tblk_id, &tstart, &tstop, &strand, &dummy);
-    check_args(line_no, status, 9);
+                    &tcon_id, &tblk_id, &tstart, &tstop, &score, &strand, &dummy);
+    check_args(line_no, status, 10);
+
+    qcon = SGC(syn, query, qcon_id);
+    tcon = SGC(syn, target, tcon_id);
+
     if (qstart > qstop || tstart > tstop) {
       fprintf(stderr, "start must be less than stop on line %zu\n", line_no);
       fprintf(stderr, "offending line:\n%s\n", line);
       exit(EXIT_FAILURE);
     }
-    if (SGC(synmap, 1, tcon_id)->length <= tstop) {
+    if (tcon->length <= tstop) {
       fprintf(stderr, "stop must be less than contig length on line %zu\n", line_no);
       fprintf(stderr, "conid=%zu blkid=%zu pos=(%zu, %zu) conlen=%zu\n",
-        tcon_id, tblk_id, tstart, tstop, SGC(synmap, 1, tcon_id)->length); 
+        tcon_id, tblk_id, tstart, tstop, tcon->length); 
       fprintf(stderr, "offending line:\n%s\n", line);
       exit(EXIT_FAILURE);
     }
     // don't exceed the specified number of Contig in Genome
-    if (qcon_id >= SG(synmap, query)->size
-        || tcon_id >= SG(synmap, target)->size) {
+    if (qcon_id >= SG(syn, query)->size
+        || tcon_id >= SG(syn, target)->size) {
       fprintf(stderr, "too few contigs specified\n");
       exit(EXIT_FAILURE);
     }
     // don't exceed the specified size of the Contig block arrays
-    if (qblk_id >= SGC(synmap, query, qcon_id)->size ||
-        tblk_id >= SGC(synmap, target, tcon_id)->size) {
+    if (qblk_id >= qcon->size ||
+        tblk_id >= tcon->size) {
       fprintf(stderr, "too few blocks specified\n");
       exit(EXIT_FAILURE);
     }
 
-    qblk = init_Block(qstart, qstop);
-    tblk = init_Block(tstart, tstop);
+    qblk = &qcon->block[qblk_id];
+    tblk = &tcon->block[tblk_id];
 
-    qblk->strand = '+';
-    tblk->strand = strand;
+    switch(trans){
+        case 'l':
+            score = -1 * log(score);
+            break;
+        case 'd':
+            score = score * MIN((tstop - tstart + 1), (qstop - qstart + 1));
+            break;
+        case 'p':
+            score = score * MIN((tstop - tstart + 1), (qstop - qstart + 1)) / 100.0;
+            break;
+        case 'i':
+            // no transformation
+            break;
+        default:
+            fprintf(stderr, "Unexpected transformation '%c'\n", trans);
+            exit(EXIT_FAILURE);
+            break;
+    }
 
-    qblk->parent = SGC(synmap, query,  qcon_id);
-    tblk->parent = SGC(synmap, target, tcon_id);
 
-    qblk->over = tblk;
-    tblk->over = qblk;
+    set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk, line_no);
+    set_Block(tblk, tstart, tstop, score, strand, tcon, qblk, line_no);
 
-    SGCB(synmap, query,  qcon_id, qblk_id) = qblk;
-    SGCB(synmap, target, tcon_id, tblk_id) = tblk;
   }
   free(line);
 
@@ -118,17 +135,17 @@ Synmap *load_Synmap(FILE * synfile, int swap)
     exit(EXIT_FAILURE);
   }
 
-  sort_all_contigs(synmap);
+  // The following must be run in order
+  link_block_corners(syn);
+  set_contig_corners(syn);
+  set_overlap_group(syn);
+  merge_all_doubly_overlapping_blocks(syn);
+  link_adjacent_blocks(syn);
+  link_contiguous_blocks(syn, k);
 
-  set_overlap_group(synmap);
+  validate_synmap(syn);
 
-  link_adjacent_blocks(synmap);
-
-  link_contiguous_blocks(synmap);
-
-  validate_synmap(synmap);
-
-  return (synmap);
+  return (syn);
 }
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs)

@@ -5,13 +5,13 @@
 
 /** the eponymous structure */
 typedef struct {
-    size_t start;
-    size_t stop;
+    long start;
+    long stop;
     void * link; /* a pointer to arbitrary related data */
 } Interval;
 
 /** initialize Interval with start and stop, but set link to NULL */
-Interval * init_Interval(size_t start, size_t stop);
+Interval * init_Interval(long start, long stop);
 
 void print_Interval(Interval *);
 
@@ -25,7 +25,7 @@ int cmp_stop(const void *, const void *);
 int cmp_start(const void *, const void *);
 
 /** find position of point A relative to interval B (see Pos) */
-Pos point_overlap(size_t A, Interval * B);
+Pos point_overlap(long A, Interval * B);
 
 /** find position of interval A relative to interval B (see Pos) */
 Pos interval_overlap(Interval *, Interval *);

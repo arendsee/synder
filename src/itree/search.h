@@ -41,7 +41,7 @@ typedef struct {
  * @param pnt a point position on the IntervalTree
  * @param tree an IntervalTree
  */
-size_t count_point_overlaps(size_t pnt, IntervalTree * tree);
+long count_point_overlaps(long pnt, IntervalTree * tree);
 
 
 /** Count the number of query-side intervals that overlap a search interval
@@ -49,7 +49,7 @@ size_t count_point_overlaps(size_t pnt, IntervalTree * tree);
  * @param interval an interval on the IntervalTree
  * @param tree an IntervalTree
  */
-size_t count_interval_overlaps(Interval * interval, IntervalTree * tree);
+long count_interval_overlaps(Interval * interval, IntervalTree * tree);
 
 
 /** Allocate memory and set defaults for an IntervalResults struct */
@@ -67,7 +67,7 @@ void print_IntervalResult(IntervalResult *);
  *
  * See notes on get_point_overlaps
  */
-IntervalResult * get_point_overlaps(size_t, IntervalTree *);
+IntervalResult * get_point_overlaps(long, IntervalTree *);
 
 /** Retrieve all target intervals overlapping a query interval
  *

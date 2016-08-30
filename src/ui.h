@@ -12,7 +12,11 @@ typedef struct Arguments {
   char *cmd;
   char **pos;
   char offsets[5];
+  long k;
+  char trans;
+  bool dump_blks;
   bool swap;
+  bool debug;
 } Arguments;
 
 void close_Arguments(Arguments arg);

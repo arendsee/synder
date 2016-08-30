@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "global.h"
 #include "ui.h"
 #include "io.h"
@@ -84,7 +78,16 @@ int main(int argc, char *argv[])
   }
   // Load synteny db 
   if (args.synfile) {
-    syn = load_Synmap(args.synfile, args.swap);
+    syn = load_Synmap(args.synfile, args.swap, args.k, args.trans);
+    if(syn != NULL && args.debug){
+        print_args(args);
+        print_Synmap(syn, true); 
+        exit(EXIT_SUCCESS);
+    }
+    if(syn != NULL && args.dump_blks){
+        dump_blocks(syn);
+        exit(EXIT_SUCCESS);
+    }
   }
   // No arguments passed
   if (syn == NULL) {
@@ -126,8 +129,8 @@ int main(int argc, char *argv[])
   // Clean up
   // ------------------------------------------------------------------------
 
-  if (syn != NULL)
-    free_Synmap(syn);
+  // if (syn != NULL)
+  //   free_Synmap(syn);
   close_Arguments(args);
 
   return (EXIT_SUCCESS);

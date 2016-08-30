@@ -248,8 +248,9 @@ parse() {
             tblkid = $12
             tstart = $5   - start_base
             tstop  = $6   - stop_base
+            score  = $7
             strand = $8
-            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, strand
+            print "$", qseqid, qblkid, qstart, qstop, tseqid, tblkid, tstart, tstop, score, strand
         }
     ' $outtmp |
         sort -k3,3n -k4,4n >> $outdb
