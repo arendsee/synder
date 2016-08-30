@@ -1,6 +1,6 @@
 # CFLAGS=-Wall -g -std=gnu99 -lm
 # CFLAGS=-Wall -g -std=gnu99 -lm -m64
-CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99 -lm
+CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99 -lm -m64
 CC=gcc
 TARGET=synder
 

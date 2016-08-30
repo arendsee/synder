@@ -62,8 +62,9 @@ dtest-leak:
 .PHONY: dclean
 dclean:
 	rm -f vgcore.* gmon.out *log valgrind*
-	rm -rf zzz* db [a-z] gdb.txt ark
+	rm -rf zzz* db [a-z] gdb.txt ark .gdb_cmds
 	rm -f expected-output gdb input.gff observed-output synteny-map.tab
+	rm -f synmap.txt
 
 
 # Runs the sample data, linking files for review

@@ -56,7 +56,7 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
   line_no = 0;
   size_t qcon_id, qblk_id, tcon_id, tblk_id;
   long qstart, qstop, tstart, tstop;
-  float score;
+  double score;
   char strand;
 
   Block *qblk, *tblk;
@@ -67,7 +67,7 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
     if (line[0] != '$')
       continue;
     unloaded_blocks -= 2;
-    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %f %c %c\n",
+    status = sscanf(line, "$ %zu %zu %zu %zu %zu %zu %zu %zu %lf %c %c\n",
                     &qcon_id, &qblk_id, &qstart, &qstop,
                     &tcon_id, &tblk_id, &tstart, &tstop, &score, &strand, &dummy);
     check_args(line_no, status, 10);
