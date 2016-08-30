@@ -1,16 +1,16 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
+#include <math.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 #include <errno.h>
 #include <limits.h>
 #include <assert.h>
-#include <math.h>
-
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
@@ -151,7 +151,7 @@ struct Block {
   Block         *cnr[2]; // adjacent block in contiguous set
   ContiguousSet *cset;   // contiguous set id
   long          pos[2];  // start and stop positions
-  float         score;   // score provided by synteny program
+  double         score;   // score provided by synteny program
   size_t        grpid;   // overlapping group id;
   char          strand;  // strand [+-.]
   size_t        linkid;  // a unique block id used mostly for debugging

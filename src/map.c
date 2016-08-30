@@ -1,6 +1,4 @@
 #include "map.h"
-#include "contig.h"
-#include "synmap.h"
 
 // A local utility structure used filter and store contiguous sets
 typedef struct CSList{
@@ -55,7 +53,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
   // Row output of ctree
   ResultContig * crc;
   // Search interval score
-  float score;
+  double score;
 
   char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
   while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
@@ -107,7 +105,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
 
 
-      printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%f\t%zu\t%i\t%i\t%i\n",
+      printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
                                                          // Output column ids:
         seqname,                                         //  1
         blk_bounds[LO]->parent->name,                    //  2
@@ -274,7 +272,7 @@ SI_Bound * get_si_bound(
 //      |===|    |             |                 |===|
 //      |<------>| far         |       near |<-->|
 //          |<-->| near        |        far |<------>|
-float _flank_area(long near, long far, float k){
+double _flank_area(long near, long far, double k){
 
     // If far <= 0, this means there is no interval to score in this direction
     if(far > 0){
@@ -296,12 +294,12 @@ float _flank_area(long near, long far, float k){
     return 0;
 }
 
-float calculate_score(long a1, long a2, Block * blk){
+double calculate_score(long a1, long a2, Block * blk){
 
-    float weighted_length;
+    double weighted_length;
     long b1, b2, actual_length;
-    float k = 0.001;
-    float score = 0;
+    double k = 0.001;
+    double score = 0;
 
     if(blk == NULL)
         return score;

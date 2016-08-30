@@ -10,7 +10,7 @@ void set_Block(
     Block*  block,
     long    start,
     long    stop,
-    float   score,
+    double   score,
     char    strand,
     Contig* parent,
     Block*  over,

@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "lev.h"
 
 void convert_seqname(FILE * synfile, FILE * intfile, int swap)

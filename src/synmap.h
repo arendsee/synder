@@ -3,6 +3,8 @@
 
 #include "global.h"
 #include "genome.h"
+#include "global.h"
+#include "contiguous_set.h"
 
 /**
  * Allocate memory for a new Synmap.

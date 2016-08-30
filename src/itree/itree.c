@@ -1,13 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <stdbool.h>
-
 #include "itree.h"
-#include "interval.h"
-#include "ia.h"
-#include "iv.h"
 
 /* local function prototypes */
 IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation orientation);

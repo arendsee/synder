@@ -1,10 +1,10 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-#include <stdint.h>
-
 #include "global.h"
 #include "block.h"
+#include "synmap.h"
+#include "contig.h"
 #include "synmap.h"
 
 #define ANCHORED  0
@@ -30,8 +30,8 @@
  */
 void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock);
 
-float calculate_score(long start, long stop, Block * blk);
+double calculate_score(long start, long stop, Block * blk);
 
-float calculate_target_score(long a1, long a2, Block * bounds[2]);
+double calculate_target_score(long a1, long a2, Block * bounds[2]);
 
 #endif

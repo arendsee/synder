@@ -5,7 +5,7 @@ void set_Block(
     Block*  block,
     long    start,
     long    stop,
-    float   score,
+    double   score,
     char    strand,
     Contig* parent,
     Block*  over,
@@ -117,9 +117,9 @@ void merge_block_a_into_b(Block * a, Block * b){
     long olen = overlap_length(a, b);
     long al = a->pos[1] - a->pos[0] + 1;
     long bl = b->pos[1] - b->pos[0] + 1;
-    float score =
-        ((float)(al - olen) / (al)) * a->score +
-        ((float)(bl - olen) / (bl)) * b->score +
+    double score =
+        ((double)(al - olen) / (al)) * a->score +
+        ((double)(bl - olen) / (bl)) * b->score +
         olen * (a->score / al + b->score / bl) / 2;
 
     b->score = score;
