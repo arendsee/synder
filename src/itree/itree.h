@@ -1,8 +1,15 @@
 #ifndef __ITREE_H__
 #define __ITREE_H__
 
-#include "ia.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <stdbool.h>
+
 #include "interval.h"
+#include "ia.h"
+#include "iv.h"
 
 typedef enum orientation {
     O_LEFT = -1,

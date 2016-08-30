@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "interval.h"
 
 Interval * init_Interval(long start, long stop){

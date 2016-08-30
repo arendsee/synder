@@ -1,10 +1,10 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-#include <stdint.h>
-
 #include "global.h"
 #include "block.h"
+#include "synmap.h"
+#include "contig.h"
 #include "synmap.h"
 
 #define ANCHORED  0

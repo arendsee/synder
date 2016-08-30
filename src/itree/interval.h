@@ -1,6 +1,7 @@
 #ifndef __INTERVAL_H__
 #define __INTERVAL_H__
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /** the eponymous structure */

@@ -1,11 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <stdbool.h>
-
 #include "search.h"
-#include "iv.h"
 
 long count_interval_overlaps_r(Interval *, IntervalTree *, long);
 long count_point_overlaps_r(long, IntervalTree *, long);

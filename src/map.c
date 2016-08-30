@@ -1,6 +1,4 @@
 #include "map.h"
-#include "contig.h"
-#include "synmap.h"
 
 // A local utility structure used filter and store contiguous sets
 typedef struct CSList{

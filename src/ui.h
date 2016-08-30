@@ -2,6 +2,10 @@
 #define __UI_U__
 
 #include "global.h"
+#include "version.h"
+
+// maximum number of positional arguments
+#define MAX_POS 5
 
 /** Parsed command line arguments */
 typedef struct Arguments {

@@ -1,11 +1,7 @@
+#include "ui.h"
+
 #define _GNU_SOURCE
 #include <getopt.h>
-
-#include "global.h"
-#include "ui.h"
-#include "version.h"
-
-#define MAX_POS 5
 
 /** contains all legal arguments from all subcommands */
 Arguments create_Arguments()

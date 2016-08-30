@@ -1,7 +1,4 @@
-#include <stdlib.h>
-
 #include "ia.h"
-#include "interval.h"
 
 IA * init_IA(){
     IA * ia = (IA *)malloc(sizeof(IA));

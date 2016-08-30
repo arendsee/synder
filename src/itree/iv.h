@@ -3,9 +3,11 @@
 
 #define IV_INITIAL_SIZE 8
 
+#include <string.h>
+#include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 
 #include "interval.h"
 #include "ia.h"

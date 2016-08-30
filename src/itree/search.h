@@ -1,10 +1,13 @@
 #ifndef __SEARCH_H__
 #define __SEARCH_H__
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
 #include <stdbool.h>
 
 #include "ia.h"
-#include "iv.h"
 #include "interval.h"
 #include "itree.h"
 

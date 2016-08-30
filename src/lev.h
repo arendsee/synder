@@ -1,8 +1,6 @@
 #ifndef __LEV_H__
 #define __LEV_H__
 
-#include <stdint.h>
-
 #include "global.h"
 
 #define TOLC(s)	for(char *p =(s);*p;++p) *p=*p>0x40&&*p<0x5b?*p|0x60:*p

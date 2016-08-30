@@ -1,4 +1,3 @@
-#include "global.h"
 #include "io.h"
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs);

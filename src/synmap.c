@@ -1,7 +1,4 @@
-#include "global.h"
 #include "synmap.h"
-#include "contiguous_set.h"
-
 
 Synmap* init_Synmap()
 {
