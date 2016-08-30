@@ -125,7 +125,34 @@ One table with the following fields:
  - [x] Add strand awareness to contiguity rules (so all contiguous sets are elements on the same strand)
  - [x] Determine direction of SI based on strand
  - [x] Snap search space boundaries for to nearest block on target side
- - [ ] Merge two blocks if they overlap on both the target and query sides
- - [ ] Merge overlapping search intervals
- - [ ] Do not make extra-chromosomal hits break contiguous blocks
- - [ ] If query interval is between two blocks on the query side, and if the homologs of the two blocks overlap on the target, set the search space length to 0 (the point inbetween the overlaps)
+ - [ ] If query interval is between two blocks on the query side, and if the
+       homologs of the two blocks overlap on the target, set the search space
+       length to 0 (the point inbetween the overlaps)
+ - [x] write tests for 3rd gen cases 1-3
+ - [x] debug contiguous set builder for cases 1-3
+ - [x] implement contiguous\_set structures
+ - [x] write tests for case 4
+ - [x] debug contiguous set builder for case 4
+ - [x] write tests for dedicated double-overlapper test
+ - [x] implement double-overlapper merging
+ - [x] add score transforms to positive additive
+ - [ ] implement target side scoring
+ - [ ] implement score thresholding
+ - [ ] implement contiguous set scoring
+ - [ ] write test code for scores
+ - [ ] test against fagin
+ - [ ] refactor to c++
+ - [ ]  - refactor structs and associated functions into classes
+ - [ ]  - refactor IA, IV, and utility LLs into vectors
+ - [ ]  - polymorph the repetitively named functions
+ - [ ]  - replace tricky memory structures with smart pointers
+ - [ ]  - implement abstract interval class
+ - [ ] clean up IO
+ - [ ]  - replace getopt
+ - [ ]  - incorporate subcommands
+ - [ ]  - allow reading of GFF files with string sequence names
+ - [ ] update README documentation
+ - [ ] update Doxygen documentation
+ - [ ] make Github wiki
+ - [ ] make Github pages site
+ - [ ] merge into Win code
