@@ -87,7 +87,7 @@ diff_exit_status=1
 # A function to select which parts of the output should be compared
 # Since flags are currently in flux, test only the first 7 columns
 filter () {
-    sort | cut -f1-8,10-12
+    sort | cut -f1-8,11-13
 }
 
 filter_plus_one () {

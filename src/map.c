@@ -99,8 +99,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
 
       inverted = blk_bounds[HI]->over->strand == '-';
 
-      score = calculate_score(bounds[LO], bounds[HI], blk_bounds[LO]) +
-              calculate_target_score(bounds[LO], bounds[HI], blk_bounds);
+      score = calculate_score(bounds[LO], bounds[HI], blk_bounds[LO]);
 
       bound_results[inverted ^ LO] =
         get_si_bound(bounds[LO], set_bounds, blk_bounds, LO, inverted);
@@ -108,19 +107,21 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
         get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
 
 
-      printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%f\t%i\t%i\t%i\n",
-        seqname,
-        blk_bounds[LO]->parent->name,
-        bounds[LO] + global_out_start,
-        bounds[HI] + global_out_stop,
-        blk_bounds[LO]->over->parent->name,
-        bound_results[LO]->bound + global_out_start,
-        bound_results[HI]->bound + global_out_stop,
-        blk_bounds[LO]->over->strand,
-        score,
-        bound_results[LO]->flag,
-        bound_results[HI]->flag,
-        rc->inbetween || rc->leftmost || rc->rightmost
+      printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%f\t%zu\t%i\t%i\t%i\n",
+                                                         // Output column ids:
+        seqname,                                         //  1
+        blk_bounds[LO]->parent->name,                    //  2
+        bounds[LO] + global_out_start,                   //  3
+        bounds[HI] + global_out_stop,                    //  4
+        blk_bounds[LO]->over->parent->name,              //  5
+        bound_results[LO]->bound + global_out_start,     //  6
+        bound_results[HI]->bound + global_out_stop,      //  7
+        blk_bounds[LO]->over->strand,                    //  8
+        score,                                           //  9
+        blk_bounds[LO]->cset->id,                        // 10
+        bound_results[LO]->flag,                         // 11
+        bound_results[HI]->flag,                         // 12
+        rc->inbetween || rc->leftmost || rc->rightmost   // 13
       );
 
       free(bound_results[0]);
@@ -293,14 +294,6 @@ float _flank_area(long near, long far, float k){
         return (1 / k) * ( exp(-1 * k * near) - exp(-1 * k * far) );
     }
     return 0;
-}
-
-// This function is a wrapper for calculate_score. It maps the query position
-// on the query scaffold to the most likely position in the given contiguous
-// set.
-float calculate_target_score(long a1, long a2, Block * bounds[2]){
-    // This is a stub
-    return 0; 
 }
 
 float calculate_score(long a1, long a2, Block * blk){

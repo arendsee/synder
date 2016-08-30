@@ -84,6 +84,10 @@ int main(int argc, char *argv[])
         print_Synmap(syn, true); 
         exit(EXIT_SUCCESS);
     }
+    if(syn != NULL && args.dump_blks){
+        dump_blocks(syn);
+        exit(EXIT_SUCCESS);
+    }
   }
   // No arguments passed
   if (syn == NULL) {

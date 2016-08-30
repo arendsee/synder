@@ -1,2 +1,2 @@
-between	que	625	675	mordor	1000	1100	+	100	1	1	1
-between	que	625	675	mirkwood	2100	2200	+	100	1	1	1
+between	que	625	675	mordor	1000	1100	+	100	.	1	1	1
+between	que	625	675	mirkwood	2100	2200	+	100	.	1	1	1

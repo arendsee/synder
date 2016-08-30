@@ -1,2 +1,2 @@
-between	que	225	275	tar	200	300	+	100	2	2	1
-between	que	225	275	tar	400	500	-	100	2	2	1
+between	que	225	275	tar	200	300	+	100	.	2	2	1
+between	que	225	275	tar	400	500	-	100	.	2	2	1

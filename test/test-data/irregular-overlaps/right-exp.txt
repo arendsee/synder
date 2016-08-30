@@ -1,2 +1,2 @@
-right	que	425	475	tar	200	300	-	100	2	2	1
-right	que	425	475	tar	400	500	+	100	2	2	1
+right	que	425	475	tar	200	300	-	100	.	2	2	1
+right	que	425	475	tar	400	500	+	100	.	2	2	1

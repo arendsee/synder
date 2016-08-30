@@ -25,6 +25,8 @@ void free_Synmap(Synmap *);
 /** Recursively print a synteny map. */
 void print_Synmap(Synmap *, bool forward);
 
+void dump_blocks(Synmap *);
+
 /** Link blocks by next and prev stop and next and prev start */
 void link_block_corners(Synmap * syn);
 

@@ -139,14 +139,20 @@ void merge_block_a_into_b(Block * a, Block * b){
 
 void print_Block(Block* block)
 {
-    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\n",
+    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
         block->parent->name,
         block->pos[0] + global_out_start,
         block->pos[1] + global_out_stop,
         block->over->parent->name,
         block->over->pos[0] + global_out_start,
         block->over->pos[1] + global_out_stop,
-        block->strand);
+        block->strand
+    );
+    if(block->cset != NULL){
+        printf("\t%zu\n", block->cset->id);
+    } else {
+        printf("\t-\n");
+    }
 }
 
 // if block is NULL, "-"

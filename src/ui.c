@@ -20,6 +20,7 @@ Arguments create_Arguments()
     .db_filename = NULL,
     .cmd         = NULL,
     .debug       = false,
+    .dump_blks   = false,
     .pos         = (char **) malloc(MAX_POS * sizeof(char *))
   };
   memset(args.pos, 0, MAX_POS * sizeof(char *));
@@ -87,12 +88,13 @@ void print_help()
          "\t-b \t Start and stop offsets for input and output (e.g. 1100)\n"
          "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"
          "\t-D \t Print debug info\n"
+         "\t-B \t Dump synteny map links with contiguous set ids\n"
          "\t-x \t Transform score (Synder requires additive scores):\n"
-         "\t\t - 'i' := S            (default, no transformation)\n"
-         "\t\t - 'd' := L * S        (score densities)\n"
-         "\t\t - 'p' := L * S / 100  (percent identity)\n"
-         "\t\t - 'l' := -log(S)      (e-values or p-values)\n"
-         "\t\t    Where S is input score and L interval length\n"
+         "\t   \t -'i' := S            (default, no transformation)\n"
+         "\t   \t -'d' := L * S        (score densities)\n"
+         "\t   \t -'p' := L * S / 100  (percent identity)\n"
+         "\t   \t -'l' := -log(S)      (e-values or p-values)\n"
+         "\t   \t   Where S is input score and L interval length\n"
          "COMMANDS\n"
          "\tmap\n"
          "\t\t print target intervals overlapping each query interval\n"
@@ -124,7 +126,7 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  while ((opt = getopt(argc, argv, "hvrDd:s:i:c:f:b:k:x:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
@@ -134,6 +136,9 @@ Arguments parse_command(int argc, char *argv[])
         break;
       case 'D':
         args.debug = true;
+        break;
+      case 'B':
+        args.dump_blks = true;
         break;
       case 'x':
         args.trans = optarg[0];

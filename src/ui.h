@@ -14,6 +14,7 @@ typedef struct Arguments {
   char offsets[5];
   long k;
   char trans;
+  bool dump_blks;
   bool swap;
   bool debug;
 } Arguments;

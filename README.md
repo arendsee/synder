@@ -125,9 +125,6 @@ One table with the following fields:
  - [x] Add strand awareness to contiguity rules (so all contiguous sets are elements on the same strand)
  - [x] Determine direction of SI based on strand
  - [x] Snap search space boundaries for to nearest block on target side
- - [ ] If query interval is between two blocks on the query side, and if the
-       homologs of the two blocks overlap on the target, set the search space
-       length to 0 (the point inbetween the overlaps)
  - [x] write tests for 3rd gen cases 1-3
  - [x] debug contiguous set builder for cases 1-3
  - [x] implement contiguous\_set structures
@@ -136,10 +133,9 @@ One table with the following fields:
  - [x] write tests for dedicated double-overlapper test
  - [x] implement double-overlapper merging
  - [x] add score transforms to positive additive
- - [ ] implement target side scoring
- - [ ] implement score thresholding
- - [ ] implement contiguous set scoring
+ - [x] write search interval score to output
  - [ ] write test code for scores
+ - [ ] write contiguous set id to output
  - [ ] test against fagin
  - [ ] refactor to c++
  - [ ]  - refactor structs and associated functions into classes
@@ -156,3 +152,11 @@ One table with the following fields:
  - [ ] make Github wiki
  - [ ] make Github pages site
  - [ ] merge into Win code
+
+# Theoretical stuff
+
+I do not know a good way to do these, nor am I certain of their value.
+
+ - [ ] implement target side scoring
+ - [ ] implement score thresholding
+ - [ ] implement contiguous set scoring

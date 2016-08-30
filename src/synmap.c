@@ -38,6 +38,16 @@ void print_Synmap(Synmap* synmap, bool forward)
     // print_Genome(SG(synmap, 1), forward);
 }
 
+void dump_blocks(Synmap* synmap)
+{
+    for(size_t i = 0; i < SG(synmap, 0)->size; i++){
+        Block * blk = SGC(synmap, 0, i)->cor[0];
+        for(; blk != NULL; blk = blk->cor[1]){ 
+            print_Block(blk);   
+        } 
+    }    
+}
+
 void link_block_corners(Synmap* syn)
 {
     Contig* con;

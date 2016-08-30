@@ -1,4 +1,4 @@
-extreme-left	que	625	675	tar	0	300	-	100	3	2	1
-extreme-left	que	625	675	tar	600	700	+	100	2	2	1
-extreme-right	que	825	875	tar	1000	999999999	-	100	2	3	1
-extreme-right	que	825	875	tar	800	900	+	100	2	2	1
+extreme-left	que	625	675	tar	0	300	-	100	.	3	2	1
+extreme-left	que	625	675	tar	600	700	+	100	.	2	2	1
+extreme-right	que	825	875	tar	1000	999999999	-	100	.	2	3	1
+extreme-right	que	825	875	tar	800	900	+	100	.	2	2	1
