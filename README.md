@@ -10,6 +10,7 @@
 
 ``` bash
 make
+make test
 make install
 ```
 
@@ -17,7 +18,6 @@ This will install the program into /usr/local. To install elsewhere, run (for
 example)
 
 ``` bash
-make
 make install PREFIX=$HOME
 ```
 
@@ -38,22 +38,6 @@ make uninstall PREFIX=<PATH>
 To get a usage statement and descriptions of commands, type
 
 `synder -h`
-
-# Contiguous Set Use
-
-./synder -i GFF -s DB -c contig
-
-output is like -c map with additon of flag
-SEQNAME TARGETNAME SEARCH_INTERVAL_START SEARCH_INTERVAL_STOP FLAG
-
-Flag is to keep track of edge dependability:
-
- * 0 -> the search interval is bound on both ends (is reliable)
- * 1 -> the start edge is unbounded
- * 2 -> the stop edge is unbound
- * 3 -> both edges are unbound, but there are internal overlaps
- * 4 -> query is to the left of a contig, no overlap
- * 5 -> query is to the right of a contig, no overlap
 
 # Definitions
 
@@ -81,8 +65,9 @@ Flag is to keep track of edge dependability:
 
 Build an interval adjacency matrix for the query context intervals and for the
 target context intervals. AND them together to get a block adjacency matrix.
-From this matrix, extract paths of adjacent blocks. For biological synteny
-maps, these paths *should* be unique.
+From this matrix, extract paths of adjacent blocks. Synder will merge any
+blocks that overlap on both genomes, this ensures there is a unque path through
+the adjacency matrix.
 
 # Getting search intervals from contiguous sets
 
@@ -104,21 +89,23 @@ E and F.
 ## Search subcommand
 
 One table with the following fields:
- 1. query interval name (e.g. AT1G20300)
- 2. query chromosome name
- 3. query start position
- 4. query stop position
- 5. target chromosome name
- 6. search interval start position on target chromsome
- 7. search interval stop position on target chromsome
- 8. score
- 9. flag
-    0. query interval falls between two intervals within the contiguous set
-    1. query overlaps synteny block(s), but the left edge is inbetween
-    2. query overlaps synteny block(s), but the right edge is inbetween
-    3. query overlaps synteny block(s), but the both edges are inbetween
-    4. query is to the left of the contiguous set
-    5. query is to the right of the contiguous set
+ 1.  query interval name (e.g. AT1G20300)
+ 2.  query chromosome name
+ 3.  query start position
+ 4.  query stop position
+ 5.  target chromosome name
+ 6.  search interval start position on target chromsome
+ 7.  search interval stop position on target chromsome
+ 8.  search interval strand ('+' / '-')
+ 9.  score
+ 10. contiguous set id
+ 11. lower flag
+     - 0 lower bound is inside a syntenic interval
+     - 1 lower bound is between intervals in a contiguous set
+     - 2 lower bound does not overlap the contiguous set
+     - 3 lower bound is beyond any syntenic interval (near end of scaffold)
+ 12. upper flag - see lower flag
+ 13. between flag - 0 if query overlaps a syntenic interval, 1 otherwise
 
 # TODO list
 
@@ -134,8 +121,8 @@ One table with the following fields:
  - [x] implement double-overlapper merging
  - [x] add score transforms to positive additive
  - [x] write search interval score to output
+ - [x] write contiguous set id to output
  - [ ] write test code for scores
- - [ ] write contiguous set id to output
  - [ ] test against fagin
  - [ ] refactor to c++
  - [ ]  - refactor structs and associated functions into classes
