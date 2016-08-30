@@ -13,6 +13,7 @@ typedef struct Arguments {
   char **pos;
   char offsets[5];
   long k;
+  char trans;
   bool swap;
   bool debug;
 } Arguments;

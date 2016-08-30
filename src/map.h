@@ -2,7 +2,6 @@
 #define __MAP_H__
 
 #include <stdint.h>
-#include <math.h>
 
 #include "global.h"
 #include "block.h"

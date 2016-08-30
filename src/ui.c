@@ -14,6 +14,7 @@ Arguments create_Arguments()
     .synfile     = NULL,
     .intfile     = NULL,
     .hitfile     = NULL,
+    .trans       = 'i',
     .offsets     = "0000",
     .k           = 0,
     .db_filename = NULL,
@@ -86,6 +87,12 @@ void print_help()
          "\t-b \t Start and stop offsets for input and output (e.g. 1100)\n"
          "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"
          "\t-D \t Print debug info\n"
+         "\t-x \t Transform score (Synder requires additive scores):\n"
+         "\t\t - 'i' := S            (default, no transformation)\n"
+         "\t\t - 'd' := L * S        (score densities)\n"
+         "\t\t - 'p' := L * S / 100  (percent identity)\n"
+         "\t\t - 'l' := -log(S)      (e-values or p-values)\n"
+         "\t\t    Where S is input score and L interval length\n"
          "COMMANDS\n"
          "\tmap\n"
          "\t\t print target intervals overlapping each query interval\n"
@@ -117,7 +124,7 @@ Arguments parse_command(int argc, char *argv[])
   int opt;
   FILE *temp;
   Arguments args = create_Arguments();
-  while ((opt = getopt(argc, argv, "hvrDd:s:i:c:f:b:k:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvrDd:s:i:c:f:b:k:x:")) != -1) {
     switch (opt) {
       case 'h':
         print_help();
@@ -127,6 +134,18 @@ Arguments parse_command(int argc, char *argv[])
         break;
       case 'D':
         args.debug = true;
+        break;
+      case 'x':
+        args.trans = optarg[0];
+        if(! (
+            args.trans == 'i' ||
+            args.trans == 'd' ||
+            args.trans == 'p' ||
+            args.trans == 'l'))
+        {
+            fprintf(stderr, "-x only takes arguments 'i', 'n', 'l' and 'm'\n");
+            exit(EXIT_FAILURE);
+        }
         break;
       case 'd':
         temp = fopen(optarg, "r");
@@ -166,6 +185,7 @@ Arguments parse_command(int argc, char *argv[])
         args.k = k;
         break;
       case '?':
+        fprintf(stderr, "Argument '%c' not recognized\n", opt);
         exit(EXIT_FAILURE);
     }
   }

@@ -305,8 +305,8 @@ float calculate_target_score(long a1, long a2, Block * bounds[2]){
 
 float calculate_score(long a1, long a2, Block * blk){
 
-    float area;
-    long b1, b2;
+    float weighted_length;
+    long b1, b2, actual_length;
     float k = 0.001;
     float score = 0;
 
@@ -329,7 +329,7 @@ float calculate_score(long a1, long a2, Block * blk){
         // near difference := i1 = a1 - b2
         // far difference  := i2 = a1 - b1
         // i1 and i2 may be negative, if query is not in the above position
-        area = _flank_area(a1 - b2, a1 - b1, k) +
+        weighted_length = _flank_area(a1 - b2, a1 - b1, k) +
 
         //    a1        a2
         //    |=========|    b1  b2     query interval
@@ -355,7 +355,9 @@ float calculate_score(long a1, long a2, Block * blk){
         // overlapping segment length by the score, gives the overlapping
         // segmental score.
 
-        score += blk->score * area;
+        actual_length = blk->pos[1] - blk->pos[0] + 1;
+
+        score += blk->score * weighted_length / actual_length;
     }
     return score;
 }

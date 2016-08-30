@@ -3,7 +3,7 @@
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs);
 
-Synmap *load_Synmap(FILE * synfile, int swap, long k)
+Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
 {
   assert(synfile != NULL);
 
@@ -102,6 +102,26 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k)
 
     qblk = &qcon->block[qblk_id];
     tblk = &tcon->block[tblk_id];
+
+    switch(trans){
+        case 'l':
+            score = -1 * log(score);
+            break;
+        case 'd':
+            score = score * MIN((tstop - tstart + 1), (qstop - qstart + 1));
+            break;
+        case 'p':
+            score = score * MIN((tstop - tstart + 1), (qstop - qstart + 1)) / 100.0;
+            break;
+        case 'i':
+            // no transformation
+            break;
+        default:
+            fprintf(stderr, "Unexpected transformation '%c'\n", trans);
+            exit(EXIT_FAILURE);
+            break;
+    }
+
 
     set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk, line_no);
     set_Block(tblk, tstart, tstop, score, strand, tcon, qblk, line_no);

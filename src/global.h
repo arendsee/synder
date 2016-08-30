@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <assert.h>
-
+#include <math.h>
 
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
