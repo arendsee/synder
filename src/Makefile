@@ -1,13 +1,14 @@
-# CFLAGS=-Wall -g -std=gnu99 -lm
-# CFLAGS=-Wall -g -std=gnu99 -lm -m64
-CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99 -lm
+# CFLAGS=-Wall -g -std=gnu99
+# CFLAGS=-Wall -g -std=gnu99 -m64
+CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99
+LINKER_FLAGS=-lm
 CC=gcc
 TARGET=synder
 
 OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o contiguous_set.o synmap.o io.o analysis.o map.o main.o global.o
 
 ${TARGET}: ${OBJECTS}
-	${CC} -o ${TARGET} ${CFLAGS} ${OBJECTS}
+	${CC} -o ${TARGET} ${OBJECTS} ${LINKER_FLAGS}
 
 global.o: global.c global.h
 	${CC} -c ${CFLAGS} global.[ch]
