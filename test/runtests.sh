@@ -42,6 +42,7 @@ debug=0
 valgrind=0
 verbose=0
 archive=0
+bigdata=0
 gdb_out="none"
 while getopts "hdxvma:o:" opt; do
     case $opt in
@@ -83,6 +84,7 @@ valgrind_exit_status=1
 synder_db_exit_status=1
 synder_exit_status=1
 diff_exit_status=1
+
 
 # A function to select which parts of the output should be compared
 # Since flags are currently in flux, test only the first 7 columns
@@ -236,7 +238,6 @@ runtest(){
             warn "logic:"
             fail=1
             [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
-            total_failed=$(( $total_failed + 1 ))
             echo "======================================="
             emphasize_n "test directory"; echo ": `basename $dir`"
             emphasize_n "expected output"; echo ": (${base}-exp.txt)"
@@ -486,6 +487,19 @@ args= exp_ext=
 dir="$PWD/test/test-data/synmap-overlaps"
 announce "\nsyntenic overlaps"
 runtest simple "Between the weird"
+
+
+#---------------------------------------------------------------------
+dir="$PWD/test/test-data/big"
+$synder -s "$dir/c.syn" -i "$dir/c.gff" -c search > /dev/null 2> /dev/null
+if [[ $? -ne 0 ]]
+then
+    warn "\nFAILED STRESS TEST\n"
+    total_failed=$(( total_failed + 1 ))
+else
+    total_passed=$(( total_passed + 1 ))
+    announce "\nPASSED STRESS TEST\n"
+fi
 
 #---------------------------------------------------------------------
 echo

@@ -31,8 +31,11 @@ void print_Synmap(Synmap* synmap, bool forward)
         SG(synmap, 1)->size
     );
     fprintf(stderr, "---------------------------------------------------------\n");
-    print_Genome(SG(synmap, 0), forward);
-    // print_Genome(SG(synmap, 1), forward);
+    fprintf(stderr, "Target contigs:\n");
+    print_Genome(SG(synmap, 1), forward, false);
+    fprintf(stderr, "---------------------------------------------------------\n");
+    fprintf(stderr, "Query contigs and blocks:\n");
+    print_Genome(SG(synmap, 0), forward, true);
 }
 
 void dump_blocks(Synmap* synmap)
@@ -42,6 +45,23 @@ void dump_blocks(Synmap* synmap)
         for(; blk != NULL; blk = blk->cor[1]){ 
             print_Block(blk);   
         } 
+    }    
+}
+
+void dump_verbose_block_mem(Synmap* synmap)
+{
+    for(size_t i = 0; i < SG(synmap, 0)->size; i++){
+        if(i == 1){
+            fprintf(stderr, "\n");
+        }
+        for(int j = 0; j < SGC(synmap, 0, i)->size; j++){
+            Block * blk = &SGC(synmap, 0, i)->block[j];
+            if(blk != NULL){
+                print_verbose_Block(blk);   
+            } else {
+                fprintf(stderr, "NULL\n");
+            }
+        }
     }    
 }
 
@@ -62,14 +82,14 @@ void link_block_corners(Synmap* syn)
             // sort by stop
             sort_blocks(blocks, N, true);
             for (size_t i = 0; i < N; i++) {
-                blocks[i]->cor[PREV_STOP] = (i == 0) ? NULL : blocks[i - 1];
-                blocks[i]->cor[NEXT_STOP] = (i == N - 1) ? NULL : blocks[i + 1];
+                blocks[i]->cor[2] = (i == 0)     ? NULL : blocks[i - 1];
+                blocks[i]->cor[3] = (i == N - 1) ? NULL : blocks[i + 1];
             }
             // sort by start
             sort_blocks(blocks, N, false);
             for (size_t i = 0; i < N; i++) {
-                blocks[i]->cor[PREV_START] = (i == 0) ? NULL : blocks[i - 1];
-                blocks[i]->cor[NEXT_START] = (i == N - 1) ? NULL : blocks[i + 1];
+                blocks[i]->cor[0] = (i == 0)     ? NULL : blocks[i - 1];
+                blocks[i]->cor[1] = (i == N - 1) ? NULL : blocks[i + 1];
             }
 
             free(blocks);
@@ -80,24 +100,16 @@ void link_block_corners(Synmap* syn)
 void set_contig_corners(Synmap* syn)
 {
     Contig* con;
+    int k;
     for (size_t g = 0; g < 2; g++) {
         for (size_t c = 0; c < SG(syn, g)->size; c++) {
             con = SGC(syn, g, c);
-            con->cor[1] = &con->block[0];
-            con->cor[0] = &con->block[0];
-            con->cor[2] = &con->block[con->size - 1];
-            con->cor[3] = &con->block[con->size - 1];
-            while (con->cor[1]->cor[PREV_STOP] != NULL) {
-                con->cor[1] = con->cor[1]->cor[PREV_STOP];
-            }
-            while (con->cor[0]->cor[PREV_START] != NULL) {
-                con->cor[0] = con->cor[0]->cor[PREV_START];
-            }
-            while (con->cor[2]->cor[NEXT_START] != NULL) {
-                con->cor[2] = con->cor[2]->cor[NEXT_STOP];
-            }
-            while (con->cor[3]->cor[NEXT_STOP] != NULL) {
-                con->cor[3] = con->cor[3]->cor[NEXT_STOP];
+            for(int i = 0; i < 4; i++){
+                k = i % 2 == 0 ? 0 : con->size - 1;
+                con->cor[i] = &con->block[k];
+                while (con->cor[i]->cor[i] != NULL) {
+                    con->cor[i] = con->cor[i]->cor[i];
+                }
             }
         }
     }
@@ -151,23 +163,17 @@ void link_adjacent_blocks_directed(Contig* con, Direction d)
     // ---> indicates a lo block
     // All diagrams and comments relative to the d==HI direction
 
-    if (con->cor[d] == NULL || con->cor[!d] == NULL) {
+    if (con->cor[0] == NULL || con->cor[1] == NULL || con->cor[2] == NULL || con->cor[3] == NULL) {
         fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
+        fprintf(stderr, "genome=(%s) contig=(%s)\n", con->parent->name, con->name);
         exit(EXIT_FAILURE);
     }
 
-    // Transformed indices for Block->cor
-    // ----------------------------------
-    // a   b          c   d
-    // <--->   <--->  <--->
-    //   a - previous element by start
-    //   b - previous element by stop
-    //   c - next element by start
-    //   d - next element by stop
-    int idx_a = (!d * 2) + !d; // - 0
-    //int idx_b = (d  * 2) + !d; // - 2
-    int idx_c = (!d * 2) + d;  // - 1
-    int idx_d = (d  * 2) + d;  // - 3
+    // Transformed indices for Block->cor and Contig->cor
+    int idx_a = (!d * 2) + !d; // - 0 previous/first element by start
+    int idx_b = (!d * 2) +  d; // - 1 next/last element by start
+    int idx_c = ( d * 2) + !d; // - 2 previous/first element by stop
+    int idx_d = ( d * 2) +  d; // - 3 next/last element by stop
 
     Block *lo, *hi;
 
@@ -184,7 +190,7 @@ void link_adjacent_blocks_directed(Contig* con, Direction d)
         // This should should occur only at the beginning
         if (REL_LE(hi->pos[!d], lo->pos[d], d)) {
             hi->adj[!d] = NULL;
-            hi = hi->cor[idx_c];
+            hi = hi->cor[idx_b];
         }
 
         //  lo     next
@@ -201,7 +207,7 @@ void link_adjacent_blocks_directed(Contig* con, Direction d)
         // The current lo is next to, and not overlapping, current hi
         else {
             hi->adj[!d] = lo;
-            hi = hi->cor[idx_c];
+            hi = hi->cor[idx_b];
         }
     }
 }
@@ -262,7 +268,6 @@ void link_contiguous_blocks(Synmap* syn, long k)
     Node* node;
     Node* root;
     bool block_added;
-    size_t setid = 0;
 
     for (size_t i = 0; i < SG(syn, 0)->size; i++) {
         // The current Contig
@@ -303,28 +308,45 @@ void link_contiguous_blocks(Synmap* syn, long k)
             node = root;
         }
         free_node(root);
+    }
 
-        // rewind - TODO - build the csets so this isn't necessary
-        while(con->cset->prev != NULL){
-            con->cset = con->cset->prev;
-        }
-        // TODO - remove setids. I don't use them for anything but debugging
-        for(ContiguousSet * cset = con->cset; cset != NULL; cset = cset->next){
-            setid++;
-            cset->id = setid;
-            cset->over->id = setid;
+    size_t setid = 0;
+    ContiguousSet * cset;
+    for(int i = 0; i < 2; i++){
+        for(int j = 0; j < SG(syn, i)->size; j++){
+           con = SGC(syn, i, j); 
+            // rewind - TODO - build the csets so this isn't necessary
+            while(con->cset->prev != NULL){
+                con->cset = con->cset->prev;
+            }
+            if(i == 0){
+                // TODO - remove setids. I don't use them for anything but debugging
+                for(cset = con->cset; cset != NULL; cset = cset->next){
+                    setid++;
+                    cset->id = setid;
+                    cset->over->id = setid;
+                }
+            }
         }
     }
 }
 
 void validate_synmap(Synmap* syn)
 {
-    #define ASSERT(t)                                        \
+    #define ASSERT_CON(t, con)                               \
         if(!(t)){                                            \
           is_good=false;                                     \
-          if(blk != NULL)                                    \
-              fprintf(stderr, "%zu:%zu ", gid, blk->linkid); \
           fprintf(stderr, "Assert failed: `" #t "`\n");      \
+          if(blk != NULL)                                    \
+            print_Contig(con, false, false);                 \
+        }
+
+    #define ASSERT_BLK(t, blk)                               \
+        if(!(t)){                                            \
+          is_good=false;                                     \
+          fprintf(stderr, "Assert failed: `" #t "`\n");      \
+          if(blk != NULL){print_verbose_Block(blk);}         \
+          else {fprintf(stderr, "NULL\n");}                  \
         }
 
     size_t  gid     = 0;
@@ -334,15 +356,15 @@ void validate_synmap(Synmap* syn)
     Block*  blk     = NULL;
     bool    is_good = true;
 
-    ASSERT(syn->size == 2)
+    assert(syn->size == 2);
     for (gid = 0; gid < syn->size; gid++) {
         for (cid = 0; cid < SG(syn, gid)->size; cid++) {
             con = SGC(syn, gid, cid);
 
-            ASSERT(con->cor[0] != NULL);
-            ASSERT(con->cor[1] != NULL);
-            ASSERT(con->cor[2] != NULL);
-            ASSERT(con->cor[3] != NULL);
+            ASSERT_CON(con->cor[0] != NULL, con);
+            ASSERT_CON(con->cor[1] != NULL, con);
+            ASSERT_CON(con->cor[2] != NULL, con);
+            ASSERT_CON(con->cor[3] != NULL, con);
 
             blk = con->cor[0];
             nblks = 0;
@@ -355,47 +377,56 @@ void validate_synmap(Synmap* syn)
 
                 nblks++;
 
-                ASSERT(blk->over != NULL);
-                ASSERT(blk->cset != NULL);
-                ASSERT(blk == blk->over->over);
-                ASSERT(blk->cset->id == blk->over->cset->id);
-                ASSERT(blk->cset->over == blk->over->cset);
-                ASSERT(blk->score == blk->over->score);
+                ASSERT_BLK(blk->over != NULL, blk);
+                ASSERT_BLK(blk->cset != NULL, blk);
+                ASSERT_BLK(blk == blk->over->over, blk);
+                ASSERT_BLK(blk->cset->id == blk->over->cset->id, blk);
+                ASSERT_BLK(blk->cset->over == blk->over->cset, blk);
+                ASSERT_BLK(blk->score == blk->over->score, blk);
+
+                ASSERT_BLK(blk->pos[0] >= con->cor[0]->pos[0], blk);
+                ASSERT_BLK(blk->pos[0] <= con->cor[1]->pos[0], blk);
+                ASSERT_BLK(blk->pos[1] >= con->cor[2]->pos[1], blk);
+                ASSERT_BLK(blk->pos[1] <= con->cor[3]->pos[1], blk);
+
+                if (blk->cor[0] != NULL){
+                    ASSERT_BLK(blk->pos[0] >= blk->cor[0]->pos[0], blk);
+                    ASSERT_BLK(blk->cor[0]->cor[1]->pos[0] == blk->pos[0], blk);
+                }
+                if (blk->cor[1] != NULL){
+                    ASSERT_BLK(blk->pos[0] <= blk->cor[1]->pos[0], blk);
+                    ASSERT_BLK(blk->cor[1]->cor[0]->pos[0] == blk->pos[0], blk);
+                }
+                if (blk->cor[2] != NULL){
+                    ASSERT_BLK(blk->pos[1] >= blk->cor[2]->pos[1], blk);
+                    ASSERT_BLK(blk->cor[2]->cor[3]->pos[1] == blk->pos[1], blk);
+                }
+                if (blk->cor[3] != NULL){
+                    ASSERT_BLK(blk->pos[1] <= blk->cor[3]->pos[1], blk);
+                    ASSERT_BLK(blk->cor[3]->cor[2]->pos[1] == blk->pos[1], blk);
+                }
 
                 // grpid == 0 only if unset
-                ASSERT(blk->grpid != 0);
+                ASSERT_BLK(blk->grpid != 0, blk);
 
-                if (blk->cnr[1] != NULL) {
-                    ASSERT(blk->grpid != blk->cnr[1]->grpid);
-                    ASSERT(blk->cset == blk->cnr[1]->cset);
-                    ASSERT(blk->cnr[1]->over->cnr[0] != NULL);
-                    ASSERT(blk->cnr[1]->over->cnr[0]->over == blk);
+                for(int i = 0; i < 2; i++){
+                    if (blk->cnr[i] != NULL) {
+                        ASSERT_BLK(blk->grpid != blk->cnr[i]->grpid, blk);
+                        ASSERT_BLK(blk->cset == blk->cnr[i]->cset, blk);
+                        ASSERT_BLK(blk->cnr[i]->over->cnr[!i]->over == blk, blk);
+                    }
                 }
-                if (blk->cor[NEXT_START] != NULL) {
-                    ASSERT(blk->pos[0] <= blk->cor[NEXT_START]->pos[0]);
-                    ASSERT(blk->cor[NEXT_START]->cor[PREV_START] != NULL);
-                    ASSERT(blk == blk->cor[NEXT_START]->cor[PREV_START]);
-                }
-                if (blk->cor[NEXT_STOP] != NULL) {
-                    ASSERT(blk->pos[1] <= blk->cor[NEXT_STOP]->pos[1]);
-                    ASSERT(blk->cor[NEXT_STOP]->cor[PREV_STOP] != NULL);
-                    ASSERT(blk == blk->cor[NEXT_STOP]->cor[PREV_STOP]);
-                }
-                if (blk->cor[PREV_START] != NULL) {
-                    ASSERT(blk->cor[PREV_START]->cor[NEXT_START] != NULL);
-                }
-                if (blk->cor[PREV_STOP] != NULL) {
-                    ASSERT(blk->cor[PREV_STOP]->cor[NEXT_STOP] != NULL);
-                }
+
             }
             // blocks may be deleted, so nblks == con->size may not hold
             // however no blocks should ever be added
-            ASSERT(nblks <= con->size);
+            ASSERT_CON(nblks <= con->size, con);
         }
     }
     if(! is_good){
         print_Synmap(syn, true);
         exit(EXIT_FAILURE);
     }
-    #undef vprint
+    #undef ASSERT_BLK
+    #undef ASSERT_CON
 }

@@ -41,7 +41,7 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
       } else if (line[0] == '$') {
         status = sscanf(line, "$ %zu %zu %s %zu %c\n", &conid, &nblocks, seqid, &contig_length, &dummy);
         check_args(line_no, status, 4);
-        SGC(syn, loc, conid) = init_Contig(seqid, nblocks, contig_length);
+        SGC(syn, loc, conid) = init_Contig(seqid, nblocks, contig_length, SG(syn, loc));
         unloaded_blocks += nblocks;
       } else {
         fprintf(stderr, "Incorrect file format, line %zu\n", line_no);
@@ -141,6 +141,9 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
   merge_all_doubly_overlapping_blocks(syn);
   link_adjacent_blocks(syn);
   link_contiguous_blocks(syn, k);
+
+  // print_Synmap(syn, true);
+  // exit(EXIT_FAILURE);
 
   validate_synmap(syn);
 

@@ -23,6 +23,6 @@ Genome *init_Genome(char *, size_t);
 void free_Genome(Genome *);
 
 /** Recursively print a genome. */
-void print_Genome(Genome *, bool forward);
+void print_Genome(Genome *, bool forward, bool print_blocks);
 
 #endif
