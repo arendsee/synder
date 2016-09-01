@@ -56,11 +56,7 @@ void dump_verbose_block_mem(Synmap* synmap)
         }
         for(int j = 0; j < SGC(synmap, 0, i)->size; j++){
             Block * blk = &SGC(synmap, 0, i)->block[j];
-            if(blk != NULL){
-                print_verbose_Block(blk);   
-            } else {
-                fprintf(stderr, "NULL\n");
-            }
+            print_verbose_Block(blk);   
         }
     }    
 }

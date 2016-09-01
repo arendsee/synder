@@ -238,29 +238,20 @@ long count_overlaps(Contig* con, long a, long b)
 
 void merge_doubly_overlapping_blocks(Contig *con)
 {
-    if (con->cor[0] == NULL ||
-        con->cor[1] == NULL ||
-        con->cor[2] == NULL ||
-        con->cor[3] == NULL)
-    {
-        fprintf(stderr, "Contig head must be set before merging blocks\n");
-        exit(EXIT_FAILURE);
-    }
+    Block *lo, *hi;
 
-    Block *hi, *lo;
-
-    // iterate up in start-based order
-    for(hi = con->cor[0]; hi != NULL; hi = hi->cor[1])
+    // iterate through all blocks
+    for(lo = con->cor[0]; lo != NULL; lo = lo->cor[1])
     {
-        // look back in stop-based order
-        for(lo = hi->cor[2]; lo != NULL; lo = lo->cor[2])
+        // look ahead to find all doubly-overlapping blocks
+        for(hi = lo->cor[1]; hi != NULL; hi = hi->cor[1])
         {
-            if(lo->grpid != hi->grpid){
+            if(! block_overlap(hi, lo)){
                 break;
             }
-            if(lo->over->grpid == hi->over->grpid){
-                merge_block_a_into_b(lo, hi);
-                lo = hi;
+            if(block_overlap(hi->over, lo->over)){
+                merge_block_a_into_b(hi, lo);
+                hi = lo;
             }
         }
     }

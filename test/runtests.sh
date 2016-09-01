@@ -100,7 +100,6 @@ set_defaults () {
     g_dir=
     g_arg=
     g_exp_ext=
-    g_test_num=0
     g_map=map.syn
 }
 
@@ -108,6 +107,7 @@ set_defaults () {
 # It specifies where the input files can be found
 set_defaults
 
+g_test_num=0
 runtest(){
     base=$1
     msg=$2
