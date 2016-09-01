@@ -149,6 +149,9 @@ void b_is_further(Block * a, Block * b, int i, int r){
     } else {
         // fprintf(stderr, " - null value\n");
     }
+    if(a->parent->cor[i + r] == a){
+        a->parent->cor[i + r] = a->cor[!i + r];
+    }
 }
 /** Merge one edge of a into b
  *
@@ -197,6 +200,7 @@ void merge_block_a_into_b(Block * a, Block * b){
     merge_block_a_into_b_edge_(a->over, b->over, 0);
     merge_block_a_into_b_edge_(a->over, b->over, 1);
 
+    memset(a->over, 0, sizeof(Block));
     memset(a, 0, sizeof(Block));
 }
 
