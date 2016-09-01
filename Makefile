@@ -26,21 +26,25 @@ uninstall:
 	rm -f ${PREFIX}/bin/${DBSCRIPT}
 
 
+# ===================================================================
+# Documentation
+
 .PHONY: docs
 docs:
 	doxygen Doxyfile
 
 
 # ===================================================================
-# Convenience functions
+# Utilities
 
-.PHONY: clean
-clean:
-	rm -f ${TARGET}
-	rm -f vgcore.* gmon.out *log valgrind*
-	rm -rf zzz* db [a-z] gdb.txt ark
-	cd src && ${MAKE} clean
+.PHONY: tags
+tag:
+	ctags .
 
+
+# ===================================================================
+# Debugging
+ARCHIVE=ark
 
 # Debug test
 # * stops at first error
@@ -48,30 +52,46 @@ clean:
 # * links valgrind output
 .PHONY: dtest
 dtest:
-	rm -rf ark
-	mkdir ark
-	./test/runtests.sh -mdv -o log -a ark | tee ark/log
+	${MAKE} ddclean
+	mkdir ${ARCHIVE}
+	./test/runtests.sh -mdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Same as above, but does not test memory
 .PHONY: dtest-leak
 dtest-leak:
-	rm -rf ark
-	mkdir ark
-	./test/runtests.sh -dv -o log -a ark | tee ark/log
-
-.PHONY: dclean
-dclean:
-	rm -f vgcore.* gmon.out *log valgrind*
-	rm -rf zzz* db [a-z] gdb.txt ark .gdb_cmds
-	rm -f expected-output gdb input.gff observed-output synteny-map.tab
-	rm -f synmap.txt
-
+	${MAKE} ddclean
+	mkdir ${ARCHIVE}
+	./test/runtests.sh -dv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Runs the sample data, linking files for review
 .PHONY: sample
 sample:
+	${MAKE} ddclean
 	${MAKE}
 	./synder -d sample-inputs/a-b.syn a b db
 	ln -sf sample-inputs/a.gff g
 	ln -sf db/a_b.txt d
 	./synder -i g -s d -c search
+
+
+# ===================================================================
+# Cleaning functions
+
+TEMP=vgcor* gmon.out *log valgrind* gdb.txt [a-z] zz* expected-output gdb input.gff observed-output synteny-map.tab synmap.txt .gdb_cmd run
+TEMP_DIR=db doc ${ARCHIVE}
+
+.PHONY: clean
+clean:
+	rm -f ${TARGET} ${TEMP}
+	rm -rf ${TEMP_DIR}
+	cd src && ${MAKE} clean
+
+.PHONY: dclean
+dclean:
+	rm -rf db
+	rm -f ${TEMP}
+
+.PHONY: ddclean
+ddclean:
+	rm -f ${TEMP}
+	rm -rf ${TEMP_DIR}

@@ -96,9 +96,18 @@ filter_plus_one () {
     awk -v OFS="\t" '{$3++ ; $4++ ; $6++ ; $7++ ; print}' | filter
 }
 
+set_defaults () {
+    g_dir=
+    g_arg=
+    g_exp_ext=
+    g_test_num=0
+    g_map=map.syn
+}
+
 # This variable will be set for each set of test
 # It specifies where the input files can be found
-dir= arg= exp_ext= test_num=0
+set_defaults
+
 runtest(){
     base=$1
     msg=$2
@@ -109,7 +118,7 @@ runtest(){
 
     fail=0
 
-    [[ -z $exp_ext ]] && exp_ext=exp
+    [[ -z $g_exp_ext ]] && g_exp_ext=exp
 
     # initialize temporary files
     gff=input.gff
@@ -125,16 +134,16 @@ runtest(){
     gdb=gdb
     syn=synmap.txt
 
-    cp $dir/$base.gff $gff
-    cp $dir/map.syn   $map
+    cp $g_dir/$base.gff $gff
+    cp $g_dir/$g_map    $map
 
     # Default synder database building command
     db_cmd="$synder -d $map a b $db"
 
     # Query genome length file
-    tgen=$dir/tgen.tab
+    tgen=$g_dir/tgen.tab
     # Target genome length file
-    qgen=$dir/qgen.tab
+    qgen=$g_dir/qgen.tab
 
     # If the length files are given, add to db command
     if [[ -f $tgen ]]
@@ -149,9 +158,9 @@ runtest(){
 
     if [[ $out_base == 1 ]]
     then
-        cat $dir/${base}-${exp_ext}.txt | filter_plus_one > $exp
+        cat $g_dir/${base}-${g_exp_ext}.txt | filter_plus_one > $exp
     else
-        cat $dir/${base}-${exp_ext}.txt | filter > $exp
+        cat $g_dir/${base}-${g_exp_ext}.txt | filter > $exp
     fi
 
     # Build database
@@ -170,12 +179,13 @@ runtest(){
         synder_cmd="$synder_cmd -i $gff"
         synder_cmd="$synder_cmd -s $tdb"
         synder_cmd="$synder_cmd -c search"
-        synder_cmd="$synder_cmd $arg"
+        synder_cmd="$synder_cmd $g_arg"
 
         # command for loading into gdb
         echo "set args $synder_cmd"  >  $gdbcmd
-        echo "source $PWD/.cmds.gdb" >> $gdbcmd
+        # this must go before sourcing .cmds.gdb for breakpoints to work
         echo "file $PWD/synder"      >> $gdbcmd
+        echo "source $PWD/.cmds.gdb" >> $gdbcmd
         if [[ $gdb_out != "none" ]]
         then
             echo "set logging off"                   >> $gdbcmd
@@ -237,48 +247,63 @@ runtest(){
         then
             warn "logic:"
             fail=1
-            [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
-            echo "======================================="
-            emphasize_n "test directory"; echo ": `basename $dir`"
-            emphasize_n "expected output"; echo ": (${base}-exp.txt)"
-            cat $exp
-            emphasize "observed output:"
-            cat $obs
-            emphasize_n "query gff"; echo ": (${base}.gff)"
-            column -t $gff
-            emphasize_n "synteny map"; echo ": (map.syn)"
-            column -t $map
-            if [[ $debug -eq 1 && $verbose -eq 1 ]]
-            then
-                echo "Debugging files:"
-                echo " * g - input GFF file"
-                echo " * o - observed output"
-                echo " * e - expected output"
-                echo " * d - database directory"
-                echo " * v - valgrind log (empty on success)"
-                echo " * l - error log (synder STDERR output)"
-                echo " * s - synmap dump"
-                echo " * c - gdb command"
-                echo " * x - initialize gdb"
-                echo " * r - run the command that failed"
-                echo "Synder database command:"
-                echo $db_cmd
-                echo "Synder command:"
-                echo $synder_cmd
-            fi
-            echo -e "---------------------------------------\n"
         fi
+    fi
+
+    if [[ $fail -eq 0 ]]
+    then
+        echo "OK"
+        total_passed=$(( $total_passed + 1 ))
+    else
+        warn "FAIL\n"
+        total_failed=$(( $total_failed + 1 ))
+    fi
+
+    # Print expected and observed output, for successful failures
+    if [[ $fail -ne 0 && $diff_exit_status -ne 0 ]]
+    then
+        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
+        echo "======================================="
+        emphasize_n "test directory"; echo ": `basename $g_dir`"
+        emphasize_n "expected output"; echo ": (${base}-exp.txt)"
+        cat $exp
+        emphasize "observed output:"
+        cat $obs
+        emphasize_n "query gff"; echo ": (${base}.gff)"
+        column -t $gff
+        emphasize_n "synteny map"; echo ": (map.syn)"
+        column -t $map
+        if [[ $debug -eq 1 && $verbose -eq 1 ]]
+        then
+            echo "Debugging files:"
+            echo " * g - input GFF file"
+            echo " * o - observed output"
+            echo " * e - expected output"
+            echo " * d - database directory"
+            echo " * v - valgrind log (empty on success)"
+            echo " * l - error log (synder STDERR output)"
+            echo " * s - synmap dump"
+            echo " * c - gdb command"
+            echo " * x - initialize gdb"
+            echo " * r - run the command that failed"
+            echo "Synder database command:"
+            echo $db_cmd
+            echo "Synder command:"
+            echo $synder_cmd
+        fi
+        echo -e "---------------------------------------\n"
     fi
 
     if [[ -d $archive ]]
     then
-        test_num=$(( test_num + 1 ))
-        if [[ $fail -eq 1 ]]
+        g_test_num=$(( g_test_num + 1 ))
+        if [[ $fail -ne 0 ]]
         then
-            arch="$archive/${test_num}_F_`basename $dir`"
+            state="F"
         else
-            arch="$archive/${test_num}_P_`basename $dir`"
+            state="P"
         fi
+        arch="$archive/${state}_${g_test_num}_`basename $g_dir`"
         [[ -d $arch ]] && rm -rf $arch
         mkdir -p $arch
         mv $gff $map $gdbcmd $obs $exp $val $syn $db $log $run $gdb $arch 2> /dev/null
@@ -289,37 +314,28 @@ runtest(){
     # clear all temporary files
     rm -rf $gff $map $gdbcmd $obs $exp $val $db $log $gdb
 
-    if [[ $fail -eq 0 ]]
-    then
-        echo "OK"
-        total_passed=$(( $total_passed + 1 ))
-    else
-        warn "FAIL\n"
-        total_failed=$(( $total_failed + 1 ))
-        [[ $die_on_fail -eq 0 ]] || exit 1
-    fi
-
     # Reset all values
     gff= map= cmd= obs= exp= val= db= tdb= log=
 
+    [[ $fail -ne 0 && $die_on_fail -ne 0 ]] && exit 1
 }
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/one-block"
+g_dir="$PWD/test/test-data/one-block"
 announce "\nTesting with synteny map length == 1"
 runtest hi     "query after of block"
 runtest within "query within block"
 runtest lo     "query before of block"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/two-block"
+g_dir="$PWD/test/test-data/two-block"
 announce "\nTesting with synteny map length == 2"
 runtest hi      "query downstream of all blocks"
 runtest between "query between two blocks"
 runtest lo      "query upstream of all blocks"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/multi-block"
+g_dir="$PWD/test/test-data/multi-block"
 announce "\nTesting with 5 adjacent blocks on the same strand"
 runtest a "extreme left"
 runtest b "inbetween two adjacent blocks"
@@ -332,33 +348,32 @@ runtest h "starts before block 2, ends after block 3"
 runtest i "starts in block 2, ends in block 2"
 runtest j "extreme right"
 
-
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/simple-duplication"
+g_dir="$PWD/test/test-data/simple-duplication"
 announce "\nTest simple tandem duplication"
 runtest between "query starts between the duplicated intervals"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/one-interval-inversion"
+g_dir="$PWD/test/test-data/one-interval-inversion"
 announce "\nTest when a single interval is inverted"
 runtest between "query next to inverted interval"
 runtest over    "query overlaps inverted interval"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/two-interval-inversion"
+g_dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
 runtest beside   "query next to inverted interval"
 runtest within   "query between inverted intervals"
 runtest spanning "query spans inverted intervals"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/tandem-transposition"
+g_dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
 runtest beside "query beside the transposed pair"
 runtest within "query between the transposed pair"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/irregular-overlaps"
+g_dir="$PWD/test/test-data/irregular-overlaps"
 announce "\nTest target side internal overlaps"
 runtest left "left side" "You are either 1) not sorting the by_stop vector
 in Contig by Block stop positions, or 2) are snapping the search interval left
@@ -366,22 +381,22 @@ boundary to a Block that is nearest by start, but not be stop."
 runtest right "right side"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/off-by-one"
+g_dir="$PWD/test/test-data/off-by-one"
 announce "\nTest overlap edge cases"
 runtest a "overlap of 1"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/inverted-extremes"
+g_dir="$PWD/test/test-data/inverted-extremes"
 announce "\nExtreme value resulting from an inversion"
 runtest extreme "between the query intervals, extreme SI"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/deletion"
+g_dir="$PWD/test/test-data/deletion"
 announce "\nDeletion tests (adjacent bounds in target)"
 runtest between "query is inbetween"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/unassembled"
+g_dir="$PWD/test/test-data/unassembled"
 announce "\nMappings beyond the edges of target scaffold"
 runtest lo "query is below scaffold"
 runtest adj-lo "query is just below the scaffold"
@@ -391,13 +406,13 @@ runtest lo "test with 1-base" 0 1
 
 #---------------------------------------------------------------------
 announce "\nTest multi-chromosome cases when k=0"
-arg=" -k 0 "
+g_arg=" -k 0 "
 #  T   =====[---->
 #        |
 #  Q   =====   <->   =====
 #                      |
 #  T           <----]=====
-dir="$PWD/test/test-data/interruptions/multi-chromosome"
+g_dir="$PWD/test/test-data/interruptions/multi-chromosome"
 runtest between "interuption between query intervals"
 #  T   =====[-------------]=====
 #        |                   |
@@ -406,40 +421,41 @@ runtest between "interuption between query intervals"
 #  T        ===[--]=====
 #            |
 #  Q        ===
-dir="$PWD/test/test-data/interruptions/one-query-side"
+g_dir="$PWD/test/test-data/interruptions/one-query-side"
 runtest beside "query side"
 # T             ===    ===
 #                |      |
 # Q    =====[--]===    ===[--]=====
 #        |                      |
 # T    =====   <-->           =====
-dir="$PWD/test/test-data/interruptions/two-target-side"
+g_dir="$PWD/test/test-data/interruptions/two-target-side"
 runtest beside "target side"
-arg=" -k 1 "
+g_arg=" -k 1 "
 runtest beside "target side, k=1 (should be the same)"
 # T    =====                      =====
 #        |                          |
 # Q    =====   ===== <--> =====   =====
 #                |          |
 # T            =====[----]=====
-dir="$PWD/test/test-data/interruptions/two-query-side"
+g_dir="$PWD/test/test-data/interruptions/two-query-side"
 ark=" -k 0 "
 runtest between "between two interior query-side intervals (k=0)"
 
 #---------------------------------------------------------------------
-args=' -k 4 '
-exp_ext=
+set_defaults
+g_arg=' -k 4 '
 announce "\nConfirm two-scaffold systems are unaffected by k"
-dir="$PWD/test/test-data/tandem-transposition"
+g_dir="$PWD/test/test-data/tandem-transposition"
 runtest beside "query beside the transposed pair"
 runtest within "query between the transposed pair"
-dir="$PWD/test/test-data/simple-duplication"
+g_dir="$PWD/test/test-data/simple-duplication"
 runtest between "query starts between the duplicated intervals"
 
 #---------------------------------------------------------------------
+set_defaults
 announce "\nTest multi-chromosome cases when k=2"
-arg=" -k 2 "
-exp_ext='exp-k2'
+g_arg=" -k 2 "
+g_exp_ext='exp-k2'
 #  T   =====[-------------]=====
 #        |                   |
 #  Q   ===== <->   =====   =====
@@ -447,7 +463,7 @@ exp_ext='exp-k2'
 #  T        ===[--]=====
 #            |
 #  Q        ===
-dir="$PWD/test/test-data/interruptions/one-query-side"
+g_dir="$PWD/test/test-data/interruptions/one-query-side"
 runtest beside "query side"
 #           [----------------]
 # T             ===    ===
@@ -455,14 +471,14 @@ runtest beside "query side"
 # Q    =====    ===    ===    =====
 #        |                      |
 # T    =====   <-->           =====
-dir="$PWD/test/test-data/interruptions/two-target-side"
+g_dir="$PWD/test/test-data/interruptions/two-target-side"
 runtest beside "target side"
 # T    =====[--------------------]=====
 #        |                          |
 # Q    =====   ===== <--> =====   =====
 #                |          |
 # T            =====[----]=====
-dir="$PWD/test/test-data/interruptions/two-query-side"
+g_dir="$PWD/test/test-data/interruptions/two-query-side"
 runtest between "between two interior query-side intervals (k=2)"
 # T    =====[------------------------------------]=====
 #        |                                          |
@@ -471,35 +487,39 @@ runtest between "between two interior query-side intervals (k=2)"
 # T            =====[----|----------|----]=====
 #                        |          |
 #                      =====[----]=====
-dir="$PWD/test/test-data/interruptions/nested"
-arg=" -k 4 "
-exp_ext="exp-k4"
+g_dir="$PWD/test/test-data/interruptions/nested"
+g_arg=" -k 4 "
+g_exp_ext="exp-k4"
 runtest between "query nested two pairs of interrupting intervals (k=4)"
-arg=" -k 3 "
-exp_ext="exp-k3"
+g_arg=" -k 3 "
+g_exp_ext="exp-k3"
 runtest between "query nested two pairs of interrupting intervals (k=3)"
 
-arg=        # reset to default
-exp_ext=exp # reset to default
-
 #---------------------------------------------------------------------
-args= exp_ext=
-dir="$PWD/test/test-data/synmap-overlaps"
+set_defaults
+g_dir="$PWD/test/test-data/synmap-overlaps"
 announce "\nsyntenic overlaps"
 runtest simple "Between the weird"
 
+# g_dir="$PWD/test/test-data/build/big"
+# build-test "$g_dir/c.syn" "$g_dir/c.gff" "Stress test"
 
 #---------------------------------------------------------------------
-dir="$PWD/test/test-data/big"
-$synder -s "$dir/c.syn" -i "$dir/c.gff" -c search > /dev/null 2> /dev/null
-if [[ $? -ne 0 ]]
-then
-    warn "\nFAILED STRESS TEST\n"
-    total_failed=$(( total_failed + 1 ))
-else
-    total_passed=$(( total_passed + 1 ))
-    announce "\nPASSED STRESS TEST\n"
-fi
+set_defaults
+announce "\ndouble overlapping tests"
+g_dir="$PWD/test/test-data/build/overlap-tests"
+g_map="map-1.syn"
+runtest a "Overlap - single nesting"
+g_map="map-2.syn"
+runtest a "Overlap - triple identical"
+g_map="map-3.syn"
+runtest a "Overlap - left"
+g_map="map-4.syn"
+runtest a "Overlap - left-right"
+g_map="map-5.syn"
+runtest a "Overlap - double nest"
+g_map="map-6.syn"
+runtest a "Overlap - double nest left"
 
 #---------------------------------------------------------------------
 echo
