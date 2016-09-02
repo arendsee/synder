@@ -114,7 +114,11 @@ void unlink(Block * blk, int u, int d){
         blk->cor[u]->cor[d] = blk->cor[d];
     }
     if(blk->parent->cor[u] == blk){
-        blk->parent->cor[u] = blk->cor[d];
+        if(blk->cor[d] != NULL){
+            blk->parent->cor[u] = blk->cor[d];
+        } else {
+            fprintf(stderr, "ERROR: cannot set parent cor to NULL in %s:%d\n", __func__, __LINE__);
+        }
     }
 }
 

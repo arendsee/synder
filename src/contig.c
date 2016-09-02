@@ -249,7 +249,7 @@ void merge_doubly_overlapping_blocks(Contig *con)
             if(! block_overlap(hi, lo)){
                 break;
             }
-            if(block_overlap(hi->over, lo->over)){
+            if(block_overlap(hi->over, lo->over) && hi->over->parent == lo->over->parent){
                 merge_block_a_into_b(hi, lo);
                 hi = lo;
             }

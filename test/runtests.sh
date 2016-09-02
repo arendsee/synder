@@ -134,6 +134,8 @@ runtest(){
     gdb=gdb
     syn=synmap.txt
 
+    tempfiles="$gff $map $gdbcmd $obs $exp $val $db $log $gdb $run $syn"
+
     cp $g_dir/$base.gff $gff
     cp $g_dir/$g_map    $map
 
@@ -184,7 +186,7 @@ runtest(){
         # command for loading into gdb
         echo "set args $synder_cmd"  >  $gdbcmd
         # this must go before sourcing .cmds.gdb for breakpoints to work
-        echo "file $PWD/synder"      >> $gdbcmd
+        echo "file $synder"      >> $gdbcmd
         echo "source $PWD/.cmds.gdb" >> $gdbcmd
         if [[ $gdb_out != "none" ]]
         then
@@ -306,13 +308,13 @@ runtest(){
         arch="$archive/${state}_${g_test_num}_`basename $g_dir`"
         [[ -d $arch ]] && rm -rf $arch
         mkdir -p $arch
-        mv $gff $map $gdbcmd $obs $exp $val $syn $db $log $run $gdb $arch 2> /dev/null
+        mv $tempfiles $arch 2> /dev/null
         echo $synder_cmd > $arch/$run
         chmod 755 $arch/$run
     fi
 
     # clear all temporary files
-    rm -rf $gff $map $gdbcmd $obs $exp $val $db $log $gdb
+    rm -rf $tempfiles
 
     # Reset all values
     gff= map= cmd= obs= exp= val= db= tdb= log=
@@ -524,6 +526,8 @@ g_map="map-7.syn"
 runtest a "Overlap - Q-inside T-right"
 g_map="map-8.syn"
 runtest a "Overlap - Tangles"
+g_map="map-9.syn"
+runtest a "Overlap - double overlap on different target contigs"
 
 #---------------------------------------------------------------------
 echo
