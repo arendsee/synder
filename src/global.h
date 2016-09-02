@@ -97,6 +97,7 @@ struct Genome {
  */
 struct Contig {
   char * name;
+  Genome * parent;
   size_t idx;
   // handle Blocks
   long length;
@@ -151,7 +152,7 @@ struct Block {
   Block         *cnr[2]; // adjacent block in contiguous set
   ContiguousSet *cset;   // contiguous set id
   long          pos[2];  // start and stop positions
-  double         score;   // score provided by synteny program
+  double        score;   // score provided by synteny program
   size_t        grpid;   // overlapping group id;
   char          strand;  // strand [+-.]
   size_t        linkid;  // a unique block id used mostly for debugging

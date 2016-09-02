@@ -22,7 +22,7 @@
  * @return pointer to a new Contig
  *
  */
-Contig *init_Contig(char *name, size_t size, long length);
+Contig *init_Contig(char *name, size_t size, long length, Genome * parent);
 
 /** Recursively free all memory.
  *
@@ -47,7 +47,7 @@ void free_partial_Contig(Contig * contig);
 void merge_doubly_overlapping_blocks(Contig * contig);
 
 /** Recursively print contig. */
-void print_Contig(Contig * contig, bool forward);
+void print_Contig(Contig * contig, bool forward, bool print_blocks);
 
 /** A wrapper for Contig that includes IntervalResult flags
  *

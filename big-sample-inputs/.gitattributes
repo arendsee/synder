@@ -1,3 +1,0 @@
-at-al.tab.gz filter=lfs diff=lfs merge=lfs -text
-at.gff.gz filter=lfs diff=lfs merge=lfs -text
-hits.syn.gz filter=lfs diff=lfs merge=lfs -text

@@ -1,8 +1,9 @@
 #include "contig.h"
 
-Contig* init_Contig(char* name, size_t size, long length)
+Contig* init_Contig(char* name, size_t size, long length, Genome * parent)
 {
     Contig* con = (Contig*)malloc(sizeof(Contig));
+    con->parent = parent;
     con->name   = strdup(name);
     con->length = length;
     con->size   = size;
@@ -39,7 +40,7 @@ void free_Contig(Contig* contig)
     }
 }
 
-void print_Contig(Contig* contig, bool forward)
+void print_Contig(Contig* contig, bool forward, bool print_blocks)
 {
     fprintf(
         stderr,
@@ -50,15 +51,21 @@ void print_Contig(Contig* contig, bool forward)
         contig->cor[0]->linkid,
         contig->cor[1]->linkid,
         contig->cor[2]->linkid,
-        contig->cor[3]->linkid);
-    for (ContiguousSet* cset = contig->cset; cset != NULL; cset = cset->next) {
+        contig->cor[3]->linkid
+    );
+
+    ContiguousSet* cset = contig->cset;
+    for (; cset != NULL; cset = cset->next) {
         fprintf(stderr, "  -- ");
-        print_ContiguousSet(contig->cset);
+        print_ContiguousSet(cset);
     }
-    Block* blk = contig->cor[!forward];
-    Corner d = forward ? NEXT_START : NEXT_STOP;
-    for (; blk != NULL; blk = blk->cor[d]) {
-        print_verbose_Block(blk);
+
+    if(print_blocks){
+        int d = forward ? 1 : 3;       // next by start or next by stop
+        Block* blk = contig->cor[d-1]; // prev by start or prev by stop
+        for (; blk != NULL; blk = blk->cor[d]) {
+            print_verbose_Block(blk);
+        }
     }
 }
 
@@ -231,29 +238,20 @@ long count_overlaps(Contig* con, long a, long b)
 
 void merge_doubly_overlapping_blocks(Contig *con)
 {
-    if (con->cor[0] == NULL ||
-        con->cor[1] == NULL ||
-        con->cor[2] == NULL ||
-        con->cor[3] == NULL)
-    {
-        fprintf(stderr, "Contig head must be set before merging blocks\n");
-        exit(EXIT_FAILURE);
-    }
+    Block *lo, *hi;
 
-    Block *hi, *lo;
-
-    // iterate up in start-based order
-    for(hi = con->cor[0]; hi != NULL; hi = hi->cor[1])
+    // iterate through all blocks
+    for(lo = con->cor[0]; lo != NULL; lo = lo->cor[1])
     {
-        // look back in stop-based order
-        for(lo = hi->cor[3]; lo != NULL; lo = lo->cor[3])
+        // look ahead to find all doubly-overlapping blocks
+        for(hi = lo->cor[1]; hi != NULL; hi = hi->cor[1])
         {
-            if(lo->grpid != hi->grpid){
+            if(! block_overlap(hi, lo)){
                 break;
             }
-            if(lo->over->grpid == hi->over->grpid){
-                merge_block_a_into_b(lo, hi);
-                lo = hi;
+            if(block_overlap(hi->over, lo->over) && hi->over->parent == lo->over->parent){
+                merge_block_a_into_b(hi, lo);
+                hi = lo;
             }
         }
     }
