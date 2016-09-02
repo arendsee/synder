@@ -109,50 +109,43 @@ long overlap_length(Block * a, Block * b){
     );
 }
 
-/** Merge a connections into b 
- * r can be either 0 or 2, indicating sort by start and sort by stop
- * i can be 0 or 1, indicating prev or next
- */
-void a_is_further(Block * a, Block * b, int i, int r){
-    // fprintf(stderr, "entering %s on (%d %d)", __func__, i, r);
-    assert(i == 0 || i == 1);
-    assert(r == 0 || r == 2);
-    if(a->cor[i + r] != NULL){
-        if(a->cor[i + r] == b){
-            fprintf(stderr, " - self-reference\n");
-        } else {
-            // fprintf(stderr, " - all's well\n");
-        }
-        a->cor[i + r]->cor[!i + r] = b;
-        b->cor[i + r] = a->cor[i + r];
-    } else {
-        // fprintf(stderr, " - null value\n");
+void unlink(Block * blk, int u, int d){
+    if(blk->cor[u] != NULL){
+        blk->cor[u]->cor[d] = blk->cor[d];
     }
-    if(a->parent->cor[i + r] == a){
-        a->parent->cor[i + r] = b;
+    if(blk->parent->cor[u] == blk){
+        blk->parent->cor[u] = blk->cor[d];
     }
 }
 
-/** Dissolve a
- * r can be either 0 or 2, indicating sort by start and sort by stop
- * i can be 0 or 1, indicating prev or next
- *
- * Since $b$ is further out, $a$ cannot be in parent->cor in this direction
- */
-void b_is_further(Block * a, Block * b, int i, int r){
-    // fprintf(stderr, "entering %s on (%d %d)", __func__, i, r);
-    assert(i == 0 || i == 1);
-    assert(r == 0 || r == 2);
-    if(a->cor[i + r] != NULL){
-        a->cor[i + r]->cor[!i + r] = a->cor[!i + r];
-        // fprintf(stderr, " - all's well\n");
+void dissolve_edge(Block * blk, int u, int d){
+    unlink(blk, u, d);
+    unlink(blk, d, u);
+}
+
+void replace_edge(Block * a, Block * b, int u, int d){
+    if(a->cor[u] != NULL){
+        if(a->cor[u] != b){
+            b->cor[u] = a->cor[u];
+            a->cor[u]->cor[d] = b;
+        }
     } else {
-        // fprintf(stderr, " - null value\n");
+        b->cor[u] = NULL;
     }
-    if(a->parent->cor[i + r] == a){
-        a->parent->cor[i + r] = a->cor[!i + r];
+    if(a->parent->cor[u] == a){
+        a->parent->cor[u] = b;
     }
 }
+
+void move_b_to_a(Block * a, Block * b, int u, int d){
+
+    dissolve_edge(b, u, d);
+
+    replace_edge(a, b, u, d);
+    replace_edge(a, b, d, u);
+
+}
+
 /** Merge one edge of a into b
  *
  * i can be 0 or 1
@@ -160,29 +153,42 @@ void b_is_further(Block * a, Block * b, int i, int r){
  */
 void merge_block_a_into_b_edge_(Block * a, Block * b, int i){
     assert(i == 0 || i == 1);
-    if(REL_GT(a->pos[i], b->pos[i], i)){
-        a_is_further(a, b, i, 0);
-        a_is_further(a, b, i, 2);
+    int u = 2 * i +  i;
+    int d = 2 * i + !i;
+    if(REL_GE(a->pos[i], b->pos[i], i)){
+        move_b_to_a(a, b, u, d);
         b->pos[i] = a->pos[i];
     } else {
-        b_is_further(a, b, i, 0);
-        b_is_further(a, b, i, 2);
+        dissolve_edge(a, u, d);
     }
 }
+
+/*
+ * a->cor[0] <-
+ * a->cor[1] <-
+ * a->cor[2] <-
+ * a->cor[3] <-
+ *
+ * a->cor[0] -> \
+ * a->cor[1] -> |_removed in memset
+ * a->cor[2] -> |
+ * a->cor[3] -> /
+ *
+ * b->cor[0] <-
+ * b->cor[0] ->
+ * b->cor[1] <-
+ * b->cor[1] ->
+ * b->cor[2] <-
+ * b->cor[2] ->
+ * b->cor[3] <-
+ * b->cor[3] ->
+ *
+ */
 void merge_block_a_into_b(Block * a, Block * b){
 
     if(! (block_overlap(a, b) && block_overlap(a->over, b->over)) ){
         fprintf(stderr, "Blocks are not doubly overlapping, I don't know how to merge them\n");
     }
-
-
-// fprintf(stderr, "\n=======\n");
-// fprintf(stderr, "Block a\n");
-// print_verbose_Block(a);
-// fprintf(stderr, "\nBlock b\n");
-// print_verbose_Block(b);
-// fprintf(stderr, "\n------\n");
-
 
     long olen = overlap_length(a, b);
     long al = a->pos[1] - a->pos[0] + 1;

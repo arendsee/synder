@@ -522,6 +522,8 @@ g_map="map-6.syn"
 runtest a "Overlap - double nest left"
 g_map="map-7.syn"
 runtest a "Overlap - Q-inside T-right"
+g_map="map-8.syn"
+runtest a "Overlap - Tangles"
 
 #---------------------------------------------------------------------
 echo
