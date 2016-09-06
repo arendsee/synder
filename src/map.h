@@ -28,7 +28,7 @@
  *                    a given search region
  * 
  */
-void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock);
+void find_search_intervals(Synmap * syn, FILE * intfile);
 
 double calculate_score(long start, long stop, Block * blk);
 

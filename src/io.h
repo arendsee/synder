@@ -14,6 +14,6 @@
  *
  * @return pointer to a complete Synmap object
  */
-Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans);
+Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans, bool validate);
 
 #endif

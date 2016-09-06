@@ -31,7 +31,7 @@ void set_Block(
  */
 Block* init_Block(long start, long stop)
 {
-    Block* block = (Block*)calloc(1, sizeof(Block));
+    Block* block  = (Block*)calloc(1, sizeof(Block));
     block->pos[0] = start;
     block->pos[1] = stop;
     block->strand = '.';
@@ -167,27 +167,6 @@ void merge_block_a_into_b_edge_(Block * a, Block * b, int i){
     }
 }
 
-/*
- * a->cor[0] <-
- * a->cor[1] <-
- * a->cor[2] <-
- * a->cor[3] <-
- *
- * a->cor[0] -> \
- * a->cor[1] -> |_removed in memset
- * a->cor[2] -> |
- * a->cor[3] -> /
- *
- * b->cor[0] <-
- * b->cor[0] ->
- * b->cor[1] <-
- * b->cor[1] ->
- * b->cor[2] <-
- * b->cor[2] ->
- * b->cor[3] <-
- * b->cor[3] ->
- *
- */
 void merge_block_a_into_b(Block * a, Block * b){
 
     if(! (block_overlap(a, b) && block_overlap(a->over, b->over)) ){
@@ -242,15 +221,15 @@ void link_str(char * s, Block * b){
         sprintf(s, "%zu", b->linkid);
     }
 }
-void setid_str(char * s, Block * b){
-    if(b == NULL || b->cset == NULL) {
+void score_str(char * s, Block * b){
+    if(b == NULL) {
         strcpy(s, "-");
     }
     else{
-        sprintf(s, "%zu", b->cset->id);
+        sprintf(s, "%lf", b->score);
     }
 }
-void score_str(char * s, Block * b){
+void setid_str(char * s, Block * b){
     if(b == NULL || b->cset == NULL) {
         strcpy(s, "-");
     }
@@ -366,26 +345,11 @@ void print_verbose_Block(Block* block)
     }
 }
 
-/**
- * Determine whether interval (a,b) overlaps interval (c,d)
- *
- * @param a1 start of first interval
- * @param a2 stop of first interval
- * @param b1 start of second interval
- * @param b2 stop of second interval
- *
- * @return TRUE if the intervals overlap
- */
 bool overlap(long a1, long a2, long b1, long b2)
 {
     return a1 <= b2 && a2 >= b1;
 }
 
-/**
- * Determine whether two Blocks overlap 
- *
- * @return TRUE if they overlap 
- */
 bool block_overlap(Block* a, Block* b)
 {
     return a->pos[0] <= b->pos[1] && a->pos[1] >= b->pos[0];
@@ -405,12 +369,4 @@ int block_cmp_start(const void* ap, const void* bp)
     Block* a = *(Block**)ap;
     Block* b = *(Block**)bp;
     return (int)(a->pos[0] > b->pos[0]) - (int)(a->pos[0] < b->pos[0]);
-}
-
-long get_set_bound(Block* blk, Direction d)
-{
-    if (blk->cnr[d] != NULL) {
-        return get_set_bound(blk->cnr[d], d);
-    }
-    return blk->pos[d];
 }

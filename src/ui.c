@@ -13,6 +13,7 @@ Arguments create_Arguments()
     .trans       = 'i',
     .offsets     = "0000",
     .k           = 0,
+    .validate    = false,
     .db_filename = NULL,
     .cmd         = NULL,
     .debug       = false,
@@ -85,6 +86,7 @@ void print_help()
          "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"
          "\t-D \t Print debug info\n"
          "\t-B \t Dump synteny map links with contiguous set ids\n"
+         "\t-C \t Validate the datastructures after loading\n"
          "\t-x \t Transform score (Synder requires additive scores):\n"
          "\t   \t -'i' := S            (default, no transformation)\n"
          "\t   \t -'d' := L * S        (score densities)\n"
@@ -100,8 +102,6 @@ void print_help()
          "\t\t print query-to-target links consistent with the synteny map\n"
          "\tsearch\n"
          "\t\t predict target search spaces for each query interval\n"
-         "\tsearchblock\n"
-         "\t\t as per search, but also prints blocks\n"
          "\tconvert\n"
          "\t\t convert names in provided gff file to match names in synteny db\n"
          "EXAMPLES\n"

@@ -14,9 +14,6 @@ void analysis_count(Synmap * syn, FILE * intfile)
     start -= global_in_start;
     stop  -= global_in_stop;
 
-    // contig.c::count_overlaps ->
-    //   itree/search.c::count_interval_overlaps ->
-    //   itree/search.c::count_interval_overlaps_r
     count = count_overlaps(SGC(syn, 0, chrid), start, stop);
     printf("%s\t%zu\n", seqname, count);
   }

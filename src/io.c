@@ -2,9 +2,12 @@
 
 void check_args(size_t line_no, size_t nargs, size_t correct_nargs);
 
-Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
+Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans, bool validate)
 {
-  assert(synfile != NULL);
+  if(synfile == NULL){
+    fprintf(stderr, "NULL synteny input file (%s:%d in %s)", __FILE__, __LINE__, __func__);
+    exit(EXIT_FAILURE);
+  }
 
   Synmap *syn = init_Synmap();
 
@@ -121,7 +124,6 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
             break;
     }
 
-
     set_Block(qblk, qstart, qstop, score, '+',    qcon, tblk, line_no);
     set_Block(tblk, tstart, tstop, score, strand, tcon, qblk, line_no);
 
@@ -142,10 +144,9 @@ Synmap *load_Synmap(FILE * synfile, int swap, long k, char trans)
   link_adjacent_blocks(syn);
   link_contiguous_blocks(syn, k);
 
-  // print_Synmap(syn, true);
-  // exit(EXIT_FAILURE);
-
-  validate_synmap(syn);
+  if(validate){
+      validate_synmap(syn);
+  }
 
   return (syn);
 }
