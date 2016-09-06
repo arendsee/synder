@@ -1,4 +1,4 @@
-#include "search.h"
+#include "search.hpp"
 
 long count_interval_overlaps_r(Interval *, IntervalTree *, long);
 long count_point_overlaps_r(long, IntervalTree *, long);

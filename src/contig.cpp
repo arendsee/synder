@@ -1,4 +1,4 @@
-#include "contig.h"
+#include "contig.hpp"
 
 Contig* init_Contig(char* name, size_t size, long length, Genome * parent)
 {

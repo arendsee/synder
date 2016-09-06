@@ -1,4 +1,4 @@
-#include "genome.h"
+#include "genome.hpp"
 
 Genome *init_Genome(char *name, size_t size)
 {

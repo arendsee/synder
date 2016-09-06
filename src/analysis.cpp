@@ -1,4 +1,4 @@
-#include "analysis.h"
+#include "analysis.hpp"
 
 void analysis_count(Synmap * syn, FILE * intfile)
 {
@@ -11,8 +11,8 @@ void analysis_count(Synmap * syn, FILE * intfile)
                  &chrid, &start, &stop, seqname)) != EOF)
   {
     check_in_offset(start, stop);
-    start -= global_in_start;
-    stop  -= global_in_stop;
+    start -= Offsets::in_start;
+    stop  -= Offsets::in_stop;
 
     count = count_overlaps(SGC(syn, 0, chrid), start, stop);
     printf("%s\t%zu\n", seqname, count);
@@ -32,8 +32,8 @@ void analysis_map(Synmap * syn, FILE * intfile)
                  &chrid, &start, &stop, seqname)) != EOF)
   {
     check_in_offset(start, stop);
-    start -= global_in_start;
-    stop  -= global_in_stop;
+    start -= Offsets::in_start;
+    stop  -= Offsets::in_stop;
 
     rc = get_region(SGC(syn, 0, chrid), start, stop, false);
     missing = rc->inbetween || rc->leftmost || rc->rightmost;
@@ -45,8 +45,8 @@ void analysis_map(Synmap * syn, FILE * intfile)
         printf("%s %s %zu %zu %d\n",
                seqname,
                tblk->parent->name,
-               tblk->pos[0] + global_out_start,
-               tblk->pos[1] + global_out_stop,
+               tblk->pos[0] + Offsets::out_start,
+               tblk->pos[1] + Offsets::out_stop,
                missing
         );
       }

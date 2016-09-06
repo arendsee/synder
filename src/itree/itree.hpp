@@ -7,9 +7,9 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "interval.h"
-#include "ia.h"
-#include "iv.h"
+#include "interval.hpp"
+#include "ia.hpp"
+#include "iv.hpp"
 
 typedef enum orientation {
     O_LEFT = -1,

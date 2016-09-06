@@ -1,69 +1,70 @@
-# CFLAGS=-Wall -g -std=gnu99
-# CFLAGS=-Wall -g -std=gnu99 -m64
-CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99
+# CFLAGS=-Wall -g
+# CFLAGS=-Wall -g -m64
+# CFLAGS=-Wall -gdwarf-4 -g3
+CFLAGS=-Wall
 LINKER_FLAGS=-lm
-CC=gcc
+CC=g++
 TARGET=synder
 
-OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o contiguous_set.o synmap.o io.o analysis.o map.o main.o global.o
+OBJECTS=ia.o iv.o interval.o itree.o search.o arguments.o lev.o block.o contig.o genome.o contiguous_set.o synmap.o io.o analysis.o map.o main.o global.o
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${OBJECTS} ${LINKER_FLAGS}
 
-global.o: global.c global.h
-	${CC} -c ${CFLAGS} global.[ch]
+global.o: global.cpp global.hpp
+	${CC} -c ${CFLAGS} global.cpp global.hpp
 
-main.o: main.c
-	${CC} -c ${CFLAGS} main.c
+main.o: main.cpp
+	${CC} -c ${CFLAGS} main.cpp
 
-io.o: io.c io.h
-	${CC} -c ${CFLAGS} io.[ch]
+io.o: io.cpp io.hpp
+	${CC} -c ${CFLAGS} io.cpp io.hpp
 
-genome.o: genome.c genome.h
-	${CC} -c ${CFLAGS} genome.[ch]
+genome.o: genome.cpp genome.hpp
+	${CC} -c ${CFLAGS} genome.cpp genome.hpp
 
-analysis.o: analysis.c analysis.h
-	${CC} -c ${CFLAGS} analysis.[ch]
+analysis.o: analysis.cpp analysis.hpp
+	${CC} -c ${CFLAGS} analysis.cpp analysis.hpp
 
-contig.o: contig.c contig.h
-	${CC} -c ${CFLAGS} contig.[ch]
+contig.o: contig.cpp contig.hpp
+	${CC} -c ${CFLAGS} contig.cpp contig.hpp
 
-block.o: block.c block.h
-	${CC} -c ${CFLAGS} block.[ch]
+block.o: block.cpp block.hpp
+	${CC} -c ${CFLAGS} block.cpp block.hpp
 
-synmap.o: synmap.c synmap.h
-	${CC} -c ${CFLAGS} synmap.[ch]
+synmap.o: synmap.cpp synmap.hpp
+	${CC} -c ${CFLAGS} synmap.cpp synmap.hpp
 
-contiguous_set.o: contiguous_set.c contiguous_set.h
-	${CC} -c ${CFLAGS} contiguous_set.[ch]
+contiguous_set.o: contiguous_set.cpp contiguous_set.hpp
+	${CC} -c ${CFLAGS} contiguous_set.cpp contiguous_set.hpp
 
-ui.o: ui.c ui.h version.h
-	${CC} -c ${CFLAGS} ui.[ch]
+arguments.o: arguments.cpp arguments.hpp version.hpp
+	${CC} -c ${CFLAGS} arguments.cpp arguments.hpp
 
-map.o: map.c map.h
-	${CC} -c ${CFLAGS} map.[ch]
+map.o: map.cpp map.hpp
+	${CC} -c ${CFLAGS} map.cpp map.hpp
 
-itree.o: itree/itree.c itree/itree.h
-	${CC} -c ${CFLAGS} itree/itree.[ch]
+itree.o: itree/itree.cpp itree/itree.hpp
+	${CC} -c ${CFLAGS} itree/itree.cpp itree/itree.hpp
 
-interval.o: itree/interval.c itree/interval.h
-	${CC} -c ${CFLAGS} itree/interval.[ch]
+interval.o: itree/interval.cpp itree/interval.hpp
+	${CC} -c ${CFLAGS} itree/interval.cpp itree/interval.hpp
 
-search.o: itree/search.c itree/search.h
-	${CC} -c ${CFLAGS} itree/search.[ch]
+search.o: itree/search.cpp itree/search.hpp
+	${CC} -c ${CFLAGS} itree/search.cpp itree/search.hpp
 
-ia.o: itree/ia.c itree/ia.h
-	${CC} -c ${CFLAGS} itree/ia.[ch]
+ia.o: itree/ia.cpp itree/ia.hpp
+	${CC} -c ${CFLAGS} itree/ia.cpp itree/ia.hpp
 
-iv.o: itree/iv.c itree/iv.h
-	${CC} -c ${CFLAGS} itree/iv.[ch]
+iv.o: itree/iv.cpp itree/iv.hpp
+	${CC} -c ${CFLAGS} itree/iv.cpp itree/iv.hpp
 
-lev.o: lev.c lev.h
-	${CC} -c ${CFLAGS} lev.[ch]
+lev.o: lev.cpp lev.hpp
+	${CC} -c ${CFLAGS} lev.cpp lev.hpp
 
 
 profiler-build:
-	${CC} -o ${TARGET} ${CFLAGS} -pg *.c *.h itree/*.c itree/*.h
+	${CC} -o ${TARGET} ${CFLAGS} -pg *.cpp *.hpp itree/*.cpp itree/*.hpp
 
 clean:
 	rm -f ${OBJECTS} *.{gch,o} itree/*.{gch,o} ${TARGET}

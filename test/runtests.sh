@@ -114,6 +114,8 @@ runtest(){
     errmsg=${3:-0}
     out_base=${4:-0}
 
+    synder_cmd=
+
     echo -n "Testing $msg ... "
 
     fail=0

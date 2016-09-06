@@ -1,4 +1,4 @@
-#include "itree.h"
+#include "itree.hpp"
 
 /* local function prototypes */
 IntervalTree * build_tree_r(IA * intervals, IntervalTree * parent, Orientation orientation);

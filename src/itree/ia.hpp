@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#include "interval.h"
+#include "interval.hpp"
 
 /** Interval array */
 typedef struct {

@@ -1,4 +1,4 @@
-#include "lev.h"
+#include "lev.hpp"
 
 void convert_seqname(FILE * synfile, FILE * intfile, int swap)
 {
@@ -92,7 +92,7 @@ void convert_seqname(FILE * synfile, FILE * intfile, int swap)
               seqname, name_arr[min_idx]);
       fprintf(stderr,
               "Press Enter to use the closest match, or enter a number from below: \n");
-      for (int i = 0; i <= idx; i++) {
+      for (unsigned int i = 0; i <= idx; i++) {
         fprintf(stderr, "%d: %s\t\t", i, name_arr[i]);
         if (i % 5 == 4) {
           fprintf(stderr, "\n");

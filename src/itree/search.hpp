@@ -7,9 +7,9 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "ia.h"
-#include "interval.h"
-#include "itree.h"
+#include "ia.hpp"
+#include "interval.hpp"
+#include "itree.hpp"
 
 #define LAST_STOP(tree)   tree->by_stop->v[tree->by_stop->size-1]
 #define FIRST_START(tree) tree->by_start->v[0]

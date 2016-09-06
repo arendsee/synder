@@ -1,9 +1,9 @@
 #ifndef __CONTIGUOUS_SET_H__
 #define __CONTIGUOUS_SET_H__
 
-#include "global.h"
-#include "block.h"
-#include "itree/itree.h"
+#include "global.hpp"
+#include "block.hpp"
+#include "itree/itree.hpp"
 
 
 ContiguousSet * init_ContiguousSet(Block * blk);

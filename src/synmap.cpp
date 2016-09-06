@@ -1,4 +1,4 @@
-#include "synmap.h"
+#include "synmap.hpp"
 
 Synmap* init_Synmap()
 {
@@ -54,7 +54,7 @@ void dump_verbose_block_mem(Synmap* synmap)
         if(i == 1){
             fprintf(stderr, "\n");
         }
-        for(int j = 0; j < SGC(synmap, 0, i)->size; j++){
+        for(size_t j = 0; j < SGC(synmap, 0, i)->size; j++){
             Block * blk = &SGC(synmap, 0, i)->block[j];
             print_verbose_Block(blk);   
         }
@@ -100,7 +100,7 @@ void set_contig_corners(Synmap* syn)
     for (size_t g = 0; g < 2; g++) {
         for (size_t c = 0; c < SG(syn, g)->size; c++) {
             con = SGC(syn, g, c);
-            for(int i = 0; i < 4; i++){
+            for(size_t i = 0; i < 4; i++){
                 k = i % 2 == 0 ? 0 : con->size - 1;
                 con->cor[i] = &con->block[k];
                 while (con->cor[i]->cor[i] != NULL) {
@@ -308,8 +308,8 @@ void link_contiguous_blocks(Synmap* syn, long k)
 
     size_t setid = 0;
     ContiguousSet * cset;
-    for(int i = 0; i < 2; i++){
-        for(int j = 0; j < SG(syn, i)->size; j++){
+    for(size_t i = 0; i < 2; i++){
+        for(size_t j = 0; j < SG(syn, i)->size; j++){
            con = SGC(syn, i, j); 
             // rewind - TODO - build the csets so this isn't necessary
             while(con->cset->prev != NULL){
@@ -405,7 +405,7 @@ void validate_synmap(Synmap* syn)
                 // grpid == 0 only if unset
                 ASSERT_BLK(blk->grpid != 0, blk);
 
-                for(int i = 0; i < 2; i++){
+                for(size_t i = 0; i < 2; i++){
                     if (blk->cnr[i] != NULL) {
                         ASSERT_BLK(blk->grpid != blk->cnr[i]->grpid, blk);
                         ASSERT_BLK(blk->cset == blk->cnr[i]->cset, blk);

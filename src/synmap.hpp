@@ -1,10 +1,10 @@
 #ifndef __SYNMAP_H__
 #define __SYNMAP_H__
 
-#include "global.h"
-#include "genome.h"
-#include "global.h"
-#include "contiguous_set.h"
+#include "global.hpp"
+#include "genome.hpp"
+#include "global.hpp"
+#include "contiguous_set.hpp"
 
 /**
  * Allocate memory for a new Synmap.

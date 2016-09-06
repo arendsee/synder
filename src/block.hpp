@@ -1,7 +1,7 @@
 #ifndef __BLOCK_H__
 #define __BLOCK_H__
 
-#include "global.h"
+#include "global.hpp"
 
 Block *init_Block(long, long);
 

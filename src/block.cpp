@@ -1,4 +1,4 @@
-#include "block.h"
+#include "block.hpp"
 
 /** Initialize values in a block */
 void set_Block(
@@ -197,11 +197,11 @@ void print_Block(Block* block)
 {
     printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
         block->parent->name,
-        block->pos[0] + global_out_start,
-        block->pos[1] + global_out_stop,
+        block->pos[0] + Offsets::out_start,
+        block->pos[1] + Offsets::out_stop,
         block->over->parent->name,
-        block->over->pos[0] + global_out_start,
-        block->over->pos[1] + global_out_stop,
+        block->over->pos[0] + Offsets::out_start,
+        block->over->pos[1] + Offsets::out_stop,
         block->strand
     );
     if(block->cset != NULL){

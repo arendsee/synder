@@ -1,4 +1,4 @@
-#include "contiguous_set.h"
+#include "contiguous_set.hpp"
 
 void add_block_to_ContiguousSet_side_(ContiguousSet * cset, Block * blk);
 
@@ -179,7 +179,7 @@ void add_block_to_ContiguousSet_side_(ContiguousSet * cset, Block * b){
 
     Block * a;
 
-    Direction d = (cset->strand == '+');
+    Direction d = (Direction)(cset->strand == '+');
 
     if(b->pos[0] > cset->bounds[1]){
         cset->bounds[1] = b->pos[1];

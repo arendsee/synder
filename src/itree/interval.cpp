@@ -1,4 +1,4 @@
-#include "interval.h"
+#include "interval.hpp"
 
 Interval * init_Interval(long start, long stop){
     Interval * inv = (Interval*)malloc(sizeof(Interval));

@@ -1,11 +1,11 @@
 #ifndef __CONTIG_H__
 #define __CONTIG_H__
 
-#include "global.h"
-#include "block.h"
-#include "itree/itree.h"
-#include "itree/search.h"
-#include "contiguous_set.h"
+#include "global.hpp"
+#include "block.hpp"
+#include "itree/itree.hpp"
+#include "itree/search.hpp"
+#include "contiguous_set.hpp"
 
 /** Allocate memory for a contig and set each field.
  *

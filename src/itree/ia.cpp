@@ -1,4 +1,4 @@
-#include "ia.h"
+#include "ia.hpp"
 
 IA * init_IA(){
     IA * ia = (IA *)malloc(sizeof(IA));

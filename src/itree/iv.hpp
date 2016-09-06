@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "interval.h"
-#include "ia.h"
+#include "interval.hpp"
+#include "ia.hpp"
 
 /** An automatically resizing vector of Interval objects  */
 typedef struct {
