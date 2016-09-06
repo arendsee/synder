@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
   }
   // Load synteny db 
   if (args.synfile) {
-    syn = load_Synmap(args.synfile, args.swap, args.k, args.trans);
+    syn = load_Synmap(args.synfile, args.swap, args.k, args.trans, args.validate);
     if(syn != NULL && args.debug){
         print_args(args);
         print_Synmap(syn, true); 
@@ -117,9 +117,7 @@ int main(int argc, char *argv[])
     } else if (strcmp(args.cmd, "map") == 0) {
       analysis_map(syn, args.intfile);
     } else if (strcmp(args.cmd, "search") == 0) {
-      find_search_intervals(syn, args.intfile, false);
-    } else if (strcmp(args.cmd, "searchblock") == 0) {
-      find_search_intervals(syn, args.intfile, true);
+      find_search_intervals(syn, args.intfile);
     } else {
       printf("Command '%s' not recognized\n", args.cmd);
       print_help();

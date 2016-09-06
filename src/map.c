@@ -19,7 +19,6 @@ typedef struct SI_Bound{
 
 SI_Bound * get_si_bound(
   long q,
-  long set_bounds[2],
   Block * blk_bounds[2],
   Direction d,
   bool inverted
@@ -27,13 +26,11 @@ SI_Bound * get_si_bound(
 
 int get_flag(SI_Bound * br[2]);
 
-void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
+void find_search_intervals(Synmap * syn, FILE * intfile)
 {
 
   // start and stop positions read from input line
   long bounds[2];
-  // Max and min nodes in current contiguous set
-  long set_bounds[2]; 
   // Max and min blocks retrieved from itree.
   Block * blk_bounds[2]; 
   // Search interval boundary information
@@ -89,9 +86,6 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
     // For each contiguous set, there is exactly one search interval.
     for(; cslist != NULL; cslist = cslist->next){
 
-      set_bounds[LO] = get_set_bound(cslist->bound[LO], LO);
-      set_bounds[HI] = get_set_bound(cslist->bound[HI], HI);
-
       blk_bounds[LO] = cslist->bound[LO];
       blk_bounds[HI] = cslist->bound[HI];
 
@@ -100,9 +94,9 @@ void find_search_intervals(Synmap * syn, FILE * intfile, bool pblock)
       score = calculate_score(bounds[LO], bounds[HI], blk_bounds[LO]);
 
       bound_results[inverted ^ LO] =
-        get_si_bound(bounds[LO], set_bounds, blk_bounds, LO, inverted);
+        get_si_bound(bounds[LO], blk_bounds, LO, inverted);
       bound_results[inverted ^ HI] =
-        get_si_bound(bounds[HI], set_bounds, blk_bounds, HI, inverted);
+        get_si_bound(bounds[HI], blk_bounds, HI, inverted);
 
 
       printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
@@ -143,7 +137,6 @@ SI_Bound * init_SI_Bound(long bound, int flag){
 
 SI_Bound * get_si_bound(
   long q,
-  long set_bounds[2],
   Block * blk_bounds[2],
   Direction d,
   bool inverted)
@@ -154,6 +147,10 @@ SI_Bound * get_si_bound(
   int flag = 0;
   // non-zero to ease debugging
   long bound = 444444;
+
+  long set_bounds[2];
+  set_bounds[0] = blk_bounds[0]->cset->bounds[0];
+  set_bounds[1] = blk_bounds[0]->cset->bounds[1];
 
   // All diagrams are shown for the d=HI case, take the mirror image fr d=LO.
   //
