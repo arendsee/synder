@@ -1,4 +1,4 @@
-#include "analysis.hpp"
+#include "analysis.h"
 
 void analysis_count(Synmap * syn, FILE * intfile)
 {

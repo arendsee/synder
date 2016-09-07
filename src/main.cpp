@@ -1,10 +1,10 @@
-#include "global.hpp"
-#include "arguments.hpp"
-#include "io.hpp"
-#include "synmap.hpp"
-#include "analysis.hpp"
-#include "map.hpp"
-#include "lev.hpp"
+#include "global.h"
+#include "arguments.h"
+#include "io.h"
+#include "synmap.h"
+#include "analysis.h"
+#include "map.h"
+#include "lev.h"
 
 int Offsets::in_start;
 int Offsets::in_stop;

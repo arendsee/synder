@@ -1,8 +1,16 @@
 #ifndef __GENOME_H__
 #define __GENOME_H__
 
-#include "global.hpp"
-#include "contig.hpp"
+#include "global.h"
+#include "contig.h"
+
+/** A named set of Contig objects*/
+struct Genome
+{
+    char * name;
+    size_t size;
+    Contig ** contig;
+};
 
 /** Allocate memory for Genome *name* of size *size*.
  *

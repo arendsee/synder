@@ -1,8 +1,8 @@
 #ifndef __SYNMAP_IO_H__
 #define __SYNMAP_IO_H__
 
-#include "global.hpp"
-#include "synmap.hpp"
+#include "global.h"
+#include "synmap.h"
 
 /** Build synteny tree from specially formatted file.
  *

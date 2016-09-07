@@ -3,8 +3,8 @@
 
 #include <getopt.h>
 
-#include "global.hpp"
-#include "version.hpp"
+#include "global.h"
+#include "version.h"
 
 #define MAX_POS 5
 

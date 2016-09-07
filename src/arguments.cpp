@@ -1,4 +1,4 @@
- #include "arguments.hpp"
+#include "arguments.h"
 
 void Arguments::set_defaults()
 {

@@ -1,11 +1,43 @@
 #ifndef __CONTIG_H__
 #define __CONTIG_H__
 
-#include "global.hpp"
-#include "block.hpp"
-#include "itree/itree.hpp"
-#include "itree/search.hpp"
-#include "contiguous_set.hpp"
+#include "global.h"
+#include "block.h"
+#include "contiguous_set.h"
+#include "itree.h"
+
+/** Contiguous sequence object containing list of Block structures and an
+ * interval tree to search them.
+ *
+ * Fields:
+ * - name    - a unique name for this contig (e.g. "Chr1")
+ * - idx     - a unique index between 0 and (Genome->size - 1)
+ * - length  - total number of bases in the chromosome/scaffold
+ * - cor     - four terminal Blocks
+ *   [0] first by start
+ *   [1] last by start
+ *   [2] first by stop
+ *   [3] last by stop
+ * - size    - total number of Blocks in Contig (including deleted ones)
+ * - block   - memory pool for all Block structs
+ * - itree   - an IntervalTree for log(n)+m search of overlapping intervals (Blocks)
+ * - ctree   - an IntervalTree for searching ContiguousSets
+ */
+struct Contig
+{
+    char * name;
+    Genome * parent;
+    size_t idx;
+    // handle Blocks
+    long length;
+    Block * cor[4];
+    size_t size;
+    Block * block;
+    IntervalTree * itree;
+    // handle ContiguousSets
+    ContiguousSet * cset;
+    IntervalTree * ctree;
+};
 
 /** Allocate memory for a contig and set each field.
  *
@@ -60,7 +92,8 @@ void print_Contig(Contig * contig, bool forward, bool print_blocks);
  *    2. leftmost  - query is further left than any interval
  *    3. rightmost - query is further right than any interval
  */
-typedef struct ResultContig{
+typedef struct ResultContig
+{
     Contig * contig;
     size_t size;
     Block ** block;

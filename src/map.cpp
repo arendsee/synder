@@ -1,4 +1,4 @@
-#include "map.hpp"
+#include "map.h"
 
 // A local utility structure used filter and store contiguous sets
 typedef struct CSList{

@@ -324,7 +324,7 @@ runtest(){
     [[ $fail -ne 0 && $die_on_fail -ne 0 ]] && exit 1
 }
 
-#---------------------------------------------------------------------
+---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/one-block"
 announce "\nTesting with synteny map length == 1"
 runtest hi     "query after of block"

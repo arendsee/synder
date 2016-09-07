@@ -1,9 +1,9 @@
 #ifndef __ANALYSIS_H__
 #define __ANALYSIS_H__
 
-#include "global.hpp"
-#include "synmap.hpp"
-#include "contig.hpp"
+#include "global.h"
+#include "synmap.h"
+#include "contig.h"
 
 /** Count blocks overlapping intervals in intfile
  *

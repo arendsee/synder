@@ -1,10 +1,23 @@
 #ifndef __CONTIGUOUS_SET_H__
 #define __CONTIGUOUS_SET_H__
 
-#include "global.hpp"
-#include "block.hpp"
-#include "itree/itree.hpp"
+#include "global.h"
+#include "block.h"
+#include "itree.h"
 
+/** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
+struct ContiguousSet
+{
+    long bounds[2];
+    size_t size;
+    Contig * parent;
+    ContiguousSet * next;
+    ContiguousSet * prev;
+    ContiguousSet * over;
+    char strand;
+    size_t id; // mostly for debugging
+    Block * ends[2];
+};
 
 ContiguousSet * init_ContiguousSet(Block * blk);
 

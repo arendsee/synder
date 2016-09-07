@@ -1,4 +1,4 @@
-#include "global.hpp"
+#include "global.h"
 
 void check_in_offset(size_t start, size_t stop){
     if(start == 0 && Offsets::in_start > 0){

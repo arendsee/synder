@@ -1,10 +1,21 @@
 #ifndef __SYNMAP_H__
 #define __SYNMAP_H__
 
-#include "global.hpp"
-#include "genome.hpp"
-#include "global.hpp"
-#include "contiguous_set.hpp"
+#include "global.h"
+#include "genome.h"
+#include "global.h"
+#include "contiguous_set.h"
+
+#define SGCB(syn, gid, cid, bid) syn->genome[(gid)]->contig[(cid)]->block[(bid)]
+#define SGC(syn, gid, cid)       syn->genome[(gid)]->contig[(cid)]
+#define SG(syn, gid)             syn->genome[(gid)]
+
+/** A pair of syntenically linked Genome objects  */
+struct Synmap
+{
+    size_t size; // should always be 2
+    Genome ** genome;
+};
 
 /**
  * Allocate memory for a new Synmap.

@@ -1,4 +1,4 @@
-#include "lev.hpp"
+#include "lev.h"
 
 void convert_seqname(FILE * synfile, FILE * intfile, int swap)
 {
