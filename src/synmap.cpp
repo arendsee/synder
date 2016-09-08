@@ -424,97 +424,47 @@ void Synmap::merge_all_doubly_overlapping_blocks()
 }
 
 
-// ---- A local utility structure used to build contiguous sets ----
-typedef struct Node
-{
-    struct Node * down;
-    ContiguousSet * cset;
-} Node;
-Node* init_node(Block* blk)
-{
-    Node* node = (Node*)malloc(sizeof(Node));
-    node->down = NULL;
-    node->cset = init_ContiguousSet(blk);
-    return (node);
-}
-void remove_node(Node* node)
-{
-    if (node->down != NULL)
-    {
-        Node* tmp = node->down;
-        memcpy(node, node->down, sizeof(Node));
-        free(tmp);
-    }
-    else
-    {
-        node->cset = NULL;
-    }
-}
-void free_node(Node* node)
-{
-    if (node->down != NULL)
-        free_node(node->down);
-    free(node);
-}
 void Synmap::link_contiguous_blocks(long k)
 {
 
     Contig * con;
-    Block *blk;
-    Node* node;
-    Node* root;
-    bool block_added;
+    Block * blk;
+
+    std::list<ContiguousSet*> csets;
+    std::list<ContiguousSet*>::iterator iter;
+    ContiguousSet * cset;
 
     for (size_t i = 0; i < get_genome(0)->size; i++)
     {
-        // The current Contig
-        con = get_contig(0, i);
+
         // Initialize the first block in the scaffold
-        blk  = con->cor[0];
-        // A container for the nascent ContiguousSets
-        node = init_node(blk);
-        // For returning after descent, since Node has no prev
-        root = node;
+        blk = get_contig(0, i)->cor[0];
+
+        // Initialize first ContiguousSet
+        csets.clear();
+        csets.push_front(init_ContiguousSet(blk));
+
         for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1])
         {
-            while (true)
+            for(iter = csets.begin(); iter != csets.end(); ++iter)
             {
-
-                block_added = add_block_to_ContiguousSet(node->cset, blk, k);
+                cset = *iter;
 
                 // if block has joined a set
-                if (block_added)
-                {
-                    // break and process next block
-                    break;
-                }
-                // if we reach the bottom of the Node list
-                else if (node->down == NULL)
-                {
-                    // begin new contiguous set
-                    node->down = init_node(blk);
-                    break;
-                }
-                // if this node is done
-                else if (strictly_forbidden(node->cset->ends[1], blk, k))
-                {
-                    // remove it, exposing the next Node
-                    remove_node(node);
-                }
-                // otherwise
-                else
-                {
-                    // descend to the next Node
-                    node = node->down;
-                }
+                if (add_block_to_ContiguousSet(cset, blk, k))
+                    goto added;
+
+                // if set terminates
+                if (strictly_forbidden(cset->ends[1], blk, k))
+                    iter = csets.erase(iter);
             }
-            node = root;
+                // if block fits in no set, create a new one
+                csets.push_front(init_ContiguousSet(blk));
+            added: {}
         }
-        free_node(root);
     }
 
     size_t setid = 0;
-    ContiguousSet * cset;
     for (size_t i = 0; i < 2; i++)
     {
         for (size_t j = 0; j < get_genome(i)->size; j++)

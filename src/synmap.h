@@ -6,6 +6,10 @@
 #include "global.h"
 #include "contiguous_set.h"
 
+#include <iterator>
+#include <list>
+
+
 /** A pair of syntenically linked Genome objects  */
 class Synmap
 {

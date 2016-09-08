@@ -106,7 +106,7 @@ bool strictly_forbidden(Block * a, Block * b, long k)
 {
     return
         a->parent == b->parent &&
-        ((long)b->grpid - (long)a->grpid) > k;
+        ((long)b->grpid - (long)a->grpid) > (k+1);
 }
 
 bool are_contiguous(Block * blk_a, Block * blk_b, long k)

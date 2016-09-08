@@ -1,7 +1,7 @@
 # CFLAGS=-Wall -g
 # CFLAGS=-Wall -g -m64
 # CFLAGS=-Wall -gdwarf-4 -g3
-CFLAGS=-Wall -gdwarf-4 -g3
+CFLAGS=-Wall -gdwarf-4 -g3 -std=c++11
 LINKER_FLAGS=-lm
 CC=g++
 TARGET=synder
