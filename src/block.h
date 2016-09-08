@@ -60,14 +60,6 @@ void free_Block(Block *);
 /** A clean TAB-delimited output suitable for giving to the user */
 void print_Block(Block *);
 
-/** A diagnostic function designed for use in synmap dumps
- *
- * This function prints the homologous pair of blocks, not just the the input
- * block.
- *
- */
-void print_verbose_Block(Block * blk);
-
 /** Determine whether interval (a,b) overlaps interval (c,d)
  *
  * @param a1 start of first interval

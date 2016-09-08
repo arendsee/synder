@@ -65,7 +65,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
     bounds[LO] -= Offsets::in_start;
     bounds[HI] -= Offsets::in_stop;
 
-    rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI], false);
+    rc = get_region(syn->get_contig(0, chrid), bounds[LO], bounds[HI], false);
 
     cslist = init_empty_CSList();
     root = cslist;
@@ -75,7 +75,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
       add_blk_CSList(cslist, rc->block[i]); 
     }
 
-    crc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI], true);
+    crc = get_region(syn->get_contig(0, chrid), bounds[LO], bounds[HI], true);
     if(! (crc->inbetween || crc->leftmost || crc->rightmost) ){
         for(size_t i = 0; i < crc->size; i++){
           add_cset_CSList(cslist, crc->cset[i], bounds); 

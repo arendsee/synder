@@ -54,14 +54,14 @@ ARCHIVE=ark
 dtest:
 	${MAKE} ddclean
 	mkdir ${ARCHIVE}
-	./test/runtests.sh -mdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
+	./test/runtests.sh -mdvx -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Same as above, but does not test memory
 .PHONY: dtest-leak
 dtest-leak:
 	${MAKE} ddclean
 	mkdir ${ARCHIVE}
-	./test/runtests.sh -dv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
+	./test/runtests.sh -dvx -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Runs the sample data, linking files for review
 .PHONY: sample

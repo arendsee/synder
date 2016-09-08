@@ -70,7 +70,7 @@ void print_Contig(Contig* contig, bool forward, bool print_blocks)
         Block* blk = contig->cor[d - 1]; // prev by start or prev by stop
         for (; blk != NULL; blk = blk->cor[d])
         {
-            print_verbose_Block(blk);
+            print_Block(blk);
         }
     }
 }

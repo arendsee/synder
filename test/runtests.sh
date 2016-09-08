@@ -324,21 +324,21 @@ runtest(){
     [[ $fail -ne 0 && $die_on_fail -ne 0 ]] && exit 1
 }
 
----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/one-block"
 announce "\nTesting with synteny map length == 1"
 runtest hi     "query after of block"
 runtest within "query within block"
 runtest lo     "query before of block"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/two-block"
 announce "\nTesting with synteny map length == 2"
 runtest hi      "query downstream of all blocks"
 runtest between "query between two blocks"
 runtest lo      "query upstream of all blocks"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/multi-block"
 announce "\nTesting with 5 adjacent blocks on the same strand"
 runtest a "extreme left"
@@ -352,31 +352,31 @@ runtest h "starts before block 2, ends after block 3"
 runtest i "starts in block 2, ends in block 2"
 runtest j "extreme right"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/simple-duplication"
 announce "\nTest simple tandem duplication"
 runtest between "query starts between the duplicated intervals"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/one-interval-inversion"
 announce "\nTest when a single interval is inverted"
 runtest between "query next to inverted interval"
 runtest over    "query overlaps inverted interval"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/two-interval-inversion"
 announce "\nTest when two interval are inverted"
 runtest beside   "query next to inverted interval"
 runtest within   "query between inverted intervals"
 runtest spanning "query spans inverted intervals"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/tandem-transposition"
 announce "\nTest tandem transposition"
 runtest beside "query beside the transposed pair"
 runtest within "query between the transposed pair"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/irregular-overlaps"
 announce "\nTest target side internal overlaps"
 runtest left "left side" "You are either 1) not sorting the by_stop vector
@@ -384,22 +384,22 @@ in Contig by Block stop positions, or 2) are snapping the search interval left
 boundary to a Block that is nearest by start, but not be stop."
 runtest right "right side"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/off-by-one"
 announce "\nTest overlap edge cases"
 runtest a "overlap of 1"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/inverted-extremes"
 announce "\nExtreme value resulting from an inversion"
 runtest extreme "between the query intervals, extreme SI"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/deletion"
 announce "\nDeletion tests (adjacent bounds in target)"
 runtest between "query is inbetween"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 g_dir="$PWD/test/test-data/unassembled"
 announce "\nMappings beyond the edges of target scaffold"
 runtest lo "query is below scaffold"
@@ -408,7 +408,7 @@ runtest adj-hi "query is just above the scaffold"
 runtest hi "query is above the scaffold"
 runtest lo "test with 1-base" 0 1
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 announce "\nTest multi-chromosome cases when k=0"
 g_arg=" -k 0 "
 #  T   =====[---->
@@ -445,7 +445,7 @@ g_dir="$PWD/test/test-data/interruptions/two-query-side"
 ark=" -k 0 "
 runtest between "between two interior query-side intervals (k=0)"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 set_defaults
 g_arg=' -k 4 '
 announce "\nConfirm two-scaffold systems are unaffected by k"
@@ -455,7 +455,7 @@ runtest within "query between the transposed pair"
 g_dir="$PWD/test/test-data/simple-duplication"
 runtest between "query starts between the duplicated intervals"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 set_defaults
 announce "\nTest multi-chromosome cases when k=2"
 g_arg=" -k 2 "
@@ -499,7 +499,7 @@ g_arg=" -k 3 "
 g_exp_ext="exp-k3"
 runtest between "query nested two pairs of interrupting intervals (k=3)"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 set_defaults
 g_dir="$PWD/test/test-data/synmap-overlaps"
 announce "\nsyntenic overlaps"
@@ -508,7 +508,7 @@ runtest simple "Between the weird"
 # g_dir="$PWD/test/test-data/build/big"
 # build-test "$g_dir/c.syn" "$g_dir/c.gff" "Stress test"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 set_defaults
 announce "\ndouble overlapping tests"
 g_dir="$PWD/test/test-data/build/overlap-tests"
@@ -531,7 +531,7 @@ runtest a "Overlap - Tangles"
 g_map="map-9.syn"
 runtest a "Overlap - double overlap on different target contigs"
 
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 echo
 
 total=$(( total_passed + total_failed))

@@ -1,8 +1,6 @@
 #include "global.h"
 #include "arguments.h"
-#include "io.h"
 #include "synmap.h"
-#include "analysis.h"
 #include "map.h"
 #include "lev.h"
 
@@ -14,7 +12,7 @@ int Offsets::out_stop;
 int main(int argc, char *argv[])
 {
 
-    Synmap *syn = NULL;
+    Synmap * syn = NULL;
 
     // ------------------------------------------------------------------------
     // Prep input
@@ -95,16 +93,16 @@ int main(int argc, char *argv[])
     // Load synteny db
     if (args.synfile)
     {
-        syn = load_Synmap(args.synfile, args.swap, args.k, args.trans, args.validate);
-        if (syn != NULL && args.debug)
+        syn = new Synmap(args.synfile, args.swap, args.k, args.trans, args.validate);
+        if (args.debug)
         {
             args.print();
-            print_Synmap(syn, true);
+            syn->print(true);
             exit(EXIT_SUCCESS);
         }
-        if (syn != NULL && args.dump_blks)
+        if (args.dump_blks)
         {
-            dump_blocks(syn);
+            syn->dump_blocks();
             exit(EXIT_SUCCESS);
         }
     }
@@ -116,13 +114,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // // Fileter
-    // if (args.hitfile) {
-    //   if (args.cmd != NULL && args.cmd == "filter") {
-    //     size_t width = 5000;
-    //     analysis_filter(syn, args.hitfile, single_advocate, &width);
-    //   }
-    // }
     if (args.hitfile)
     {
         printf("Filter function currently unavailable\n");
@@ -142,11 +133,11 @@ int main(int argc, char *argv[])
         }
         else if (args.cmd == "count")
         {
-            analysis_count(syn, args.intfile);
+            syn->count(args.intfile);
         }
         else if (args.cmd == "map")
         {
-            analysis_map(syn, args.intfile);
+            syn->map(args.intfile);
         }
         else if (args.cmd == "search")
         {

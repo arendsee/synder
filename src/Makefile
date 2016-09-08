@@ -19,7 +19,6 @@ OBJECTS=               \
 	contiguous_set.o   \
 	synmap.o           \
 	io.o               \
-	analysis.o         \
 	map.o              \
 	main.o             \
 
