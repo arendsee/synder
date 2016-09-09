@@ -31,7 +31,7 @@ void free_ContiguousSet(ContiguousSet * cset)
 
     if (cset->parent->ctree != NULL)
     {
-        // free_IntervalTree(cset->parent->ctree);
+        delete cset->parent->ctree;
         cset->parent->ctree = NULL;
     }
 

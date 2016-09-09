@@ -21,25 +21,11 @@ IntervalTree::~IntervalTree()
     if (root != NULL)
         delete root;
 }
-
+ 
 void IntervalTree::print(int verbosity)
 {
     root->print(verbosity);
 }
-
-IntervalResult::IntervalResult()
-{
-    iv.clear();
-    inbetween = false;
-    leftmost  = false;
-    rightmost = false;
-}
-
-void IntervalResult::print()
-{
-    printf("inbetween=%i leftmost=%i rightmost=%i\n", inbetween, leftmost, rightmost);
-}
-
 
 long IntervalTree::count_overlaps(long pnt)
 {

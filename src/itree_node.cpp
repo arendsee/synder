@@ -53,6 +53,14 @@ IntervalTreeNode::IntervalTreeNode(
 }
 
 
+IntervalTreeNode::~IntervalTreeNode(){
+    if (children[0] != NULL)
+        delete children[0];
+
+    if (children[1] != NULL)
+        delete children[1];
+}
+
 
 /*
  * Select a point at the center of the middle interval.

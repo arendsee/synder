@@ -262,7 +262,12 @@ ResultContig* get_region(Contig * con, long a, long b, bool is_cset)
 
     ResultContig* resultcontig = init_ResultContig(con, res, is_cset);
 
-    free(res);
+    if(tmp_a != NULL)
+        delete tmp_a;
+    if(tmp_b != NULL)
+        delete tmp_b;
+
+    delete res;
 
     return resultcontig;
 }

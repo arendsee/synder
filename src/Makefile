@@ -9,6 +9,7 @@ TARGET=synder
 OBJECTS=               \
 	global.o           \
 	interval.o         \
+	itree_result.o     \
 	itree_node.o       \
 	itree.o            \
 	arguments.o        \

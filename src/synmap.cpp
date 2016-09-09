@@ -201,7 +201,6 @@ Synmap::~Synmap()
     // TODO
     free_Genome(genome[0]);
     free_Genome(genome[1]);
-    free(genome);
 }
 
 void Synmap::print(bool forward)

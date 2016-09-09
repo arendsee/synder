@@ -6,24 +6,7 @@
 #include "global.h"
 #include "interval.h"
 #include "itree_node.h"
-
-/** A container for results from searches for overlaps
- *
- * bool inbetween - TRUE if the query overlaps nothing
- */
-class IntervalResult
-{
-public:
-    std::vector<Interval*> iv;
-    bool inbetween;
-    bool leftmost;
-    bool rightmost;
-
-    IntervalResult();
-
-    void print();
-};
-
+#include "itree_result.h"
 
 class IntervalTree
 {

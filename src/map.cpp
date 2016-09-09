@@ -122,6 +122,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
     }
 
     free_ResultContig(rc);
+    free_ResultContig(crc);
     free_CSList(root);
   }
 

@@ -55,6 +55,8 @@ class IntervalTreeNode {
             Orientation orientation = O_ROOT
         );
 
+        ~IntervalTreeNode();
+
         // Wrapper for the treal recursive printer
         void print(int verbosity);
         void print(IntervalTreeNode * n, int depth, char pos, int verbosity);
