@@ -141,24 +141,6 @@ runtest(){
     cp $g_dir/$base.gff $gff
     cp $g_dir/$g_map    $map
 
-    # Query genome length file
-    tgen=$g_dir/tgen.tab
-    # Target genome length file
-    qgen=$g_dir/qgen.tab
-
-    # If the length files are given, add to db command
-    if [[ -f $tgen ]]
-    then
-        # TODO incorporate length files
-        echo "Length files currently not supported" >> $tmpmsg
-    fi
-
-    if [[ -f $tgen && -f $qgen ]]
-    then
-        # TODO incorporate length files
-        echo "Length files currently not supported" >> $tmpmsg
-    fi
-
     if [[ $out_base == 1 ]]
     then
         cat $g_dir/${base}-${g_exp_ext}.txt | filter_plus_one > $exp
@@ -173,6 +155,22 @@ runtest(){
     synder_cmd="$synder_cmd -s $map"
     synder_cmd="$synder_cmd -c search"
     synder_cmd="$synder_cmd $g_arg"
+
+    # Query genome length file
+    tgen=$g_dir/tgen.tab
+    # Target genome length file
+    qgen=$g_dir/qgen.tab
+
+    # If the length files are given, add to db command
+    if [[ -f $tgen ]]
+    then
+        synder_cmd="$synder_cmd -t $tgen"
+    fi
+
+    if [[ -f $qgen ]]
+    then
+        synder_cmd="$synder_cmd -q $qgen"
+    fi
 
     # command for loading into gdb
     echo "set args $synder_cmd"  >  $gdbcmd

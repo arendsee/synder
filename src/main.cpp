@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     if (args.synfile)
     {
-        syn = new Synmap(args.synfile, args.swap, args.k, args.trans);
+        syn = new Synmap(args);
         if (args.debug)
         {
             args.print();

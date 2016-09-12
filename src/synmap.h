@@ -5,6 +5,7 @@
 #include "genome.h"
 #include "global.h"
 #include "contiguous_set.h"
+#include "arguments.h"
 
 #include <iterator>
 #include <list>
@@ -14,6 +15,16 @@
 class Synmap
 {
 private:
+
+    FILE* synfile;
+    FILE* tclfile;
+    FILE* qclfile;
+    int swap;
+    long k;
+    char trans;
+
+    // loads synfile and calls the below functions in proper order
+    void load_blocks();
 
     // wrappers for Genome functions
     void set_contig_lengths();
@@ -41,8 +52,7 @@ public:
      *
      * @return pointer to a complete Synmap object
      */
-    Synmap(FILE* synfile, int swap, long k, char trans);
-
+    Synmap(Arguments& args);
     ~Synmap();
 
     Contig* get_contig(size_t gid, char* contig_name);

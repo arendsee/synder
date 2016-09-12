@@ -1,6 +1,19 @@
 #include "synmap.h"
 
-Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
+Synmap::Synmap(Arguments& args){
+    synfile = args.synfile;
+    tclfile = args.tclfile;
+    qclfile = args.qclfile;
+    swap    = args.swap;
+    k       = args.k;
+    trans   = args.trans;
+
+    load_blocks();
+    set_contig_lengths();
+    validate();
+}
+
+void Synmap::load_blocks()
 {
     if (synfile == NULL)
     {
@@ -73,19 +86,13 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
     }
     free(line);
 
-    set_contig_lengths();
-
     // The following must be run in order
     link_block_corners();
     set_contig_corners();
     merge_doubly_overlapping_blocks();
-
     set_overlap_group();
     link_adjacent_blocks();
     link_contiguous_blocks(k);
-
-    // If you tell me not to validate, I will do so anyway
-    validate();
 }
 
 Contig* Synmap::get_contig(size_t gid, char* contig_name)
@@ -138,8 +145,8 @@ void Synmap::dump_blocks()
 
 void Synmap::set_contig_lengths()
 {
-    genome[0]->set_contig_lengths();
-    genome[1]->set_contig_lengths();
+    genome[0]->set_contig_lengths(qclfile);
+    genome[1]->set_contig_lengths(tclfile);
 }
 
 void Synmap::link_block_corners()

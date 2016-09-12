@@ -33,7 +33,7 @@ public:
         char        strand
     );
 
-    void set_contig_lengths();
+    void set_contig_lengths(FILE* clfile);
 
     size_t size() {
         return contig.size();

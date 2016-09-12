@@ -84,14 +84,31 @@ Block* Genome::add_block(
     return blk_ptr;
 }
 
-void Genome::set_contig_lengths()
+void Genome::set_contig_lengths(FILE* clfile)
 {
-    // TODO process file if given, to replace the default of 1000000000
-    // Contig * con;
-    // for (auto &pair : contig)
-    // {
-    //     con = &pair.second;
-    // }
+    if(clfile != NULL){
+        // read loop variables
+        int     status = 0;
+        char*   line   = NULL;
+        size_t  len    = 0;
+        ssize_t read;
+
+        char contig_name[NAME_BUFFER_SIZE];
+        long contig_length; 
+
+        Contig* con;
+        while ((read = getline(&line, &len, clfile)) != EOF)
+        {
+            status = sscanf(line, "%s %zu", contig_name, &contig_length);
+            if(status == EOF){
+                fprintf(stderr, "Failed to read contig length file\n");
+                exit(EXIT_FAILURE);
+            }
+            con = get_contig(contig_name); 
+            con->length = contig_length;
+        }
+        free(line);
+    }
 }
 
 void Genome::print(bool print_blocks, bool forward)

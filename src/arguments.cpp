@@ -5,6 +5,8 @@ void Arguments::set_defaults()
     synfile     = NULL;
     intfile     = NULL;
     hitfile     = NULL;
+    tclfile     = NULL;
+    qclfile     = NULL;
     cmd         = "";
     offsets[0]  = 0;
     offsets[1]  = 0;
@@ -29,7 +31,7 @@ Arguments::Arguments(int argc, char *argv[])
 
     int opt;
 
-    while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:")) != -1)
+    while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:q:t:")) != -1)
     {
         switch (opt)
         {
@@ -71,6 +73,14 @@ Arguments::Arguments(int argc, char *argv[])
             hitfile = fopen(optarg, "r");
             Arguments::check_file(hitfile, optarg);
             break;
+        case 't':
+            tclfile = fopen(optarg, "r");
+            Arguments::check_file(tclfile, optarg);
+            break;
+        case 'q':
+            qclfile = fopen(optarg, "r");
+            Arguments::check_file(qclfile, optarg);
+            break;
         case 'c':
             cmd = optarg;
             break;
@@ -110,6 +120,10 @@ Arguments::~Arguments()
         fclose(intfile);
     if (hitfile != NULL)
         fclose(hitfile);
+    if (tclfile != NULL)
+        fclose(tclfile);
+    if (qclfile != NULL)
+        fclose(qclfile);
 }
 
 
@@ -172,7 +186,9 @@ void Arguments::print_help()
            "\t-d \t Convert synteny file into synteny database.\n"
            "\t-f \t Filter using provided gff file.\n"
            "\t-i \t GFF search interval file, if not provided, uses stdin\n"
-           "\t-t \t Switch target and query in synteny database\n"
+           "\t-t \t Target chromosome lengths file\n"
+           "\t-q \t Query chromosome lengths file\n"
+           "\t-r \t Switch target and query in synteny database\n"
            "\t-c \t Synder command to run. (See Below)\n"
            "\t-b \t Start and stop offsets for input and output (e.g. 1100)\n"
            "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"

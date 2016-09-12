@@ -20,6 +20,8 @@ public:
     FILE *synfile;
     FILE *intfile;
     FILE *hitfile;
+    FILE *tclfile;
+    FILE *qclfile;
     std::string cmd;
     std::vector<std::string> pos;
     int offsets[4];
