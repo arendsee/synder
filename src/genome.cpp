@@ -105,7 +105,9 @@ void Genome::set_contig_lengths(FILE* clfile)
                 exit(EXIT_FAILURE);
             }
             con = get_contig(contig_name); 
-            con->length = contig_length;
+            if(con != NULL){
+                con->length = contig_length;
+            }
         }
         free(line);
     }
