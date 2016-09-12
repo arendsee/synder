@@ -20,19 +20,23 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
     // Contig name
     char qseqid[NAME_BUFFER_SIZE];
     char tseqid[NAME_BUFFER_SIZE];
+    char * seqid[2] = {qseqid, tseqid};
     double score;
     char strand;
-    long qstart, qstop, tstart, tstop;
+    long start[2], stop[2];
 
     Block *qblk, *tblk;
+
+    size_t i = swap ? 1 : 0;
+    size_t j = swap ? 0 : 1;
 
     while ((read = getline(&line, &len, synfile)) != EOF)
     {
 
         status = sscanf(line, "%s %zu %zu %s %zu %zu %lf %c",
-                        qseqid, &qstart, &qstop,
-                        tseqid, &tstart, &tstop,
-                        &score, &strand);
+            seqid[i], &start[i], &stop[i],
+            seqid[j], &start[j], &stop[j],
+            &score, &strand);
 
         if(status != 8){
             fprintf(stderr, "Failed to read input line:\n%s", line);
@@ -45,10 +49,10 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
             score = -1 * log(score);
             break;
         case 'd':
-            score = score * MIN((tstop - tstart + 1), (qstop - qstart + 1));
+            score = score * MIN((stop[0] - start[0] + 1), (stop[1] - start[1] + 1));
             break;
         case 'p':
-            score = score * MIN((tstop - tstart + 1), (qstop - qstart + 1)) / 100.0;
+            score = score * MIN((stop[0] - start[0] + 1), (stop[0] - start[0] + 1)) / 100.0;
             break;
         case 'i':
             // no transformation
@@ -59,8 +63,8 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
             break;
         }
 
-        qblk = genome[0]->add_block(qseqid, qstart, qstop, score, '+');
-        tblk = genome[1]->add_block(tseqid, tstart, tstop, score, strand);
+        qblk = genome[0]->add_block(seqid[0], start[0], stop[0], score, '+');
+        tblk = genome[1]->add_block(seqid[1], start[1], stop[1], score, strand);
 
         // link homologs
         qblk->over = tblk;
@@ -84,15 +88,20 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
     validate();
 }
 
-Contig* Synmap::get_contig(size_t gid, char* contig_name){
-    if(gid == 0 || gid == 1){
+Contig* Synmap::get_contig(size_t gid, char* contig_name)
+{
+    if (gid == 0 || gid == 1)
+    {
         return genome[gid]->get_contig(contig_name);
-    } else {
+    }
+    else
+    {
         return NULL;
     }
 }
 
-Genome* Synmap::get_genome(size_t gid){
+Genome* Synmap::get_genome(size_t gid)
+{
     return (gid == 0 || gid == 1) ? genome[gid] : NULL;
 }
 
@@ -157,72 +166,76 @@ void Synmap::link_adjacent_blocks()
     genome[1]->link_adjacent_blocks();
 }
 
-void Synmap::merge_doubly_overlapping_blocks(){
-   genome[0]->merge_overlaps(); 
+void Synmap::merge_doubly_overlapping_blocks()
+{
+    genome[0]->merge_overlaps();
 }
 
-void Synmap::link_contiguous_blocks(long k){
-   genome[0]->link_contiguous_blocks(k); 
+void Synmap::link_contiguous_blocks(long k)
+{
+    genome[0]->link_contiguous_blocks(k);
 }
 
 void Synmap::validate()
 {
-   genome[0]->validate(); 
-   genome[1]->validate(); 
+    genome[0]->validate();
+    genome[1]->validate();
 }
 
 void Synmap::count(FILE * intfile)
 {
-  char seqname[NAME_BUFFER_SIZE];
-  char contig_seqid[NAME_BUFFER_SIZE];
-  size_t count;
-  long start, stop;
-  while ((fscanf(intfile,
-                 "%s %*s %*s %li %li %*s %*c %*s %s\n",
-                 contig_seqid, &start, &stop, seqname)) != EOF)
-  {
-    check_in_offset(start, stop);
-    start -= Offsets::in_start;
-    stop  -= Offsets::in_stop;
+    char seqname[NAME_BUFFER_SIZE];
+    char contig_seqid[NAME_BUFFER_SIZE];
+    size_t count;
+    long start, stop;
+    while ((fscanf(intfile,
+                   "%s %*s %*s %li %li %*s %*c %*s %s\n",
+                   contig_seqid, &start, &stop, seqname)) != EOF)
+    {
+        check_in_offset(start, stop);
+        start -= Offsets::in_start;
+        stop  -= Offsets::in_stop;
 
-    count = get_contig(0, contig_seqid)->count_overlaps(start, stop);
-    printf("%s\t%zu\n", seqname, count);
-  }
+        count = get_contig(0, contig_seqid)->count_overlaps(start, stop);
+        printf("%s\t%zu\n", seqname, count);
+    }
 }
 
 void Synmap::map(FILE * intfile)
 {
-  char seqname[128];
-  char contig_seqid[NAME_BUFFER_SIZE];
-  long start, stop;
-  ResultContig * rc;
-  Block *qblk, *tblk;
-  bool missing;
-  while ((fscanf(intfile,
-                 "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
-                 contig_seqid, &start, &stop, seqname)) != EOF)
-  {
-    check_in_offset(start, stop);
-    start -= Offsets::in_start;
-    stop  -= Offsets::in_stop;
+    char seqname[128];
+    char contig_seqid[NAME_BUFFER_SIZE];
+    long start, stop;
+    ResultContig * rc;
+    Block *qblk, *tblk;
+    bool missing;
+    while ((fscanf(intfile,
+                   "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
+                   contig_seqid, &start, &stop, seqname)) != EOF)
+    {
+        check_in_offset(start, stop);
+        start -= Offsets::in_start;
+        stop  -= Offsets::in_stop;
 
-    rc = get_contig(0, contig_seqid)->get_region(start, stop, false);
-    missing = rc->inbetween || rc->leftmost || rc->rightmost;
+        rc = get_contig(0, contig_seqid)->get_region(start, stop, false);
+        missing = rc->inbetween || rc->leftmost || rc->rightmost;
 
-    for (size_t i = 0; i < rc->size; i++) {
-      qblk = rc->block[i];
-      if (qblk != NULL) {
-        tblk = qblk->over;
-        printf("%s %s %zu %zu %d\n",
-               seqname,
-               tblk->parent->name.c_str(),
-               tblk->pos[0] + Offsets::out_start,
-               tblk->pos[1] + Offsets::out_stop,
-               missing
-        );
-      }
+        for (size_t i = 0; i < rc->size; i++)
+        {
+            qblk = rc->block[i];
+            if (qblk != NULL)
+            {
+                tblk = qblk->over;
+                printf("%s %s %zu %zu %d\n",
+                       seqname,
+                       tblk->parent->name.c_str(),
+                       tblk->pos[0] + Offsets::out_start,
+                       tblk->pos[1] + Offsets::out_stop,
+                       missing
+                      );
+            }
+        }
+
+        free(rc);
     }
-
-    free(rc);
-  }
 }
