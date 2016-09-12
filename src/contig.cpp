@@ -134,6 +134,56 @@ void Contig::build_cset_itree()
     }
 }
 
+void Contig::link_contiguous_blocks(long k, size_t &setid)
+{
+
+    std::list<ContiguousSet*> csets;
+    std::list<ContiguousSet*>::iterator iter = csets.begin();
+
+    for (Block * blk = cor[0]; blk != NULL; blk = blk->cor[1])
+    {
+        iter = csets.begin();
+        while (true)
+        {
+            if (iter == csets.end())
+            {
+                // if block fits in no set, create a new one
+                csets.push_front(init_ContiguousSet(blk));
+                break;
+            }
+            // if block has joined a set
+            else if (add_block_to_ContiguousSet(*iter, blk, k))
+            {
+                break;
+            }
+            // if set terminates
+            else if (strictly_forbidden((*iter)->ends[1], blk, k))
+            {
+                iter = csets.erase(iter);
+            }
+            else
+            {
+                iter++;
+            }
+        }
+    }
+
+    ContiguousSet* cset_ptr = *csets.begin();
+    // rewind - TODO - build the csets so this isn't necessary
+    while (cset_ptr->prev != NULL)
+    {
+        cset_ptr = cset_ptr->prev;
+    }
+    cset = cset_ptr;
+    while (cset_ptr != NULL)
+    {
+        setid++;
+        cset_ptr->id = setid;
+        cset_ptr->over->id = setid;
+        cset_ptr = cset_ptr->next;
+    }
+}
+
 ResultContig* Contig::get_region(long a, long b, bool is_cset)
 {
 
@@ -201,9 +251,9 @@ ResultContig* Contig::get_region(long a, long b, bool is_cset)
 
     ResultContig* resultcontig = init_ResultContig(this, res, is_cset);
 
-    if(tmp_a != NULL)
+    if (tmp_a != NULL)
         delete tmp_a;
-    if(tmp_b != NULL)
+    if (tmp_b != NULL)
         delete tmp_b;
 
     delete res;
@@ -245,7 +295,8 @@ void Contig::merge_doubly_overlapping_blocks()
 
 void Contig::sort_blocks(Block** blocks, size_t size, bool by_stop)
 {
-    if(blocks != NULL){
+    if (blocks != NULL)
+    {
         if (by_stop)
         {
             qsort(blocks, size, sizeof(Block*), block_cmp_stop);
@@ -257,7 +308,8 @@ void Contig::sort_blocks(Block** blocks, size_t size, bool by_stop)
     }
 }
 
-void Contig::clear_cset_tree(){
+void Contig::clear_cset_tree()
+{
     if (ctree != NULL)
     {
         delete ctree;

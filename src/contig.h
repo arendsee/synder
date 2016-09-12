@@ -10,6 +10,8 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <list> 
+
 
 class Contig {
 private:
@@ -45,6 +47,8 @@ public:
      *
      * */
     ResultContig *get_region(long a, long b, bool is_cset);
+
+    void link_contiguous_blocks(long k, size_t &setid);
 
     /** Given two points, find the number of blocks they overlap */
     long count_overlaps(long a, long b);

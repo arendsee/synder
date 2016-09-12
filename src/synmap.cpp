@@ -59,7 +59,7 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
             break;
         }
 
-        qblk = genome[0]->add_block(qseqid, qstart, qstop, score, strand);
+        qblk = genome[0]->add_block(qseqid, qstart, qstop, score, '+');
         tblk = genome[1]->add_block(tseqid, tstart, tstop, score, strand);
 
         // link homologs

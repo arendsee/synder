@@ -7,9 +7,9 @@ break -function Synmap::Synmap
 # break -function Synmap::merge_all_doubly_overlapping_blocks
 # break -function Synmap::link_adjacent_blocks
 break -function Synmap::link_contiguous_blocks
-break -function Synmap::validate
-break -function find_search_intervals
-break -function get_region
+# break -function Synmap::validate
+# break -function find_search_intervals
+# break -function get_region
 
 # set print repeats 100
 # 

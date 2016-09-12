@@ -275,58 +275,10 @@ void Genome::merge_overlaps()
 void Genome::link_contiguous_blocks(long k)
 {
 
-    Block * blk;
-
-    std::list<ContiguousSet*> csets;
-    std::list<ContiguousSet*>::iterator iter;
-    ContiguousSet * cset;
-
-    for (auto &pair : contig)
-    {
-
-        // Initialize the first block in the scaffold
-        blk = pair.second->cor[0];
-
-        // Initialize first ContiguousSet
-        csets.clear();
-        csets.push_front(init_ContiguousSet(blk));
-
-        for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1])
-        {
-            for (auto &cset : csets)
-            {
-                // if block has joined a set
-                if (add_block_to_ContiguousSet(cset, blk, k))
-                    goto added;
-
-                // if set terminates
-                if (strictly_forbidden(cset->ends[1], blk, k))
-                    iter = csets.erase(iter);
-            }
-            // if block fits in no set, create a new one
-            csets.push_front(init_ContiguousSet(blk));
-added:
-            {}
-        }
-    }
-
     size_t setid = 0;
     for (auto &pair : contig)
     {
-        cset = pair.second->cset;
-        // rewind - TODO - build the csets so this isn't necessary
-        while (cset->prev != NULL)
-        {
-            cset = cset->prev;
-        }
-        pair.second->cset = cset;
-        // TODO - remove setids. I don't use them for anything but debugging
-        for (; cset != NULL; cset = cset->next)
-        {
-            setid++;
-            cset->id = setid;
-            cset->over->id = setid;
-        }
+        pair.second->link_contiguous_blocks(k, setid);
     }
 }
 

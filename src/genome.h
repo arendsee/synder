@@ -7,7 +7,6 @@
 
 #include <map>
 #include <stack>
-#include <list>
 
 class Genome {
 private:
