@@ -46,6 +46,10 @@ void Synmap::load_blocks()
     while ((read = getline(&line, &len, synfile)) != EOF)
     {
 
+        // skip comments
+        if (line[0] == '#')
+            continue;
+
         status = sscanf(line, "%s %zu %zu %s %zu %zu %lf %c",
             seqid[i], &start[i], &stop[i],
             seqid[j], &start[j], &stop[j],
@@ -199,6 +203,10 @@ void Synmap::count(FILE * intfile)
                    "%s %*s %*s %li %li %*s %*c %*s %s\n",
                    contig_seqid, &start, &stop, seqname)) != EOF)
     {
+        // skip comments
+        if(contig_seqid[0] == '#')
+            continue;
+        
         check_in_offset(start, stop);
         start -= Offsets::in_start;
         stop  -= Offsets::in_stop;
@@ -220,6 +228,10 @@ void Synmap::map(FILE * intfile)
                    "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
                    contig_seqid, &start, &stop, seqname)) != EOF)
     {
+        // skip comments
+        if(contig_seqid[0] == '#')
+            continue;
+
         check_in_offset(start, stop);
         start -= Offsets::in_start;
         stop  -= Offsets::in_stop;

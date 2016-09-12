@@ -56,6 +56,11 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
 
   char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
   while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
+
+    // skip comments
+    if (line[0] == '#')
+        continue;
+
     if (!sscanf(line,
                 "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
                 contig_seqname, &bounds[LO], &bounds[HI], seqname))
