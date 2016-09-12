@@ -29,11 +29,7 @@ void free_ContiguousSet(ContiguousSet * cset)
         cset->parent->cset = cset->prev != NULL ? cset->prev : cset->next;
     }
 
-    if (cset->parent->ctree != NULL)
-    {
-        delete cset->parent->ctree;
-        cset->parent->ctree = NULL;
-    }
+    cset->parent->clear_cset_tree();
 
     free(cset);
 }
@@ -90,11 +86,11 @@ void print_ContiguousSet(ContiguousSet * cset)
             stderr,
             "cset (n=%zu) - (%s, %zu, %zu, %c) <-> (%s, %zu, %zu, %c)\n",
             cset->size,
-            cset->parent->name,
+            cset->parent->name.c_str(),
             cset->bounds[0],
             cset->bounds[1],
             cset->ends[0]->strand,
-            cset->over->parent->name,
+            cset->over->parent->name.c_str(),
             cset->over->bounds[0],
             cset->over->bounds[1],
             cset->over->ends[0]->strand

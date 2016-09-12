@@ -5,6 +5,7 @@
 #include "block.h"
 #include "synmap.h"
 #include "contig.h"
+#include "contig_result.h"
 
 #define ANCHORED  0
 #define BOUND     1

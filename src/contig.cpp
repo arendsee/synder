@@ -1,67 +1,65 @@
 #include "contig.h"
 
-Contig* init_Contig(char* name, size_t size, long length, Genome * parent)
+Contig::Contig()
 {
-    Contig* con = (Contig*)malloc(sizeof(Contig));
-    con->parent = parent;
-    con->name   = strdup(name);
-    con->length = length;
-    con->itree  = NULL;
-    con->cor[0] = NULL;
-    con->cor[1] = NULL;
-    con->cor[2] = NULL;
-    con->cor[3] = NULL;
-    con->cset   = NULL;
-    con->ctree  = NULL;
-    return con;
+    length = default_length;
+    name   = "";
+    parent = NULL;
+    itree  = NULL;
+    ctree  = NULL;
+    cset   = NULL;
 }
 
-void free_Contig(Contig* contig)
+Contig::Contig(std::string new_name, Genome * new_parent)
+    : name(new_name), parent(new_parent)
 {
-    if (contig != NULL)
+    length = default_length;
+    itree  = NULL;
+    ctree  = NULL;
+    cset   = NULL;
+}
+
+Contig::~Contig()
+{
+    while (cset != NULL)
     {
-        while (contig->cset != NULL)
-        {
-            free_ContiguousSet(contig->cset);
-        }
-        if (contig->itree != NULL)
-        {
-            delete contig->itree;
-        }
-        if (contig->ctree != NULL)
-        {
-            delete contig->ctree;
-        }
-        free(contig->name);
-        // free(contig);
+        free_ContiguousSet(cset);
+    }
+    if (itree != NULL)
+    {
+        delete itree;
+    }
+    if (ctree != NULL)
+    {
+        delete ctree;
     }
 }
 
-void print_Contig(Contig* contig, bool forward, bool print_blocks)
+void Contig::print(bool forward, bool print_blocks)
 {
     fprintf(
         stderr,
         "$ %s size=%lu length=%lu cor=[%zu,%zu,%zu,%zu]\n",
-        contig->name,
-        contig->block.size(),
-        contig->length,
-        contig->cor[0]->linkid,
-        contig->cor[1]->linkid,
-        contig->cor[2]->linkid,
-        contig->cor[3]->linkid
+        name.c_str(),
+        block.size(),
+        length,
+        cor[0]->linkid,
+        cor[1]->linkid,
+        cor[2]->linkid,
+        cor[3]->linkid
     );
 
-    ContiguousSet* cset = contig->cset;
-    for (; cset != NULL; cset = cset->next)
+    ContiguousSet* c = cset;
+    for (; c != NULL; c = c->next)
     {
         fprintf(stderr, "  -- ");
-        print_ContiguousSet(cset);
+        print_ContiguousSet(c);
     }
 
     if (print_blocks)
     {
-        int d = forward ? 1 : 3;       // next by start or next by stop
-        Block* blk = contig->cor[d - 1]; // prev by start or prev by stop
+        int d = forward ? 1 : 3; // next by start or next by stop
+        Block* blk = cor[d - 1]; // prev by start or prev by stop
         for (; blk != NULL; blk = blk->cor[d])
         {
             print_Block(blk);
@@ -69,65 +67,12 @@ void print_Contig(Contig* contig, bool forward, bool print_blocks)
     }
 }
 
-ResultContig* init_ResultContig(Contig* contig, IntervalResult* ir, bool is_cset)
-{
-    ResultContig* rc = (ResultContig*)malloc(sizeof(ResultContig));
-    rc->size = ir->iv.size();
-    rc->contig = contig;
-    rc->inbetween = ir->inbetween;
-    rc->leftmost = ir->leftmost;
-    rc->rightmost = ir->rightmost;
-    if (is_cset)
-    {
-        rc->cset  = (ContiguousSet**)malloc(rc->size * sizeof(ContiguousSet*));
-        rc->block = NULL;
-        for (size_t i = 0; i < rc->size; i++)
-        {
-            rc->cset[i] = (ContiguousSet*)ir->iv[i]->link;
-        }
-    }
-    else
-    {
-        rc->block = (Block**)malloc(rc->size * sizeof(Block*));
-        rc->cset  = NULL;
-        for (size_t i = 0; i < rc->size; i++)
-        {
-            rc->block[i] = (Block*)ir->iv[i]->link;
-        }
-    }
-    return rc;
-}
-
-void free_ResultContig(ResultContig* rc)
-{
-    if (rc != NULL)
-    {
-        if (rc->block != NULL)
-        {
-            free(rc->block);
-        }
-        if (rc->cset != NULL)
-        {
-            free(rc->cset);
-        }
-        free(rc);
-    }
-}
-
-/*
-void print_ResultContig(ResultContig * rc)
-{
-    printf("inbetween=%i leftmost=%i rightmost=%i\n", rc->inbetween, rc->leftmost, rc->rightmost);
-    print_Contig(rc->contig, true);
-}
-*/
-
-void build_block_itree(Contig* con)
+void Contig::build_block_itree()
 {
     // build itree if necessary
-    if (con != NULL && con->itree == NULL)
+    if (itree == NULL)
     {
-        Block* blk = con->cor[0];
+        Block* blk = cor[0];
         // count the number of blks in the linked list
         // since blocks can be deleted, we cannot just use con->size
         size_t n = 0;
@@ -143,7 +88,7 @@ void build_block_itree(Contig* con)
         // index for array of intervals
         size_t i = 0;
         // reset blk, since was wound to NULL above
-        blk = con->cor[0];
+        blk = cor[0];
         // map the Block list to the new Interval pool
         for (; blk != NULL; blk = blk->cor[1], i++)
         {
@@ -152,57 +97,57 @@ void build_block_itree(Contig* con)
             intervals[i].link  = (void*)blk;
         }
 
-        con->itree = new IntervalTree(intervals, n);
+        itree = new IntervalTree(intervals, n);
     }
 }
 
-void build_cset_itree(Contig* con)
+void Contig::build_cset_itree()
 {
     // Build ctree if necessary
-    if (con != NULL && con->ctree == NULL)
+    if (ctree == NULL)
     {
-        ContiguousSet * cset = con->cset;
+        ContiguousSet * c = cset;
         // rewind cset if necessary
-        while (cset->prev != NULL)
+        while (c->prev != NULL)
         {
-            cset = cset->prev;
+            c = c->prev;
         }
         size_t n = 0;
-        for (; cset != NULL; cset = cset->next)
+        for (; c != NULL; c = c->next)
         {
             n++;
         }
         // Reset cset, since was wound to NULL above
-        cset = con->cset;
+        c = cset;
 
         // Map the Block list to the new IA structure
         Interval* intervals = (Interval*)malloc(n * sizeof(Interval));
 
-        for (size_t i = 0; cset != NULL; cset = cset->next, i++)
+        for (size_t i = 0; c != NULL; c = c->next, i++)
         {
-            intervals[i].start = cset->bounds[0];
-            intervals[i].stop  = cset->bounds[1];
-            intervals[i].link  = (void*)cset;
+            intervals[i].start = c->bounds[0];
+            intervals[i].stop  = c->bounds[1];
+            intervals[i].link  = (void*)c;
         }
 
-        con->ctree = new IntervalTree(intervals, n);
+        ctree = new IntervalTree(intervals, n);
     }
 }
 
-ResultContig* get_region(Contig * con, long a, long b, bool is_cset)
+ResultContig* Contig::get_region(long a, long b, bool is_cset)
 {
 
     IntervalTree * tree;
 
     if (is_cset)
     {
-        build_cset_itree(con);
-        tree = con->ctree;
+        build_cset_itree();
+        tree = ctree;
     }
     else
     {
-        build_block_itree(con);
-        tree = con->itree;
+        build_block_itree();
+        tree = itree;
     }
 
     // Search itree
@@ -223,8 +168,8 @@ ResultContig* get_region(Contig * con, long a, long b, bool is_cset)
             // If inbetween, itree should have returned the two flanking blocks
             if (res->iv.size() == 2)
             {
-                tmp_a = con->itree->get_overlaps(res->iv[0]);
-                tmp_b = con->itree->get_overlaps(res->iv[1]);
+                tmp_a = itree->get_overlaps(res->iv[0]);
+                tmp_b = itree->get_overlaps(res->iv[1]);
                 res->iv.clear();
                 res->iv = tmp_a->iv;
                 res->iv.insert(
@@ -243,7 +188,7 @@ ResultContig* get_region(Contig * con, long a, long b, bool is_cset)
         {
             if (res->iv.size() == 1)
             {
-                tmp_a = con->itree->get_overlaps(res->iv[0]);
+                tmp_a = itree->get_overlaps(res->iv[0]);
                 res->iv = tmp_a->iv;
             }
             else
@@ -254,7 +199,7 @@ ResultContig* get_region(Contig * con, long a, long b, bool is_cset)
         }
     }
 
-    ResultContig* resultcontig = init_ResultContig(con, res, is_cset);
+    ResultContig* resultcontig = init_ResultContig(this, res, is_cset);
 
     if(tmp_a != NULL)
         delete tmp_a;
@@ -266,21 +211,21 @@ ResultContig* get_region(Contig * con, long a, long b, bool is_cset)
     return resultcontig;
 }
 
-long count_overlaps(Contig* con, long a, long b)
+long Contig::count_overlaps(long a, long b)
 {
-    build_block_itree(con);
+    build_block_itree();
     Interval inv(a, b);
-    long count = con->itree->count_overlaps(&inv);
+    long count = itree->count_overlaps(&inv);
     return count;
 }
 
 
-void merge_doubly_overlapping_blocks(Contig *con)
+void Contig::merge_doubly_overlapping_blocks()
 {
     Block *lo, *hi;
 
     // iterate through all blocks
-    for (lo = con->cor[0]; lo != NULL; lo = lo->cor[1])
+    for (lo = cor[0]; lo != NULL; lo = lo->cor[1])
     {
         // look ahead to find all doubly-overlapping blocks
         for (hi = lo->cor[1]; hi != NULL; hi = hi->cor[1])
@@ -298,14 +243,24 @@ void merge_doubly_overlapping_blocks(Contig *con)
     }
 }
 
-void sort_blocks(Block** blocks, size_t size, bool by_stop)
+void Contig::sort_blocks(Block** blocks, size_t size, bool by_stop)
 {
-    if (by_stop)
-    {
-        qsort(blocks, size, sizeof(Block*), block_cmp_stop);
+    if(blocks != NULL){
+        if (by_stop)
+        {
+            qsort(blocks, size, sizeof(Block*), block_cmp_stop);
+        }
+        else
+        {
+            qsort(blocks, size, sizeof(Block*), block_cmp_start);
+        }
     }
-    else
+}
+
+void Contig::clear_cset_tree(){
+    if (ctree != NULL)
     {
-        qsort(blocks, size, sizeof(Block*), block_cmp_start);
+        delete ctree;
+        ctree = NULL;
     }
 }

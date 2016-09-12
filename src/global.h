@@ -36,6 +36,7 @@
 
 typedef struct Block Block;
 typedef struct Contig Contig;
+typedef struct ResultContig ResultContig;
 typedef struct ContiguousSet ContiguousSet;
 
 class Genome;

@@ -69,6 +69,8 @@ Synmap::Synmap(FILE * synfile, int swap, long k, char trans)
     }
     free(line);
 
+    set_contig_lengths();
+
     // The following must be run in order
     link_block_corners();
     set_contig_corners();
@@ -125,6 +127,12 @@ void Synmap::dump_blocks()
     // TODO implement
 }
 
+void Synmap::set_contig_lengths()
+{
+    genome[0]->set_contig_lengths();
+    genome[1]->set_contig_lengths();
+}
+
 void Synmap::link_block_corners()
 {
     genome[0]->link_block_corners();
@@ -177,7 +185,7 @@ void Synmap::count(FILE * intfile)
     start -= Offsets::in_start;
     stop  -= Offsets::in_stop;
 
-    count = count_overlaps(get_contig(0, contig_seqid), start, stop);
+    count = get_contig(0, contig_seqid)->count_overlaps(start, stop);
     printf("%s\t%zu\n", seqname, count);
   }
 }
@@ -198,7 +206,7 @@ void Synmap::map(FILE * intfile)
     start -= Offsets::in_start;
     stop  -= Offsets::in_stop;
 
-    rc = get_region(get_contig(0, contig_seqid), start, stop, false);
+    rc = get_contig(0, contig_seqid)->get_region(start, stop, false);
     missing = rc->inbetween || rc->leftmost || rc->rightmost;
 
     for (size_t i = 0; i < rc->size; i++) {
@@ -207,7 +215,7 @@ void Synmap::map(FILE * intfile)
         tblk = qblk->over;
         printf("%s %s %zu %zu %d\n",
                seqname,
-               tblk->parent->name,
+               tblk->parent->name.c_str(),
                tblk->pos[0] + Offsets::out_start,
                tblk->pos[1] + Offsets::out_stop,
                missing

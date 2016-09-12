@@ -20,6 +20,7 @@ OBJECTS=               \
 	itree.o            \
 	arguments.o        \
 	block.o            \
+	contig_result.o    \
 	contig.o           \
 	genome.o           \
 	contiguous_set.o   \

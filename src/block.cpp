@@ -196,10 +196,10 @@ void merge_block_a_into_b(Block * a, Block * b){
 void print_Block(Block* block)
 {
     printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
-        block->parent->name,
+        block->parent->name.c_str(),
         block->pos[0] + Offsets::out_start,
         block->pos[1] + Offsets::out_stop,
-        block->over->parent->name,
+        block->over->parent->name.c_str(),
         block->over->pos[0] + Offsets::out_start,
         block->over->pos[1] + Offsets::out_stop,
         block->strand

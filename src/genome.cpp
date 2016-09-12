@@ -9,26 +9,71 @@ Genome::~Genome()
 {
     for (auto &pair : contig)
     {
-        free_Contig(&pair.second);
+        delete pair.second;
     }
 }
 
+Contig* Genome::add_contig(std::string contig_name)
+{
+    Contig* con;
+    auto it = contig.find(contig_name);
+    if (it == contig.end())
+    {
+        con = new Contig(contig_name, this);
+        contig[contig_name] = con;
+    }
+    else
+    {
+        con = (*it).second;
+    }
+    return con;
+}
+
+Contig* Genome::get_contig(std::string name)
+{
+    Contig* con;
+    try
+    {
+        con = contig.at(name);
+    }
+    catch (const std::out_of_range& e)
+    {
+        con = NULL;
+    }
+    return con;
+}
+
 Block* Genome::add_block(
-    char* contig_name,
+    std::string contig_name,
     long start,
     long stop,
     double score,
     char strand = '+'
 )
 {
-    Contig* con = &contig[contig_name];
+    Contig* con = add_contig(contig_name);
 
     Block blk;
+
+    blk.over   = NULL;
+    blk.cor[0] = NULL;
+    blk.cor[1] = NULL;
+    blk.cor[2] = NULL;
+    blk.cor[3] = NULL;
+    blk.adj[0] = NULL;
+    blk.adj[1] = NULL;
+    blk.cor[0] = NULL;
+    blk.cor[1] = NULL;
+    blk.cnr[0] = NULL;
+    blk.cnr[1] = NULL;
+    blk.cset   = NULL;
+
     blk.parent = con;
     blk.pos[0] = start;
     blk.pos[1] = stop;
-    blk.score = score;
+    blk.score  = score;
     blk.strand = strand;
+    blk.linkid = pool.size() + 1;
 
     pool.push(blk);
 
@@ -39,10 +84,14 @@ Block* Genome::add_block(
     return blk_ptr;
 }
 
-Contig* Genome::get_contig(char* name)
+void Genome::set_contig_lengths()
 {
-    // TODO catch - this throws std::out_of_range on failure
-    return &contig.at(name);
+    // TODO process file if given, to replace the default of 1000000000
+    // Contig * con;
+    // for (auto &pair : contig)
+    // {
+    //     con = &pair.second;
+    // }
 }
 
 void Genome::print(bool print_blocks, bool forward)
@@ -50,28 +99,28 @@ void Genome::print(bool print_blocks, bool forward)
     fprintf(stderr, ">%s size=%lu\n", name.c_str(), contig.size());
     for (auto &pair : contig)
     {
-        print_Contig(&pair.second, forward, print_blocks);
+        pair.second->print(forward, print_blocks);
     }
 }
 
 void Genome::link_block_corners()
 {
     size_t N;
-    for (auto &&pair : contig)
+    for (auto &pair : contig)
     {
-        N = pair.second.block.size();
+        N = pair.second->block.size();
 
-        Block** blocks = &pair.second.block[0];
+        Block** blocks = &pair.second->block[0];
 
         // sort by stop
-        sort_blocks(blocks, N, true);
+        Contig::sort_blocks(blocks, N, true);
         for (size_t i = 0; i < N; i++)
         {
             blocks[i]->cor[2] = (i == 0)     ? NULL : blocks[i - 1];
             blocks[i]->cor[3] = (i == N - 1) ? NULL : blocks[i + 1];
         }
         // sort by start
-        sort_blocks(blocks, N, false);
+        Contig::sort_blocks(blocks, N, false);
         for (size_t i = 0; i < N; i++)
         {
             blocks[i]->cor[0] = (i == 0)     ? NULL : blocks[i - 1];
@@ -80,12 +129,13 @@ void Genome::link_block_corners()
     }
 }
 
-void Genome::set_contig_corners(){
+void Genome::set_contig_corners()
+{
     Contig * con;
     size_t k;
     for (auto &pair : contig)
     {
-        con = &pair.second;
+        con = pair.second;
         for (size_t i = 0; i < 4; i++)
         {
             k = i % 2 == 0 ? 0 : con->block.size() - 1;
@@ -116,7 +166,7 @@ void Genome::set_overlap_group()
     // i := contig id
     for (auto &pair : contig)
     {
-        con = &pair.second;
+        con = pair.second;
         maximum_stop = 0;
         // Loop through each Block in the linked list
         blk = con->cor[0];
@@ -152,7 +202,7 @@ void Genome::link_adjacent_blocks_directed(Contig* con, Direction d)
     if (con->cor[0] == NULL || con->cor[1] == NULL || con->cor[2] == NULL || con->cor[3] == NULL)
     {
         fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
-        fprintf(stderr, "genome=(%s) contig=(%s)\n", con->parent->name.c_str(), con->name);
+        fprintf(stderr, "genome=(%s) contig=(%s)\n", con->parent->name.c_str(), con->name.c_str());
         exit(EXIT_FAILURE);
     }
 
@@ -208,22 +258,22 @@ void Genome::link_adjacent_blocks()
     Contig * con;
     for (auto &pair : contig)
     {
-        con = &pair.second;
+        con = pair.second;
         link_adjacent_blocks_directed(con, HI);
         link_adjacent_blocks_directed(con, LO);
     }
 }
 
-void Genome::merge_overlaps(){
-    Contig * con;
+void Genome::merge_overlaps()
+{
     for (auto &pair : contig)
     {
-        con = &pair.second;
-        merge_doubly_overlapping_blocks(con);
+        pair.second->merge_doubly_overlapping_blocks();
     }
 }
 
-void Genome::link_contiguous_blocks(long k){
+void Genome::link_contiguous_blocks(long k)
+{
 
     Block * blk;
 
@@ -235,7 +285,7 @@ void Genome::link_contiguous_blocks(long k){
     {
 
         // Initialize the first block in the scaffold
-        blk = pair.second.cor[0];
+        blk = pair.second->cor[0];
 
         // Initialize first ContiguousSet
         csets.clear();
@@ -243,7 +293,7 @@ void Genome::link_contiguous_blocks(long k){
 
         for (blk = blk->cor[1]; blk != NULL; blk = blk->cor[1])
         {
-            for(auto &cset : csets)
+            for (auto &cset : csets)
             {
                 // if block has joined a set
                 if (add_block_to_ContiguousSet(cset, blk, k))
@@ -253,22 +303,23 @@ void Genome::link_contiguous_blocks(long k){
                 if (strictly_forbidden(cset->ends[1], blk, k))
                     iter = csets.erase(iter);
             }
-                // if block fits in no set, create a new one
-                csets.push_front(init_ContiguousSet(blk));
-            added: {}
+            // if block fits in no set, create a new one
+            csets.push_front(init_ContiguousSet(blk));
+added:
+            {}
         }
     }
 
     size_t setid = 0;
     for (auto &pair : contig)
     {
-        cset = pair.second.cset;
+        cset = pair.second->cset;
         // rewind - TODO - build the csets so this isn't necessary
         while (cset->prev != NULL)
         {
             cset = cset->prev;
         }
-        pair.second.cset = cset;
+        pair.second->cset = cset;
         // TODO - remove setids. I don't use them for anything but debugging
         for (; cset != NULL; cset = cset->next)
         {
@@ -279,13 +330,14 @@ void Genome::link_contiguous_blocks(long k){
     }
 }
 
-void Genome::validate(){
+void Genome::validate()
+{
 #define ASSERT_CON(t, con)                                   \
         if(!(t)){                                            \
           is_good=false;                                     \
           fprintf(stderr, "Assert failed: `" #t "`\n");      \
           if(blk != NULL)                                    \
-            print_Contig(con, false, false);                 \
+            con->print(false, false);                        \
         }
 #define ASSERT_BLK(t, blk)                                   \
         if(!(t)){                                            \
@@ -302,7 +354,7 @@ void Genome::validate(){
 
     for (auto &pair : contig)
     {
-        con = &pair.second;
+        con = pair.second;
 
         ASSERT_CON(con->cor[0] != NULL, con);
         ASSERT_CON(con->cor[1] != NULL, con);

@@ -12,8 +12,10 @@
 class Genome {
 private:
     std::string name;
-    std::map<char*, Contig> contig;
+    std::map<std::string, Contig*> contig;
     std::stack<Block> pool;
+
+    Contig* add_contig(std::string contig_name);
 
 public:
 
@@ -21,16 +23,18 @@ public:
     ~Genome();
 
     /** get contig by name, die if no matches */
-    Contig* get_contig(char* contig_name);
+    Contig* get_contig(std::string contig_name);
 
     /** create a new Block, new contigs are created as needed */
     Block* add_block(
-        char*  contig_name,
-        long   start,
-        long   stop,
-        double  score,
-        char   strand
+        std::string contig_name,
+        long        start,
+        long        stop,
+        double      score,
+        char        strand
     );
+
+    void set_contig_lengths();
 
     size_t size() {
         return contig.size();

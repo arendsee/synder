@@ -16,6 +16,7 @@ class Synmap
 private:
 
     // wrappers for Genome functions
+    void set_contig_lengths();
     void link_block_corners();
     void set_contig_corners();
     void merge_doubly_overlapping_blocks();
