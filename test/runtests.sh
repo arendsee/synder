@@ -113,6 +113,11 @@ runtest(){
 
     synder_cmd=
 
+    # temp file for special error messages that need to be sent to user
+    tmpmsg=/tmp/m
+
+    >$tmpmsg
+
     echo -n "Testing $msg ... "
 
     fail=0
@@ -145,13 +150,13 @@ runtest(){
     if [[ -f $tgen ]]
     then
         # TODO incorporate length files
-        echo "Currently not supported"
+        echo "Length files currently not supported" >> $tmpmsg
     fi
 
     if [[ -f $tgen && -f $qgen ]]
     then
         # TODO incorporate length files
-        echo "Currently not supported"
+        echo "Length files currently not supported" >> $tmpmsg
     fi
 
     if [[ $out_base == 1 ]]
@@ -172,7 +177,7 @@ runtest(){
     # command for loading into gdb
     echo "set args $synder_cmd"  >  $gdbcmd
     # this must go before sourcing .cmds.gdb for breakpoints to work
-    echo "file $synder"      >> $gdbcmd
+    echo "file $synder"          >> $gdbcmd
     echo "source $PWD/.cmds.gdb" >> $gdbcmd
     if [[ $gdb_out != "none" ]]
     then
@@ -228,7 +233,7 @@ runtest(){
     fi
 
     filter < $obs > /tmp/z && mv /tmp/z $obs
-    diff $exp $obs 2> /dev/null
+    diff $exp $obs 2>&1 > /dev/null
     diff_exit_status=$?
 
     if [[ $fail -eq 0 && $diff_exit_status -ne 0 ]]
@@ -260,6 +265,11 @@ runtest(){
         column -t $gff
         emphasize_n "synteny map"; echo ": (map.syn)"
         column -t $map
+        if [[ -s $tmpmsg ]]
+        then
+            emphasize "messages:"
+            cat $tmpmsg
+        fi
         if [[ $debug -eq 1 && $verbose -eq 1 ]]
         then
             echo "Debugging files:"
