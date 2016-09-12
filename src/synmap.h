@@ -14,49 +14,17 @@
 class Synmap
 {
 private:
-    void check_args(size_t line_no, size_t nargs, size_t correct_nargs);
 
-    /** Link blocks by next and prev stop and next and prev start */
+    // wrappers for Genome functions
     void link_block_corners();
-
-    /** Link Contig to first and last blocks */
     void set_contig_corners();
-
-    /** Set a unique index for each set of overlapping sequences */
+    void merge_doubly_overlapping_blocks();
     void set_overlap_group();
-
-    /** Merge blocks that overlap on both query and target sides
-     *
-     * For now, I will use a weighted average for the merged Block score.
-     *
-     */
-    void merge_all_doubly_overlapping_blocks();
-
-    /** Link each node to its adjacent neighbors
-     *
-     * Link blocks to nearest non-overlapping up and downstream blocks
-     *
-     * For example, given these for blocks:
-     *  |---a---|
-     *            |--b--|
-     *             |----c----|
-     *                     |---d---|
-     *                               |---e---|
-     * a->adj := (NULL, b)
-     * b->adj := (a, e)
-     * c->adj := (a, e)
-     * d->adj := (a, e)
-     * e->adj := (d, NULL)
-     */
     void link_adjacent_blocks();
-    /** Do one half of the job */
-    void link_adjacent_blocks_directed(Contig* con, Direction d);
-
-    /** Link each node to its contiguous neighbor */
     void link_contiguous_blocks(long k);
 
-    /** Build and link ContiguousSet structures */
-    void build_contiguous_sets();
+    /** Checks invariants - dies if anything goes wrong */
+    void validate();
 
 public:
 
@@ -72,23 +40,18 @@ public:
      *
      * @return pointer to a complete Synmap object
      */
-    Synmap(FILE * synfile, int swap, long k, char trans, bool validate_on);
+    Synmap(FILE* synfile, int swap, long k, char trans);
 
     ~Synmap();
 
-    // syn->genome[(gid)]->contig[(cid)]
-    Contig * get_contig(size_t gid, size_t cid);
+    Contig* get_contig(size_t gid, char* contig_name);
 
-    // syn->genome[(gid)]
-    Genome * get_genome(size_t gid);
+    Genome* get_genome(size_t gid);
 
     /** Recursively print a synteny map. */
-    void print(bool forward);
+    void print(bool forward=true);
 
     void dump_blocks();
-
-    /** Checks invariants - dies if anything goes wrong */
-    void validate();
 
     /** Count blocks overlapping intervals in intfile
      *
@@ -97,7 +60,7 @@ public:
      * @param syn synmap, where the query and gff_file reference the same genome.
      * @param gff_file GFF format file, 9th column is treated as the interval name.
      */
-    void count(FILE * gff_file);
+    void count(FILE* gff_file);
 
     /** Write blocks overlapping intervals in intfile
      *
@@ -110,7 +73,7 @@ public:
      * @param syn synmap, where the query and gff_file reference the same genome.
      * @param gff_file GFF format file, 9th column is treated as the interval name.
      */
-    void map(FILE * gff_file);
+    void map(FILE* gff_file);
 
 };
 

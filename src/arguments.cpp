@@ -5,7 +5,6 @@ void Arguments::set_defaults()
     synfile     = NULL;
     intfile     = NULL;
     hitfile     = NULL;
-    db_filename = "";
     cmd         = "";
     offsets[0]  = 0;
     offsets[1]  = 0;
@@ -13,7 +12,6 @@ void Arguments::set_defaults()
     offsets[3]  = 0;
     k           = 0;
     trans       = 'i';
-    validate    = false;
     dump_blks   = false;
     swap        = false;
     debug       = false;
@@ -30,7 +28,6 @@ Arguments::Arguments(int argc, char *argv[])
     }
 
     int opt;
-    FILE *temp;
 
     while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:")) != -1)
     {
@@ -61,12 +58,6 @@ Arguments::Arguments(int argc, char *argv[])
                 fprintf(stderr, "-x only takes arguments 'i', 'n', 'l' and 'm'\n");
                 exit(EXIT_FAILURE);
             }
-            break;
-        case 'd':
-            temp = fopen(optarg, "r");
-            Arguments::check_file(temp, optarg);
-            fclose(temp);
-            db_filename = optarg;
             break;
         case 's':
             synfile = fopen(optarg, "r");
@@ -175,7 +166,6 @@ void Arguments::print_version()
 void Arguments::print_help()
 {
     printf("USAGE\n"
-           "  synder -d <SYNTENY_FILE> <QUERY> <TARGET> <DB_DIR> <TARGET_GF> <QUERY_GF>\n"
            "  synder [-t -i <GFF_FILE>] -s <SYNTENY_DB> -c <COMMAND>\n"
            "  synder -f <GFF_FILE> -s <SYNTENY_DB> -c <COMMAND>\n"
            " \n"
@@ -188,7 +178,6 @@ void Arguments::print_help()
            "\t-k \t Number of interrupting intervals allowed before breaking contiguous set (default=0)\n"
            "\t-D \t Print debug info\n"
            "\t-B \t Dump synteny map links with contiguous set ids\n"
-           "\t-C \t Validate the datastructures after loading\n"
            "\t-x \t Transform score (Synder requires additive scores):\n"
            "\t   \t -'i' := S            (default, no transformation)\n"
            "\t   \t -'d' := L * S        (score densities)\n"
@@ -196,22 +185,15 @@ void Arguments::print_help()
            "\t   \t -'l' := -log(S)      (e-values or p-values)\n"
            "\t   \t   Where S is input score and L interval length\n"
            "COMMANDS\n"
+           "\tsearch\n"
+           "\t\t predict target search spaces for each query interval\n"
            "\tmap\n"
            "\t\t print target intervals overlapping each query interval\n"
            "\tcount\n"
            "\t\t like map but prints only the number that overlap\n"
-           "\tfilter\n"
-           "\t\t print query-to-target links consistent with the synteny map\n"
-           "\tsearch\n"
-           "\t\t predict target search spaces for each query interval\n"
-           "\tconvert\n"
-           "\t\t convert names in provided gff file to match names in synteny db\n"
            "EXAMPLES\n"
-           "  synder -b 1100 -d a-b.syn a b db\n"
-           "  synder -b 1111 -i a.gff   -s db/a_b.txt -c map\n"
-           "  synder -b 1111 -i a.gff   -s db/a_b.txt -c count\n"
-           "  synder -b 1111 -i a.gff   -s db/a_b.txt -c search\n"
-           "  synder -b 1111 -i a.gff   -s db/a_b.txt -c convert -t\n"
-           "  synder -b 1111 -f hits.syn -s db/a_b.txt -c filter\n"
+           "  synder -b 1100 -i a.gff -s a-b.map -c map\n"
+           "  synder -b 1111 -i a.gff -s a-b.map -c count\n"
+           "  synder -b 1111 -i a.gff -s a-b.map -c search\n"
           );
 }

@@ -20,13 +20,11 @@ public:
     FILE *synfile;
     FILE *intfile;
     FILE *hitfile;
-    std::string db_filename;
     std::string cmd;
     std::vector<std::string> pos;
     int offsets[4];
     long k;
     char trans;
-    bool validate;
     bool dump_blks;
     bool swap;
     bool debug;

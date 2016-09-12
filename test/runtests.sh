@@ -28,9 +28,8 @@ OPTIONAL ARGUMENTS
   -h  print this help message
   -x  die on first failure 
   -m  test memory with valgrind
-  -d  print full debugging info and link input file (g), database file (d),
-      observed (o) and expected (e) files to the working directory.
-  -v  verbose
+  -d  print full debugging info
+  -v  print verbose debugging info
   -o  redirect gdb output to this file (or tty)
   -a  archive all results
 EOF
@@ -38,29 +37,17 @@ EOF
 }
 
 die_on_fail=0
-debug=0
 valgrind=0
+debug=0
 verbose=0
-archive=0
-bigdata=0
 gdb_out="none"
+archive=0
 while getopts "hdxvma:o:" opt; do
     case $opt in
         h)
             usage ;;
-        a)
-            archive=$OPTARG
-            mkdir -p $archive
-            ;;
-        d) 
-            debug=1 ;;
         x)
             die_on_fail=1 ;;
-        v)
-            verbose=1 ;;
-        o)
-            gdb_out=$OPTARG
-            ;;
         m)
             if [[ ! -z `type -P valgrind` ]]
             then
@@ -68,6 +55,17 @@ while getopts "hdxvma:o:" opt; do
             else
                 warn "Valgrind not found"   
             fi
+            ;;
+        d) 
+            debug=1 ;;
+        v)
+            verbose=1 ;;
+        o)
+            gdb_out=$OPTARG
+            ;;
+        a)
+            archive=$OPTARG
+            mkdir -p $archive
             ;;
         ?)
             echo "Illegal arguments"
@@ -81,7 +79,6 @@ total_passed=0
 total_failed=0
 valgrind_checked=0
 valgrind_exit_status=1
-synder_db_exit_status=1
 synder_exit_status=1
 diff_exit_status=1
 
@@ -129,20 +126,15 @@ runtest(){
     obs=observed-output
     exp=expected-output
     val=valgrind-log
-    db=db
-    tdb=$db/a_b.txt
     log=error-log
     run=run
     gdb=gdb
     syn=synmap.txt
 
-    tempfiles="$gff $map $gdbcmd $obs $exp $val $db $log $gdb $run $syn"
+    tempfiles="$gff $map $gdbcmd $obs $exp $val $log $gdb $run $syn"
 
     cp $g_dir/$base.gff $gff
     cp $g_dir/$g_map    $map
-
-    # Default synder database building command
-    db_cmd="$synder -d $map a b $db"
 
     # Query genome length file
     tgen=$g_dir/tgen.tab
@@ -152,12 +144,14 @@ runtest(){
     # If the length files are given, add to db command
     if [[ -f $tgen ]]
     then
-        db_cmd="$db_cmd $tgen"
+        # TODO incorporate length files
+        echo "Currently not supported"
     fi
 
     if [[ -f $tgen && -f $qgen ]]
     then
-        db_cmd="$db_cmd $qgen"
+        # TODO incorporate length files
+        echo "Currently not supported"
     fi
 
     if [[ $out_base == 1 ]]
@@ -167,91 +161,80 @@ runtest(){
         cat $g_dir/${base}-${g_exp_ext}.txt | filter > $exp
     fi
 
-    # Build database
-    $db_cmd
-    synder_db_exit_status=$?
+    synder_cmd=$synder
 
-    if [[ $synder_db_exit_status != 0 ]]
+    [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
+    synder_cmd="$synder_cmd -i $gff"
+    synder_cmd="$synder_cmd -s $map"
+    synder_cmd="$synder_cmd -c search"
+    synder_cmd="$synder_cmd $g_arg"
+
+    # command for loading into gdb
+    echo "set args $synder_cmd"  >  $gdbcmd
+    # this must go before sourcing .cmds.gdb for breakpoints to work
+    echo "file $synder"      >> $gdbcmd
+    echo "source $PWD/.cmds.gdb" >> $gdbcmd
+    if [[ $gdb_out != "none" ]]
     then
+        echo "set logging off"                   >> $gdbcmd
+        echo "set logging file $gdb_out"         >> $gdbcmd
+        echo "set logging redirect on"           >> $gdbcmd
+        echo "set logging on"                    >> $gdbcmd
+        echo "gdb -tui --command $gdbcmd -d $PWD" > $gdb
+        chmod 755 $gdb
+    fi
+
+    # Ensure all input files are readable
+    for f in $gff $exp $map;
+    do
+        if [[ ! -r "$f" ]]
+        then
+            warn "input:"
+            fail=1
+        fi
+    done
+
+    $synder_cmd > $obs 2> $log
+    synder_exit_status=$?
+
+    if [[ $valgrind -eq 1 ]]
+    then
+        # append valgrind messages to any synder error messages
+        valgrind --leak-check=full $synder_cmd > $obs 2> $val
+        grep "ERROR SUMMARY: 0 errors" $val > /dev/null
+        valgrind_exit_status=$?
+        if [[ $valgrind_exit_status -ne 0 ]]
+        then
+            warn "valgrind:"
+            fail=1
+        fi
+    fi
+
+    $synder_cmd -D > /dev/null 2> $syn
+    if [[ $? -ne 0 ]]
+    then
+        if [[ $valgrind_exit_status -eq 0 || $synder_exit_status -eq 0 ]]
+        then
+            warn "dump:"
+            synder_exit_status=1
+            fail=1
+        fi
+    fi
+
+    if [[ $synder_exit_status != 0 ]]
+    then
+        warn "runtime:"
         fail=1
-        warn "database:"
-    else
+    fi
 
-        synder_cmd=$synder
+    filter < $obs > /tmp/z && mv /tmp/z $obs
+    diff $exp $obs 2> /dev/null
+    diff_exit_status=$?
 
-        [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
-        synder_cmd="$synder_cmd -i $gff"
-        synder_cmd="$synder_cmd -s $tdb"
-        synder_cmd="$synder_cmd -c search"
-        synder_cmd="$synder_cmd $g_arg"
-
-        # command for loading into gdb
-        echo "set args $synder_cmd"  >  $gdbcmd
-        # this must go before sourcing .cmds.gdb for breakpoints to work
-        echo "file $synder"      >> $gdbcmd
-        echo "source $PWD/.cmds.gdb" >> $gdbcmd
-        if [[ $gdb_out != "none" ]]
-        then
-            echo "set logging off"                   >> $gdbcmd
-            echo "set logging file $gdb_out"         >> $gdbcmd
-            echo "set logging redirect on"           >> $gdbcmd
-            echo "set logging on"                    >> $gdbcmd
-            echo "gdb -tui --command $gdbcmd -d $PWD" > $gdb
-            chmod 755 $gdb
-        fi
-
-        # Ensure all input files are readable
-        for f in $gff $exp $map $tdb;
-        do
-            if [[ ! -r "$f" ]]
-            then
-                warn "input:"
-                fail=1
-            fi
-        done
-
-        $synder_cmd > $obs 2> $log
-        synder_exit_status=$?
-
-        if [[ $valgrind -eq 1 ]]
-        then
-            # append valgrind messages to any synder error messages
-            valgrind --leak-check=full $synder_cmd > $obs 2> $val
-            grep "ERROR SUMMARY: 0 errors" $val > /dev/null
-            valgrind_exit_status=$?
-            if [[ $valgrind_exit_status -ne 0 ]]
-            then
-                warn "valgrind:"
-                fail=1
-            fi
-        fi
-
-        $synder_cmd -D > /dev/null 2> $syn
-        if [[ $? -ne 0 ]]
-        then
-            if [[ $valgrind_exit_status -eq 0 || $synder_exit_status -eq 0 ]]
-            then
-                warn "dump:"
-                synder_exit_status=1
-                fail=1
-            fi
-        fi
-
-        if [[ $synder_exit_status != 0 ]]
-        then
-            warn "runtime:"
-            fail=1
-        fi
-
-        filter < $obs > /tmp/z && mv /tmp/z $obs
-        diff $exp $obs 2> /dev/null
-        diff_exit_status=$?
-
-        if [[ $fail -eq 0 && $diff_exit_status -ne 0 ]]
-        then
-            warn "logic:"
-            fail=1
-        fi
+    if [[ $fail -eq 0 && $diff_exit_status -ne 0 ]]
+    then
+        warn "logic:"
+        fail=1
     fi
 
     if [[ $fail -eq 0 ]]
@@ -290,8 +273,6 @@ runtest(){
             echo " * c - gdb command"
             echo " * x - initialize gdb"
             echo " * r - run the command that failed"
-            echo "Synder database command:"
-            echo $db_cmd
             echo "Synder command:"
             echo $synder_cmd
         fi
@@ -319,7 +300,7 @@ runtest(){
     rm -rf $tempfiles
 
     # Reset all values
-    gff= map= cmd= obs= exp= val= db= tdb= log=
+    gff= map= cmd= obs= exp= val= log=
 
     [[ $fail -ne 0 && $die_on_fail -ne 0 ]] && exit 1
 }

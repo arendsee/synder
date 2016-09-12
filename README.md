@@ -125,15 +125,14 @@ One table with the following fields:
  - [ ] write test code for scores
  - [ ] test against fagin
  - [ ] refactor to c++
- - [ ]  - refactor structs and associated functions into classes
- - [ ]  - refactor IA, IV, and utility LLs into vectors
- - [ ]  - polymorph the repetitively named functions
- - [ ]  - replace tricky memory structures with smart pointers
- - [ ]  - implement abstract interval class
  - [ ] clean up IO
  - [ ]  - replace getopt
  - [ ]  - incorporate subcommands
  - [ ]  - allow reading of GFF files with string sequence names
+ - [ ] directly parse synteny files, no database Bash script
+ - [ ] implement filter
+ - [ ] add quiet mode to runtests.sh
+ - [ ] implement assembly checking
  - [ ] update README documentation
  - [ ] update Doxygen documentation
  - [ ] make Github wiki

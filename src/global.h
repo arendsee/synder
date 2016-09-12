@@ -37,8 +37,9 @@
 typedef struct Block Block;
 typedef struct Contig Contig;
 typedef struct ContiguousSet ContiguousSet;
-typedef struct Genome Genome;
-typedef struct Synmap Synmap;
+
+class Genome;
+class Synmap;
 
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
 class Offsets

@@ -31,8 +31,7 @@ struct Contig
     // handle Blocks
     long length;
     Block * cor[4];
-    size_t size;
-    Block * block;
+    std::vector<Block*> block;
     IntervalTree * itree;
     // handle ContiguousSets
     ContiguousSet * cset;

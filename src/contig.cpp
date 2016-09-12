@@ -6,8 +6,6 @@ Contig* init_Contig(char* name, size_t size, long length, Genome * parent)
     con->parent = parent;
     con->name   = strdup(name);
     con->length = length;
-    con->size   = size;
-    con->block  = (Block*)calloc(size, sizeof(Block));
     con->itree  = NULL;
     con->cor[0] = NULL;
     con->cor[1] = NULL;
@@ -22,10 +20,6 @@ void free_Contig(Contig* contig)
 {
     if (contig != NULL)
     {
-        if (contig->block)
-        {
-            free(contig->block);
-        }
         while (contig->cset != NULL)
         {
             free_ContiguousSet(contig->cset);
@@ -39,7 +33,7 @@ void free_Contig(Contig* contig)
             delete contig->ctree;
         }
         free(contig->name);
-        free(contig);
+        // free(contig);
     }
 }
 
@@ -49,7 +43,7 @@ void print_Contig(Contig* contig, bool forward, bool print_blocks)
         stderr,
         "$ %s size=%lu length=%lu cor=[%zu,%zu,%zu,%zu]\n",
         contig->name,
-        contig->size,
+        contig->block.size(),
         contig->length,
         contig->cor[0]->linkid,
         contig->cor[1]->linkid,
