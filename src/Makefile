@@ -25,7 +25,6 @@ OBJECTS=               \
 	genome.o           \
 	contiguous_set.o   \
 	synmap.o           \
-	io.o               \
 	map.o              \
 	main.o             \
 
