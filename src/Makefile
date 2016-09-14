@@ -2,7 +2,7 @@
 # CFLAGS=-Wall -O2 -std=c++11
 
 # debug build
-CFLAGS=-Wall -gdwarf-4 -g3 -std=c++11
+CFLAGS=-Wall -pedantic -gdwarf-4 -g3 -std=c++11
 
 # # profiling build
 # # NOTE: GNU profiler leaks memory, so turn off memory tests
@@ -15,12 +15,10 @@ TARGET=synder
 OBJECTS=               \
 	global.o           \
 	interval.o         \
-	itree_result.o     \
-	itree_node.o       \
+	bound.o            \
 	itree.o            \
 	arguments.o        \
 	block.o            \
-	contig_result.o    \
 	contig.o           \
 	genome.o           \
 	contiguous_set.o   \

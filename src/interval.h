@@ -4,31 +4,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define START(inv) inv->pos[0]
+#define STOP(inv) inv->pos[1]
+
+
 /** position of Interval or point A relative to B */
 typedef enum {lo = 0, in = 1, hi = 2} Pos;
 
+template <class T>
 class Interval
 {
 public:
-    long start;
-    long stop;
-    void * link; /* a pointer to arbitrary related data */
-
-    Interval(long start, long stop);
-
-    void print();
+    long pos[2];
 
     /** find position of point A relative to interval B (see Pos) */
-    Pos overlap(long A);
+    Pos position_relative_to(long a);
 
     /** find position of this interval other */
-    Pos overlap(Interval * other);
+    template <class U>
+    Pos position_relative_to(U* b);
 
-    /** compare intervals by stop */
-    static bool cmp_stop(Interval * a, Interval * b);
+    /** Determine whether intervals */
+    template <class U>
+    bool overlap(U* b);
 
-    /** compare intervals by start */
-    static bool cmp_start(Interval * a, Interval * b);
+    /** Calculate the length of the overlap of two intervals */
+    template <class U>
+    long overlap_length(U* b);
 
 };
 

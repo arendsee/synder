@@ -2,18 +2,43 @@
 #define __ITREE_H__
 
 #include <array>
+#include <algorithm>
 
 #include "global.h"
 #include "interval.h"
-#include "itree_node.h"
-#include "itree_result.h"
+#include "itree_result.hpp"
+#include "bound.h"
 
+
+#define LAST_STOP(tree)   tree->by_stop.back()
+#define FIRST_START(tree) tree->by_start.front()
+
+#define T_SIZE(tree) tree->by_start.size()
+
+#define T_START(tree, i) tree->by_start[i]
+#define T_START_START(tree, i) tree->by_start[i]->pos[0]
+
+#define T_STOP(tree, i) tree->by_stop[i]
+#define T_STOP_STOP(tree, i) tree->by_stop[i]->pos[1]
+
+#define R_SIZE(result) result->iv.size()
+
+#define LEFT(tree) tree->children[0]
+#define RIGHT(tree) tree->children[1]
+
+typedef enum orientation {
+    O_LEFT  = -1,
+    O_ROOT  =  0,
+    O_RIGHT =  1,
+    O_UNSET =  2
+} Orientation;
+
+
+template <class T>
 class IntervalTree
 {
 private:
-    size_t size;
-    Interval * interval_pool;
-    IntervalTreeNode * root;
+    long get_center(std::vector<Bound*> intervals);
 
     /** Count the number of query-side intervals that overlap a search interval
      *
@@ -21,8 +46,8 @@ private:
      * @param tree an IntervalTree
      */
     long count_overlaps(
-        Interval * interval,
-        IntervalTreeNode * tree,
+        Bound* interval,
+        IntervalTree* tree,
         long count
     );
 
@@ -34,7 +59,7 @@ private:
      */
     long count_overlaps(
         long point,
-        IntervalTreeNode * tree,
+        IntervalTree* tree,
         long count
     );
 
@@ -50,10 +75,10 @@ private:
      * @param query the query search interval
      * @param tree an IntervalTree
      */
-    IntervalResult * get_overlaps(
-        Interval * interval,
-        IntervalTreeNode * tree,
-        IntervalResult * ir
+    IntervalResult<T>* get_overlaps(
+        Bound* interval,
+        IntervalTree* tree,
+        IntervalResult<T>* ir
     );
 
     /** Count the number of query-side intervals that overlap a point
@@ -65,8 +90,8 @@ private:
      */
     void get_overlaps(
         long point,
-        IntervalTreeNode * tree,
-        IntervalResult * ir
+        IntervalTree* tree,
+        IntervalResult<T>* ir
     );
 
     /**
@@ -90,29 +115,48 @@ private:
      *
      */
     void set_nearest_opposing_interval(
-        IntervalTreeNode * tree,
-        IntervalResult * result,
+        IntervalTree* tree,
+        IntervalResult<T>* result,
         Pos position
     );
 
+    // printer dispatcher
+    void print(IntervalTree* n, int depth, char pos, int verbosity);
+    void print_verbosity_1(IntervalTree* n, int depth, char pos);
+    void print_verbosity_2(IntervalTree* n, int depth, char pos);
+    void print_verbosity_3(IntervalTree* n, int depth, char pos);
+
 public:
-    IntervalTree(Interval * ipool, size_t ipool_size);
+    // the center position for this node
+    long center;
+    // all intervals that overlap the center, sorted by start position
+    std::vector<T*> by_start;
+    // all intervals that overlap the center, sorted by stop position
+    std::vector<T*> by_stop;
+    // Child nodes
+    IntervalTree* children[2];
+    // Parent
+    IntervalTree* parent;
+    // position relative to parent
+    Orientation orientation;
+
+    IntervalTree(
+        std::vector<T*> intervals,
+        IntervalTree* parent = NULL,
+        Orientation orientation = O_ROOT
+    );
 
     ~IntervalTree();
 
     void print(int verbosity);
 
-    /** Wrapper for search.h::count_overlaps */
-    long count_overlaps(Interval * interval);
+    long count_overlaps(Bound* interval);
 
-    /** Wrapper for search.h::count_overlaps */
     long count_overlaps(long point);
 
-    /** Wrapper for search.h::get_overlaps */
-    IntervalResult * get_overlaps(Interval * interval);
+    IntervalResult<T>* get_overlaps(Bound* interval);
 
-    /** Wrapper for search.h::get_overlaps */
-    IntervalResult * get_overlaps(long point);
+    IntervalResult<T>* get_overlaps(long point);
 };
 
 #endif

@@ -16,6 +16,7 @@ class Synmap
 {
 private:
 
+    Genome* genome[2];
     FILE* synfile;
     FILE* tclfile;
     FILE* qclfile;
@@ -40,8 +41,6 @@ private:
 
 public:
 
-    Genome * genome[2];
-
     /** Build synteny tree from specially formatted file.
      *
      * @warning This function is VERY picky about input. It expects input to be
@@ -56,8 +55,6 @@ public:
     ~Synmap();
 
     Contig* get_contig(size_t gid, char* contig_name);
-
-    Genome* get_genome(size_t gid);
 
     /** Recursively print a synteny map. */
     void print(bool forward=true);

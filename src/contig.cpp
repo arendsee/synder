@@ -10,7 +10,7 @@ Contig::Contig()
     cset   = NULL;
 }
 
-Contig::Contig(std::string new_name, Genome * new_parent)
+Contig::Contig(std::string new_name, Genome* new_parent)
     : name(new_name), parent(new_parent)
 {
     length = default_length;
@@ -21,16 +21,13 @@ Contig::Contig(std::string new_name, Genome * new_parent)
 
 Contig::~Contig()
 {
-    while (cset != NULL)
-    {
+    while (cset != NULL) {
         free_ContiguousSet(cset);
     }
-    if (itree != NULL)
-    {
+    if (itree != NULL) {
         delete itree;
     }
-    if (ctree != NULL)
-    {
+    if (ctree != NULL) {
         delete ctree;
     }
 }
@@ -50,88 +47,118 @@ void Contig::print(bool forward, bool print_blocks)
     );
 
     ContiguousSet* c = cset;
-    for (; c != NULL; c = c->next)
-    {
+    for (; c != NULL; c = c->next) {
         fprintf(stderr, "  -- ");
         print_ContiguousSet(c);
     }
 
-    if (print_blocks)
-    {
+    if (print_blocks) {
         int d = forward ? 1 : 3; // next by start or next by stop
         Block* blk = cor[d - 1]; // prev by start or prev by stop
-        for (; blk != NULL; blk = blk->cor[d])
-        {
+        for (; blk != NULL; blk = blk->cor[d]) {
             print_Block(blk);
         }
     }
 }
 
+template<typename T>
+T* add_whatever_overlaps_flanks(T* res)
+{
+    // itree returns the flanks for queries that overlap nothing. However, I
+    // need all the intervals that overlap these flanks as well.
+    T* tmp_a = NULL;
+    T* tmp_b = NULL;
+
+    if (res->inbetween) {
+        // If inbetween, itree should have returned the two flanking blocks
+        if (res->iv.size() == 2) {
+            tmp_a = res->tree->get_overlaps(res->iv[0]);
+            tmp_b = res->tree->get_overlaps(res->iv[1]);
+            res->iv.clear();
+            res->iv = tmp_a->iv;
+            res->iv.insert(
+                res->iv.end(),
+                tmp_b->iv.begin(),
+                tmp_b->iv.end()
+            );
+        } else {
+            fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
+            exit(EXIT_FAILURE);
+        }
+    } else if (res->leftmost || res->rightmost) {
+        if (res->iv.size() == 1) {
+            tmp_a = res->tree->get_overlaps(res->iv[0]);
+            res->iv = tmp_a->iv;
+        } else {
+            fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (tmp_a != NULL)
+        delete tmp_a;
+
+    if (tmp_b != NULL)
+        delete tmp_b;
+
+    return res;
+}
+
+template<typename T>
 void Contig::build_block_itree()
 {
-    // build itree if necessary
-    if (itree == NULL)
-    {
-        Block* blk = cor[0];
-        // count the number of blks in the linked list
-        // since blocks can be deleted, we cannot just use con->size
-        size_t n = 0;
-        for (; blk != NULL; blk = blk->cor[1])
-        {
-            n++;
+    if (itree == NULL) {
+
+        std::vector<Block*> intervals;
+
+        for (Block* blk = cor[0]; blk != NULL; blk = blk->cor[1]) {
+            intervals.push_back(blk);
         }
 
-        // allocate Interval memory pool for IntervalTree
-        // IntervalTree's destructor will free this block
-        Interval* intervals = (Interval*)malloc(n * sizeof(Interval));
-
-        // index for array of intervals
-        size_t i = 0;
-        // reset blk, since was wound to NULL above
-        blk = cor[0];
-        // map the Block list to the new Interval pool
-        for (; blk != NULL; blk = blk->cor[1], i++)
-        {
-            intervals[i].start = blk->pos[0];
-            intervals[i].stop  = blk->pos[1];
-            intervals[i].link  = (void*)blk;
-        }
-
-        itree = new IntervalTree(intervals, n);
+        itree = new IntervalTree(intervals);
     }
 }
 
-void Contig::build_cset_itree()
+void Contig::build_itree()
 {
-    // Build ctree if necessary
-    if (ctree == NULL)
-    {
-        ContiguousSet * c = cset;
-        // rewind cset if necessary
-        while (c->prev != NULL)
-        {
-            c = c->prev;
-        }
-        size_t n = 0;
-        for (; c != NULL; c = c->next)
-        {
-            n++;
-        }
-        // Reset cset, since was wound to NULL above
-        c = cset;
+    if (ctree == NULL) {
 
-        // Map the Block list to the new IA structure
-        Interval* intervals = (Interval*)malloc(n * sizeof(Interval));
+        std::vector<ContiguousSet*> intervals;
 
-        for (size_t i = 0; c != NULL; c = c->next, i++)
-        {
-            intervals[i].start = c->bounds[0];
-            intervals[i].stop  = c->bounds[1];
-            intervals[i].link  = (void*)c;
+        for (ContiguousSet* c = cset; c != NULL; c = c->next) {
+            intervals.push_back(c);
         }
 
-        ctree = new IntervalTree(intervals, n);
+        ctree = new IntervalTree(intervals);
     }
+}
+
+template <class T>
+ResultContig<T>* Contig::get_region(long a, long b, IntervalTree<T>* tree)
+{
+
+    tree = build_tree(tree);
+
+    // Search itree
+    Bound inv(a, b);
+    IntervalResult* res = tree->get_overlaps(&inv);
+
+    // I want everything that overlaps the flanks if I am doing a Block search.
+    // For ContiguousSet searches, I currently only want overlapping intervals.
+    // TODO find a better solution
+    if (!is_cset) {
+        res = add_whatever_overlaps_flanks(res);
+    }
+
+    return res;
+}
+
+IntervalResult<ContiguousSet>* get_cset_region(long a, long b){
+    get_region(a, b);
+}
+
+IntervalResult<Block>* get_block_region(long a, long b){
+    get_region(a, b);
 }
 
 void Contig::link_contiguous_blocks(long k, size_t &setid)
@@ -140,125 +167,39 @@ void Contig::link_contiguous_blocks(long k, size_t &setid)
     std::list<ContiguousSet*> csets;
     std::list<ContiguousSet*>::iterator iter = csets.begin();
 
-    for (Block * blk = cor[0]; blk != NULL; blk = blk->cor[1])
-    {
+    for (Block* blk = cor[0]; blk != NULL; blk = blk->cor[1]) {
         iter = csets.begin();
-        while (true)
-        {
-            if (iter == csets.end())
-            {
+        while (true) {
+            if (iter == csets.end()) {
                 // if block fits in no set, create a new one
-                csets.push_front(init_ContiguousSet(blk));
+                csets.push_front(new ContiguousSet(blk));
                 break;
             }
             // if block has joined a set
-            else if (add_block_to_ContiguousSet(*iter, blk, k))
-            {
+            else if ((*iter)->add_block(blk, k)) {
                 break;
             }
             // if set terminates
-            else if (strictly_forbidden((*iter)->ends[1], blk, k))
-            {
+            else if (strictly_forbidden((*iter)->ends[1], blk, k)) {
                 iter = csets.erase(iter);
-            }
-            else
-            {
+            } else {
                 iter++;
             }
         }
     }
 
     ContiguousSet* cset_ptr = *csets.begin();
-    // rewind - TODO - build the csets so this isn't necessary
-    while (cset_ptr->prev != NULL)
-    {
+    // rewind - TODO - build the csets such that this isn't necessary
+    while (cset_ptr->prev != NULL) {
         cset_ptr = cset_ptr->prev;
     }
     cset = cset_ptr;
-    while (cset_ptr != NULL)
-    {
+    while (cset_ptr != NULL) {
         setid++;
         cset_ptr->id = setid;
         cset_ptr->over->id = setid;
         cset_ptr = cset_ptr->next;
     }
-}
-
-ResultContig* Contig::get_region(long a, long b, bool is_cset)
-{
-
-    IntervalTree * tree;
-
-    if (is_cset)
-    {
-        build_cset_itree();
-        tree = ctree;
-    }
-    else
-    {
-        build_block_itree();
-        tree = itree;
-    }
-
-    // Search itree
-    Interval inv(a, b);
-    IntervalResult* res = tree->get_overlaps(&inv);
-
-    // itree returns the flanks for queries that overlap nothing. However, I
-    // need all the intervals that overlap these flanks as well.
-    IntervalResult* tmp_a = NULL;
-    IntervalResult* tmp_b = NULL;
-
-    // I want everything that overlaps the flanks if I am doing a Block search.
-    // For ContiguousSet searches, I currently only want overlapping intervals.
-    if (!is_cset)
-    {
-        if (res->inbetween)
-        {
-            // If inbetween, itree should have returned the two flanking blocks
-            if (res->iv.size() == 2)
-            {
-                tmp_a = itree->get_overlaps(res->iv[0]);
-                tmp_b = itree->get_overlaps(res->iv[1]);
-                res->iv.clear();
-                res->iv = tmp_a->iv;
-                res->iv.insert(
-                    res->iv.end(),
-                    tmp_b->iv.begin(),
-                    tmp_b->iv.end()
-                );
-            }
-            else
-            {
-                fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-        else if (res->leftmost || res->rightmost)
-        {
-            if (res->iv.size() == 1)
-            {
-                tmp_a = itree->get_overlaps(res->iv[0]);
-                res->iv = tmp_a->iv;
-            }
-            else
-            {
-                fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-
-    ResultContig* resultcontig = init_ResultContig(this, res, is_cset);
-
-    if (tmp_a != NULL)
-        delete tmp_a;
-    if (tmp_b != NULL)
-        delete tmp_b;
-
-    delete res;
-
-    return resultcontig;
 }
 
 long Contig::count_overlaps(long a, long b)
@@ -275,17 +216,13 @@ void Contig::merge_doubly_overlapping_blocks()
     Block *lo, *hi;
 
     // iterate through all blocks
-    for (lo = cor[0]; lo != NULL; lo = lo->cor[1])
-    {
+    for (lo = cor[0]; lo != NULL; lo = lo->cor[1]) {
         // look ahead to find all doubly-overlapping blocks
-        for (hi = lo->cor[1]; hi != NULL; hi = hi->cor[1])
-        {
-            if (! block_overlap(hi, lo))
-            {
+        for (hi = lo->cor[1]; hi != NULL; hi = hi->cor[1]) {
+            if (! hi->overlap(lo)) {
                 break;
             }
-            if (block_overlap(hi->over, lo->over) && hi->over->parent == lo->over->parent)
-            {
+            if (hi->over->overlap(lo->over) && hi->over->parent == lo->over->parent) {
                 merge_block_a_into_b(hi, lo);
                 hi = lo;
             }
@@ -293,25 +230,15 @@ void Contig::merge_doubly_overlapping_blocks()
     }
 }
 
-void Contig::sort_blocks(Block** blocks, size_t size, bool by_stop)
+void Contig::sort_blocks(bool by_stop)
 {
-    if (blocks != NULL)
-    {
-        if (by_stop)
-        {
-            qsort(blocks, size, sizeof(Block*), block_cmp_stop);
-        }
-        else
-        {
-            qsort(blocks, size, sizeof(Block*), block_cmp_start);
-        }
-    }
+    auto cmp = by_stop ? Block::cmp_start : Block::cmp_stop;
+    std::sort(blocks.begin(), blocks.end(), cmp);
 }
 
 void Contig::clear_cset_tree()
 {
-    if (ctree != NULL)
-    {
+    if (ctree != NULL) {
         delete ctree;
         ctree = NULL;
     }

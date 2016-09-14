@@ -28,10 +28,10 @@
  *                    a given search region
  * 
  */
-void find_search_intervals(Synmap * syn, FILE * intfile);
+void find_search_intervals(Synmap* syn, FILE* intfile);
 
-double calculate_score(long start, long stop, Block * blk);
+double calculate_score(long start, long stop, Block* blk);
 
-double calculate_target_score(long a1, long a2, Block * bounds[2]);
+double calculate_target_score(long a1, long a2, Block* bounds[2]);
 
 #endif

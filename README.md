@@ -128,9 +128,10 @@ One table with the following fields:
  - [ ] clean up IO
  - [ ]  - replace getopt
  - [ ]  - incorporate subcommands
- - [ ]  - allow reading of GFF files with string sequence names
- - [ ] directly parse synteny files, no database Bash script
+ - [x]  - allow reading of GFF files with string sequence names
+ - [x] directly parse synteny files, no database Bash script
  - [ ] implement filter
+ - [ ] reimplement dump blocks
  - [ ] add quiet mode to runtests.sh
  - [ ] implement assembly checking
  - [ ] update README documentation

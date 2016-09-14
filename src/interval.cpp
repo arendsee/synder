@@ -1,57 +1,60 @@
 #include "interval.h"
 
-Interval::Interval(
-    long new_start,
-    long new_stop
-)
-    : start(new_start), stop(new_stop)
+template <class T>
+Pos Interval<T>::position_relative_to(long a)
 {
-    link = NULL;
-}
-
-void Interval::print()
-{
-    printf("%zu %zu\n", start, stop);
-}
-
-bool Interval::cmp_start(Interval * a, Interval * b)
-{
-    return ( a->start < b->start );
-}
-
-bool Interval::cmp_stop(Interval * a, Interval * b)
-{
-    return ( a->stop < b->stop );
-}
-
-Pos Interval::overlap(long a)
-{
-    if (a < start)
-    {
+    if (a < pos[0]) {
         return lo;
-    }
-    else if (a > stop)
-    {
+    } else if (a > pos[1]) {
         return hi;
-    }
-    else
-    {
+    } else {
         return in;
     }
 }
 
-Pos Interval::overlap(Interval * b)
+template <class T>
+template <class U>
+Pos Interval<T>::position_relative_to(U* b)
 {
-    if (stop < b->start)
-    {
+    if (pos[1] < b->pos[0]) {
         return lo;
-    }
-    else if (start > b->stop)
-    {
+    } else if (pos[0] > b->pos[1]) {
         return hi;
-    }
-    else
-    {
+    } else {
         return in;
     }
+}
+
+template <class T>
+template <class U>
+long Interval<T>::overlap_length(U* b)
+{
+    long a1 = pos[0];
+    long a2 = pos[1];
+    long b1 = b->pos[0];
+    long b2 = b->pos[1];
+
+    // If the intervals overlap
+    if(a1 <= b2 && b1 <= a2) {
+        // Find the lower bound of the overlapping region
+        long a = a1 > b1 ? a1 : b1;
+        // Find the upper bound of the overlapping region
+        long b = a2 > b2 ? b2 : a2;
+        // Return the overlapping interval length
+        return b - a + 1;
+    } else {
+        return 0;
+    }
+}
+
+template <class T>
+template <class U>
+bool Interval<T>::overlap(U* b)
+{
+    long a1 = pos[0];
+    long a2 = pos[1];
+    long b1 = b->pos[0];
+    long b2 = b->pos[1];
+
+    return (a1 <= b2) && (a2 >= b1);
 }

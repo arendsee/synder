@@ -53,27 +53,7 @@ Block* Genome::add_block(
 {
     Contig* con = add_contig(contig_name);
 
-    Block blk;
-
-    blk.over   = NULL;
-    blk.cor[0] = NULL;
-    blk.cor[1] = NULL;
-    blk.cor[2] = NULL;
-    blk.cor[3] = NULL;
-    blk.adj[0] = NULL;
-    blk.adj[1] = NULL;
-    blk.cor[0] = NULL;
-    blk.cor[1] = NULL;
-    blk.cnr[0] = NULL;
-    blk.cnr[1] = NULL;
-    blk.cset   = NULL;
-
-    blk.parent = con;
-    blk.pos[0] = start;
-    blk.pos[1] = stop;
-    blk.score  = score;
-    blk.strand = strand;
-    blk.linkid = pool.size() + 1;
+    Block blk(start, stop, score, strand, con, pool.size() + 1);
 
     pool.push(blk);
 
@@ -125,21 +105,21 @@ void Genome::print(bool print_blocks, bool forward)
 void Genome::link_block_corners()
 {
     size_t N;
+    Contig* con;
     for (auto &pair : contig)
     {
-        N = pair.second->block.size();
-
-        Block** blocks = &pair.second->block[0];
+        con = pair.second;
+        N = con->block.size();
 
         // sort by stop
-        Contig::sort_blocks(blocks, N, true);
+        con->sort_blocks(true);
         for (size_t i = 0; i < N; i++)
         {
             blocks[i]->cor[2] = (i == 0)     ? NULL : blocks[i - 1];
             blocks[i]->cor[3] = (i == N - 1) ? NULL : blocks[i + 1];
         }
         // sort by start
-        Contig::sort_blocks(blocks, N, false);
+        con.sort_blocks(false);
         for (size_t i = 0; i < N; i++)
         {
             blocks[i]->cor[0] = (i == 0)     ? NULL : blocks[i - 1];
@@ -150,7 +130,7 @@ void Genome::link_block_corners()
 
 void Genome::set_contig_corners()
 {
-    Contig * con;
+    Contig* con;
     size_t k;
     for (auto &pair : contig)
     {
@@ -274,7 +254,7 @@ void Genome::link_adjacent_blocks_directed(Contig* con, Direction d)
 
 void Genome::link_adjacent_blocks()
 {
-    Contig * con;
+    Contig* con;
     for (auto &pair : contig)
     {
         con = pair.second;

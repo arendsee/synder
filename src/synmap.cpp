@@ -1,6 +1,7 @@
 #include "synmap.h"
 
-Synmap::Synmap(Arguments& args){
+Synmap::Synmap(Arguments& args)
+{
     synfile = args.synfile;
     tclfile = args.tclfile;
     qclfile = args.qclfile;
@@ -15,8 +16,7 @@ Synmap::Synmap(Arguments& args){
 
 void Synmap::load_blocks()
 {
-    if (synfile == NULL)
-    {
+    if (synfile == NULL) {
         fprintf(stderr, "NULL synteny input file (%s:%d in %s)", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
@@ -33,7 +33,7 @@ void Synmap::load_blocks()
     // Contig name
     char qseqid[NAME_BUFFER_SIZE];
     char tseqid[NAME_BUFFER_SIZE];
-    char * seqid[2] = {qseqid, tseqid};
+    char* seqid[2] = {qseqid, tseqid};
     double score;
     char strand;
     long start[2], stop[2];
@@ -43,41 +43,39 @@ void Synmap::load_blocks()
     size_t i = swap ? 1 : 0;
     size_t j = swap ? 0 : 1;
 
-    while ((read = getline(&line, &len, synfile)) != EOF)
-    {
+    while ((read = getline(&line, &len, synfile)) != EOF) {
 
         // skip comments
         if (line[0] == '#')
             continue;
 
         status = sscanf(line, "%s %zu %zu %s %zu %zu %lf %c",
-            seqid[i], &start[i], &stop[i],
-            seqid[j], &start[j], &stop[j],
-            &score, &strand);
+                        seqid[i], &start[i], &stop[i],
+                        seqid[j], &start[j], &stop[j],
+                        &score, &strand);
 
-        if(status != 8){
+        if(status != 8) {
             fprintf(stderr, "Failed to read input line:\n%s", line);
             exit(EXIT_FAILURE);
         }
 
-        switch (trans)
-        {
-        case 'l':
-            score = -1 * log(score);
-            break;
-        case 'd':
-            score = score * MIN((stop[0] - start[0] + 1), (stop[1] - start[1] + 1));
-            break;
-        case 'p':
-            score = score * MIN((stop[0] - start[0] + 1), (stop[0] - start[0] + 1)) / 100.0;
-            break;
-        case 'i':
-            // no transformation
-            break;
-        default:
-            fprintf(stderr, "Unexpected transformation '%c'\n", trans);
-            exit(EXIT_FAILURE);
-            break;
+        switch (trans) {
+            case 'l':
+                score = -1 * log(score);
+                break;
+            case 'd':
+                score = score * MIN((stop[0] - start[0] + 1), (stop[1] - start[1] + 1));
+                break;
+            case 'p':
+                score = score * MIN((stop[0] - start[0] + 1), (stop[0] - start[0] + 1)) / 100.0;
+                break;
+            case 'i':
+                // no transformation
+                break;
+            default:
+                fprintf(stderr, "Unexpected transformation '%c'\n", trans);
+                exit(EXIT_FAILURE);
+                break;
         }
 
         qblk = genome[0]->add_block(seqid[0], start[0], stop[0], score, '+');
@@ -101,19 +99,11 @@ void Synmap::load_blocks()
 
 Contig* Synmap::get_contig(size_t gid, char* contig_name)
 {
-    if (gid == 0 || gid == 1)
-    {
+    if (gid == 0 || gid == 1) {
         return genome[gid]->get_contig(contig_name);
-    }
-    else
-    {
+    } else {
         return NULL;
     }
-}
-
-Genome* Synmap::get_genome(size_t gid)
-{
-    return (gid == 0 || gid == 1) ? genome[gid] : NULL;
 }
 
 Synmap::~Synmap()
@@ -193,7 +183,7 @@ void Synmap::validate()
     genome[1]->validate();
 }
 
-void Synmap::count(FILE * intfile)
+void Synmap::count(FILE* intfile)
 {
     char seqname[NAME_BUFFER_SIZE];
     char contig_seqid[NAME_BUFFER_SIZE];
@@ -201,12 +191,11 @@ void Synmap::count(FILE * intfile)
     long start, stop;
     while ((fscanf(intfile,
                    "%s %*s %*s %li %li %*s %*c %*s %s\n",
-                   contig_seqid, &start, &stop, seqname)) != EOF)
-    {
+                   contig_seqid, &start, &stop, seqname)) != EOF) {
         // skip comments
         if(contig_seqid[0] == '#')
             continue;
-        
+
         check_in_offset(start, stop);
         start -= Offsets::in_start;
         stop  -= Offsets::in_stop;
@@ -216,18 +205,17 @@ void Synmap::count(FILE * intfile)
     }
 }
 
-void Synmap::map(FILE * intfile)
+void Synmap::map(FILE* intfile)
 {
     char seqname[128];
     char contig_seqid[NAME_BUFFER_SIZE];
     long start, stop;
-    ResultContig * rc;
+    ResultContig* rc;
     Block *qblk, *tblk;
     bool missing;
     while ((fscanf(intfile,
                    "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
-                   contig_seqid, &start, &stop, seqname)) != EOF)
-    {
+                   contig_seqid, &start, &stop, seqname)) != EOF) {
         // skip comments
         if(contig_seqid[0] == '#')
             continue;
@@ -239,11 +227,9 @@ void Synmap::map(FILE * intfile)
         rc = get_contig(0, contig_seqid)->get_region(start, stop, false);
         missing = rc->inbetween || rc->leftmost || rc->rightmost;
 
-        for (size_t i = 0; i < rc->size; i++)
-        {
+        for (size_t i = 0; i < rc->size; i++) {
             qblk = rc->block[i];
-            if (qblk != NULL)
-            {
+            if (qblk != NULL) {
                 tblk = qblk->over;
                 printf("%s %s %zu %zu %d\n",
                        seqname,

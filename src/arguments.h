@@ -13,8 +13,8 @@ class Arguments
 
 private:
     void set_defaults();
-    void check_file(FILE * fp, char * name);
-    void set_offsets(char * offset);
+    void check_file(FILE* fp, char* name);
+    void set_offsets(char* offset);
 
 public:
     FILE *synfile;

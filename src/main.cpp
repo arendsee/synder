@@ -11,7 +11,7 @@ int Offsets::out_stop;
 int main(int argc, char *argv[])
 {
 
-    Synmap * syn = NULL;
+    Synmap* syn = NULL;
 
     // ------------------------------------------------------------------------
     // Prep input
