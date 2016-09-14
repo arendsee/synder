@@ -3,101 +3,62 @@
 
 #include "global.h"
 #include "block.h"
-#include "itree/itree.h"
-#include "itree/search.h"
 #include "contiguous_set.h"
+#include "itree.h"
+#include "contig_result.h"
 
-/** Allocate memory for a contig and set each field.
- *
- * The itree field, which can hold an interval tree for (log(n)+m) overlap
- * searching, is initialized to NULL. Building this tree is expensive (n
- * log(n)) so will not be done unless needed.
- *
- * Memory is allocated for pointers to *size* blocks, but they are not
- * initialized.
- *
- * @param name name of this Contig (e.g. "Chr1")
- * @param total sequence length
- *
- * @return pointer to a new Contig
- *
- */
-Contig *init_Contig(char *name, size_t size, long length, Genome * parent);
+#include <array>
+#include <vector>
+#include <string>
+#include <list> 
 
-/** Recursively free all memory.
- *
- * This functions calls free_Block on each Block in its block field.
- *
- * If the Contig has an IntervalTree defined, it will free it with free_IntervalTree.
- *
- * @param contig pointer to a contig, may be NULL
- */
-void free_Contig(Contig * contig);
 
-/** Recursively free all memory EXCEPT blocks
- *
- * Like free_Contig but does not free all the Blocks. This is useful for
- * structures that hold blocks which do not belong to them (i.e. pointers to
- * blocks held elsewhere).
- *
- * @param contig pointer to a contig, may be NULL
- */
-void free_partial_Contig(Contig * contig);
+class Contig {
+private:
+    IntervalTree * itree;
+    IntervalTree * ctree;
+    void build_block_itree();
+    void build_cset_itree();
+    const static long default_length = 1000000000;
+public:
+    long length;
+    std::string name;
+    Genome* parent;
+    std::array<Block*,4> cor;
+    std::vector<Block*> block;
+    ContiguousSet* cset;
 
-void merge_doubly_overlapping_blocks(Contig * contig);
+    Contig();
+    Contig(std::string name, Genome* parent);
+    ~Contig();
 
-/** Recursively print contig. */
-void print_Contig(Contig * contig, bool forward, bool print_blocks);
+    void merge_doubly_overlapping_blocks();
 
-/** A wrapper for Contig that includes IntervalResult flags
- *
- * Fields
- *  - contig - a pointer to the original Contig
- *  - size   - number of elements in block
- *  - block  - pointer to selection of Block structs in Contig
- *  - flags
- *    1. inbetween - query is between (not overlapping) two search intervals
- *    2. leftmost  - query is further left than any interval
- *    3. rightmost - query is further right than any interval
- */
-typedef struct ResultContig{
-    Contig * contig;
-    size_t size;
-    Block ** block;
-    ContiguousSet ** cset;
-    bool inbetween;
-    bool leftmost;
-    bool rightmost;
-} ResultContig;
+    void print(bool forward=true, bool print_blocks=true);
 
-ResultContig * init_ResultContig(Contig *, IntervalResult *, bool is_cset);
+    /** Given two points, find all blocks overlapping or flanking them
+     *
+     * If there is at least one overlapping block, return all overlapping blocks
+     *
+     * Otherwise, return the blocks above and below the input region
+     *
+     * If there is only one flanking interval (i.e., the query is beyond any
+     * syntenic interval), return just the nearest interval.
+     *
+     * */
+    ResultContig *get_region(long a, long b, bool is_cset);
 
-void free_ResultContig(ResultContig *);
+    void link_contiguous_blocks(long k, size_t &setid);
 
-void print_ResultContig(ResultContig *);
+    /** Given two points, find the number of blocks they overlap */
+    long count_overlaps(long a, long b);
 
-/** Given two points, find all blocks overlapping or flanking them
- *
- * If there is at least one overlapping block, return all overlapping blocks
- *
- * Otherwise, return the blocks above and below the input region
- *
- * If there is only one flanking interval (i.e., the query is beyond any
- * syntenic interval), return just the nearest interval.
- *
- * */
-ResultContig *get_region(Contig * contig, long a, long b, bool is_cset);
+    /** This should be called whenever an operation corrupts an itree */
+    void clear_cset_tree();
 
-/** Given two points, find the number of blocks they overlap */
-long count_overlaps(Contig * contig, long a, long b);
+    /** Sort Block objects */
+    static void sort_blocks(Block** blocks, size_t size, bool by_stop);
 
-// /** Get intervals flanking input interval */
-// Contig * get_flanks(Contig * contig, long n, bool left);
-
-/** Sort Block objects */
-void sort_blocks(Block ** block, size_t size, bool by_stop);
-
-/** Find closest block above/below a given value */
-Block * closest_block(Contig * con, long x, Direction d);
+};
 
 #endif

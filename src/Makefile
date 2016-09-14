@@ -1,69 +1,38 @@
-# CFLAGS=-Wall -g -std=gnu99
-# CFLAGS=-Wall -g -std=gnu99 -m64
-CFLAGS=-Wall -gdwarf-4 -g3 -std=gnu99
+# # production build
+# CFLAGS=-Wall -O2 -std=c++11
+
+# debug build
+CFLAGS=-Wall -gdwarf-4 -g3 -std=c++11
+
+# # profiling build
+# # NOTE: GNU profiler leaks memory, so turn off memory tests
+# CFLAGS=-Wall -pg -std=c++11
+
 LINKER_FLAGS=-lm
-CC=gcc
+CC=g++
 TARGET=synder
 
-OBJECTS=ia.o iv.o interval.o itree.o search.o ui.o lev.o block.o contig.o genome.o contiguous_set.o synmap.o io.o analysis.o map.o main.o global.o
+OBJECTS=               \
+	global.o           \
+	interval.o         \
+	itree_result.o     \
+	itree_node.o       \
+	itree.o            \
+	arguments.o        \
+	block.o            \
+	contig_result.o    \
+	contig.o           \
+	genome.o           \
+	contiguous_set.o   \
+	synmap.o           \
+	map.o              \
+	main.o             \
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${OBJECTS} ${LINKER_FLAGS}
 
-global.o: global.c global.h
-	${CC} -c ${CFLAGS} global.[ch]
-
-main.o: main.c
-	${CC} -c ${CFLAGS} main.c
-
-io.o: io.c io.h
-	${CC} -c ${CFLAGS} io.[ch]
-
-genome.o: genome.c genome.h
-	${CC} -c ${CFLAGS} genome.[ch]
-
-analysis.o: analysis.c analysis.h
-	${CC} -c ${CFLAGS} analysis.[ch]
-
-contig.o: contig.c contig.h
-	${CC} -c ${CFLAGS} contig.[ch]
-
-block.o: block.c block.h
-	${CC} -c ${CFLAGS} block.[ch]
-
-synmap.o: synmap.c synmap.h
-	${CC} -c ${CFLAGS} synmap.[ch]
-
-contiguous_set.o: contiguous_set.c contiguous_set.h
-	${CC} -c ${CFLAGS} contiguous_set.[ch]
-
-ui.o: ui.c ui.h version.h
-	${CC} -c ${CFLAGS} ui.[ch]
-
-map.o: map.c map.h
-	${CC} -c ${CFLAGS} map.[ch]
-
-itree.o: itree/itree.c itree/itree.h
-	${CC} -c ${CFLAGS} itree/itree.[ch]
-
-interval.o: itree/interval.c itree/interval.h
-	${CC} -c ${CFLAGS} itree/interval.[ch]
-
-search.o: itree/search.c itree/search.h
-	${CC} -c ${CFLAGS} itree/search.[ch]
-
-ia.o: itree/ia.c itree/ia.h
-	${CC} -c ${CFLAGS} itree/ia.[ch]
-
-iv.o: itree/iv.c itree/iv.h
-	${CC} -c ${CFLAGS} itree/iv.[ch]
-
-lev.o: lev.c lev.h
-	${CC} -c ${CFLAGS} lev.[ch]
-
-
-profiler-build:
-	${CC} -o ${TARGET} ${CFLAGS} -pg *.c *.h itree/*.c itree/*.h
-
+%.o: %.cpp
+	${CC} -c ${CFLAGS} $< -o $@
+	
 clean:
-	rm -f ${OBJECTS} *.{gch,o} itree/*.{gch,o} ${TARGET}
+	rm -f ${OBJECTS} *.{gch,o} ${TARGET}

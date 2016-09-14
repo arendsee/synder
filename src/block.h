@@ -2,6 +2,44 @@
 #define __BLOCK_H__
 
 #include "global.h"
+#include "contig.h"
+
+
+/** Query interval with directions to matching target
+ *
+ * Fields:
+ * - pos - start and stop positions of the interval
+ * - over - pointer to Block on the other genome
+ * - parent - pointer to the Contig containing this Block
+ * - corner - prev and next by start and stop
+ * - adj - nearest non-overlapping blocks (0 for left block, 1 for right block)
+ * - cnr - adjacent members in the Block's contiguous set (may be NULL)
+ * - set - pointer to this Block's ContiguousSet
+ * - grpid - an id shared between this Block and all Block's it overlaps
+ *
+ * next and prev used when you need to just iterate through all the block, they
+ * also allow easy deletion of blocks.
+ *
+ * adj and cnr are designed for specialized cases where symmetry is important.
+ *
+ *   NOTE: setid and grpid are both initialized to 0 in init_Block. 0 is
+ *   reserved for an UNSET id. If a 0 value ever appears after synmap is
+ *   initialized, it implies a serious bug.
+ */
+struct Block
+{
+    Contig        *parent; // Contig parent
+    Block         *over;   // homologous block in other genome
+    Block         *cor[4]; // next and prev elements by start and stop
+    Block         *adj[2]; // adjacent non-overlapping block
+    Block         *cnr[2]; // adjacent block in contiguous set
+    ContiguousSet *cset;   // contiguous set id
+    long          pos[2];  // start and stop positions
+    double        score;   // score provided by synteny program
+    size_t        grpid;   // overlapping group id;
+    char          strand;  // strand [+-.]
+    size_t        linkid;  // a unique block id used mostly for debugging
+};
 
 Block *init_Block(long, long);
 
@@ -21,14 +59,6 @@ void free_Block(Block *);
 
 /** A clean TAB-delimited output suitable for giving to the user */
 void print_Block(Block *);
-
-/** A diagnostic function designed for use in synmap dumps
- *
- * This function prints the homologous pair of blocks, not just the the input
- * block.
- *
- */
-void print_verbose_Block(Block * blk);
 
 /** Determine whether interval (a,b) overlaps interval (c,d)
  *

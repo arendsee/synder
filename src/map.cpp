@@ -44,7 +44,9 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
   // Name of query input (e.g. AT1G01010)
   char seqname[NAME_BUFFER_SIZE];
   // Index of query chromosome
-  size_t chrid;
+  char contig_seqname[NAME_BUFFER_SIZE];
+  // query contig
+  Contig * qcon;
   // Row output of itree
   ResultContig * rc;
   // Row output of ctree
@@ -54,18 +56,30 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
 
   char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
   while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
+
+    // skip comments
+    if (line[0] == '#')
+        continue;
+
     if (!sscanf(line,
-                "%zu %*s %*s %zu %zu %*s %*c %*s %s\n",
-                &chrid, &bounds[LO], &bounds[HI], seqname))
+                "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
+                contig_seqname, &bounds[LO], &bounds[HI], seqname))
     {
       printf("invalid input\n");
       exit(EXIT_FAILURE);
     }
     check_in_offset(bounds[LO], bounds[HI]);
-    bounds[LO] -= global_in_start;
-    bounds[HI] -= global_in_stop;
+    bounds[LO] -= Offsets::in_start;
+    bounds[HI] -= Offsets::in_stop;
 
-    rc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI], false);
+    qcon = syn->get_contig(0, contig_seqname);
+
+    if(qcon == NULL){
+        fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
+        continue;
+    }
+
+    rc = qcon->get_region(bounds[LO], bounds[HI], false);
 
     cslist = init_empty_CSList();
     root = cslist;
@@ -75,7 +89,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
       add_blk_CSList(cslist, rc->block[i]); 
     }
 
-    crc = get_region(SGC(syn, 0, chrid), bounds[LO], bounds[HI], true);
+    crc = qcon->get_region(bounds[LO], bounds[HI], true);
     if(! (crc->inbetween || crc->leftmost || crc->rightmost) ){
         for(size_t i = 0; i < crc->size; i++){
           add_cset_CSList(cslist, crc->cset[i], bounds); 
@@ -102,12 +116,12 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
       printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
                                                          // Output column ids:
         seqname,                                         //  1
-        blk_bounds[LO]->parent->name,                    //  2
-        bounds[LO] + global_out_start,                   //  3
-        bounds[HI] + global_out_stop,                    //  4
-        blk_bounds[LO]->over->parent->name,              //  5
-        bound_results[LO]->bound + global_out_start,     //  6
-        bound_results[HI]->bound + global_out_stop,      //  7
+        blk_bounds[LO]->parent->name.c_str(),            //  2
+        bounds[LO] + Offsets::out_start,                 //  3
+        bounds[HI] + Offsets::out_stop,                  //  4
+        blk_bounds[LO]->over->parent->name.c_str(),      //  5
+        bound_results[LO]->bound + Offsets::out_start,   //  6
+        bound_results[HI]->bound + Offsets::out_stop,    //  7
         blk_bounds[LO]->over->strand,                    //  8
         score,                                           //  9
         blk_bounds[LO]->cset->id,                        // 10
@@ -122,6 +136,7 @@ void find_search_intervals(Synmap * syn, FILE * intfile)
     }
 
     free_ResultContig(rc);
+    free_ResultContig(crc);
     free_CSList(root);
   }
 
@@ -142,7 +157,7 @@ SI_Bound * get_si_bound(
   bool inverted)
 {
   // Invert orientation mapping to target if search interval is inverted
-  Direction vd = inverted ? !d : d;
+  Direction vd = (Direction) (inverted ? !d : d);
   // See contiguous.h
   int flag = 0;
   // non-zero to ease debugging

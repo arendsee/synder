@@ -1,13 +1,15 @@
 fs next
 
-break -function load_Synmap
-break -function link_block_corners
-break -function set_contig_corners
-break -function set_overlap_group
-break -function merge_all_doubly_overlapping_blocks
-break -function link_adjacent_blocks
-break -function link_contiguous_blocks
-break -function validate_synmap
+break -function Synmap::Synmap
+# break -function Synmap::link_block_corners
+# break -function Synmap::set_contig_corners
+# break -function Synmap::set_overlap_group
+# break -function Synmap::merge_all_doubly_overlapping_blocks
+# break -function Synmap::link_adjacent_blocks
+break -function Synmap::link_contiguous_blocks
+# break -function Synmap::validate
+# break -function find_search_intervals
+# break -function get_region
 
 # set print repeats 100
 # 

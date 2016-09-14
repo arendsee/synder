@@ -1,6 +1,4 @@
 TARGET=synder
-DBSCRIPT=make-synder-db.sh
-DBSCRIPT_DIR=util
 PREFIX=/usr/local
 
 all:
@@ -17,13 +15,11 @@ test:
 install:
 	mkdir -p ${PREFIX}/bin
 	cp -f ${TARGET} ${PREFIX}/bin
-	cp -f ${DBSCRIPT_DIR}/${DBSCRIPT} ${PREFIX}/bin
 
 
 .PHONY: uninstall
 uninstall:
 	rm -f ${PREFIX}/bin/synder
-	rm -f ${PREFIX}/bin/${DBSCRIPT}
 
 
 # ===================================================================
@@ -54,25 +50,14 @@ ARCHIVE=ark
 dtest:
 	${MAKE} ddclean
 	mkdir ${ARCHIVE}
-	./test/runtests.sh -mdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
+	./test/runtests.sh -xmdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Same as above, but does not test memory
 .PHONY: dtest-leak
 dtest-leak:
 	${MAKE} ddclean
 	mkdir ${ARCHIVE}
-	./test/runtests.sh -dv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
-
-# Runs the sample data, linking files for review
-.PHONY: sample
-sample:
-	${MAKE} ddclean
-	${MAKE}
-	./synder -d sample-inputs/a-b.syn a b db
-	ln -sf sample-inputs/a.gff g
-	ln -sf db/a_b.txt d
-	./synder -i g -s d -c search
-
+	./test/runtests.sh -xdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # ===================================================================
 # Cleaning functions
@@ -88,7 +73,6 @@ clean:
 
 .PHONY: dclean
 dclean:
-	rm -rf db
 	rm -f ${TEMP}
 
 .PHONY: ddclean

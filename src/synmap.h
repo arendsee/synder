@@ -5,95 +5,87 @@
 #include "genome.h"
 #include "global.h"
 #include "contiguous_set.h"
+#include "arguments.h"
 
-/**
- * Allocate memory for a new Synmap.
- *
- * This struct holds the pair of genomes that wil be compared.
- *
- * @return pointer to the new Synmap
- */
-Synmap *init_Synmap();
+#include <iterator>
+#include <list>
 
-/** Recursively free all memory allocated to the synteny map.
- * 
- * Calls free_genome on both its Genome children.
- *
- * @param pointer to Synmap struct
- *
- * */
-void free_Synmap(Synmap *);
 
-/** Recursively print a synteny map. */
-void print_Synmap(Synmap *, bool forward);
+/** A pair of syntenically linked Genome objects  */
+class Synmap
+{
+private:
 
-void dump_blocks(Synmap *);
+    FILE* synfile;
+    FILE* tclfile;
+    FILE* qclfile;
+    int swap;
+    long k;
+    char trans;
 
-void dump_verbose_block_mem(Synmap* synmap);
+    // loads synfile and calls the below functions in proper order
+    void load_blocks();
 
-/** Link blocks by next and prev stop and next and prev start */
-void link_block_corners(Synmap * syn);
+    // wrappers for Genome functions
+    void set_contig_lengths();
+    void link_block_corners();
+    void set_contig_corners();
+    void merge_doubly_overlapping_blocks();
+    void set_overlap_group();
+    void link_adjacent_blocks();
+    void link_contiguous_blocks(long k);
 
-/** Link Contig to first and last blocks
- *
- * Requires previous run of link_block_corners
- *
- */
-void set_contig_corners(Synmap * syn);
+    /** Checks invariants - dies if anything goes wrong */
+    void validate();
 
-/** Set a unique index for each set of overlapping sequences
- *
- * Requires previous run of set_contig_corners
- *
- */
-void set_overlap_group(Synmap * syn);
+public:
 
-/** Merge blocks that overlap on both query and target sides
- *
- * For now, I will use a weighted average for the merged Block score.
- *
- */
-void merge_all_doubly_overlapping_blocks(Synmap * syn);
+    Genome * genome[2];
 
-/** Link each node to its adjacent neighbors
- *
- * Requires previous run of set_overlap_group
- *
- * Link blocks to nearest non-overlapping up and downstream blocks
- *
- * For example, given these for blocks:
- *  |---a---|
- *            |--b--|
- *             |----c----|
- *                     |---d---|
- *                               |---e---|
- * a->adj := (NULL, b)
- * b->adj := (a, e)
- * c->adj := (a, e)
- * d->adj := (a, e)
- * e->adj := (d, NULL)
- */
-void link_adjacent_blocks(Synmap * syn);
+    /** Build synteny tree from specially formatted file.
+     *
+     * @warning This function is VERY picky about input. It expects input to be
+     * formatted exactly as util/prepare-data.sh produces. You must not feed this
+     * function raw synteny files. I currently have no input checks.
+     *
+     * @param synfile specially formatted synteny file
+     *
+     * @return pointer to a complete Synmap object
+     */
+    Synmap(Arguments& args);
+    ~Synmap();
 
-/** Link each node to its contiguous neighbor
- *
- * Requires previous run of link_adjacent_blocks
- *
- */
-void link_contiguous_blocks(Synmap * syn, long k);
+    Contig* get_contig(size_t gid, char* contig_name);
 
-/** Build and link ContiguousSet structures
- *
- * Requires previous run of link_contiguous_blocks
- *
- */ 
-void build_contiguous_sets(Synmap* syn);
+    Genome* get_genome(size_t gid);
 
-/** Checks invariants - dies if anything goes wrong
- *
- * Assumes previous run of link_contiguous_blocks
- *
- */
-void validate_synmap(Synmap * syn);
+    /** Recursively print a synteny map. */
+    void print(bool forward=true);
+
+    void dump_blocks();
+
+    /** Count blocks overlapping intervals in intfile
+     *
+     * Prints the input sequence name and count to STDOUT in TAB-delimited format.
+     *
+     * @param syn synmap, where the query and gff_file reference the same genome.
+     * @param gff_file GFF format file, 9th column is treated as the interval name.
+     */
+    void count(FILE* gff_file);
+
+    /** Write blocks overlapping intervals in intfile
+     *
+     * Prints the following TAB-delimited columns to STDOUT:
+     * - query entry name, this should be unique for input interval
+     * - target contig name
+     * - target start position
+     * - target stop position
+     *
+     * @param syn synmap, where the query and gff_file reference the same genome.
+     * @param gff_file GFF format file, 9th column is treated as the interval name.
+     */
+    void map(FILE* gff_file);
+
+};
 
 #endif
