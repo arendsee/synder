@@ -1,8 +1,8 @@
 # # production build
-# CFLAGS=-Wall -O2 -std=c++11
+CFLAGS=-Wall -O2 -std=c++11
 
 # debug build
-CFLAGS=-Wall -gdwarf-4 -g3 -std=c++11
+# CFLAGS=-Wall -gdwarf-4 -g3 -std=c++11
 
 # # profiling build
 # # NOTE: GNU profiler leaks memory, so turn off memory tests
