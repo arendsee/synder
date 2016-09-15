@@ -83,6 +83,8 @@ public:
      */
     void map(FILE* gff_file);
 
+    void find_search_intervals(FILE* intfile);
+
 };
 
 #endif

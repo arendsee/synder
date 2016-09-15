@@ -13,13 +13,6 @@ public:
     double  score;  // score provided by synteny program
     size_t  grpid;  // overlapping group id;
     size_t  id;     // unique id for element
-
-    virtual T* next();
-    virtual T* prev();
-    virtual T* next_bs();
-    virtual T* prev_bs();
-    virtual T* next_adj();
-    virtual T* prev_adj();
 }
 
 #endif

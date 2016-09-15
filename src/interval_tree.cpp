@@ -1,4 +1,4 @@
-#include "itree.h"
+#include "interval_tree.h"
 
 template <class T>
 IntervalTree<T>::IntervalTree(

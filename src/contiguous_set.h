@@ -3,7 +3,7 @@
 
 #include "global.h"
 #include "block.h"
-#include "itree.h"
+#include "interval_tree.h"
 
 /** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
 class ContiguousSet : Interval<ContiguousSet>, LinkedInterval<ContiguousSet>

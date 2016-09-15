@@ -1,5 +1,5 @@
-#ifndef __ITREE_H__
-#define __ITREE_H__
+#ifndef __INTERVAL_TREE_H__
+#define __INTERVAL_TREE_H__
 
 #include <array>
 #include <algorithm>
@@ -126,7 +126,7 @@ private:
     void print_verbosity_2(IntervalTree* n, int depth, char pos);
     void print_verbosity_3(IntervalTree* n, int depth, char pos);
 
-public:
+protected:
     // the center position for this node
     long center;
     // all intervals that overlap the center, sorted by start position
@@ -140,6 +140,7 @@ public:
     // position relative to parent
     Orientation orientation;
 
+public:
     IntervalTree(
         std::vector<T*> intervals,
         IntervalTree* parent = NULL,

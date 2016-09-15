@@ -244,3 +244,46 @@ void Synmap::map(FILE* intfile)
         free(rc);
     }
 }
+
+void Synmap::find_search_intervals(FILE* intfile){
+    // start and stop positions read from input line
+    long start, stop;
+    Bound bound;
+    // Name of query input (e.g. AT1G01010)
+    char seqname[NAME_BUFFER_SIZE];
+    // Index of query chromosome
+    char contig_seqname[NAME_BUFFER_SIZE];
+    // query contig
+    Contig* qcon;
+
+    char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
+    while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
+
+        // skip comments
+        if (line[0] == '#')
+            continue;
+
+        if (!sscanf(line,
+                    "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
+                    contig_seqname, &start, &stop, seqname)) {
+            printf("invalid input\n");
+            exit(EXIT_FAILURE);
+        }
+        check_in_offset(start, stop);
+        start -= Offsets::in_start;
+        stop -= Offsets::in_stop;
+
+        qcon = syn->get_contig(0, contig_seqname);
+
+        if(qcon == NULL) {
+            fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
+            continue;
+        }
+
+        bound.start = start;
+        bound.stop = stop;
+
+        qcon->find_search_intervals(bound, seqname);
+    }
+    free(line);
+}
