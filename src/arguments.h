@@ -8,6 +8,16 @@
 
 #define MAX_POS 5
 
+typedef enum Command = {
+    C_UNSET,
+    C_FILTER,
+    C_DEBUG,
+    C_DUMP,
+    C_MAP,
+    C_COUNT,
+    C_SEARCH
+}
+
 class Arguments
 {
 
@@ -22,7 +32,7 @@ public:
     FILE *hitfile;
     FILE *tclfile;
     FILE *qclfile;
-    std::string cmd;
+    Command cmd;
     std::vector<std::string> pos;
     int offsets[4];
     long k;

@@ -12,7 +12,7 @@ class IntervalResult
 {
 public:
     std::vector<T*> iv;
-    IntervalTree* tree;
+    IntervalTree<T>* tree;
     bool inbetween;
     bool leftmost;
     bool rightmost;

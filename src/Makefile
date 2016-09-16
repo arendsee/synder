@@ -16,14 +16,13 @@ OBJECTS=               \
 	global.o           \
 	interval.o         \
 	bound.o            \
-	itree.o            \
+	interval_tree.o    \
 	arguments.o        \
 	block.o            \
 	contig.o           \
 	genome.o           \
 	contiguous_set.o   \
 	synmap.o           \
-	map.o              \
 	main.o             \
 
 ${TARGET}: ${OBJECTS}

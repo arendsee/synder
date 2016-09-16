@@ -6,25 +6,16 @@
 #include "contiguous_set.h"
 #include "interval_tree.h"
 #include "itree_result.hpp"
+#include "contig_result.h"
 
 #include <array>
 #include <vector>
 #include <string>
 #include <list> 
 
-#include "global.h"
-#include "block.h"
-#include "synmap.h"
-#include "contig.h"
-#include "contig_result.h"
-
 class Contig {
 private:
     const static long default_length = 1000000000;
-
-    double calculate_score(long start, long stop, Block* blk);
-
-    double calculate_target_score(long a1, long a2, Block* bounds[2]);
 
 public:
     Genome* parent;

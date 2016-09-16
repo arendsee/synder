@@ -183,69 +183,8 @@ void Synmap::validate()
     genome[1]->validate();
 }
 
-void Synmap::count(FILE* intfile)
-{
-    char seqname[NAME_BUFFER_SIZE];
-    char contig_seqid[NAME_BUFFER_SIZE];
-    size_t count;
-    long start, stop;
-    while ((fscanf(intfile,
-                   "%s %*s %*s %li %li %*s %*c %*s %s\n",
-                   contig_seqid, &start, &stop, seqname)) != EOF) {
-        // skip comments
-        if(contig_seqid[0] == '#')
-            continue;
 
-        check_in_offset(start, stop);
-        start -= Offsets::in_start;
-        stop  -= Offsets::in_stop;
-
-        count = get_contig(0, contig_seqid)->count_overlaps(start, stop);
-        printf("%s\t%zu\n", seqname, count);
-    }
-}
-
-void Synmap::map(FILE* intfile)
-{
-    char seqname[128];
-    char contig_seqid[NAME_BUFFER_SIZE];
-    long start, stop;
-    ResultContig* rc;
-    Block *qblk, *tblk;
-    bool missing;
-    while ((fscanf(intfile,
-                   "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
-                   contig_seqid, &start, &stop, seqname)) != EOF) {
-        // skip comments
-        if(contig_seqid[0] == '#')
-            continue;
-
-        check_in_offset(start, stop);
-        start -= Offsets::in_start;
-        stop  -= Offsets::in_stop;
-
-        rc = get_contig(0, contig_seqid)->get_region(start, stop, false);
-        missing = rc->inbetween || rc->leftmost || rc->rightmost;
-
-        for (size_t i = 0; i < rc->size; i++) {
-            qblk = rc->block[i];
-            if (qblk != NULL) {
-                tblk = qblk->over;
-                printf("%s %s %zu %zu %d\n",
-                       seqname,
-                       tblk->parent->name.c_str(),
-                       tblk->pos[0] + Offsets::out_start,
-                       tblk->pos[1] + Offsets::out_stop,
-                       missing
-                      );
-            }
-        }
-
-        free(rc);
-    }
-}
-
-void Synmap::find_search_intervals(FILE* intfile){
+bool Synmap::process_gff(FILE* intfile, Command cmd){
     // start and stop positions read from input line
     long start, stop;
     Bound bound;
@@ -269,10 +208,6 @@ void Synmap::find_search_intervals(FILE* intfile){
             printf("invalid input\n");
             exit(EXIT_FAILURE);
         }
-        check_in_offset(start, stop);
-        start -= Offsets::in_start;
-        stop -= Offsets::in_stop;
-
         qcon = syn->get_contig(0, contig_seqname);
 
         if(qcon == NULL) {
@@ -280,10 +215,32 @@ void Synmap::find_search_intervals(FILE* intfile){
             continue;
         }
 
+        check_in_offset(start, stop);
+        start -= Offsets::in_start;
+        stop -= Offsets::in_stop;
+
         bound.start = start;
         bound.stop = stop;
 
-        qcon->find_search_intervals(bound, seqname);
+        switch(cmd){
+            case C_FILTER:
+                fprintf(stderr, "Filter function currently unavailable\n");
+                return false;
+            case C_COUNT:
+                qcon->count_overlaps(bound, seqname);
+            case C_SEARCH:
+                qcon->find_search_intervals(bound, seqname);
+            case C_MAP:
+                qcon->map(bound, seqname);
+            case C_UNSET:
+                fprintf(stderr, "Please, give me a command\n");
+                return false;
+            default:
+                fprintf(stderr, "Command '%s' not recognized\n", args.cmd.c_str());
+                args.print_help();
+                return false;
+        }
     }
-    free(line);
+    free line;
+    return true;
 }

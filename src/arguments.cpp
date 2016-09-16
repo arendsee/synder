@@ -7,7 +7,7 @@ void Arguments::set_defaults()
     hitfile     = NULL;
     tclfile     = NULL;
     qclfile     = NULL;
-    cmd         = "";
+    cmd         = C_UNSET;
     offsets[0]  = 0;
     offsets[1]  = 0;
     offsets[2]  = 0;
@@ -41,10 +41,10 @@ Arguments::Arguments(int argc, char *argv[])
                 exit(EXIT_SUCCESS);
                 break;
             case 'D':
-                debug = true;
+                cmd = C_DEBUG
                 break;
             case 'B':
-                dump_blks = true;
+                cmd = C_DUMP;
                 break;
             case 'x':
                 trans = optarg[0];
@@ -74,7 +74,15 @@ Arguments::Arguments(int argc, char *argv[])
                 Arguments::check_file(qclfile, optarg);
                 break;
             case 'c':
-                cmd = optarg;
+                if (optarg == "filter") {
+                    cmd = C_FILTER;
+                } else if (optarg == "count") {
+                    cmd = C_COUNT;
+                } else if (optarg == "map") {
+                    cmd = C_MAP;
+                } else if (optarg == "search") {
+                    cmd = C_SEARCH
+                }
                 break;
             case 'r':
                 swap = true;
