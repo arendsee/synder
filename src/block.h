@@ -4,9 +4,10 @@
 #include "global.h"
 #include "contig.h"
 #include "interval.h"
+#include "linked_interval.h"
+#include "contiguous_set.h"
 
-
-class Block : Interval<Block>, LinkedInterval<Block>
+class Block : public LinkedInterval<Block>, public Interval<Block>
 {
 private:
     static void unlink(Block* blk, int u, int d);
@@ -19,6 +20,7 @@ public:
     Block*         cnr[2]; // adjacent block in contiguous set
     ContiguousSet* cset;   // contiguous set id
 
+    Block();
     Block(
         long    start,
         long    stop,

@@ -8,7 +8,7 @@
 
 #define MAX_POS 5
 
-typedef enum Command = {
+typedef enum {
     C_UNSET,
     C_FILTER,
     C_DEBUG,
@@ -16,7 +16,7 @@ typedef enum Command = {
     C_MAP,
     C_COUNT,
     C_SEARCH
-}
+} Command;
 
 class Arguments
 {

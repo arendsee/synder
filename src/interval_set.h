@@ -8,9 +8,9 @@ public:
     std::vector<T*> inv;
     IntervalTree<T>* itree;
 
-    virtual T* begin();
-    virtual void add(T* );
-    virtual void print();
+    // T* begin();
+    // void add(T* );
+    // void print();
 
     /** Given two points, find all blocks overlapping or flanking them
      *
@@ -34,6 +34,6 @@ public:
     /** compare intervals by start - used in std::sort */
     static bool cmp_start(T* a, T* b);
 
-}
+};
 
 #endif

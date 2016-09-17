@@ -33,7 +33,6 @@ typedef enum orientation {
     O_UNSET =  2
 } Orientation;
 
-
 template <class T>
 class IntervalTree
 {
@@ -51,7 +50,6 @@ private:
         long count
     );
 
-
     /** Count the number of query-side intervals that overlap a point
      *
      * @param point on the IntervalTree
@@ -62,7 +60,6 @@ private:
         IntervalTree* tree,
         long count
     );
-
 
     /** Retrieve all target intervals overlapping a query interval
      *
@@ -143,7 +140,7 @@ protected:
 public:
     IntervalTree(
         std::vector<T*> intervals,
-        IntervalTree* parent = NULL,
+        IntervalTree<T>* parent = NULL,
         Orientation orientation = O_ROOT
     );
 

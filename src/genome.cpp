@@ -7,282 +7,282 @@ Genome::Genome(std::string new_name)
 
 Genome::~Genome()
 {
-    for (auto &pair : contig)
-    {
-        delete pair.second;
-    }
+    // for (auto &pair : contig)
+    // {
+    //     delete pair.second;
+    // }
 }
 
 Contig* Genome::add_contig(std::string contig_name)
 {
-    Contig* con;
-    auto it = contig.find(contig_name);
-    if (it == contig.end())
-    {
-        con = new Contig(contig_name, this);
-        contig[contig_name] = con;
-    }
-    else
-    {
-        con = (*it).second;
-    }
+    // Contig* con;
+    // auto it = contig.find(contig_name);
+    // if (it == contig.end())
+    // {
+    //     con = new Contig(contig_name, this);
+    //     contig[contig_name] = con;
+    // }
+    // else
+    // {
+    //     con = (*it).second;
+    // }
+    // return con;
+    Contig * con = new Contig;
     return con;
 }
 
 Contig* Genome::get_contig(std::string name)
 {
-    Contig* con;
-    try
-    {
-        con = contig.at(name);
-    }
-    catch (const std::out_of_range& e)
-    {
-        con = NULL;
-    }
+    // Contig* con;
+    // try
+    // {
+    //     con = contig.at(name);
+    // }
+    // catch (const std::out_of_range& e)
+    // {
+    //     con = NULL;
+    // }
+    // return con;
+    Contig * con = new Contig;
     return con;
 }
 
-Block* Genome::add_block(
-    std::string contig_name,
-    long start,
-    long stop,
-    double score,
-    char strand = '+'
-)
+Block* Genome::add_block(std::string contig_name, long start, long stop, double score, char strand = '+')
 {
-    Contig* con = add_contig(contig_name);
-
-    Block blk(start, stop, score, strand, con, pool.size() + 1);
-
-    pool.push(blk);
-
-    Block* blk_ptr = &pool.top();
-
-    con->block.push_back(blk_ptr);
-
-    return blk_ptr;
+    // Contig* con = add_contig(contig_name);
+    // 
+    // Block blk(start, stop, score, strand, con, pool.size() + 1);
+    // 
+    // pool.push(blk);
+    // 
+    // Block* blk_ptr = &pool.top();
+    // 
+    // con->block.push_back(blk_ptr);
+    // 
+    // return blk_ptr;
+    Block* blk = new Block;
+    return blk;
 }
 
 void Genome::set_contig_lengths(FILE* clfile)
 {
-    if(clfile != NULL){
-        // read loop variables
-        int     status = 0;
-        char*   line   = NULL;
-        size_t  len    = 0;
-        ssize_t read;
-
-        char contig_name[NAME_BUFFER_SIZE];
-        long contig_length; 
-
-        Contig* con;
-        while ((read = getline(&line, &len, clfile)) != EOF)
-        {
-            status = sscanf(line, "%s %zu", contig_name, &contig_length);
-            if(status == EOF){
-                fprintf(stderr, "Failed to read contig length file\n");
-                exit(EXIT_FAILURE);
-            }
-            con = get_contig(contig_name); 
-            if(con != NULL){
-                con->length = contig_length;
-            }
-        }
-        free(line);
-    }
+    // if(clfile != NULL){
+    //     // read loop variables
+    //     int     status = 0;
+    //     char*   line   = NULL;
+    //     size_t  len    = 0;
+    //     ssize_t read;
+    // 
+    //     char contig_name[NAME_BUFFER_SIZE];
+    //     long contig_length; 
+    // 
+    //     Contig* con;
+    //     while ((read = getline(&line, &len, clfile)) != EOF)
+    //     {
+    //         status = sscanf(line, "%s %zu", contig_name, &contig_length);
+    //         if(status == EOF){
+    //             fprintf(stderr, "Failed to read contig length file\n");
+    //             exit(EXIT_FAILURE);
+    //         }
+    //         con = get_contig(contig_name); 
+    //         if(con != NULL){
+    //             con->length = contig_length;
+    //         }
+    //     }
+    //     free(line);
+    // }
 }
 
 void Genome::print(bool print_blocks, bool forward)
 {
-    fprintf(stderr, ">%s size=%lu\n", name.c_str(), contig.size());
-    for (auto &pair : contig)
-    {
-        pair.second->print(forward, print_blocks);
-    }
+    // fprintf(stderr, ">%s size=%lu\n", name.c_str(), contig.size());
+    // for (auto &pair : contig)
+    // {
+    //     pair.second->print(forward, print_blocks);
+    // }
 }
 
 void Genome::link_block_corners()
 {
-    size_t N;
-    Contig* con;
-    for (auto &pair : contig)
-    {
-        con = pair.second;
-        N = con->block.size();
-
-        // sort by stop
-        con->sort_blocks(true);
-        for (size_t i = 0; i < N; i++)
-        {
-            blocks[i]->cor[2] = (i == 0)     ? NULL : blocks[i - 1];
-            blocks[i]->cor[3] = (i == N - 1) ? NULL : blocks[i + 1];
-        }
-        // sort by start
-        con.sort_blocks(false);
-        for (size_t i = 0; i < N; i++)
-        {
-            blocks[i]->cor[0] = (i == 0)     ? NULL : blocks[i - 1];
-            blocks[i]->cor[1] = (i == N - 1) ? NULL : blocks[i + 1];
-        }
-    }
+    // size_t N;
+    // Contig* con;
+    // for (auto &pair : contig)
+    // {
+    //     con = pair.second;
+    //     N = con->block.size();
+    // 
+    //     // sort by stop
+    //     con->sort_blocks(true);
+    //     for (size_t i = 0; i < N; i++)
+    //     {
+    //         blocks[i]->cor[2] = (i == 0)     ? NULL : blocks[i - 1];
+    //         blocks[i]->cor[3] = (i == N - 1) ? NULL : blocks[i + 1];
+    //     }
+    //     // sort by start
+    //     con.sort_blocks(false);
+    //     for (size_t i = 0; i < N; i++)
+    //     {
+    //         blocks[i]->cor[0] = (i == 0)     ? NULL : blocks[i - 1];
+    //         blocks[i]->cor[1] = (i == N - 1) ? NULL : blocks[i + 1];
+    //     }
+    // }
 }
 
 void Genome::set_contig_corners()
 {
-    Contig* con;
-    size_t k;
-    for (auto &pair : contig)
-    {
-        con = pair.second;
-        for (size_t i = 0; i < 4; i++)
-        {
-            k = i % 2 == 0 ? 0 : con->block.size() - 1;
-            con->cor[i] = con->block[k];
-            while (con->cor[i]->cor[i] != NULL)
-            {
-                con->cor[i] = con->cor[i]->cor[i];
-            }
-        }
-    }
+    // Contig* con;
+    // size_t k;
+    // for (auto &pair : contig)
+    // {
+    //     con = pair.second;
+    //     for (size_t i = 0; i < 4; i++)
+    //     {
+    //         k = i % 2 == 0 ? 0 : con->block.size() - 1;
+    //         con->cor[i] = con->block[k];
+    //         while (con->cor[i]->cor[i] != NULL)
+    //         {
+    //             con->cor[i] = con->cor[i]->cor[i];
+    //         }
+    //     }
+    // }
 }
 
 
 void Genome::set_overlap_group()
 {
-
-    // Holds current overlapping group id
-    size_t grpid = 1;
-    // Needed for determining overlaps and thus setids
-    long maximum_stop = 0;
-    // The stop position of the current interval
-    long this_stop = 0;
-    // Current Block in linked list
-    Block* blk;
-    Contig* con;
-
-    // Loop through each contig in the query genome
-    // i := contig id
-    for (auto &pair : contig)
-    {
-        con = pair.second;
-        maximum_stop = 0;
-        // Loop through each Block in the linked list
-        blk = con->cor[0];
-        for (; blk != NULL; blk = blk->cor[1])
-        {
-            this_stop = blk->pos[1];
-            // If the start is greater than the maximum stop, then the block is in
-            // a new adjacency group. For this to work, Contig->block must be
-            // sorted by start. This sort is performed in build_tree.
-            if (blk->pos[0] > maximum_stop)
-            {
-                grpid++;
-            }
-            if (this_stop > maximum_stop)
-            {
-                maximum_stop = this_stop;
-            }
-            blk->grpid = grpid;
-        }
-        // increment to break adjacency between contigs and genomes
-        grpid++;
-    }
+    // 
+    // // Holds current overlapping group id
+    // size_t grpid = 1;
+    // // Needed for determining overlaps and thus setids
+    // long maximum_stop = 0;
+    // // The stop position of the current interval
+    // long this_stop = 0;
+    // // Current Block in linked list
+    // Block* blk;
+    // Contig* con;
+    // 
+    // // Loop through each contig in the query genome
+    // // i := contig id
+    // for (auto &pair : contig)
+    // {
+    //     con = pair.second;
+    //     maximum_stop = 0;
+    //     // Loop through each Block in the linked list
+    //     blk = con->cor[0];
+    //     for (; blk != NULL; blk = blk->cor[1])
+    //     {
+    //         this_stop = blk->pos[1];
+    //         // If the start is greater than the maximum stop, then the block is in
+    //         // a new adjacency group. For this to work, Contig->block must be
+    //         // sorted by start. This sort is performed in build_tree.
+    //         if (blk->pos[0] > maximum_stop)
+    //         {
+    //             grpid++;
+    //         }
+    //         if (this_stop > maximum_stop)
+    //         {
+    //             maximum_stop = this_stop;
+    //         }
+    //         blk->grpid = grpid;
+    //     }
+    //     // increment to break adjacency between contigs and genomes
+    //     grpid++;
+    // }
 }
 
 
 void Genome::link_adjacent_blocks_directed(Contig* con, Direction d)
 {
-    // In diagrams:
-    // <--- indicates a hi block
-    // ---> indicates a lo block
-    // All diagrams and comments relative to the d==HI direction
-
-    if (con->cor[0] == NULL || con->cor[1] == NULL || con->cor[2] == NULL || con->cor[3] == NULL)
-    {
-        fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
-        fprintf(stderr, "genome=(%s) contig=(%s)\n", con->parent->name.c_str(), con->name.c_str());
-        exit(EXIT_FAILURE);
-    }
-
-    // Transformed indices for Block->cor and Contig->cor
-    int idx_a = (!d * 2) + !d; // - 0 previous/first element by start
-    int idx_b = (!d * 2) +  d; // - 1 next/last element by start
-    int idx_c = ( d * 2) + !d; // - 2 previous/first element by stop
-    int idx_d = ( d * 2) +  d; // - 3 next/last element by stop
-
-    Block *lo, *hi;
-
-    lo = con->cor[idx_c]; // first element by stop
-    hi = con->cor[idx_a]; // first element by start
-
-    while (hi != NULL)
-    {
-
-        //       --->
-        // <---
-        // OR
-        // --->
-        //   <---
-        // This should should occur only at the beginning
-        if (REL_LE(hi->pos[!d], lo->pos[d], d))
-        {
-            hi->adj[!d] = NULL;
-            hi = hi->cor[idx_b];
-        }
-
-        //  lo     next
-        // ---->  ---->
-        //               <---
-        // If next is closer, and not overlapping the hi, increment lo
-        // You increment lo until it is adjacent to the current hi
-        else if (REL_LT(lo->cor[idx_d]->pos[d], hi->pos[!d], d))
-        {
-            lo = lo->cor[idx_d];
-        }
-
-        // --->
-        //      <---
-        // The current lo is next to, and not overlapping, current hi
-        else
-        {
-            hi->adj[!d] = lo;
-            hi = hi->cor[idx_b];
-        }
-    }
+    // // In diagrams:
+    // // <--- indicates a hi block
+    // // ---> indicates a lo block
+    // // All diagrams and comments relative to the d==HI direction
+    // 
+    // if (con->cor[0] == NULL || con->cor[1] == NULL || con->cor[2] == NULL || con->cor[3] == NULL)
+    // {
+    //     fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
+    //     fprintf(stderr, "genome=(%s) contig=(%s)\n", con->parent->name.c_str(), con->name.c_str());
+    //     exit(EXIT_FAILURE);
+    // }
+    // 
+    // // Transformed indices for Block->cor and Contig->cor
+    // int idx_a = (!d * 2) + !d; // - 0 previous/first element by start
+    // int idx_b = (!d * 2) +  d; // - 1 next/last element by start
+    // int idx_c = ( d * 2) + !d; // - 2 previous/first element by stop
+    // int idx_d = ( d * 2) +  d; // - 3 next/last element by stop
+    // 
+    // Block *lo, *hi;
+    // 
+    // lo = con->cor[idx_c]; // first element by stop
+    // hi = con->cor[idx_a]; // first element by start
+    // 
+    // while (hi != NULL)
+    // {
+    // 
+    //     //       --->
+    //     // <---
+    //     // OR
+    //     // --->
+    //     //   <---
+    //     // This should should occur only at the beginning
+    //     if (REL_LE(hi->pos[!d], lo->pos[d], d))
+    //     {
+    //         hi->adj[!d] = NULL;
+    //         hi = hi->cor[idx_b];
+    //     }
+    // 
+    //     //  lo     next
+    //     // ---->  ---->
+    //     //               <---
+    //     // If next is closer, and not overlapping the hi, increment lo
+    //     // You increment lo until it is adjacent to the current hi
+    //     else if (REL_LT(lo->cor[idx_d]->pos[d], hi->pos[!d], d))
+    //     {
+    //         lo = lo->cor[idx_d];
+    //     }
+    // 
+    //     // --->
+    //     //      <---
+    //     // The current lo is next to, and not overlapping, current hi
+    //     else
+    //     {
+    //         hi->adj[!d] = lo;
+    //         hi = hi->cor[idx_b];
+    //     }
+    // }
 }
 
 void Genome::link_adjacent_blocks()
 {
-    Contig* con;
-    for (auto &pair : contig)
-    {
-        con = pair.second;
-        link_adjacent_blocks_directed(con, HI);
-        link_adjacent_blocks_directed(con, LO);
-    }
+    // Contig* con;
+    // for (auto &pair : contig)
+    // {
+    //     con = pair.second;
+    //     link_adjacent_blocks_directed(con, HI);
+    //     link_adjacent_blocks_directed(con, LO);
+    // }
 }
 
 void Genome::merge_overlaps()
 {
-    for (auto &pair : contig)
-    {
-        pair.second->merge_doubly_overlapping_blocks();
-    }
+    // for (auto &pair : contig)
+    // {
+    //     pair.second->merge_doubly_overlapping_blocks();
+    // }
 }
 
 void Genome::link_contiguous_blocks(long k)
 {
-
-    size_t setid = 0;
-    for (auto &pair : contig)
-    {
-        pair.second->link_contiguous_blocks(k, setid);
-    }
+    // size_t setid = 0;
+    // for (auto &pair : contig)
+    // {
+    //     pair.second->link_contiguous_blocks(k, setid);
+    // }
 }
 
 void Genome::validate()
 {
+/*
 #define ASSERT_CON(t, con)                                   \
         if(!(t)){                                            \
           is_good=false;                                     \
@@ -382,4 +382,5 @@ void Genome::validate()
 
 #undef ASSERT_BLK
 #undef ASSERT_CON
+*/
 }

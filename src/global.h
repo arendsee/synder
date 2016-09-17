@@ -34,13 +34,12 @@
 #define LINE_BUFFER_SIZE 512
 #define NAME_BUFFER_SIZE 128
 
-typedef struct Block Block;
-typedef struct Contig Contig;
-typedef struct ResultContig ResultContig;
-typedef struct ContiguousSet ContiguousSet;
-
+// To break circular dependencies
+class Block;
+class ContiguousSet;
 class Genome;
-class Synmap;
+class Contig;
+template<class T> class IntervalTree;
 
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
 class Offsets

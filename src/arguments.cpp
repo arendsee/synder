@@ -41,7 +41,7 @@ Arguments::Arguments(int argc, char *argv[])
                 exit(EXIT_SUCCESS);
                 break;
             case 'D':
-                cmd = C_DEBUG
+                cmd = C_DEBUG;
                 break;
             case 'B':
                 cmd = C_DUMP;
@@ -74,14 +74,14 @@ Arguments::Arguments(int argc, char *argv[])
                 Arguments::check_file(qclfile, optarg);
                 break;
             case 'c':
-                if (optarg == "filter") {
+                if (strcmp(optarg, "filter") == 0) {
                     cmd = C_FILTER;
-                } else if (optarg == "count") {
+                } else if (strcmp(optarg, "count") == 0) {
                     cmd = C_COUNT;
-                } else if (optarg == "map") {
+                } else if (strcmp(optarg, "map") == 0) {
                     cmd = C_MAP;
-                } else if (optarg == "search") {
-                    cmd = C_SEARCH
+                } else if (strcmp(optarg, "search") == 0) {
+                    cmd = C_SEARCH;
                 }
                 break;
             case 'r':
@@ -147,13 +147,13 @@ void Arguments::print()
 {
     fprintf(
         stderr,
-        "arguments: k=%ld offsets=%d%d%d%d cmd=%s\n",
+        "arguments: k=%ld offsets=%d%d%d%d cmd=%c\n",
         k,
         offsets[0],
         offsets[1],
         offsets[2],
         offsets[3],
-        cmd.c_str()
+        cmd
     );
 }
 

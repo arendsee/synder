@@ -4,10 +4,14 @@
 class SearchInterval : Interval<SearchInterval>
 {
 private:
-    double score;
-    char* seqname;
+    char* seqname[NAME_BUFFER_SIZE];
+    ContiguousSet* cset;
+    Bound* qbound;
 
-    // TODO create SI class
+    double score;
+    int flag[2];
+    bool inbetween;
+
     typedef struct SI_Bound {
         long bound;
         int flag;
@@ -39,7 +43,11 @@ private:
     int get_flag(SI_Bound* br[2]);
 
 public:
-    SearchInterval(Bound bound, char* seqname);
+    SearchInterval(Contig* qcon);
+    ~SearchInterval();
+
+    // TODO this is smells awful
+    void build_search_interval(Bound& bound, Block* blk_bound[2], char* seqname, bool inbetween);
 
     void print();
 

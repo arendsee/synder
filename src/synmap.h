@@ -3,8 +3,6 @@
 
 #include "global.h"
 #include "genome.h"
-#include "global.h"
-#include "contiguous_set.h"
 #include "arguments.h"
 
 #include <iterator>
@@ -61,29 +59,8 @@ public:
 
     void dump_blocks();
 
-    /** Count blocks overlapping intervals in intfile
-     *
-     * Prints the input sequence name and count to STDOUT in TAB-delimited format.
-     *
-     * @param syn synmap, where the query and gff_file reference the same genome.
-     * @param gff_file GFF format file, 9th column is treated as the interval name.
-     */
-    void count(FILE* gff_file);
-
-    /** Write blocks overlapping intervals in intfile
-     *
-     * Prints the following TAB-delimited columns to STDOUT:
-     * - query entry name, this should be unique for input interval
-     * - target contig name
-     * - target start position
-     * - target stop position
-     *
-     * @param syn synmap, where the query and gff_file reference the same genome.
-     * @param gff_file GFF format file, 9th column is treated as the interval name.
-     */
-    void map(FILE* gff_file);
-
-    void find_search_intervals(FILE* intfile);
+    /** Reads a GFF file and calls the appropriate command on each line */
+    bool process_gff(FILE* intfile, Command cmd);
 
 };
 

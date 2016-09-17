@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "interval_tree.h"
+
 /** A container for results from searches for overlaps
  *
  * bool inbetween - TRUE if the query overlaps nothing
@@ -18,7 +20,7 @@ public:
     bool rightmost;
 
     IntervalResult(){
-        parent_tree = NULL;
+        tree      = NULL;
         inbetween = false;
         leftmost  = false;
         rightmost = false;

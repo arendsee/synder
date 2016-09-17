@@ -4,9 +4,11 @@
 #include "global.h"
 #include "block.h"
 #include "interval_tree.h"
+#include "linked_interval.h"
+
 
 /** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
-class ContiguousSet : Interval<ContiguousSet>, LinkedInterval<ContiguousSet>
+class ContiguousSet : LinkedInterval<ContiguousSet>
 {
 private:
     static void add_block_side_(Block* blk);
@@ -21,6 +23,9 @@ public:
     Block*         ends[2];
 
     ContiguousSet();
+    ContiguousSet(Block* blk);
+
+    ContiguousSet* make_pair(Block* blk);
 
     /** Destructor for a single ContiguousSet in a linked list
      *

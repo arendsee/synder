@@ -5,6 +5,7 @@
 
 class Bound : Interval<Bound>
 {
+    Bound();
     Bound(long start, long stop);
 };
 

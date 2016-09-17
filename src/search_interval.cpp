@@ -1,84 +1,50 @@
 #include "search_interval.h"
 
-void SearchInterval::SearchInterval(Bound& bound, char* new_seqname, Contig* new_parent)
-    : parent(new_parent), seqname(new_seqname)
+void SearchInterval::SearchInterval(Contig* new_parent)
 {
-    // Max and min blocks retrieved from itree.
-    Block* blk_bounds[2];
+    parent = new_parent;
+}
+
+void build_search_interval(Bound& bound, Block* blk_bound[2], char* seqname, bool new_inbetween)
+{
     // Search interval boundary information
     SI_Bound* bound_results[2];
-    // List of contiguous sets
-    CSList *cslist;
-    // A pointer to the root node of cslist (needed only for freeing the list)
-    CSList *root;
-    // Does starget strand == '-'?
-    bool inverted;
-    // Row output of itree
-    ResultContig* rc;
-    // Row output of ctree
-    ResultContig* crc;
 
-    // Get blocks overlapping the query
-    rc = qcon->get_region(bounds, qcon->block, true);
+    bool inverted = blk_bounds[HI]->over->strand == '-';
 
-    // get list of highest and lowest members of each contiguous set
-    cslist = init_empty_CSList();
-    root = cslist;
-    for(size_t i = 0; i < rc->size; i++) {
-        add_blk_CSList(cslist, rc->block[i]);
-    }
+    float score = calculate_score(bounds, blk_bounds[LO]);
 
-    // TODO what am I doing here?
-    crc = qcon->get_region(bounds, qcon->cset, false);
-    if(! (crc->inbetween || crc->leftmost || crc->rightmost) ) {
-        for(size_t i = 0; i < crc->size; i++) {
-            add_cset_CSList(cslist, crc->cset[i], bounds);
-        }
-    }
+    bound_results[inverted ^ LO] =
+        get_si_bound(bounds.pos[LO], blk_bounds, LO, inverted);
+    bound_results[inverted ^ HI] =
+        get_si_bound(bounds.pos[HI], blk_bounds, HI, inverted);
 
-    // Iterate through each contiguous set, for each find the search interval
-    // For each contiguous set, there is exactly one search interval.
-    for(; cslist != NULL; cslist = cslist->next) {
-
-        blk_bounds[LO] = cslist->bound[LO];
-        blk_bounds[HI] = cslist->bound[HI];
-
-        inverted = blk_bounds[HI]->over->strand == '-';
-
-        score = calculate_score(bounds, blk_bounds[LO]);
-
-        bound_results[inverted ^ LO] =
-            get_si_bound(bounds.pos[0], blk_bounds, LO, inverted);
-        bound_results[inverted ^ HI] =
-            get_si_bound(bounds.pos[1], blk_bounds, HI, inverted);
-
-        free(bound_results[0]);
-        free(bound_results[1]);
-
-    }
-
-    free_ResultContig(rc);
-    free_ResultContig(crc);
-    free_CSList(root);
+    qbound = &bound;
+    cset = blk_bounds[LO]->cset;
+    inbetween = new_inbetween;
+    pos[0]  = bound_results[0]->bound;
+    pos[1]  = bound_results[1]->bound;
+    flag[0] = bound_result[0]->flag;
+    flag[1] = bound_result[1]->flag;
 }
 
 void SearchInterval::print()
 {
         printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
                // Output column ids:
-               seqname,                                         //  1
-               blk_bounds[LO]->parent->name.c_str(),            //  2
-               bounds.pos[0] + Offsets::out_start,              //  3
-               bounds.pos[1] + Offsets::out_stop,               //  4
-               blk_bounds[LO]->over->parent->name.c_str(),      //  5
-               bound_results[LO]->bound + Offsets::out_start,   //  6
-               bound_results[HI]->bound + Offsets::out_stop,    //  7
-               blk_bounds[LO]->over->strand,                    //  8
-               score,                                           //  9
-               blk_bounds[LO]->cset->id,                        // 10
-               bound_results[LO]->flag,                         // 11
-               bound_results[HI]->flag,                         // 12
-               rc->inbetween || rc->leftmost || rc->rightmost   // 13
+               seqname,                             //  1
+               cset->parent->name.c_str(),          //  2
+               qbound->pos[0] + Offsets::out_start, //  3
+               qbound->pos[1] + Offsets::out_stop,  //  4
+               cset->over->parent->name.c_str(),    //  5
+               pos[0] + Offsets::out_start,         //  6
+               pos[1] + Offsets::out_stop,          //  7
+               cset->over->strand,                  //  8
+               score,                               //  9
+               cset->id,                            // 10
+               flag[0],                             // 11
+               flag[1],                             // 12
+               inbetween                            // 13 TODO fix the smell
               );
 }
 
