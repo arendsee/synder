@@ -2,34 +2,22 @@
 
 Contig::Contig()
 {
-    // length = default_length;
-    // name   = "";
-    // parent = NULL;
-    // itree  = NULL;
-    // ctree  = NULL;
-    // cset   = NULL;
+    length = default_length;
+    name   = "";
+    parent = NULL;
+    // TODO handle IntervalSet initialization
 }
 
 Contig::Contig(std::string new_name, Genome* new_parent)
     : parent(new_parent), name(new_name)
 {
-    // length = default_length;
-    // itree  = NULL;
-    // ctree  = NULL;
-    // cset   = NULL;
+    length = default_length;
+    // TODO handle IntervalSet initialization
 }
 
 Contig::~Contig()
 {
-    // while (cset != NULL) {
-    //     free_ContiguousSet(cset);
-    // }
-    // if (itree != NULL) {
-    //     delete itree;
-    // }
-    // if (ctree != NULL) {
-    //     delete ctree;
-    // }
+    // TODO I don't think there actually is anything to remove
 }
 
 void Contig::print(bool forward, bool print_blocks)
@@ -64,46 +52,44 @@ void Contig::print(bool forward, bool print_blocks)
 template<typename T>
 T* add_whatever_overlaps_flanks(T* res)
 {
-    T* out = new T;
-    return out;
-    // // itree returns the flanks for queries that overlap nothing. However, I
-    // // need all the intervals that overlap these flanks as well.
-    // T* tmp_a = NULL;
-    // T* tmp_b = NULL;
-    // 
-    // if (res->inbetween) {
-    //     // If inbetween, itree should have returned the two flanking blocks
-    //     if (res->iv.size() == 2) {
-    //         tmp_a = res->tree->get_overlaps(res->iv[0]);
-    //         tmp_b = res->tree->get_overlaps(res->iv[1]);
-    //         res->iv.clear();
-    //         res->iv = tmp_a->iv;
-    //         res->iv.insert(
-    //             res->iv.end(),
-    //             tmp_b->iv.begin(),
-    //             tmp_b->iv.end()
-    //         );
-    //     } else {
-    //         fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
-    //         exit(EXIT_FAILURE);
-    //     }
-    // } else if (res->leftmost || res->rightmost) {
-    //     if (res->iv.size() == 1) {
-    //         tmp_a = res->tree->get_overlaps(res->iv[0]);
-    //         res->iv = tmp_a->iv;
-    //     } else {
-    //         fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
-    //         exit(EXIT_FAILURE);
-    //     }
-    // }
-    // 
-    // if (tmp_a != NULL)
-    //     delete tmp_a;
-    // 
-    // if (tmp_b != NULL)
-    //     delete tmp_b;
-    // 
-    // return res;
+    // itree returns the flanks for queries that overlap nothing. However, I
+    // need all the intervals that overlap these flanks as well.
+    T* tmp_a = NULL;
+    T* tmp_b = NULL;
+
+    if (res->inbetween) {
+        // If inbetween, itree should have returned the two flanking blocks
+        if (res->iv.size() == 2) {
+            tmp_a = res->tree->get_overlaps(res->iv[0]);
+            tmp_b = res->tree->get_overlaps(res->iv[1]);
+            res->iv.clear();
+            res->iv = tmp_a->iv;
+            res->iv.insert(
+                res->iv.end(),
+                tmp_b->iv.begin(),
+                tmp_b->iv.end()
+            );
+        } else {
+            fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
+            exit(EXIT_FAILURE);
+        }
+    } else if (res->leftmost || res->rightmost) {
+        if (res->iv.size() == 1) {
+            tmp_a = res->tree->get_overlaps(res->iv[0]);
+            res->iv = tmp_a->iv;
+        } else {
+            fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (tmp_a != NULL)
+        delete tmp_a;
+
+    if (tmp_b != NULL)
+        delete tmp_b;
+
+    return res;
 }
 
 void Contig::build_block_itree()
@@ -226,10 +212,7 @@ void Contig::sort_blocks(bool by_stop)
 
 void Contig::clear_cset_tree()
 {
-    // if (ctree != NULL) {
-    //     delete ctree;
-    //     ctree = NULL;
-    // }
+    // TODO implement
 }
 
 void Contig::count(Bound& bound, char* seqname)

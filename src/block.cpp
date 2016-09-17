@@ -33,20 +33,20 @@ Block::~Block() { }
 
 void Block::print()
 {
-    // printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
-    //        parent->name.c_str(),
-    //        pos[0] + Offsets::out_start,
-    //        pos[1] + Offsets::out_stop,
-    //        over->parent->name.c_str(),
-    //        over->pos[0] + Offsets::out_start,
-    //        over->pos[1] + Offsets::out_stop,
-    //        strand
-    //       );
-    // if(cset != NULL) {
-    //     printf("\t%zu\n", cset->id);
-    // } else {
-    //     printf("\t-\n");
-    // }
+    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
+           parent->name.c_str(),
+           pos[0] + Offsets::out_start,
+           pos[1] + Offsets::out_stop,
+           over->parent->name.c_str(),
+           over->pos[0] + Offsets::out_start,
+           over->pos[1] + Offsets::out_stop,
+           strand
+          );
+    if(cset != NULL) {
+        printf("\t%zu\n", cset->id);
+    } else {
+        printf("\t-\n");
+    }
 }
 
 void Block::unlink(Block* blk, int u, int d)
@@ -71,21 +71,21 @@ void Block::unlink(Block* blk, int u, int d)
  */
 void Block::merge_block_a_into_b_edge_(Block* a, Block* b, int i)
 {
-    // assert(i == 0 || i == 1);
-    // int u = 2 * i +  i;
-    // int d = 2 * i + !i;
-    // if(REL_GE(a->pos[i], b->pos[i], i)) {
-    //     move_b_to_a(a, b, u, d);
-    //     b->pos[i] = a->pos[i];
-    // } else {
-    //     dissolve_edge(a, u, d);
-    // }
+    assert(i == 0 || i == 1);
+    int u = 2 * i +  i;
+    int d = 2 * i + !i;
+    if(REL_GE(a->pos[i], b->pos[i], i)) {
+        move_b_to_a(a, b, u, d);
+        b->pos[i] = a->pos[i];
+    } else {
+        dissolve_edge(a, u, d);
+    }
 }
 
 void Block::dissolve_edge(Block* blk, int u, int d)
 {
-    // unlink(blk, u, d);
-    // unlink(blk, d, u);
+    unlink(blk, u, d);
+    unlink(blk, d, u);
 }
 
 void Block::replace_edge(Block* a, Block* b, int u, int d)
@@ -105,12 +105,12 @@ void Block::replace_edge(Block* a, Block* b, int u, int d)
 
 void Block::move_b_to_a(Block* a, Block* b, int u, int d)
 {
-    // 
-    // dissolve_edge(b, u, d);
-    // 
-    // replace_edge(a, b, u, d);
-    // replace_edge(a, b, d, u);
-    // 
+
+    dissolve_edge(b, u, d);
+
+    replace_edge(a, b, u, d);
+    replace_edge(a, b, d, u);
+
 }
 
 void Block::merge_block_a_into_b(Block* a, Block* b)

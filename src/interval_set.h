@@ -8,9 +8,9 @@ public:
     std::vector<T*> inv;
     IntervalTree<T>* itree;
 
-    // T* begin();
-    // void add(T* );
-    // void print();
+    T* begin();
+    void add(T* );
+    void print();
 
     /** Given two points, find all blocks overlapping or flanking them
      *

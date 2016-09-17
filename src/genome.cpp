@@ -7,43 +7,39 @@ Genome::Genome(std::string new_name)
 
 Genome::~Genome()
 {
-    // for (auto &pair : contig)
-    // {
-    //     delete pair.second;
-    // }
+    for (auto &pair : contig)
+    {
+        delete pair.second;
+    }
 }
 
 Contig* Genome::add_contig(std::string contig_name)
 {
-    // Contig* con;
-    // auto it = contig.find(contig_name);
-    // if (it == contig.end())
-    // {
-    //     con = new Contig(contig_name, this);
-    //     contig[contig_name] = con;
-    // }
-    // else
-    // {
-    //     con = (*it).second;
-    // }
-    // return con;
-    Contig * con = new Contig;
+    Contig* con;
+    auto it = contig.find(contig_name);
+    if (it == contig.end())
+    {
+        con = new Contig(contig_name, this);
+        contig[contig_name] = con;
+    }
+    else
+    {
+        con = (*it).second;
+    }
     return con;
 }
 
 Contig* Genome::get_contig(std::string name)
 {
-    // Contig* con;
-    // try
-    // {
-    //     con = contig.at(name);
-    // }
-    // catch (const std::out_of_range& e)
-    // {
-    //     con = NULL;
-    // }
-    // return con;
-    Contig * con = new Contig;
+    Contig* con;
+    try
+    {
+        con = contig.at(name);
+    }
+    catch (const std::out_of_range& e)
+    {
+        con = NULL;
+    }
     return con;
 }
 
@@ -62,44 +58,45 @@ Block* Genome::add_block(std::string contig_name, long start, long stop, double 
     // return blk_ptr;
     Block* blk = new Block;
     return blk;
+    // TODO - need to rewrite this, since the pool is dead
 }
 
 void Genome::set_contig_lengths(FILE* clfile)
 {
-    // if(clfile != NULL){
-    //     // read loop variables
-    //     int     status = 0;
-    //     char*   line   = NULL;
-    //     size_t  len    = 0;
-    //     ssize_t read;
-    // 
-    //     char contig_name[NAME_BUFFER_SIZE];
-    //     long contig_length; 
-    // 
-    //     Contig* con;
-    //     while ((read = getline(&line, &len, clfile)) != EOF)
-    //     {
-    //         status = sscanf(line, "%s %zu", contig_name, &contig_length);
-    //         if(status == EOF){
-    //             fprintf(stderr, "Failed to read contig length file\n");
-    //             exit(EXIT_FAILURE);
-    //         }
-    //         con = get_contig(contig_name); 
-    //         if(con != NULL){
-    //             con->length = contig_length;
-    //         }
-    //     }
-    //     free(line);
-    // }
+    if(clfile != NULL){
+        // read loop variables
+        int     status = 0;
+        char*   line   = NULL;
+        size_t  len    = 0;
+        ssize_t read;
+
+        char contig_name[NAME_BUFFER_SIZE];
+        long contig_length;
+
+        Contig* con;
+        while ((read = getline(&line, &len, clfile)) != EOF)
+        {
+            status = sscanf(line, "%s %ld", contig_name, &contig_length);
+            if(status == EOF){
+                fprintf(stderr, "Failed to read contig length file\n");
+                exit(EXIT_FAILURE);
+            }
+            con = get_contig(contig_name);
+            if(con != NULL){
+                con->length = contig_length;
+            }
+        }
+        free(line);
+    }
 }
 
 void Genome::print(bool print_blocks, bool forward)
 {
-    // fprintf(stderr, ">%s size=%lu\n", name.c_str(), contig.size());
-    // for (auto &pair : contig)
-    // {
-    //     pair.second->print(forward, print_blocks);
-    // }
+    fprintf(stderr, ">%s size=%lu\n", name.c_str(), contig.size());
+    for (auto &pair : contig)
+    {
+        pair.second->print(forward, print_blocks);
+    }
 }
 
 void Genome::link_block_corners()
