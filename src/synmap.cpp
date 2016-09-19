@@ -87,13 +87,13 @@ void Synmap::load_blocks()
     }
     free(line);
 
-    // The following must be run in order
-    link_block_corners();
-    set_contig_corners();
-    merge_doubly_overlapping_blocks();
-    set_overlap_group();
-    link_adjacent_blocks();
-    link_contiguous_blocks(k);
+    // // The following must be run in order
+    // link_block_corners();
+    // set_contig_corners();
+    // merge_doubly_overlapping_blocks();
+    // set_overlap_group();
+    // link_adjacent_blocks();
+    // link_contiguous_blocks(k);
 }
 
 Contig* Synmap::get_contig(size_t gid, char* contig_name)
@@ -191,8 +191,8 @@ bool Synmap::process_gff(FILE* intfile, Command cmd){
     char seqname[NAME_BUFFER_SIZE];
     // Index of query chromosome
     char contig_seqname[NAME_BUFFER_SIZE];
-    // // query contig
-    // Contig* qcon;
+    // query contig
+    Contig* qcon;
 
     char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
     while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
@@ -215,13 +215,13 @@ bool Synmap::process_gff(FILE* intfile, Command cmd){
         bound.pos[0] = start;
         bound.pos[1] = stop;
 
-        // qcon = syn->get_contig(0, contig_seqname);
-        // 
-        // if(qcon == NULL) {
-        //     fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
-        //     continue;
-        // }
-        // 
+        qcon = get_contig(0, contig_seqname);
+
+        if(qcon == NULL) {
+            fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
+            continue;
+        }
+
         // switch(cmd){
         //     case C_FILTER:
         //         fprintf(stderr, "Filter function currently unavailable\n");
