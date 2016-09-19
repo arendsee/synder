@@ -3,6 +3,8 @@
 
 #include "global.h"
 #include "contig.h"
+#include "many_contiguous_sets.h"
+
 
 #include <map>
 #include <stack>

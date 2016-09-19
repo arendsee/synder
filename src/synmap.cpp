@@ -226,7 +226,7 @@ bool Synmap::process_gff(FILE* intfile, Command cmd){
     //             fprintf(stderr, "Filter function currently unavailable\n");
     //             return false;
     //         case C_COUNT:
-    //             qcon->count_overlaps(bound, seqname);
+    //             qcon->count(bound, seqname);
     //         case C_SEARCH:
     //             qcon->find_search_intervals(bound, seqname);
     //         case C_MAP:

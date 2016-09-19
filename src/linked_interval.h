@@ -9,7 +9,7 @@ class Contig;
 template<class T> class LinkedInterval
 {
 // TODO remove friendship
-friend class ManyBlocks;
+    friend class ManyBlocks;
 
 protected:
     T*      over;   // homologous element
@@ -22,19 +22,61 @@ protected:
     size_t  id;     // unique id for element
 
 public:
-    T* prev();
-    T* next();
-    T* prev_adj();
-    T* next_adj();
-    T* corner(size_t i);
+    T* prev()
+    {
+        return cor[0];
+    }
 
-    T*      get_over();
-    Contig* get_parent();
-    char    get_strand();
-    size_t  get_grpid();
-    size_t  get_id();
+    T* next()
+    {
+        return cor[1];
+    }
 
-    static void link_homologs(T* a, T* b);
+    T* prev_adj()
+    {
+        return adj[0];
+    }
+
+    T* next_adj()
+    {
+        return adj[1];
+    }
+
+    T* corner(size_t i)
+    {
+        return cor[i];
+    }
+
+    T* get_over()
+    {
+        return over;
+    }
+
+    Contig* get_parent()
+    {
+        return parent;
+    }
+
+    char get_strand()
+    {
+        return strand;
+    }
+
+    size_t get_grpid()
+    {
+        return grpid;
+    }
+
+    size_t get_id()
+    {
+        return id;
+    }
+
+    static void link_homologs(T* a, T* b)
+    {
+        a->over = b;
+        b->over = a;
+    }
 };
 
 #endif

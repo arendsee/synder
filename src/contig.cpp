@@ -62,6 +62,11 @@ void Contig::set_contig_corners()
     // }
 }
 
+void Contig::link_contiguous_blocks(long k, size_t &setid){
+    cset->link_contiguous_blocks(block->front(), k, setid);
+}
+
+
 void Contig::sort_blocks(bool by_stop)
 {
     // auto cmp = by_stop ? Block::cmp_start : Block::cmp_stop;

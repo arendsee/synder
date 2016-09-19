@@ -4,7 +4,6 @@
 #include "global.h"
 #include "linked_interval.h"
 #include "block.h"
-#include "contiguous_set.h"
 #include "interval_set.h"
 
 #include <list>
@@ -30,7 +29,6 @@ public:
     void link_adjacent_blocks_directed(Direction d);
     void link_adjacent_blocks();
     void merge_overlaps();
-    void link_contiguous_blocks(long k);
 
 };
 

@@ -15,14 +15,11 @@ TARGET=synder
 OBJECTS=                   \
 	global.o               \
 	arguments.o            \
-	interval.o             \
-	linked_interval.o      \
 	bound.o                \
-	interval_tree.o        \
 	block.o                \
 	contiguous_set.o       \
-	interval_set.o         \
 	many_blocks.o          \
+	many_contiguous_sets.o \
 	contig.o               \
 	genome.o               \
 	synmap.o               \

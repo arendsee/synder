@@ -27,8 +27,6 @@ public:
     ContiguousSet();
     ContiguousSet(Block* blk);
 
-    ContiguousSet* make_pair(Block* blk);
-
     /** Destructor for a single ContiguousSet in a linked list
      *
      * This function preserves the ContiguousSet linked list
@@ -39,6 +37,8 @@ public:
      *
      */
     ~ContiguousSet();
+
+    ContiguousSet* make_pair(Block* blk);
 
     void print();
 

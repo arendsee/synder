@@ -12,37 +12,135 @@ template <class T>
 class IntervalSet
 {
 private:
-    /** interval comparators - used in std::sort */
-    bool cmp_start(T* a, T* b);
-    bool cmp_stop(T* a, T* b);
-    bool cmp_start_reverse(T* a, T* b);
-    bool cmp_stop_reverse(T* a, T* b);
+    T* add_whatever_overlaps_flanks(T* res)
+    {
+        // itree returns the flanks for queries that overlap nothing. However, I
+        // need all the intervals that overlap these flanks as well.
+        T* tmp_a = NULL;
+        T* tmp_b = NULL;
 
-    T* add_whatever_overlaps_flanks(T* res);
-    void build_tree();
+        if (res->inbetween) {
+            // If inbetween, itree should have returned the two flanking blocks
+            if (res->iv.size() == 2) {
+                tmp_a = res->tree->get_overlaps(res->iv[0]);
+                tmp_b = res->tree->get_overlaps(res->iv[1]);
+                res->iv.clear();
+                res->iv = tmp_a->iv;
+                res->iv.insert(
+                    res->iv.end(),
+                    tmp_b->iv.begin(),
+                    tmp_b->iv.end()
+                );
+            } else {
+                fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
+                exit(EXIT_FAILURE);
+            }
+        } else if (res->leftmost || res->rightmost) {
+            if (res->iv.size() == 1) {
+                tmp_a = res->tree->get_overlaps(res->iv[0]);
+                res->iv = tmp_a->iv;
+            } else {
+                fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        if (tmp_a != NULL)
+            delete tmp_a;
+
+        if (tmp_b != NULL)
+            delete tmp_b;
+
+        return res;
+    }
+
+    void build_tree()
+    {
+        if (tree == NULL) {
+
+            std::vector<T*> intervals;
+
+            for (T* c = inv.front(); c != NULL; c = c->next()) {
+                intervals.push_back(c);
+            }
+
+            tree = new IntervalTree<T>(intervals);
+        }
+    }
 
 protected:
     std::vector<T*> inv;
     IntervalTree<T>* tree;
     Contig* parent;
 
+    static bool cmp_start(T* a, T* b)
+    {
+        return ( a->pos[0] < b->pos[0] );
+    }
+
+    static bool cmp_stop(T* a, T* b)
+    {
+        return ( a->pos[1] < b->pos[1] );
+    }
+
+    static bool cmp_start_reverse(T* a, T* b)
+    {
+        return ( a->pos[0] > b->pos[0] );
+    }
+
+    static bool cmp_stop_reverse(T* a, T* b)
+    {
+        return ( a->pos[1] > b->pos[1] );
+    }
+
 public:
 
     // All of these are simple wrappers for std:vector inv
-    virtual T*     front();
-    virtual T*     back();
-    virtual bool   empty();
-    virtual size_t size();
-    virtual void   clear();
+    virtual T*     front()
+    {
+        return inv.front();
+    }
+
+    virtual T*     back()
+    {
+        return inv.back();
+    }
+
+    virtual bool   empty()
+    {
+        return inv.empty();
+    }
+
+    virtual size_t size()
+    {
+        return inv.size();
+    }
+
+    virtual void   clear()
+    {
+        inv.clear();
+        delete tree;
+    }
 
     // Iterate through intervals, calling print on each
-    virtual void print();
+    virtual void print()
+    {
+        for(auto &x : inv) {
+            x->print();
+        }
+    }
 
     // wrapper for std::vector.push_back(T*)
-    virtual void add(T*);
+    virtual void add(T* x)
+    {
+        inv.push_back(x);
+    }
 
     /** Sort inv by pos[0]*/
-    void sort();
+    void sort()
+    {
+        std::sort(inv.begin(), inv.end(), IntervalSet<T>::cmp_start);
+    }
 
     /** Sort inv in various ways
      *
@@ -53,7 +151,26 @@ public:
      * - 3 = sort reverse by stop
      *
      */
-    void sort(int sort_method);
+    void sort(int sort_method)
+    {
+        switch(sort_method) {
+            case 0:
+                std::sort(inv.begin(), inv.end(), IntervalSet<T>::cmp_start);
+                break;
+            case 1:
+                std::sort(inv.begin(), inv.end(), IntervalSet<T>::cmp_start_reverse);
+                break;
+            case 2:
+                std::sort(inv.begin(), inv.end(), IntervalSet<T>::cmp_stop);
+                break;
+            case 3:
+                std::sort(inv.begin(), inv.end(), IntervalSet<T>::cmp_stop_reverse);
+                break;
+            default:
+                fprintf(stderr, "Sort method must be in {0,1,2,3}\n");
+                exit(EXIT_FAILURE);
+        }
+    }
 
     /** Given two points, find all blocks overlapping or flanking them
      *
@@ -65,7 +182,22 @@ public:
      * syntenic interval), return just the nearest interval.
      *
      */
-    IntervalResult<T>* get_region(Bound& b, bool get_flank_overlaps);
+    IntervalResult<T>* get_region(Bound& bound, bool get_flank_overlaps)
+    {
+        tree = build_tree(tree);
+
+        // Search itree
+        IntervalResult<T>* res = tree->get_overlaps(&bound);
+
+        // I want everything that overlaps the flanks if I am doing a Block search.
+        // For ContiguousSet searches, I currently only want overlapping intervals.
+        // TODO find a better solution
+        if (get_flank_overlaps) {
+            res = add_whatever_overlaps_flanks(res);
+        }
+
+        return res;
+    }
 };
 
 #endif

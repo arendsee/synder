@@ -35,9 +35,6 @@ public:
 
     void link_contiguous_blocks(long k, size_t &setid);
 
-    /** Given two points, find the number of blocks they overlap */
-    long count_overlaps(long a, long b);
-
     /** This should be called whenever an operation corrupts an itree */
     void clear_cset_tree();
 
