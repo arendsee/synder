@@ -3,8 +3,9 @@
 
 #include "interval.h"
 
-class Bound : Interval<Bound>
+class Bound : public Interval<Bound>
 {
+public:
     Bound();
     Bound(long start, long stop);
 };

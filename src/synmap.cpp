@@ -184,62 +184,63 @@ void Synmap::validate()
 
 
 bool Synmap::process_gff(FILE* intfile, Command cmd){
-    // // start and stop positions read from input line
-    // long start, stop;
-    // Bound bound;
-    // // Name of query input (e.g. AT1G01010)
-    // char seqname[NAME_BUFFER_SIZE];
-    // // Index of query chromosome
-    // char contig_seqname[NAME_BUFFER_SIZE];
+    // start and stop positions read from input line
+    long start, stop;
+    Bound bound;
+    // Name of query input (e.g. AT1G01010)
+    char seqname[NAME_BUFFER_SIZE];
+    // Index of query chromosome
+    char contig_seqname[NAME_BUFFER_SIZE];
     // // query contig
     // Contig* qcon;
-    // 
-    // char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
-    // while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
-    // 
-    //     // skip comments
-    //     if (line[0] == '#')
-    //         continue;
-    // 
-    //     if (!sscanf(line,
-    //                 "%s %*s %*s %zu %zu %*s %*c %*s %s\n",
-    //                 contig_seqname, &start, &stop, seqname)) {
-    //         printf("invalid input\n");
-    //         exit(EXIT_FAILURE);
-    //     }
-    //     qcon = syn->get_contig(0, contig_seqname);
-    // 
-    //     if(qcon == NULL) {
-    //         fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
-    //         continue;
-    //     }
-    // 
-    //     check_in_offset(start, stop);
-    //     start -= Offsets::in_start;
-    //     stop -= Offsets::in_stop;
-    // 
-    //     bound.start = start;
-    //     bound.stop = stop;
-    // 
-    //     switch(cmd){
-    //         case C_FILTER:
-    //             fprintf(stderr, "Filter function currently unavailable\n");
-    //             return false;
-    //         case C_COUNT:
-    //             qcon->count(bound, seqname);
-    //         case C_SEARCH:
-    //             qcon->find_search_intervals(bound, seqname);
-    //         case C_MAP:
-    //             qcon->map(bound, seqname);
-    //         case C_UNSET:
-    //             fprintf(stderr, "Please, give me a command\n");
-    //             return false;
-    //         default:
-    //             fprintf(stderr, "Command '%s' not recognized\n", args.cmd.c_str());
-    //             args.print_help();
-    //             return false;
-    //     }
-    // }
-    // free line;
+
+    char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
+    while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
+
+        // skip comments
+        if (line[0] == '#')
+            continue;
+
+        if (!sscanf(line,
+                    "%s %*s %*s %ld %ld %*s %*c %*s %s\n",
+                    contig_seqname, &start, &stop, seqname)) {
+            printf("invalid input\n");
+            exit(EXIT_FAILURE);
+        }
+
+        check_in_offset(start, stop);
+        start -= Offsets::in_start;
+        stop -= Offsets::in_stop;
+
+        bound.pos[0] = start;
+        bound.pos[1] = stop;
+
+        // qcon = syn->get_contig(0, contig_seqname);
+        // 
+        // if(qcon == NULL) {
+        //     fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
+        //     continue;
+        // }
+        // 
+        // switch(cmd){
+        //     case C_FILTER:
+        //         fprintf(stderr, "Filter function currently unavailable\n");
+        //         return false;
+        //     case C_COUNT:
+        //         qcon->count(bound, seqname);
+        //     case C_SEARCH:
+        //         qcon->find_search_intervals(bound, seqname);
+        //     case C_MAP:
+        //         qcon->map(bound, seqname);
+        //     case C_UNSET:
+        //         fprintf(stderr, "Please, give me a command\n");
+        //         return false;
+        //     default:
+        //         fprintf(stderr, "Command '%s' not recognized\n", args.cmd.c_str());
+        //         args.print_help();
+        //         return false;
+        // }
+    }
+    free(line);
     return true;
 }

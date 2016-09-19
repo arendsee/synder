@@ -2,6 +2,7 @@
 #define __SYNMAP_H__
 
 #include "global.h"
+#include "bound.h"
 #include "genome.h"
 #include "arguments.h"
 #include "linked_interval.h"
