@@ -2,10 +2,11 @@
 #define __BLOCK_H__
 
 #include "global.h"
-#include "contig.h"
 #include "interval.h"
 #include "linked_interval.h"
-#include "contiguous_set.h"
+
+// forward declaration
+class ContiguousSet;
 
 class Block : public LinkedInterval<Block>, public Interval<Block>
 {

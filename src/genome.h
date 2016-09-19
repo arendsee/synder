@@ -3,7 +3,6 @@
 
 #include "global.h"
 #include "contig.h"
-#include "block.h"
 
 #include <map>
 #include <stack>

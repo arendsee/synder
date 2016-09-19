@@ -3,10 +3,15 @@
 
 #include "global.h"
 
-template<class T>
-class LinkedInterval
+// Forward declarations
+class Contig;
+
+template<class T> class LinkedInterval
 {
-private:
+// TODO remove friendship
+friend class ManyBlocks;
+
+protected:
     T*      over;   // homologous element
     Contig* parent; // Contig parent of this interval
     char    strand; // strand relative to query
@@ -17,19 +22,19 @@ private:
     size_t  id;     // unique id for element
 
 public:
+    T* prev();
+    T* next();
+    T* prev_adj();
+    T* next_adj();
+    T* corner(size_t i);
 
-    T* prev()         { return cor[0]; }
-    T* next()         { return cor[1]; }
-    T* prev_adj()     { return adj[1]; }
-    T* next_adj()     { return adj[1]; }
-    T* cor(size_t i)  { return cor[i]; }
+    T*      get_over();
+    Contig* get_parent();
+    char    get_strand();
+    size_t  get_grpid();
+    size_t  get_id();
 
-    T* over()         { return over;   }
-    Conitig* parent() { return parent; }
-    char strand       { return strand; }
-    size_t grpid      { return grpid;  }
-    size_t id         { return id;     }
-
+    static void link_homologs(T* a, T* b);
 };
 
 #endif

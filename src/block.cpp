@@ -33,20 +33,20 @@ Block::~Block() { }
 
 void Block::print()
 {
-    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
-           parent->name.c_str(),
-           pos[0] + Offsets::out_start,
-           pos[1] + Offsets::out_stop,
-           over->parent->name.c_str(),
-           over->pos[0] + Offsets::out_start,
-           over->pos[1] + Offsets::out_stop,
-           strand
-          );
-    if(cset != NULL) {
-        printf("\t%zu\n", cset->id);
-    } else {
-        printf("\t-\n");
-    }
+    // printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
+    //        parent->name.c_str(),
+    //        pos[0] + Offsets::out_start,
+    //        pos[1] + Offsets::out_stop,
+    //        over->parent->name.c_str(),
+    //        over->pos[0] + Offsets::out_start,
+    //        over->pos[1] + Offsets::out_stop,
+    //        strand
+    //       );
+    // if(cset != NULL) {
+    //     printf("\t%zu\n", cset->id);
+    // } else {
+    //     printf("\t-\n");
+    // }
 }
 
 void Block::unlink(Block* blk, int u, int d)
@@ -118,7 +118,7 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
     // if(! (a->overlap(b) && a->over->overlap(b->over)) ) {
     //     fprintf(stderr, "Blocks are not doubly overlapping, I don't know how to merge them\n");
     // }
-    // 
+    //
     // long olen = a->overlap_length(b);
     // long al = a->pos[1] - a->pos[0] + 1;
     // long bl = b->pos[1] - b->pos[0] + 1;
@@ -126,15 +126,15 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
     //     ((double)(al - olen) / (al)) * a->score +
     //     ((double)(bl - olen) / (bl)) * b->score +
     //     olen * (a->score / al + b->score / bl) / 2;
-    // 
+    //
     // b->score       = score;
     // b->over->score = score;
-    // 
+    //
     // merge_block_a_into_b_edge_(a, b, 0);
     // merge_block_a_into_b_edge_(a, b, 1);
     // merge_block_a_into_b_edge_(a->over, b->over, 0);
     // merge_block_a_into_b_edge_(a->over, b->over, 1);
-    // 
+    //
     // memset(a->over, 0, sizeof(Block));
     // memset(a, 0, sizeof(Block));
 }

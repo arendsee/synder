@@ -82,8 +82,7 @@ void Synmap::load_blocks()
         tblk = genome[1]->add_block(seqid[1], start[1], stop[1], score, strand);
 
         // link homologs
-        qblk->over = tblk;
-        tblk->over = qblk;
+        LinkedInterval<Block>::link_homologs(qblk, tblk);
 
     }
     free(line);

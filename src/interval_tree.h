@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "global.h"
-#include "interval.h"
 #include "itree_result.hpp"
 #include "bound.h"
 

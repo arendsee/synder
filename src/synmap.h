@@ -4,6 +4,7 @@
 #include "global.h"
 #include "genome.h"
 #include "arguments.h"
+#include "linked_interval.h"
 
 #include <iterator>
 #include <list>

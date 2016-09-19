@@ -49,62 +49,15 @@ void Contig::print(bool forward, bool print_blocks)
     // }
 }
 
-void Contig::link_contiguous_blocks(long k, size_t &setid)
+void Contig::set_contig_corners()
 {
-    // 
-    // std::list<ContiguousSet*> csets;
-    // std::list<ContiguousSet*>::iterator iter = csets.begin();
-    // 
-    // for (Block* blk = cor[0]; blk != NULL; blk = blk->cor[1]) {
-    //     iter = csets.begin();
-    //     while (true) {
-    //         if (iter == csets.end()) {
-    //             // if block fits in no set, create a new one
-    //             csets.push_front(new ContiguousSet(blk));
-    //             break;
-    //         }
-    //         // if block has joined a set
-    //         else if ((*iter)->add_block(blk, k)) {
-    //             break;
-    //         }
-    //         // if set terminates
-    //         else if (strictly_forbidden((*iter)->ends[1], blk, k)) {
-    //             iter = csets.erase(iter);
-    //         } else {
-    //             iter++;
-    //         }
-    //     }
-    // }
-    // 
-    // ContiguousSet* cset_ptr = *csets.begin();
-    // // rewind - TODO - build the csets such that this isn't necessary
-    // while (cset_ptr->prev != NULL) {
-    //     cset_ptr = cset_ptr->prev;
-    // }
-    // cset = cset_ptr;
-    // while (cset_ptr != NULL) {
-    //     setid++;
-    //     cset_ptr->id = setid;
-    //     cset_ptr->over->id = setid;
-    //     cset_ptr = cset_ptr->next;
-    // }
-}
-
-void Contig::merge_doubly_overlapping_blocks()
-{
-    // Block *lo, *hi;
-    // 
-    // // iterate through all blocks
-    // for (lo = cor[0]; lo != NULL; lo = lo->cor[1]) {
-    //     // look ahead to find all doubly-overlapping blocks
-    //     for (hi = lo->cor[1]; hi != NULL; hi = hi->cor[1]) {
-    //         if (! hi->overlap(lo)) {
-    //             break;
-    //         }
-    //         if (hi->over->overlap(lo->over) && hi->over->parent == lo->over->parent) {
-    //             merge_block_a_into_b(hi, lo);
-    //             hi = lo;
-    //         }
+    // for (size_t i = 0; i < 4; i++)
+    // {
+    //     k = i % 2 == 0 ? 0 : block.size() - 1;
+    //     cor[i] = block[k];
+    //     while (cor[i]->cor[i] != NULL)
+    //     {
+    //         cor[i] = cor[i]->cor[i];
     //     }
     // }
 }

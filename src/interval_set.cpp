@@ -45,11 +45,13 @@ void IntervalSet<T>::clear()
     delete tree;
 }
 
+template<typename T>
 void IntervalSet<T>::sort()
 {
     std::sort(inv, cmp_start);
 }
 
+template<typename T>
 void IntervalSet<T>::sort(int sort_method)
 {
     switch(sort_method){
@@ -96,21 +98,21 @@ bool IntervalSet<T>::cmp_stop_reverse(T* a, T* b)
 }
 
 template<typename T>
-IntervalResult<T>* IntervalSet<T>::get_region(Bound& bound)
+IntervalResult<T>* IntervalSet<T>::get_region(Bound& bound, bool get_flank_overlaps)
 {
-    // tree = build_tree(tree);
-    //
-    // // Search itree
-    // IntervalResult* res = tree->get_overlaps(&bound);
-    //
-    // // I want everything that overlaps the flanks if I am doing a Block search.
-    // // For ContiguousSet searches, I currently only want overlapping intervals.
-    // // TODO find a better solution
-    // if (get_flanks) {
-    //     res = add_whatever_overlaps_flanks(res);
-    // }
-    //
-    // return res;
+    tree = build_tree(tree);
+
+    // Search itree
+    IntervalResult<T>* res = tree->get_overlaps(&bound);
+
+    // I want everything that overlaps the flanks if I am doing a Block search.
+    // For ContiguousSet searches, I currently only want overlapping intervals.
+    // TODO find a better solution
+    if (get_flank_overlaps) {
+        res = add_whatever_overlaps_flanks(res);
+    }
+
+    return res;
 }
 
 template<typename T>
@@ -163,10 +165,10 @@ void IntervalSet<T>::build_tree()
 
         std::vector<T*> intervals;
 
-        for (T* c = inv.front(); c != NULL; c = c->next) {
+        for (T* c = inv.front(); c != NULL; c = c->next()) {
             intervals.push_back(c);
         }
 
-        tree = new IntervalTree(intervals);
+        tree = new IntervalTree<T>(intervals);
     }
 }

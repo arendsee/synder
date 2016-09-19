@@ -12,18 +12,21 @@ LINKER_FLAGS=-lm
 CC=g++
 TARGET=synder
 
-OBJECTS=               \
-	global.o           \
-	interval.o         \
-	bound.o            \
-	interval_tree.o    \
-	arguments.o        \
-	block.o            \
-	contig.o           \
-	genome.o           \
-	contiguous_set.o   \
-	synmap.o           \
-	main.o             \
+OBJECTS=                   \
+	global.o               \
+	arguments.o            \
+	interval.o             \
+	linked_interval.o      \
+	bound.o                \
+	interval_tree.o        \
+	block.o                \
+	contiguous_set.o       \
+	interval_set.o         \
+	many_blocks.o          \
+	contig.o               \
+	genome.o               \
+	synmap.o               \
+	main.o                 \
 
 ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${OBJECTS} ${LINKER_FLAGS}

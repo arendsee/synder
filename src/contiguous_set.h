@@ -2,9 +2,11 @@
 #define __CONTIGUOUS_SET_H__
 
 #include "global.h"
-#include "block.h"
 #include "interval_tree.h"
 #include "linked_interval.h"
+
+// Forward declarations
+class Block;
 
 
 /** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */

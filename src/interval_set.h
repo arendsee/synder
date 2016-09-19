@@ -1,18 +1,30 @@
 #ifndef __INTERVAL_SET_H__
 #define __INTERVAL_SET_H__
 
+#include <vector>
+
+#include "global.h"
+#include "interval_tree.h"
+
+class Contig;
+
 template <class T>
 class IntervalSet
 {
 private:
-    std::vector<T*> inv;
-    IntervalTree<T>* tree;
-
     /** interval comparators - used in std::sort */
     bool cmp_start(T* a, T* b);
     bool cmp_stop(T* a, T* b);
     bool cmp_start_reverse(T* a, T* b);
     bool cmp_stop_reverse(T* a, T* b);
+
+    T* add_whatever_overlaps_flanks(T* res);
+    void build_tree();
+
+protected:
+    std::vector<T*> inv;
+    IntervalTree<T>* tree;
+    Contig* parent;
 
 public:
 
@@ -53,7 +65,7 @@ public:
      * syntenic interval), return just the nearest interval.
      *
      */
-    IntervalResult<T>* get_region(Bound& b);
+    IntervalResult<T>* get_region(Bound& b, bool get_flank_overlaps);
 };
 
 #endif

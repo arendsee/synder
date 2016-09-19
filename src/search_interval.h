@@ -1,6 +1,9 @@
 #ifndef __SEARCH_INTERVAL_H__
 #define __SEARCH_INTERVAL_H__
 
+#include "interval.h"
+
+
 class SearchInterval : Interval<SearchInterval>
 {
 private:
@@ -52,7 +55,5 @@ public:
     void print();
 
 }
-
-
 
 #endif

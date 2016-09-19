@@ -3,7 +3,8 @@
 
 #include <vector>
 
-#include "interval_tree.h"
+// Forward declaration
+template <class T> class IntervalTree; 
 
 /** A container for results from searches for overlaps
  *
