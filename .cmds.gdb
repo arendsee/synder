@@ -10,6 +10,7 @@ break -function Synmap::link_contiguous_blocks
 # break -function Synmap::validate
 # break -function find_search_intervals
 # break -function get_region
+break -function add_block
 
 # set print repeats 100
 # 

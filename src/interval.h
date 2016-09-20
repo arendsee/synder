@@ -3,10 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <array>
 
 #define START(inv) inv->pos[0]
 #define STOP(inv) inv->pos[1]
-
 
 /** position of Interval or point A relative to B */
 typedef enum {lo = 0, in = 1, hi = 2} Pos;
@@ -15,7 +15,15 @@ template <class T>
 class Interval
 {
 public:
-    long pos[2];
+
+    std::array<long, 2> pos = { 0, 0 };
+
+    Interval() {}
+
+    Interval(long t_start, long t_stop)
+        :
+        pos ( { t_start, t_stop }  )
+    {}
 
     /** find position of point A relative to interval B (see Pos) */
     Pos position_relative_to(long a)
@@ -31,11 +39,11 @@ public:
 
     /** find position of this interval other */
     template <class U>
-    Pos position_relative_to(U* b)
+    Pos position_relative_to(U* other)
     {
-        if (pos[1] < b->pos[0]) {
+        if (pos[1] < other->pos[0]) {
             return lo;
-        } else if (pos[0] > b->pos[1]) {
+        } else if (pos[0] > other->pos[1]) {
             return hi;
         } else {
             return in;
@@ -44,12 +52,12 @@ public:
 
     /** Determine whether intervals */
     template <class U>
-    bool overlap(U* b)
+    bool overlap(U* other)
     {
         long a1 = pos[0];
         long a2 = pos[1];
-        long b1 = b->pos[0];
-        long b2 = b->pos[1];
+        long b1 = other->pos[0];
+        long b2 = other->pos[1];
 
         // If the intervals overlap
         if(a1 <= b2 && b1 <= a2) {
@@ -66,12 +74,12 @@ public:
 
     /** Calculate the length of the overlap of two intervals */
     template <class U>
-    long overlap_length(U* b)
+    long overlap_length(U* other)
     {
         long a1 = pos[0];
         long a2 = pos[1];
-        long b1 = b->pos[0];
-        long b2 = b->pos[1];
+        long b1 = other->pos[0];
+        long b2 = other->pos[1];
 
         return (a1 <= b2) && (a2 >= b1);
     }

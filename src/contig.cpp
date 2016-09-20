@@ -1,23 +1,13 @@
 #include "contig.h"
 
-Contig::Contig()
-{
-    length = default_length;
-    name   = "";
-    parent = NULL;
-    // TODO handle IntervalSet initialization
-}
+Contig::Contig(const char* t_genome_name, const char* t_contig_name, long t_length);
+:
+    block(), cset(), feat(t_genome_name, 0, t_length, t_contig_name, t_length)
+{ }
 
-Contig::Contig(std::string new_name, Genome* new_parent)
-    : parent(new_parent), name(new_name)
+void Contig::set_length(long t_length)
 {
-    length = default_length;
-    // TODO handle IntervalSet initialization
-}
-
-Contig::~Contig()
-{
-    // TODO I don't think there actually is anything to remove
+    length = feat.length = t_length;
 }
 
 void Contig::print(bool forward, bool print_blocks)
@@ -49,112 +39,83 @@ void Contig::print(bool forward, bool print_blocks)
     // }
 }
 
-void Contig::set_contig_corners()
+void Contig::count(const Feature& feat)
 {
-    // for (size_t i = 0; i < 4; i++)
-    // {
-    //     k = i % 2 == 0 ? 0 : block.size() - 1;
-    //     cor[i] = block[k];
-    //     while (cor[i]->cor[i] != NULL)
-    //     {
-    //         cor[i] = cor[i]->cor[i];
-    //     }
-    // }
+    build_block_itree();
+    long count = itree->count_overlaps(feat);
+    printf("%s\t%zu\n", seqname, count);
 }
 
-void Contig::link_contiguous_blocks(long k, size_t &setid){
-    cset->link_contiguous_blocks(block->front(), k, setid);
-}
-
-
-void Contig::sort_blocks(bool by_stop)
+void Contig::map(const Feature& feat)
 {
-    // auto cmp = by_stop ? Block::cmp_start : Block::cmp_stop;
-    // std::sort(blocks.begin(), blocks.end(), cmp);
+    Block *qblk, *tblk;
+    ContigResult* rc = get_region(feat, true);
+    bool missing = rc->inbetween || rc->leftmost || rc->rightmost;
+
+    for (size_t i = 0; i < rc->size; i++) {
+        qblk = rc->block[i];
+        if (qblk != NULL) {
+            tblk = qblk->over;
+            printf("%s %s %zu %zu %d\n",
+                   feat.feature_name,
+                   feat.contig_name,
+                   tblk->pos[0] + Offsets::out_start,
+                   tblk->pos[1] + Offsets::out_stop,
+                   missing
+                  );
+        }
+    }
+    free(rc);
 }
 
-void Contig::clear_cset_tree()
-{
-    // TODO implement
-}
+void Contig::find_search_intervals(const Feature& feat){
+    // List of contiguous sets
+    CSList *cslist;
+    // A pointer to the root node of cslist (needed only for freeing the list)
+    CSList *root;
+    // Does starget strand == '-'?
+    bool inverted;
+    // Row output of itree
+    ResultContig* rc;
+    // Row output of ctree
+    ResultContig* crc;
+    // Output search interval
+    SearchInterval si(this);
 
-void Contig::count(Bound& bound, char* seqname)
-{
-    // build_block_itree();
-    // long count = itree->count_overlaps(bound);
-    // printf("%s\t%zu\n", seqname, count);
-}
+    // Get blocks overlapping the query
+    rc = block->get_region(feat, true);
 
-void Contig::map(Bound& bound, char* seqname)
-{
-    // Block *qblk, *tblk;
-    // ContigResult* rc = get_region(bound, false);
-    // bool missing = rc->inbetween || rc->leftmost || rc->rightmost;
-    // 
-    // for (size_t i = 0; i < rc->size; i++) {
-    //     qblk = rc->block[i];
-    //     if (qblk != NULL) {
-    //         tblk = qblk->over;
-    //         printf("%s %s %zu %zu %d\n",
-    //                seqname,
-    //                tblk->parent->name.c_str(),
-    //                tblk->pos[0] + Offsets::out_start,
-    //                tblk->pos[1] + Offsets::out_stop,
-    //                missing
-    //               );
-    //     }
-    // }
-    // free(rc);
-}
+    // get list of highest and lowest members of each contiguous set
+    cslist = init_empty_CSList();
+    root = cslist;
+    for(size_t i = 0; i < rc->size; i++) {
+        add_blk_CSList(cslist, rc->block[i]);
+    }
 
-void Contig::find_search_intervals(Bound& bounds, char* seqname){
-    // // List of contiguous sets
-    // CSList *cslist;
-    // // A pointer to the root node of cslist (needed only for freeing the list)
-    // CSList *root;
-    // // Does starget strand == '-'?
-    // bool inverted;
-    // // Row output of itree
-    // ResultContig* rc;
-    // // Row output of ctree
-    // ResultContig* crc;
-    // // Output search interval
-    // SearchInterval si(this);
-    // 
-    // // Get blocks overlapping the query
-    // rc = get_region(bounds, block, true);
-    // 
-    // // get list of highest and lowest members of each contiguous set
-    // cslist = init_empty_CSList();
-    // root = cslist;
-    // for(size_t i = 0; i < rc->size; i++) {
-    //     add_blk_CSList(cslist, rc->block[i]);
-    // }
-    // 
-    // // TODO what am I doing here?
-    // // Merge all this crap into the SearchInterval class
-    // crc = get_region(bounds, cset, false);
-    // if(! (crc->inbetween || crc->leftmost || crc->rightmost) ) {
-    //     for(size_t i = 0; i < crc->size; i++) {
-    //         add_cset_CSList(cslist, crc->cset[i], bounds);
-    //     }
-    // }
-    // 
-    // // Iterate through each contiguous set, for each find the search interval
-    // // For each contiguous set, there is exactly one search interval, or into a new SearchIntervalSet class
-    // for(; cslist != NULL; cslist = cslist->next) {
-    // 
-    //     blk_bounds[LO] = cslist->bound[LO];
-    //     blk_bounds[HI] = cslist->bound[HI];
-    // 
-    //     // TODO fix the smell
-    //     si = build_search_interval(bounds, blk_bounds, seqname, rc->inbetween || rc->leftmost || rc->rightmost);
-    //     si->print();
-    // 
-    // }
-    // 
-    // free_ResultContig(rc);
-    // free_ResultContig(crc);
-    // free_CSList(root);
-    // 
+    // TODO what am I doing here?
+    // Merge all this crap into the SearchInterval class
+    crc = cset->get_region(feat, false);
+    if(! (crc->inbetween || crc->leftmost || crc->rightmost) ) {
+        for(size_t i = 0; i < crc->size; i++) {
+            add_cset_CSList(cslist, crc->cset[i], feat);
+        }
+    }
+
+    // Iterate through each contiguous set, for each find the search interval
+    // For each contiguous set, there is exactly one search interval, or into a new SearchIntervalSet class
+    for(; cslist != NULL; cslist = cslist->next) {
+
+        blk_bounds[LO] = cslist->bound[LO];
+        blk_bounds[HI] = cslist->bound[HI];
+
+        // TODO fix the smell
+        si = build_search_interval(feat, blk_bounds, seqname, rc->inbetween || rc->leftmost || rc->rightmost);
+        si->print();
+
+    }
+
+    free_ResultContig(rc);
+    free_ResultContig(crc);
+    free_CSList(root);
+
 }

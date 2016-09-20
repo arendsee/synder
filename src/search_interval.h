@@ -2,18 +2,15 @@
 #define __SEARCH_INTERVAL_H__
 
 #include "interval.h"
-
+#include "feature.h"
 
 class SearchInterval : Interval<SearchInterval>
 {
 private:
-    char* seqname[NAME_BUFFER_SIZE];
-    ContiguousSet* cset;
-    Bound* qbound;
-
-    double score;
-    int flag[2];
-    bool inbetween;
+    Feature& feat;
+    double   score;
+    int      flag[2];
+    bool     inbetween;
 
     typedef struct SI_Bound {
         long bound;
@@ -46,7 +43,7 @@ private:
     int get_flag(SI_Bound* br[2]);
 
 public:
-    SearchInterval(Contig* qcon);
+    SearchInterval(const Feature& feat);
     ~SearchInterval();
 
     // TODO this is smells awful

@@ -4,6 +4,7 @@
 #include "global.h"
 #include "many_blocks.h"
 #include "many_contiguous_sets.h"
+#include "feature.h"
 
 #include <array>
 #include <vector>
@@ -15,31 +16,21 @@ class Genome;
 
 class Contig {
 private:
-    const static long default_length = 1000000000;
+    Feature feat;
+    ManyBlocks block;
+    ManyContiguousSets cset;
 
 public:
-    Genome* parent;
-    std::string name;
-    long length;
-    ManyBlocks* block;
-    ManyContiguousSets* cset;
 
     Contig();
-    Contig(std::string name, Genome* parent);
+    Contig(std::string genome_name, std::string contig_name, long length=1000000000);
 
-    ~Contig();
+    void set_length(long length);
 
     void print(bool forward=true, bool print_blocks=true);
 
-    void set_contig_corners();
-
-    void link_contiguous_blocks(long k, size_t &setid);
-
-    /** This should be called whenever an operation corrupts an itree */
-    void clear_cset_tree();
-
     /** Print target regions from a given query */
-    void find_search_intervals(Bound& bounds, char* seqname);
+    void find_search_intervals(const Feature& feat);
 
     /** Write blocks overlapping intervals in intfile
      *
@@ -49,16 +40,13 @@ public:
      * - target start position
      * - target stop position
      */
-    void map(Bound& bound, char* seqname);
+    void map(const Feature& feat);
 
     /** Count blocks overlapping intervals in intfile
      *
      * Prints the input sequence name and count to STDOUT in TAB-delimited format.
      */
-    void count(Bound& bound, char* seqname);
-
-    // TODO need this? Or should IntervalSet handle?
-    void sort_blocks(bool by_stop);
+    void count(const Feature& feat);
 
 };
 

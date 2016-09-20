@@ -6,6 +6,7 @@
 #include "genome.h"
 #include "arguments.h"
 #include "linked_interval.h"
+#include "feature.h"
 
 #include <iterator>
 #include <list>
@@ -28,13 +29,7 @@ private:
     void load_blocks();
 
     // wrappers for Genome functions
-    void set_contig_lengths();
-    void link_block_corners();
-    void set_contig_corners();
-    void merge_doubly_overlapping_blocks();
-    void set_overlap_group();
-    void link_adjacent_blocks();
-    void link_contiguous_blocks(long k);
+    void link_blocks();
 
     /** Checks invariants - dies if anything goes wrong */
     void validate();

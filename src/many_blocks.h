@@ -7,14 +7,18 @@
 #include "interval_set.h"
 
 #include <list>
+#include <array>
+
 
 class ManyBlocks : public IntervalSet<Block>
 {
 protected:
-    Block* cor[4];    
+    std::array<Block*, 4> cor;    
 
 public:
     // Base over-rides
+    ManyBlocks();
+    ~ManyBlocks();
     Block* front();
     Block* back();
     bool   empty();
@@ -22,7 +26,10 @@ public:
     void   clear();
 
     Block* front(size_t i);
-    Block* terminus(size_t i);
+    Block* corner(size_t i);
+
+    // Called by Contig:set_contig_corners
+    void link_corners();
 
     void link_block_corners();
     void set_overlap_group();

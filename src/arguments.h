@@ -2,6 +2,7 @@
 #define __ARGUMENTS_H__
 
 #include <getopt.h>
+#include <array>
 
 #include "global.h"
 #include "version.h"
@@ -22,24 +23,24 @@ class Arguments
 {
 
 private:
-    void set_defaults();
     void check_file(FILE* fp, char* name);
     void set_offsets(char* offset);
 
 public:
-    FILE *synfile;
-    FILE *intfile;
-    FILE *hitfile;
-    FILE *tclfile;
-    FILE *qclfile;
-    Command cmd;
+
+    Command cmd = C_UNSET;
+    FILE *synfile = nullptr;
+    FILE *intfile = nullptr;
+    FILE *hitfile = nullptr;
+    FILE *tclfile = nullptr;
+    FILE *qclfile = nullptr;
+    bool dump_blks = false;
+    bool swap = false;
+    bool debug = false;
+    std::array<int, 4> offsets = {0, 0, 0, 0};
+    long k = 0;
+    char trans = 'i';
     std::vector<std::string> pos;
-    int offsets[4];
-    long k;
-    char trans;
-    bool dump_blks;
-    bool swap;
-    bool debug;
 
     Arguments(int argc, char *argv[]);
     ~Arguments();

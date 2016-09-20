@@ -13,6 +13,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <exception>
 
 #include <iostream>
 using std::cout;

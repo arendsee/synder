@@ -2,27 +2,27 @@
 #define __CONTIGUOUS_SET_H__
 
 #include "global.h"
-#include "interval_tree.h"
+#include "interval.h"
+#include "feature.h"
 #include "linked_interval.h"
-
-// Forward declarations
-class Block;
+#include "block.h"
+#include "interval_tree.h"
 
 
 /** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
-class ContiguousSet : LinkedInterval<ContiguousSet>
+class ContiguousSet : public LinkedInterval<ContiguousSet>, public Interval<ContiguousSet>
 {
 private:
-    static void add_block_side_(Block* blk);
-    static bool blocks_conflict(Block* a, Block* b);
-    static void ContiguousSet_side_(Block* blk);
+    void add_block_side_(Block* blk);
+    bool blocks_conflict(Block* a, Block* b);
+    void ContiguousSet_side_(Block* blk);
 
 public:
-    size_t         size;
-    ContiguousSet* next;
-    ContiguousSet* prev;
-    size_t         id;
-    Block*         ends[2];
+    size_t         size    = 0;
+    ContiguousSet* next    = nullptr;
+    ContiguousSet* prev    = nullptr;
+    size_t         id      = 0;
+    Block*         ends[2] = { nullptr, nullptr };
 
     ContiguousSet();
     ContiguousSet(Block* blk);
@@ -40,7 +40,7 @@ public:
 
     ContiguousSet* make_pair(Block* blk);
 
-    void print();
+    ContiguousSet::print();
 
     /** Determine whether two blocks are contiguous
      * 

@@ -1,9 +1,8 @@
 #include "search_interval.h"
 
-void SearchInterval::SearchInterval(Contig* new_parent)
-{
-    parent = new_parent;
-}
+void SearchInterval::SearchInterval(const Feature& t_feat)
+    : feat(t_feat)
+{ }
 
 void build_search_interval(Bound& bound, Block* blk_bound[2], char* seqname, bool new_inbetween)
 {
@@ -30,22 +29,22 @@ void build_search_interval(Bound& bound, Block* blk_bound[2], char* seqname, boo
 
 void SearchInterval::print()
 {
-        printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
-               // Output column ids:
-               seqname,                             //  1
-               cset->parent->name.c_str(),          //  2
-               qbound->pos[0] + Offsets::out_start, //  3
-               qbound->pos[1] + Offsets::out_stop,  //  4
-               cset->over->parent->name.c_str(),    //  5
-               pos[0] + Offsets::out_start,         //  6
-               pos[1] + Offsets::out_stop,          //  7
-               cset->over->strand,                  //  8
-               score,                               //  9
-               cset->id,                            // 10
-               flag[0],                             // 11
-               flag[1],                             // 12
-               inbetween                            // 13 TODO fix the smell
-              );
+    printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
+           // Output column ids:
+           feat.feature_name,                             //  1
+           feat.contig_name,          //  2
+           qbound->pos[0] + Offsets::out_start, //  3
+           qbound->pos[1] + Offsets::out_stop,  //  4
+           cset->over->parent->name.c_str(),    //  5
+           pos[0] + Offsets::out_start,         //  6
+           pos[1] + Offsets::out_stop,          //  7
+           cset->over->strand,                  //  8
+           score,                               //  9
+           cset->id,                            // 10
+           flag[0],                             // 11
+           flag[1],                             // 12
+           inbetween                            // 13 TODO fix the smell
+          );
 }
 
 SI_Bound* SearchInterval::init_SI_Bound(long bound, int flag)

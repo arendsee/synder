@@ -10,9 +10,16 @@ Synmap::Synmap(Arguments& args)
     trans   = args.trans;
 
     load_blocks();
-    set_contig_lengths();
     validate();
 }
+
+
+Synmap::~Synmap()
+{
+    delete genome[0];
+    delete genome[1];
+}
+
 
 void Synmap::load_blocks()
 {
@@ -87,14 +94,34 @@ void Synmap::load_blocks()
     }
     free(line);
 
-    // // The following must be run in order
-    // link_block_corners();
-    // set_contig_corners();
-    // merge_doubly_overlapping_blocks();
-    // set_overlap_group();
-    // link_adjacent_blocks();
-    // link_contiguous_blocks(k);
+    link_blocks();
+
+    dump_blocks();
 }
+
+void Synmap::link_blocks()
+{
+    genome[0]->set_contig_lengths(qclfile);
+    genome[1]->set_contig_lengths(tclfile);
+
+    genome[0]->link_block_corners();
+    genome[1]->link_block_corners();
+
+    genome[0]->set_contig_corners();
+    genome[1]->set_contig_corners();
+
+    genome[0]->merge_overlaps();
+
+    genome[0]->set_overlap_group();
+    genome[1]->set_overlap_group();
+
+    genome[0]->link_adjacent_blocks();
+    genome[1]->link_adjacent_blocks();
+
+    size_t setid = 0;
+    genome[0]->link_contiguous_blocks(k, setid);
+}
+
 
 Contig* Synmap::get_contig(size_t gid, char* contig_name)
 {
@@ -103,12 +130,6 @@ Contig* Synmap::get_contig(size_t gid, char* contig_name)
     } else {
         return NULL;
     }
-}
-
-Synmap::~Synmap()
-{
-    delete genome[0];
-    delete genome[1];
 }
 
 void Synmap::print(bool forward)
@@ -133,47 +154,8 @@ void Synmap::print(bool forward)
 
 void Synmap::dump_blocks()
 {
-    // TODO implement
-}
-
-void Synmap::set_contig_lengths()
-{
-    genome[0]->set_contig_lengths(qclfile);
-    genome[1]->set_contig_lengths(tclfile);
-}
-
-void Synmap::link_block_corners()
-{
-    genome[0]->link_block_corners();
-    genome[1]->link_block_corners();
-}
-
-void Synmap::set_contig_corners()
-{
-    genome[0]->set_contig_corners();
-    genome[1]->set_contig_corners();
-}
-
-void Synmap::set_overlap_group()
-{
-    genome[0]->set_overlap_group();
-    genome[1]->set_overlap_group();
-}
-
-void Synmap::link_adjacent_blocks()
-{
-    genome[0]->link_adjacent_blocks();
-    genome[1]->link_adjacent_blocks();
-}
-
-void Synmap::merge_doubly_overlapping_blocks()
-{
-    genome[0]->merge_overlaps();
-}
-
-void Synmap::link_contiguous_blocks(long k)
-{
-    genome[0]->link_contiguous_blocks(k);
+    genome[0]->dump_blocks();
+    genome[1]->dump_blocks();
 }
 
 void Synmap::validate()
@@ -183,10 +165,10 @@ void Synmap::validate()
 }
 
 
-bool Synmap::process_gff(FILE* intfile, Command cmd){
+bool Synmap::process_gff(FILE* intfile, Command cmd)
+{
     // start and stop positions read from input line
     long start, stop;
-    Bound bound;
     // Name of query input (e.g. AT1G01010)
     char seqname[NAME_BUFFER_SIZE];
     // Index of query chromosome
@@ -212,34 +194,33 @@ bool Synmap::process_gff(FILE* intfile, Command cmd){
         start -= Offsets::in_start;
         stop -= Offsets::in_stop;
 
-        bound.pos[0] = start;
-        bound.pos[1] = stop;
-
         qcon = get_contig(0, contig_seqname);
+
+        Feature feat(contig_seqname, start, stop, seqname, qcon->length);
 
         if(qcon == NULL) {
             fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
             continue;
         }
 
-        // switch(cmd){
-        //     case C_FILTER:
-        //         fprintf(stderr, "Filter function currently unavailable\n");
-        //         return false;
-        //     case C_COUNT:
-        //         qcon->count(bound, seqname);
-        //     case C_SEARCH:
-        //         qcon->find_search_intervals(bound, seqname);
-        //     case C_MAP:
-        //         qcon->map(bound, seqname);
-        //     case C_UNSET:
-        //         fprintf(stderr, "Please, give me a command\n");
-        //         return false;
-        //     default:
-        //         fprintf(stderr, "Command '%s' not recognized\n", args.cmd.c_str());
-        //         args.print_help();
-        //         return false;
-        // }
+        switch(cmd){
+            case C_FILTER:
+                fprintf(stderr, "Filter function currently unavailable\n");
+                return false;
+            case C_COUNT:
+                qcon->count(feat);
+            case C_SEARCH:
+                qcon->find_search_intervals(feat);
+            case C_MAP:
+                qcon->map(feat);
+            case C_UNSET:
+                fprintf(stderr, "Please, give me a command\n");
+                return false;
+            default:
+                fprintf(stderr, "Command '%s' not recognized\n", args.cmd.c_str());
+                args.print_help();
+                return false;
+        }
     }
     free(line);
     return true;

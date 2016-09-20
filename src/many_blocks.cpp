@@ -1,11 +1,23 @@
 #include "many_blocks.h"
 
+ManyBlocks::ManyBlocks()
+{
+    cor[0] = NULL;
+    cor[1] = NULL;
+    cor[2] = NULL;
+    cor[3] = NULL;
+}
+
+ManyBlocks::~ManyBlocks(){
+    delete tree;
+}
+
 Block* ManyBlocks::front()
 {
     return cor[0];
 }
 
-Block* ManyBlocks::terminus(size_t i)
+Block* ManyBlocks::corner(size_t i)
 {
     Block* blk = (i < 4) ? cor[i] : NULL;
     return blk;
@@ -55,9 +67,27 @@ void ManyBlocks::link_block_corners()
     }
 }
 
+void ManyBlocks::link_corners(){
+    Block * b;
+    size_t k;
+    try {
+        for (size_t i = 0; i < 4; i++)
+        {
+            k = i % 2 == 0 ? 0 : size() - 1;
+            b = inv.at(k);
+            while (b->corner(i) != NULL)
+            {
+                b = b->corner(i);
+            }
+            cor[i] = b;
+        }
+    } catch (const std::out_of_range& e) {
+        cerr << "Index error in " << __func__ << endl;
+    }
+}
+
 void ManyBlocks::set_overlap_group()
 {
-
     // Holds current overlapping group id
     size_t grpid = 1;
     // Needed for determining overlaps and thus setids
@@ -82,7 +112,22 @@ void ManyBlocks::set_overlap_group()
     }
 }
 
-
+    /** Link each node to its adjacent neighbors
+     *
+     * Link blocks to nearest non-overlapping up and downstream blocks
+     *
+     * For example, given these for blocks:
+     *  |---a---|
+     *            |--b--|
+     *             |----c----|
+     *                     |---d---|
+     *                               |---e---|
+     * a->adj := (NULL, b)
+     * b->adj := (a, e)
+     * c->adj := (a, e)
+     * d->adj := (a, e)
+     * e->adj := (d, NULL)
+     */
 void ManyBlocks::link_adjacent_blocks_directed(Direction d)
 {
     // In diagrams:

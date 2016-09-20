@@ -2,11 +2,12 @@
 #define __BLOCK_H__
 
 #include "global.h"
+#include "feature.h"
 #include "interval.h"
 #include "linked_interval.h"
+#include "contiguous_set.h"
 
-// forward declaration
-class ContiguousSet;
+#include <array>
 
 class Block : public LinkedInterval<Block>, public Interval<Block>
 {
@@ -18,17 +19,19 @@ private:
     static void merge_block_a_into_b_edge_(Block* a, Block* b, int i);
 
 public:
-    Block*         cnr[2]; // adjacent block in contiguous set
-    ContiguousSet* cset;   // contiguous set id
+    // adjacent block in contiguous set
+    std::array<Block*, 2> cnr = {nullptr, nullptr};
+    // contiguous set id
+    ContiguousSet* cset = nullptr;
 
     Block();
     Block(
-        long    start,
-        long    stop,
-        double  score,
-        char    strand,
-        Contig* parent,
-        size_t  linkid
+        long     start,
+        long     stop,
+        double   score,
+        char     strand,
+        Feature* parent,
+        size_t   linkid
     );
     ~Block();
 

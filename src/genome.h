@@ -43,6 +43,8 @@ public:
         return name;
     }
 
+    void dump_blocks();
+
     void print(
         bool print_blocks=true,     // recursively print all blocks
         bool print_backwards=false  // print blocks sorted by stop position
@@ -57,29 +59,11 @@ public:
     /** Set a unique index for each set of overlapping sequences */
     void set_overlap_group();
 
-    /** Link each node to its adjacent neighbors
-     *
-     * Link blocks to nearest non-overlapping up and downstream blocks
-     *
-     * For example, given these for blocks:
-     *  |---a---|
-     *            |--b--|
-     *             |----c----|
-     *                     |---d---|
-     *                               |---e---|
-     * a->adj := (NULL, b)
-     * b->adj := (a, e)
-     * c->adj := (a, e)
-     * d->adj := (a, e)
-     * e->adj := (d, NULL)
-     */
     void link_adjacent_blocks();
-    /** Do one half of the job */
-    void link_adjacent_blocks_directed(Contig* con, Direction d);
 
     void merge_overlaps();
 
-    void link_contiguous_blocks(long k);
+    void link_contiguous_blocks(long k, size_t& setid);
 
     void validate();
 

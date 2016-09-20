@@ -1,27 +1,7 @@
 #include "arguments.h"
 
-void Arguments::set_defaults()
-{
-    synfile     = NULL;
-    intfile     = NULL;
-    hitfile     = NULL;
-    tclfile     = NULL;
-    qclfile     = NULL;
-    cmd         = C_UNSET;
-    offsets[0]  = 0;
-    offsets[1]  = 0;
-    offsets[2]  = 0;
-    offsets[3]  = 0;
-    k           = 0;
-    trans       = 'i';
-    dump_blks   = false;
-    swap        = false;
-    debug       = false;
-}
-
 Arguments::Arguments(int argc, char *argv[])
 {
-    set_defaults();
 
     if (argc == 1) {
         print_help();

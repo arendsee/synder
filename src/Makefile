@@ -2,7 +2,8 @@
 # CFLAGS=-Wall -O2 -std=c++11
 
 # debug build
-CFLAGS=-Wall -pedantic -gdwarf-4 -g3 -std=c++11
+CFLAGS=-Wall -Wextra -pedantic -gdwarf-4 -g3 -std=c++11
+INSUFFERABLE=-Wshadow -Wconversion -Wold-style-cast -Wcast-align -Weffc++ -Wmisleading-indentation
 
 # # profiling build
 # # NOTE: GNU profiler leaks memory, so turn off memory tests
@@ -29,7 +30,7 @@ ${TARGET}: ${OBJECTS}
 	${CC} -o ${TARGET} ${OBJECTS} ${LINKER_FLAGS}
 
 %.o: %.cpp
-	${CC} -c ${CFLAGS} $< -o $@
+	${CC} -c ${CFLAGS} ${INSUFFERABLE} $< -o $@
 	
 clean:
 	rm -f ${OBJECTS} *.{gch,o} ${TARGET}

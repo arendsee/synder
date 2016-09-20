@@ -71,7 +71,7 @@ private:
 protected:
     std::vector<T*> inv;
     IntervalTree<T>* tree;
-    Contig* parent;
+    Feature* parent;
 
     static bool cmp_start(T* a, T* b)
     {
@@ -95,18 +95,24 @@ protected:
 
 public:
 
+
+    virtual ~IntervalSet()
+    {
+        delete tree;
+    }
+
     // All of these are simple wrappers for std:vector inv
-    virtual T*     front()
+    virtual T* front()
     {
         return inv.front();
     }
 
-    virtual T*     back()
+    virtual T* back()
     {
         return inv.back();
     }
 
-    virtual bool   empty()
+    virtual bool empty()
     {
         return inv.empty();
     }
@@ -116,7 +122,7 @@ public:
         return inv.size();
     }
 
-    virtual void   clear()
+    virtual void clear()
     {
         inv.clear();
         delete tree;
