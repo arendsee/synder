@@ -42,9 +42,9 @@ bool ManyBlocks::empty()
 // TODO: set up a constant time alternative
 size_t ManyBlocks::size()
 {
-    size_t N;
+    size_t N = 1;
     for(Block* blk = front(); blk != nullptr; blk = blk->next()) {
-        N++;
+        ++N;
     }
     return N;
 }
@@ -76,10 +76,11 @@ void ManyBlocks::link_block_corners()
 void ManyBlocks::link_corners(){
     Block * b;
     size_t k;
+    size_t N = size();
     try {
         for (size_t i = 0; i < 4; i++)
         {
-            k = i % 2 == 0 ? 0 : size() - 1;
+            k = i % 2 == 0 ? 0 : N - 1;
             b = inv.at(k);
             while (b->corner(i) != nullptr)
             {

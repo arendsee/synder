@@ -297,7 +297,7 @@ runtest(){
             state="P"
         fi
         arch="$archive/${state}_${g_test_num}_`basename $g_dir`"
-        [[ -d $arch ]] && rm -rf $arch
+        # [[ -d $arch ]] && rm -rf $arch
         mkdir -p $arch
         mv $tempfiles $arch 2> /dev/null
         echo $synder_cmd > $arch/$run
