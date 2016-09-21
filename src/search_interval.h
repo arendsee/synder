@@ -4,50 +4,38 @@
 #include "interval.h"
 #include "feature.h"
 
+enum Flag {
+    ANCHORED = 0, // bound in inside a syntenic interval
+    BOUND    = 1, // bound is between members of a contiguous set
+    UNBOUND  = 2, // bound is between contiguous sets
+    BEYOND   = 3, // bound is further out than any syntenic interval
+    EXTREME  = 4  // bound is BEYOND and is tangent to the contig bound
+};
+
 class SearchInterval : Interval<SearchInterval>
 {
 private:
-    Feature& feat;
-    double   score;
-    int      flag[2];
-    bool     inbetween;
 
-    typedef struct SI_Bound {
-        long bound;
-        int flag;
-    } SI_Bound;
+    Feature*             m_feat      = nullptr;
+    bool                 m_inbetween = false;
+    std::array<Block*,2> m_bnds      = {     nullptr, nullptr };
+    double               m_score     = 0;
+    std::array<int,2>    m_flag      = {404, 404};
+    bool                 m_inverted  = false;
 
-    SI_Bound* get_si_bound(
-        long q,
-        Block* blk_bounds[2],
-        Direction d,
-        bool inverted
-    );
-
-    // TODO remove the local LL
-    // A local utility structure used filter and store contiguous sets
-    typedef struct CSList {
-        struct CSList* next;
-        Block* bound[2];
-        ContiguousSet* cset;
-    } CSList;
-    CSList* init_empty_CSList();
-    CSList* init_CSList(Block* blk);
-    void add_blk_CSList(CSList* cslist, Block* blk);
-    void add_cset_CSList(CSList* cslist, ContiguousSet* cset, long bounds[2]);
-    void free_CSList(CSList* cslist);
-
+    void set_bound(Direction d); 
+    double flank_area(long near, long far, double k)
     double calculate_score(Bound& bound, Block* blk)
-    double flank_area(long near, long far, double k);
-
-    int get_flag(SI_Bound* br[2]);
 
 public:
     SearchInterval(const Feature& feat);
     ~SearchInterval();
 
-    // TODO this is smells awful
-    void build_search_interval(Bound& bound, Block* blk_bound[2], char* seqname, bool inbetween);
+    void build_search_interval(
+        ContiguousSet* t_cset,
+        const Feature& t_feat,
+        bool t_inbetween
+    );
 
     void print();
 

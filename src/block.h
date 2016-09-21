@@ -5,12 +5,14 @@
 #include "feature.h"
 #include "interval.h"
 #include "linked_interval.h"
-#include "contiguous_set.h"
 
 #include <array>
 
+class ContiguousSet;
+
 class Block : public LinkedInterval<Block>, public Interval<Block>
 {
+friend class ManyBlocks;
 private:
     static void unlink(Block* blk, int u, int d);
     static void move_b_to_a(Block* a, Block* b, int u, int d);

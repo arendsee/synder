@@ -4,12 +4,16 @@
 #include "global.h"
 #include "contiguous_set.h"
 #include "interval_set.h"
-#include "block.h"
 
+/** A containter for ContiguousSets */
 class ManyContiguousSets : public IntervalSet<ContiguousSet>
 {
 public:
-    void link_contiguous_blocks(Block* front_blk, long k, size_t& setid);
+    void link_contiguous_blocks(
+        Block*  front,
+        long    k,
+        size_t& setid
+    );
 };
 
 #endif

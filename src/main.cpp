@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
 
     int exit_status = 0;
-    Synmap* syn = NULL;
+    Synmap* syn = nullptr;
 
     // ------------------------------------------------------------------------
     // Prep input
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     // ------------------------------------------------------------------------
 
     // If no file given by -i, use STDIN
-    if (args.intfile == NULL)
+    if (args.intfile == nullptr)
         args.intfile = stdin;
 
     if (args.synfile) {

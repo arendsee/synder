@@ -23,7 +23,7 @@ Synmap::~Synmap()
 
 void Synmap::load_blocks()
 {
-    if (synfile == NULL) {
+    if (synfile == nullptr) {
         fprintf(stderr, "NULL synteny input file (%s:%d in %s)", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
@@ -33,7 +33,7 @@ void Synmap::load_blocks()
 
     // read loop variables
     int     status = 0;
-    char*   line   = NULL;
+    char*   line   = nullptr;
     size_t  len    = 0;
     ssize_t read;
 
@@ -128,7 +128,7 @@ Contig* Synmap::get_contig(size_t gid, char* contig_name)
     if (gid == 0 || gid == 1) {
         return genome[gid]->get_contig(contig_name);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -185,9 +185,9 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
 
         if (!sscanf(line,
                     "%s %*s %*s %ld %ld %*s %*c %*s %s\n",
-                    contig_seqname, &start, &stop, seqname)) {
-            printf("invalid input\n");
-            exit(EXIT_FAILURE);
+                    contig_seqname, &start, &stop, seqname))
+        {
+            throw "invalid input in Synmap::process_gff";
         }
 
         check_in_offset(start, stop);
@@ -196,9 +196,9 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
 
         qcon = get_contig(0, contig_seqname);
 
-        Feature feat(contig_seqname, start, stop, seqname, qcon->length);
+        Feature feat(contig_seqname, start, stop, seqname, 0);
 
-        if(qcon == NULL) {
+        if(qcon == nullptr) {
             fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
             continue;
         }
@@ -217,8 +217,7 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
                 fprintf(stderr, "Please, give me a command\n");
                 return false;
             default:
-                fprintf(stderr, "Command '%s' not recognized\n", args.cmd.c_str());
-                args.print_help();
+                fprintf(stderr, "Command not recognized\n");
                 return false;
         }
     }

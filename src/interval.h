@@ -25,6 +25,9 @@ public:
         pos ( { t_start, t_stop }  )
     {}
 
+    long start() { return pos[0]; }
+    long stop()  { return pos[1]; }
+
     /** find position of point A relative to interval B (see Pos) */
     Pos position_relative_to(long a)
     {

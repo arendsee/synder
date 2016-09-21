@@ -2,21 +2,19 @@
 
 ContiguousSet::ContiguousSet() { }
 
-ContiguousSet::ContiguousSet(Block* blk)
+ContiguousSet::ContiguousSet(Block* t_blk)
 {
-    if (blk != nullptr) {
-        pos        = blk->pos;
-        strand     = blk->strand;
-        parent     = blk->parent;
-        ends[0]    = blk;
-        ends[1]    = blk;
-        size       = 1;
-        id         = 0;
-        blk->cset = this;
-    } else {
-        fprintf(stderr, "WARNING: Cannot initialize ContiguousSet from NULL blk\n");
-        exit(EXIT_FAILURE);
+    if (t_blk == nullptr) {
+        throw "Cannot initialize from NULL blk";
     }
+
+    pos         = t_blk->pos;
+    strand      = t_blk->strand;
+    parent      = t_blk->parent;
+    ends[0]     = t_blk;
+    ends[1]     = t_blk;
+    size        = 1;
+    t_blk->cset = this;
 }
 
 ContiguousSet::~ContiguousSet()
@@ -39,29 +37,21 @@ ContiguousSet::~ContiguousSet()
     // parent->clear_cset_tree();
 }
 
-void ContiguousSet::print(){
+void ContiguousSet::print()
+{
     fprintf(
         stderr,
         "cset (n=%zu) - (%s, %zu, %zu, %c) <-> (%s, %zu, %zu, %c)\n",
-        inv.size(),
-        parent.name,
+        size,
+        parent->name.c_str(),
         pos[0],
         pos[1],
         ends[0]->strand,
-        over->parent.name,
+        over->parent->name.c_str(),
         over->pos[0],
         over->pos[1],
         over->ends[0]->strand
     );
-}
-
-ContiguousSet* ContiguousSet::make_pair(Block* blk)
-{
-    ContiguousSet* a = new ContiguousSet(blk);
-    ContiguousSet* b = new ContiguousSet(blk->over);
-    a->over = b;
-    b->over = a;
-    return a;
 }
 
 bool ContiguousSet::strictly_forbidden(Block* a, Block* b, long k)
@@ -75,23 +65,23 @@ bool ContiguousSet::are_contiguous(Block* blk_a, Block* blk_b, long k)
     long qdiff, tdiff, demerits;
     char ats, bts;
     long aqg, atg, bqg, btg;
-    Contig *atc, *btc, *aqc, *bqc;
+    Feature *atc, *btc, *aqc, *bqc;
 
-    // interval variables for new query
-    bqc =       blk_b->parent;
-    bqg = (long)blk_b->grpid;
-    // three interval variables for new target
-    btc =       blk_b->over->parent;
-    btg = (long)blk_b->over->grpid;
-    bts =       blk_b->over->strand;
+    // shortcuts to parents
+    bqc = blk_b->parent;
+    btc = blk_b->over->parent;
+    aqc = blk_a->parent;
+    atc = blk_a->over->parent;
 
-    // interval variables for previous query
-    aqc =       blk_a->parent;
-    aqg = (long)blk_a->grpid;
-    // three interval variables for previously seen target
-    atc =       blk_a->over->parent;
-    atg = (long)blk_a->over->grpid;
-    ats =       blk_a->over->strand;
+    // shortcuts to strands
+    bts = blk_b->over->strand;
+    ats = blk_a->over->strand;
+
+    // shortcuts to overlapping groups
+    btg = blk_b->over->grpid;
+    bqg = blk_b->grpid;
+    atg = blk_a->over->grpid;
+    aqg = blk_a->grpid;
 
     // qdiff and tdiff describe the adjacency of blocks relative to the
     // query are target contigs, respectively. Cases:
@@ -142,50 +132,41 @@ bool ContiguousSet::add_block(Block* blk_b, long k)
     // distinct contiguity functions.
     may_add = are_contiguous(blk_a, blk_b, k);
 
-    if (may_add)
-    {
+    if (may_add) {
         // build query and target side sets
-        add_block_to_ContiguousSet_side_(blk_b);
-        add_block_to_ContiguousSet_side_(over, blk_b->over);
+        this->add_side_(blk_b);
+        over->add_side_(blk_b->over);
     }
     return may_add;
 }
 
-
-
-void ContiguousSet::add_block_side_(Block* b)
+void ContiguousSet::add_side_(Block* b)
 {
     assert(b->parent == parent);
     assert(b->strand == strand);
 
     Block* a;
 
-    Direction d = (Direction)(strand == '+');
+    Direction d = static_cast<Direction> (strand == '+');
 
-    if (b->pos[0] > pos[1])
-    {
+    if (b->pos[0] > pos[1]) {
         pos[1]     = b->pos[1];
         a          = ends[1];
         a->cnr[ d] = b;
         b->cnr[!d] = a;
         ends[1]    = b;
-    }
-    else if (b->pos[1] < pos[0])
-    {
+    } else if (b->pos[1] < pos[0]) {
         pos[0]     = b->pos[0];
         a          = ends[0];
         a->cnr[!d] = b;
         b->cnr[ d] = a;
         ends[0]    = b;
-    }
-    else
-    {
-        perror("Adding illegal or out-of-order block to ContiguousSet, dying\n");
-        exit(EXIT_FAILURE);
+    } else {
+        throw "Adding illegal or out-of-order block to ContiguousSet";
     }
 
-    b->cset = this;
     size++;
+    b->cset = this;
 }
 
 /* Determine if any non-overlapping target elements mapping to query exist
@@ -240,17 +221,14 @@ void ContiguousSet::add_block_side_(Block* b)
 bool ContiguousSet::blocks_conflict(Block* a, Block* b)
 {
     int up = (a->strand == '+') ? NEXT_START : PREV_STOP;
-    Block* x = a->cor[up];
-    for (; x != b; x = x->cor[up])
-    {
-        if (x == NULL)
-        {
-            fprintf(stderr, "Foul magic in __func__:__LINE__");
-            exit(EXIT_FAILURE);
+    Block* x = a->corner(up);
+    for (; x != b; x = x->corner(up)) {
+        if (x == nullptr) {
+            throw "Foul magic in __func__:__LINE__";
         }
         if (
-            ! block_overlap(x, a) &&
-            ! block_overlap(x, b) &&
+            ! x->overlap(a) &&
+            ! x->overlap(b) &&
             x->over->parent == a->over->parent
         )
             return true;

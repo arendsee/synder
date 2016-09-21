@@ -72,7 +72,7 @@ Arguments::Arguments(int argc, char *argv[])
                 break;
             case 'k':
                 errno = 0;
-                k = strtol(optarg, NULL, 0);
+                k = strtol(optarg, nullptr, 0);
                 if ((errno == ERANGE && (k == LONG_MAX || k == LONG_MIN)) || (errno != 0 && k == 0)) {
                     perror("In argument -k NUM, NUM must be an integer");
                 }
@@ -92,15 +92,15 @@ Arguments::Arguments(int argc, char *argv[])
 
 Arguments::~Arguments()
 {
-    if (synfile != NULL)
+    if (synfile != nullptr)
         fclose(synfile);
-    if (intfile != NULL)
+    if (intfile != nullptr)
         fclose(intfile);
-    if (hitfile != NULL)
+    if (hitfile != nullptr)
         fclose(hitfile);
-    if (tclfile != NULL)
+    if (tclfile != nullptr)
         fclose(tclfile);
-    if (qclfile != NULL)
+    if (qclfile != nullptr)
         fclose(qclfile);
 }
 
@@ -140,7 +140,7 @@ void Arguments::print()
 
 void Arguments::check_file(FILE* fp, char *name)
 {
-    if (fp == NULL) {
+    if (fp == nullptr) {
         fprintf(stderr, "ERROR: Failed to open '%s'\n", name);
         exit(EXIT_FAILURE);
     }

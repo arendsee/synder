@@ -11,8 +11,8 @@ Block::Block(
     size_t   t_linkid
 )
     :
-    Interval( t_start, t_stop ),
-    LinkedInterval(t_parent, t_score, t_strand, t_linkid)
+    LinkedInterval(t_parent, t_score, t_strand, t_linkid),
+    Interval( t_start, t_stop )
 { }
 
 Block::~Block() { }
@@ -20,24 +20,19 @@ Block::~Block() { }
 void Block::print()
 {
     printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
-           parent->name,
+           parent->name.c_str(),
            pos[0] + Offsets::out_start,
            pos[1] + Offsets::out_stop,
-           over->parent->name,
+           over->parent->name.c_str(),
            over->pos[0] + Offsets::out_start,
            over->pos[1] + Offsets::out_stop,
            strand
           );
-    if(cset != NULL) {
-        printf("\t%zu\n", cset->id);
-    } else {
-        printf("\t-\n");
-    }
 }
 
 void Block::unlink(Block* blk, int u, int d)
 {
-    if(blk->cor[u] != NULL) {
+    if(blk->cor[u] != nullptr) {
         blk->cor[u]->cor[d] = blk->cor[d];
     }
 }
@@ -69,13 +64,13 @@ void Block::dissolve_edge(Block* blk, int u, int d)
 
 void Block::replace_edge(Block* a, Block* b, int u, int d)
 {
-    if(a->cor[u] != NULL) {
+    if(a->cor[u] != nullptr) {
         if(a->cor[u] != b) {
             b->cor[u] = a->cor[u];
             a->cor[u]->cor[d] = b;
         }
     } else {
-        b->cor[u] = NULL;
+        b->cor[u] = nullptr;
     }
 }
 
@@ -95,12 +90,12 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
         fprintf(stderr, "Blocks are not doubly overlapping, I don't know how to merge them\n");
     }
 
-    long olen = a->overlap_length(b);
-    long al = a->pos[1] - a->pos[0] + 1;
-    long bl = b->pos[1] - b->pos[0] + 1;
+    double olen = a->overlap_length(b);
+    double al = a->pos[1] - a->pos[0] + 1;
+    double bl = b->pos[1] - b->pos[0] + 1;
     double score =
-        ((double)(al - olen) / (al)) * a->score +
-        ((double)(bl - olen) / (bl)) * b->score +
+        ((al - olen) / (al)) * a->score +
+        ((bl - olen) / (bl)) * b->score +
         olen * (a->score / al + b->score / bl) / 2;
 
     b->score       = score;

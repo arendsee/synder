@@ -1,12 +1,6 @@
 #include "many_blocks.h"
 
-ManyBlocks::ManyBlocks()
-{
-    cor[0] = NULL;
-    cor[1] = NULL;
-    cor[2] = NULL;
-    cor[3] = NULL;
-}
+ManyBlocks::ManyBlocks() { }
 
 ManyBlocks::~ManyBlocks(){
     delete tree;
@@ -19,8 +13,20 @@ Block* ManyBlocks::front()
 
 Block* ManyBlocks::corner(size_t i)
 {
-    Block* blk = (i < 4) ? cor[i] : NULL;
-    return blk;
+    if(i > 3) {
+        throw "Illegal index for Block::cor in ManyBlocks::corner";
+    }
+
+    return cor[i];
+}
+
+void ManyBlocks::set_corner(size_t i, Block* blk)
+{
+    if(i > 3) {
+        throw "Illegal index for Block::cor in ManyBlocks::set_corner";
+    }
+     
+     cor[i] = blk;
 }
 
 Block* ManyBlocks::back()
@@ -30,14 +36,14 @@ Block* ManyBlocks::back()
 
 bool ManyBlocks::empty()
 {
-    return cor[0] == NULL;
+    return cor[0] == nullptr;
 }
 
 // TODO: set up a constant time alternative
 size_t ManyBlocks::size()
 {
     size_t N;
-    for(Block* blk = front(); blk != NULL; blk = blk->next()) {
+    for(Block* blk = front(); blk != nullptr; blk = blk->next()) {
         N++;
     }
     return N;
@@ -56,14 +62,14 @@ void ManyBlocks::link_block_corners()
     // forward sort by stop
     sort(2);
     for (size_t i = 0; i < N; i++) {
-        inv[i]->cor[2] = (i == 0)     ? NULL : inv[i - 1];
-        inv[i]->cor[3] = (i == N - 1) ? NULL : inv[i + 1];
+        inv[i]->cor[2] = (i == 0)     ? nullptr : inv[i - 1];
+        inv[i]->cor[3] = (i == N - 1) ? nullptr : inv[i + 1];
     }
     // forward sort by start
     sort(0);
     for (size_t i = 0; i < N; i++) {
-        inv[i]->cor[0] = (i == 0)     ? NULL : inv[i - 1];
-        inv[i]->cor[1] = (i == N - 1) ? NULL : inv[i + 1];
+        inv[i]->cor[0] = (i == 0)     ? nullptr : inv[i - 1];
+        inv[i]->cor[1] = (i == N - 1) ? nullptr : inv[i + 1];
     }
 }
 
@@ -75,7 +81,7 @@ void ManyBlocks::link_corners(){
         {
             k = i % 2 == 0 ? 0 : size() - 1;
             b = inv.at(k);
-            while (b->corner(i) != NULL)
+            while (b->corner(i) != nullptr)
             {
                 b = b->corner(i);
             }
@@ -97,7 +103,7 @@ void ManyBlocks::set_overlap_group()
 
     maximum_stop = 0;
     // Loop through each Block in the linked list
-    for (Block* blk = front(); blk != NULL; blk = blk->next()) {
+    for (Block* blk = front(); blk != nullptr; blk = blk->next()) {
         this_stop = blk->pos[1];
         // If the start is greater than the maximum stop, then the block is in
         // a new adjacency group. For this to work, Contig->block must be
@@ -122,11 +128,11 @@ void ManyBlocks::set_overlap_group()
      *             |----c----|
      *                     |---d---|
      *                               |---e---|
-     * a->adj := (NULL, b)
+     * a->adj := (nullptr, b)
      * b->adj := (a, e)
      * c->adj := (a, e)
      * d->adj := (a, e)
-     * e->adj := (d, NULL)
+     * e->adj := (d, nullptr)
      */
 void ManyBlocks::link_adjacent_blocks_directed(Direction d)
 {
@@ -135,7 +141,7 @@ void ManyBlocks::link_adjacent_blocks_directed(Direction d)
     // ---> indicates a lo block
     // All diagrams and comments relative to the d==HI direction
 
-    if (cor[0] == NULL || cor[1] == NULL || cor[2] == NULL || cor[3] == NULL) {
+    if (cor[0] == nullptr || cor[1] == nullptr || cor[2] == nullptr || cor[3] == nullptr) {
         fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
         // fprintf(stderr, "genome=(%s) contig=(%s)\n", parent->parent->name.c_str(), parent->name.c_str());
         exit(EXIT_FAILURE);
@@ -152,7 +158,7 @@ void ManyBlocks::link_adjacent_blocks_directed(Direction d)
     lo = cor[idx_c]; // first element by stop
     hi = cor[idx_a]; // first element by start
 
-    while (hi != NULL) {
+    while (hi != nullptr) {
 
         //       --->
         // <---
@@ -161,7 +167,7 @@ void ManyBlocks::link_adjacent_blocks_directed(Direction d)
         //   <---
         // This should should occur only at the beginning
         if (REL_LE(hi->pos[!d], lo->pos[d], d)) {
-            hi->adj[!d] = NULL;
+            hi->adj[!d] = nullptr;
             hi = hi->cor[idx_b];
         }
 
@@ -195,9 +201,9 @@ void ManyBlocks::merge_overlaps()
     Block *lo, *hi;
 
     // iterate through all blocks
-    for (lo = front(); lo != NULL; lo = lo->next()) {
+    for (lo = front(); lo != nullptr; lo = lo->next()) {
         // look ahead to find all doubly-overlapping blocks
-        for (hi = lo->next(); hi != NULL; hi = hi->next()) {
+        for (hi = lo->next(); hi != nullptr; hi = hi->next()) {
             if (! hi->overlap(lo)) {
                 break;
             }

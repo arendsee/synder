@@ -1,5 +1,5 @@
-#ifndef __ITREE_RESULT_HPP__
-#define __ITREE_RESULT_HPP__
+#ifndef __INTERVAL_RESULT_HPP__
+#define __INTERVAL_RESULT_HPP__
 
 #include <vector>
 

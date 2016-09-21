@@ -12,13 +12,13 @@
 
 class ManyBlocks : public IntervalSet<Block>
 {
-protected:
-    std::array<Block*, 4> cor;    
-
 public:
+    std::array<Block*, 4> cor = {nullptr, nullptr, nullptr, nullptr};
+
     // Base over-rides
     ManyBlocks();
     ~ManyBlocks();
+
     Block* front();
     Block* back();
     bool   empty();
@@ -27,6 +27,8 @@ public:
 
     Block* front(size_t i);
     Block* corner(size_t i);
+
+    void set_corner(size_t i, Block* blk);
 
     // Called by Contig:set_contig_corners
     void link_corners();

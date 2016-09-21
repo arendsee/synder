@@ -6,18 +6,17 @@
 #include "global.h"
 #include "interval_tree.h"
 
-class Contig;
-
+/** A container for LinkedIntervals */
 template <class T>
 class IntervalSet
 {
 private:
-    T* add_whatever_overlaps_flanks(T* res)
+    IntervalResult<T>* add_whatever_overlaps_flanks(IntervalResult<T>* res)
     {
         // itree returns the flanks for queries that overlap nothing. However, I
         // need all the intervals that overlap these flanks as well.
-        T* tmp_a = NULL;
-        T* tmp_b = NULL;
+        IntervalResult<T>* tmp_a = nullptr;
+        IntervalResult<T>* tmp_b = nullptr;
 
         if (res->inbetween) {
             // If inbetween, itree should have returned the two flanking blocks
@@ -45,26 +44,16 @@ private:
             }
         }
 
-        if (tmp_a != NULL)
-            delete tmp_a;
-
-        if (tmp_b != NULL)
-            delete tmp_b;
+        delete tmp_a;
+        delete tmp_b;
 
         return res;
     }
 
     void build_tree()
     {
-        if (tree == NULL) {
-
-            std::vector<T*> intervals;
-
-            for (T* c = inv.front(); c != NULL; c = c->next()) {
-                intervals.push_back(c);
-            }
-
-            tree = new IntervalTree<T>(intervals);
+        if (tree == nullptr) {
+            tree = new IntervalTree<T>(inv);
         }
     }
 
@@ -73,54 +62,21 @@ protected:
     IntervalTree<T>* tree;
     Feature* parent;
 
-    static bool cmp_start(T* a, T* b)
-    {
-        return ( a->pos[0] < b->pos[0] );
-    }
-
-    static bool cmp_stop(T* a, T* b)
-    {
-        return ( a->pos[1] < b->pos[1] );
-    }
-
-    static bool cmp_start_reverse(T* a, T* b)
-    {
-        return ( a->pos[0] > b->pos[0] );
-    }
-
-    static bool cmp_stop_reverse(T* a, T* b)
-    {
-        return ( a->pos[1] > b->pos[1] );
-    }
+    static bool cmp_start         (T* a, T* b) { return ( a->pos[0] < b->pos[0] ); }
+    static bool cmp_stop          (T* a, T* b) { return ( a->pos[1] < b->pos[1] ); }
+    static bool cmp_start_reverse (T* a, T* b) { return ( a->pos[0] > b->pos[0] ); }
+    static bool cmp_stop_reverse  (T* a, T* b) { return ( a->pos[1] > b->pos[1] ); }
 
 public:
-
-
     virtual ~IntervalSet()
     {
         delete tree;
     }
 
-    // All of these are simple wrappers for std:vector inv
-    virtual T* front()
-    {
-        return inv.front();
-    }
-
-    virtual T* back()
-    {
-        return inv.back();
-    }
-
-    virtual bool empty()
-    {
-        return inv.empty();
-    }
-
-    virtual size_t size()
-    {
-        return inv.size();
-    }
+    virtual T*     front() { return inv.front(); }
+    virtual T*     back()  { return inv.back();  }
+    virtual bool   empty() { return inv.empty(); }
+    virtual size_t size()  { return inv.size();  }
 
     virtual void clear()
     {
@@ -173,8 +129,7 @@ public:
                 std::sort(inv.begin(), inv.end(), IntervalSet<T>::cmp_stop_reverse);
                 break;
             default:
-                fprintf(stderr, "Sort method must be in {0,1,2,3}\n");
-                exit(EXIT_FAILURE);
+                throw "Sort method must be in {0,1,2,3}";
         }
     }
 
@@ -188,9 +143,10 @@ public:
      * syntenic interval), return just the nearest interval.
      *
      */
-    IntervalResult<T>* get_region(Bound& bound, bool get_flank_overlaps)
+    template<class U>
+    IntervalResult<T>* get_region(U& bound, bool get_flank_overlaps)
     {
-        tree = build_tree(tree);
+        build_tree();
 
         // Search itree
         IntervalResult<T>* res = tree->get_overlaps(&bound);
@@ -203,6 +159,19 @@ public:
         }
 
         return res;
+    }
+
+    template<class U>
+    long count_overlaps(U* u)
+    {
+        build_tree();
+        return tree->count_overlaps(u);
+    }
+
+    long count_point_overlaps(long pnt)
+    {
+        build_tree();
+        return tree->count_point_overlaps(pnt);
     }
 };
 
