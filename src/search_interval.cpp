@@ -1,18 +1,12 @@
 #include "search_interval.h"
 
-void reduce_side(Direction d){
-    while(m_bnds[d]->cor[!d] != nullptr && REL_GT(m_bnds[d]->cor[!d]->pos[d], m_feat->pos[d], d)){
-        m_bnds[d] = m_bnds[d]->cor[!d];
-    }
-}
-
 SearchInterval::SearchInterval(
     const std::array<Block*,2>& t_ends,
     Feature* t_feat,
     bool t_inbetween
 )
     : m_feat(t_feat),
-      m_between(t_inbetween),
+      m_inbetween(t_inbetween),
       m_bnds(t_ends)
 {
     m_score = calculate_score(m_bnds[0]);
@@ -24,37 +18,44 @@ SearchInterval::SearchInterval(
     get_si_bound(HI);
 }
 
-void SearchInterval::print()
-{
+void SearchInterval::reduce_side(const Direction d){
+    while(m_bnds[d]->corner(!d) != nullptr && REL_GT(m_bnds[d]->corner(!d)->pos[d], m_feat->pos[d], d)){
+        m_bnds[d] = m_bnds[d]->corner(!d);
+    }
+}
+
+void SearchInterval::print() {
     printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
-           // Output column ids:
-           feat->feature_name.c_str(),          //  1
-           feat->contig_name.c_str(),           //  2
-           feat->start() + Offsets::out_start,  //  3
-           feat->stop() + Offsets::out_stop,    //  4
-           ends[0]->over->parent->name.c_str(), //  5
-           start() + Offsets::out_start,        //  6
-           stop() + Offsets::out_stop,          //  7
-           ends[0]->over->strand,               //  8
-           score,                               //  9
-           ends[0]->cset->id,                   // 10
-           flag[0],                             // 11
-           flag[1],                             // 12
-           inbetween                            // 13 TODO fix the smell
-          );
+                                                // Output column ids:
+         m_feat->name.c_str(),                  //  1
+         m_feat->parent_name.c_str(),           //  2
+         m_feat->start() + Offsets::out_start,  //  3
+         m_feat->stop() + Offsets::out_stop,    //  4
+         m_bnds[0]->over->parent->name.c_str(), //  5
+         start() + Offsets::out_start,          //  6
+         stop() + Offsets::out_stop,            //  7
+         m_bnds[0]->over->strand,               //  8
+         m_score,                               //  9
+         m_bnds[0]->cset->id,                   // 10
+         m_flag[0],                             // 11
+         m_flag[1],                             // 12
+         m_inbetween                            // 13
+    );
 }
 
 void SearchInterval::get_si_bound(const Direction d)
 {
 
     // Invert orientation mapping to target if search interval is inverted
-    Direction vd = (Direction) (inverted ? !d : d);
+    Direction vd = (Direction) (m_inverted ? !d : d);
     // See contiguous.h
     int flag = 0;
     // non-zero to ease debugging
     long bound = 444444;
 
-    const auto& set_bounds = ends[0]->cset->pos;
+    long q = m_feat->pos[d];
+
+    const auto& set_bounds = m_bnds[0]->cset->pos;
 
     // All diagrams are shown for the d=HI case, take the mirror image fr d=LO.
     //
@@ -139,7 +140,7 @@ void SearchInterval::get_si_bound(const Direction d)
     // In this case, the hi and lo Contiguous nodes will be the same
     else {
         // Get nearest non-overlapping sequence
-        Block* downstream_blk = m_bnds[d]->over->adj[vd];
+        Block* downstream_blk = m_bnds[d]->over->corner_adj(vd);
 
         // adjacent block on TARGET side exists
         //    |x...--a=======b|
@@ -163,9 +164,9 @@ void SearchInterval::get_si_bound(const Direction d)
     // 0 if (((-) and d==0, looking for last)  OR
     //       ((+) and d==1, looking for first))
     // 1 otherwise
-    size_t i  = inverted ^ d;
+    size_t i  = m_inverted ^ d;
     m_flag[i] = flag;
-    m_pos[i]  = bound;
+    pos[i]  = bound;
 }
 
 
@@ -200,31 +201,32 @@ double SearchInterval::flank_area(long near, long far, double k)
     return 0;
 }
 
-double SearchInterval::calculate_score(Block* blk)
+double SearchInterval::calculate_score(Block* b)
 {
 
-    // TODO just use the damn Feature object class member
-    Bound bound(m_feat.start(), m_feat.stop());
+    long a1, a2, b1, b2;
 
-    long a1 = bound.pos[0];
-    long a2 = bound.pos[1];
+    Feature* a = m_feat;
+
+    a1 = a->start();
+    a2 = a->stop();
 
     double weighted_length;
-    long b1, b2, actual_length;
+    long actual_length;
     double k = 0.001;
     double score = 0;
 
-    if(blk == nullptr)
+    if(b == nullptr)
         return score;
 
     // rewind
-    while(blk->cnr[0] != nullptr) {
-        blk = blk->cnr[0];
+    while(b->cnr[0] != nullptr) {
+        b = b->cnr[0];
     }
 
-    for(; blk != nullptr ; blk = blk->cnr[1]) {
-        b1 = blk->pos[0];
-        b2 = blk->pos[1];
+    for(; b != nullptr ; b = b->cnr[1]) {
+        b1 = b->start();
+        b2 = b->stop();
 
         //               a1        a2
         //      b1  b2   |=========|    query interval
@@ -249,7 +251,7 @@ double SearchInterval::calculate_score(Block* blk)
                           //             b1    |     b1
                           //             |-----|         overlapping interval
                           //             i1    i2
-                          overlap_length_ll(a1, a2, b1, b2);
+                          a->overlap_length(b);
 
         // NOTE: I am kind of adding length to area here, but it actually
         // works. `_flank_area` returns the area of a segment of the base
@@ -259,9 +261,9 @@ double SearchInterval::calculate_score(Block* blk)
         // overlapping segment length by the score, gives the overlapping
         // segmental score.
 
-        actual_length = blk->pos[1] - blk->pos[0] + 1;
+        actual_length = b->pos[1] - b->pos[0] + 1;
 
-        score += blk->score * weighted_length / actual_length;
+        score += b->score * weighted_length / actual_length;
     }
     return score;
 }

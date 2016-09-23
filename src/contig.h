@@ -2,6 +2,7 @@
 #define __CONTIG_H__
 
 #include "global.h"
+#include "search_interval.h"
 #include "many_blocks.h"
 #include "many_contiguous_sets.h"
 #include "feature.h"
@@ -11,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <set>
 
 // Forward declarations
 class Genome;

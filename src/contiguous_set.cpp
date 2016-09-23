@@ -15,6 +15,11 @@ ContiguousSet::ContiguousSet(Block* t_blk)
     ends[1]     = t_blk;
     size        = 1;
     t_blk->cset = this;
+    if(t_blk->over->cset == nullptr){
+        t_blk->over->cset = new ContiguousSet(t_blk->over);
+        this->over = t_blk->over->cset;
+        t_blk->over->cset->over = this;
+    }
 }
 
 ContiguousSet::~ContiguousSet()
@@ -26,15 +31,6 @@ ContiguousSet::~ContiguousSet()
     if (next != nullptr) {
         next->prev = prev;
     }
-
-    if (over != nullptr) {
-        over->over = nullptr;
-        delete over;
-    }
-    //   TODO removing a cset corrupts the interval tree, so I need to kill the
-    //   tree but currently parent is Contig, which makes this awkward, I should
-    //   change parent to IntervalSet
-    // parent->clear_cset_tree();
 }
 
 void ContiguousSet::print()

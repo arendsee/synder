@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "feature.h"
+#include "bound.h"
 
 #include <array>
 
@@ -60,6 +61,16 @@ public:
     {
         try {
             return cor.at(i);
+        } catch (const std::out_of_range& e) {
+            cerr << "Index error in " << __func__ << endl;
+            return nullptr;
+        }
+    }
+
+    T* corner_adj(size_t i)
+    {
+        try {
+            return adj.at(i);
         } catch (const std::out_of_range& e) {
             cerr << "Index error in " << __func__ << endl;
             return nullptr;

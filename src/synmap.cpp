@@ -95,8 +95,6 @@ void Synmap::load_blocks()
     free(line);
 
     link_blocks();
-
-    dump_blocks();
 }
 
 void Synmap::link_blocks()
@@ -190,7 +188,7 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
             throw "invalid input in Synmap::process_gff";
         }
 
-        check_in_offset(start, stop);
+        // check_in_offset(start, stop);
         start -= Offsets::in_start;
         stop -= Offsets::in_stop;
 
@@ -209,10 +207,13 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
                 return false;
             case C_COUNT:
                 qcon->count(feat);
+                break;
             case C_SEARCH:
                 qcon->find_search_intervals(feat);
+                break;
             case C_MAP:
                 qcon->map(feat);
+                break;
             case C_UNSET:
                 fprintf(stderr, "Please, give me a command\n");
                 return false;

@@ -19,7 +19,7 @@ Block::~Block() { }
 
 void Block::print()
 {
-    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c",
+    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\n",
            parent->name.c_str(),
            pos[0] + Offsets::out_start,
            pos[1] + Offsets::out_stop,

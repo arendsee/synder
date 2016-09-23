@@ -7,9 +7,9 @@ Genome::Genome(std::string new_name)
 
 Genome::~Genome()
 {
-    for (auto &pair : contig) {
-        delete pair.second;
-    }
+    // for (auto &pair : contig) {
+    //     delete pair.second;
+    // }
 }
 
 Contig* Genome::add_contig(std::string contig_name)

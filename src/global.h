@@ -20,7 +20,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
 #define REL_LE(x, y, d)   ((d) ? (x) <= (y) : (x) >= (y))
@@ -38,7 +37,6 @@ using std::endl;
 
 #define LINE_BUFFER_SIZE 512
 #define NAME_BUFFER_SIZE 128
-
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
 class Offsets
 {
@@ -47,22 +45,7 @@ public:
     static int in_stop;
     static int out_start;
     static int out_stop;
-    // void set_offsets(int offsets[4]){
-    //     in_start  = offsets[0];
-    //     in_stop   = offsets[1];
-    //     out_start = offsets[2];
-    //     out_stop  = offsets[3];
-    // }
 };
-
-
-/**
- * If the input is truly 0-based, but the user says it is 1-based, we can get
- * an overflow if we subtract 1 from 0 (and of course our output will be
- * incorrect). This function checks whether all start and stop positions are
- * greater than 0 if 1-based.
- */
-void check_in_offset(size_t start, size_t stop);
 
 typedef enum direction { LO = 0, HI = 1 } Direction;
 
