@@ -13,7 +13,7 @@
 class ManyBlocks : public IntervalSet<Block>
 {
 public:
-    std::array<Block*, 4> cor = {nullptr, nullptr, nullptr, nullptr};
+    std::array<Block*, 4> cor = {{ nullptr }};
 
     // Base over-rides
     ManyBlocks();
