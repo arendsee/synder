@@ -23,7 +23,7 @@ public:
     size_t               size = 0;
     ContiguousSet*       next = nullptr;
     ContiguousSet*       prev = nullptr;
-    std::array<Block*,2> ends = { nullptr };
+    std::array<Block*,2> ends = {{ nullptr }};
 
     ContiguousSet();
     ContiguousSet(Block* blk);

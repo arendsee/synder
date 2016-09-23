@@ -16,7 +16,7 @@ class Interval
 {
 public:
 
-    std::array<long, 2> pos = { 0 };
+    std::array<long, 2> pos = {{ 0 }};
 
     Interval() {}
 

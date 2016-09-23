@@ -37,7 +37,7 @@ public:
     bool dump_blks = false;
     bool swap = false;
     bool debug = false;
-    std::array<int, 4> offsets { 0 };
+    std::array<int, 4> offsets {{ 0 }};
     long k = 0;
     char trans = 'i';
     std::vector<std::string> pos;
