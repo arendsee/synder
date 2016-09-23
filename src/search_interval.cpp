@@ -206,12 +206,11 @@ double SearchInterval::flank_area(long near, long far, double k)
 double SearchInterval::calculate_score(Block* b)
 {
 
-    long a1, a2, b1, b2;
+    long a1, b1, b2;
 
     Feature* a = m_feat;
 
     a1 = a->start();
-    a2 = a->stop();
 
     double weighted_length;
     long actual_length;
