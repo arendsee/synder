@@ -40,7 +40,7 @@ void SearchInterval::print() {
          stop() + Offsets::out_stop,            //  7
          m_bnds[0]->over->strand,               //  8
          m_score,                               //  9
-         m_bnds[0]->cset->id,                   // 10
+         m_bnds[0]->csetid,                     // 10
          m_flag[0],                             // 11
          m_flag[1],                             // 12
          m_inbetween                            // 13

@@ -2,24 +2,17 @@
 
 ContiguousSet::ContiguousSet() { }
 
-ContiguousSet::ContiguousSet(Block* t_blk)
+ContiguousSet::ContiguousSet(Block* t_blk, size_t t_id)
+    :
+    pos(t_blk->pos),
+    parent(t_blk->parent),
+    strand(t_blk->strand),
+    id(t_id),
+    size(1),
+    ends({ t_blk, t_blk })
 {
-    if (t_blk == nullptr) {
-        throw "Cannot initialize from NULL blk";
-    }
-
-    pos         = t_blk->pos;
-    strand      = t_blk->strand;
-    parent      = t_blk->parent;
-    ends[0]     = t_blk;
-    ends[1]     = t_blk;
-    size        = 1;
-    t_blk->cset = this;
-    if(t_blk->over->cset == nullptr){
-        t_blk->over->cset = new ContiguousSet(t_blk->over);
-        this->over = t_blk->over->cset;
-        t_blk->over->cset->over = this;
-    }
+   t_blk->csetid = id; 
+   t_blk->over->csetid = id;
 }
 
 ContiguousSet::~ContiguousSet()
@@ -132,6 +125,7 @@ bool ContiguousSet::add_block(Block* blk_b, long k)
         // build query and target side sets
         this->add_side_(blk_b);
         over->add_side_(blk_b->over);
+        size++;
     }
     return may_add;
 }
@@ -142,6 +136,8 @@ void ContiguousSet::add_side_(Block* b)
     assert(b->strand == strand);
 
     Block* a;
+
+    // TODO continue from here - where does strand come from?
 
     Direction d = static_cast<Direction> (strand == '+');
 
