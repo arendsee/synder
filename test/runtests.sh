@@ -77,10 +77,6 @@ synder=$PWD/synder
 
 total_passed=0
 total_failed=0
-valgrind_checked=0
-valgrind_exit_status=1
-synder_exit_status=1
-diff_exit_status=1
 
 
 # A function to select which parts of the output should be compared
@@ -110,6 +106,12 @@ runtest(){
     msg=$2
     errmsg=${3:-0}
     out_base=${4:-0}
+
+    valgrind_checked=0
+    valgrind_exit_status=0
+    synder_exit_status=0
+    synder_dump_exit_status=0
+    diff_exit_status=0
 
     synder_cmd=
 
@@ -200,6 +202,13 @@ runtest(){
     $synder_cmd > $obs 2> $log
     synder_exit_status=$?
 
+    if [[ $synder_exit_status -ne 0 ]]
+    then
+        warn "runtime:"
+        echo $synder_cmd > zzz
+        fail=1
+    fi
+
     if [[ $valgrind -eq 1 ]]
     then
         # append valgrind messages to any synder error messages
@@ -216,18 +225,12 @@ runtest(){
     $synder_cmd -D > /dev/null 2> $syn
     if [[ $? -ne 0 ]]
     then
-        if [[ $valgrind_exit_status -eq 0 || $synder_exit_status -eq 0 ]]
+        if [[ $valgrind_exit_status -eq 0 || $synder_dump_exit_status -eq 0 ]]
         then
             warn "dump:"
-            synder_exit_status=1
+            synder_dump_exit_status=1
             fail=1
         fi
-    fi
-
-    if [[ $synder_exit_status != 0 ]]
-    then
-        warn "runtime:"
-        fail=1
     fi
 
     filter < $obs > /tmp/z && mv /tmp/z $obs

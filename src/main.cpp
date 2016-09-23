@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
                 syn.dump_blocks();
                 break;
             default:
-                exit_status = syn.process_gff(args.intfile, args.cmd);
+                exit_status = !syn.process_gff(args.intfile, args.cmd);
         }
     }
     else {

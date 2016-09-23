@@ -59,8 +59,8 @@ private:
 
 protected:
     std::vector<T*> inv;
-    IntervalTree<T>* tree;
-    Feature* parent;
+    IntervalTree<T>* tree = nullptr;
+    Feature* parent = nullptr;
 
     static bool cmp_start         (T* a, T* b) { return ( a->pos[0] < b->pos[0] ); }
     static bool cmp_stop          (T* a, T* b) { return ( a->pos[1] < b->pos[1] ); }
