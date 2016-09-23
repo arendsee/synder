@@ -22,7 +22,7 @@ private:
 
 public:
     // adjacent block in contiguous set
-    std::array<Block*, 2> cnr = {nullptr, nullptr};
+    std::array<Block*, 2> cnr = { nullptr };
     // contiguous set id
     ContiguousSet* cset = nullptr;
 

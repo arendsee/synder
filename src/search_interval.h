@@ -20,9 +20,9 @@ private:
 
     Feature*             m_feat      = nullptr;
     bool                 m_inbetween = false;
-    std::array<Block*,2> m_bnds      = {nullptr, nullptr};
+    std::array<Block*,2> m_bnds      = { nullptr };
     double               m_score     = 0;
-    std::array<int,2>    m_flag      = {404, 404};
+    std::array<int,2>    m_flag      = { 404 };
     bool                 m_inverted  = false;
 
     void reduce_side(const Direction d);

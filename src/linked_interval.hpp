@@ -12,10 +12,10 @@ template<class T> class LinkedInterval
 {
 protected:
     // next and prev elements by start and stop
-    std::array<T*, 4> cor = {nullptr, nullptr, nullptr, nullptr};
+    std::array<T*, 4> cor = { nullptr };
 
     // adjacent non-overlapping block
-    std::array<T*, 2> adj = {nullptr, nullptr};
+    std::array<T*, 2> adj = { nullptr };
 
 public:
 
