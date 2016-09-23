@@ -42,11 +42,7 @@ bool ManyBlocks::empty()
 // TODO: set up a constant time alternative
 size_t ManyBlocks::size()
 {
-    size_t N = 1;
-    for(Block* blk = front(); blk != nullptr; blk = blk->next()) {
-        ++N;
-    }
-    return N;
+    return inv.size();
 }
 
 void ManyBlocks::clear()
@@ -76,7 +72,7 @@ void ManyBlocks::link_block_corners()
 void ManyBlocks::link_corners(){
     Block * b;
     size_t k;
-    size_t N = size();
+    size_t N = inv.size();
     try {
         for (size_t i = 0; i < 4; i++)
         {
@@ -202,7 +198,7 @@ void ManyBlocks::merge_overlaps()
     Block *lo, *hi;
 
     // iterate through all blocks
-    for (lo = front(); lo != nullptr; lo = lo->next()) {
+    for (lo = front(); lo->next() != nullptr; lo = lo->next()) {
         // look ahead to find all doubly-overlapping blocks
         for (hi = lo->next(); hi != nullptr; hi = hi->next()) {
             if (! hi->overlap(lo)) {
@@ -214,4 +210,22 @@ void ManyBlocks::merge_overlaps()
             }
         }
     }
+
+    // rewind
+    while(lo->prev() != nullptr){
+        lo = lo->prev();
+    }
+
+    // clear pointer array
+    inv.clear();
+
+    // refill it with the overlap-merged remaining blocks
+    while(lo != nullptr){
+        inv.push_back(lo);    
+        lo = lo->next();
+    }
+
+    // adjust corners as necessary
+    link_corners();
+
 }

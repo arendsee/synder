@@ -52,10 +52,12 @@ public:
         id     ( t_linkid )
     {}
 
-    T* prev()       { return cor[0]; }
-    T* next()       { return cor[1]; }
-    T* prev_adj()   { return adj[0]; }
-    T* next_adj()   { return adj[1]; }
+    T* prev()        { return cor[0]; }
+    T* next()        { return cor[1]; }
+    T* prev_bystop() { return cor[2]; }
+    T* next_bystop() { return cor[3]; }
+    T* prev_adj()    { return adj[0]; }
+    T* next_adj()    { return adj[1]; }
 
     T* corner(size_t i)
     {
