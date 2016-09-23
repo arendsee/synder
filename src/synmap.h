@@ -5,7 +5,7 @@
 #include "bound.h"
 #include "genome.h"
 #include "arguments.h"
-#include "linked_interval.h"
+#include "linked_interval.hpp"
 #include "feature.h"
 
 #include <iterator>

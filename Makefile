@@ -50,14 +50,14 @@ ARCHIVE=ark
 dtest:
 	# ${MAKE} ddclean
 	mkdir -p ${ARCHIVE}
-	./test/runtests.sh -mdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
+	./test/runtests.sh -xmdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Same as above, but does not test memory
 .PHONY: dtest-leak
 dtest-leak:
 	${MAKE} ddclean
 	mkdir ${ARCHIVE}
-	./test/runtests.sh -dv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
+	./test/runtests.sh -xdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # ===================================================================
 # Cleaning functions

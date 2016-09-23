@@ -1,5 +1,5 @@
-#ifndef __INTERVAL_TREE_H__
-#define __INTERVAL_TREE_H__
+#ifndef __INTERVAL_TREE_HPP__
+#define __INTERVAL_TREE_HPP__
 
 #include <array>
 #include <algorithm>

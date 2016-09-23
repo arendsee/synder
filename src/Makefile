@@ -21,7 +21,6 @@ OBJECTS=                    \
 	many_blocks.o           \
 	many_contiguous_sets.o  \
 	search_interval.o       \
-	many_search_intervals.o \
 	contig.o                \
 	genome.o                \
 	synmap.o                \

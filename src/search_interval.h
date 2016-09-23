@@ -1,7 +1,7 @@
 #ifndef __SEARCH_INTERVAL_H__
 #define __SEARCH_INTERVAL_H__
 
-#include "interval.h"
+#include "interval.hpp"
 #include "feature.h"
 #include "block.h"
 #include "contiguous_set.h"

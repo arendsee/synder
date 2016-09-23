@@ -3,8 +3,8 @@
 
 #include "global.h"
 #include "feature.h"
-#include "interval.h"
-#include "linked_interval.h"
+#include "interval.hpp"
+#include "linked_interval.hpp"
 
 #include <array>
 

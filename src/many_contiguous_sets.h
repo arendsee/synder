@@ -3,7 +3,7 @@
 
 #include "global.h"
 #include "contiguous_set.h"
-#include "interval_set.h"
+#include "interval_set.hpp"
 
 /** A containter for ContiguousSets */
 class ManyContiguousSets : public IntervalSet<ContiguousSet>

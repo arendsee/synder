@@ -157,7 +157,7 @@ void SearchInterval::get_si_bound(const Direction d)
         // query is further out than ANYTHING in the synteny map
         else {
             bound = vd ? m_bnds[d]->over->parent->parent_length - 1 : 0;
-            flag = m_bnds[d]->over->pos[vd] == bound ? BEYOND : EXTREME;
+            flag = m_bnds[d]->over->pos[vd] == bound ? EXTREME : BEYOND;
         }
     }
 

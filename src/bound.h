@@ -1,7 +1,7 @@
 #ifndef __BOUND_H__
 #define __BOUND_H__
 
-#include "interval.h"
+#include "interval.hpp"
 
 class Bound : public Interval<Bound>
 {
