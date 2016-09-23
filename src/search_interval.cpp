@@ -14,6 +14,8 @@ SearchInterval::SearchInterval(
     reduce_side(LO);
     reduce_side(HI);
 
+    m_inverted = m_bnds[0]->over->strand == '-';
+
     get_si_bound(LO);
     get_si_bound(HI);
 }
