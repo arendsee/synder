@@ -14,9 +14,6 @@
 #include <list>
 #include <set>
 
-// Forward declarations
-class Genome;
-
 class Contig {
 public:
     ManyBlocks block;

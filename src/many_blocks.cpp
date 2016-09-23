@@ -198,7 +198,7 @@ void ManyBlocks::merge_overlaps()
     Block *lo, *hi;
 
     // iterate through all blocks
-    for (lo = front(); lo->next() != nullptr; lo = lo->next()) {
+    for (lo = front(); lo != nullptr; lo = lo->next()) {
         // look ahead to find all doubly-overlapping blocks
         for (hi = lo->next(); hi != nullptr; hi = hi->next()) {
             if (! hi->overlap(lo)) {
@@ -210,6 +210,10 @@ void ManyBlocks::merge_overlaps()
             }
         }
     }
+
+    size_t i = 0;
+    for(; inv[i] == nullptr; i++){ }
+    lo = inv[i];
 
     // rewind
     while(lo->prev() != nullptr){
