@@ -19,8 +19,8 @@ SearchInterval::SearchInterval(
 }
 
 void SearchInterval::reduce_side(const Direction d){
-    while(m_bnds[d]->corner(!d) != nullptr && REL_GT(m_bnds[d]->corner(!d)->pos[d], m_feat->pos[d], d)){
-        m_bnds[d] = m_bnds[d]->corner(!d);
+    while(m_bnds[d]->cnr[!d] != nullptr && REL_GT(m_bnds[d]->cnr[!d]->pos[d], m_feat->pos[d], d)){
+        m_bnds[d] = m_bnds[d]->cnr[!d];
     }
 }
 
