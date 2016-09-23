@@ -2,10 +2,11 @@
 #define __SYNMAP_H__
 
 #include "global.h"
+#include "bound.h"
 #include "genome.h"
-#include "global.h"
-#include "contiguous_set.h"
 #include "arguments.h"
+#include "linked_interval.hpp"
+#include "feature.h"
 
 #include <iterator>
 #include <list>
@@ -16,6 +17,7 @@ class Synmap
 {
 private:
 
+    Genome* genome[2];
     FILE* synfile;
     FILE* tclfile;
     FILE* qclfile;
@@ -27,20 +29,12 @@ private:
     void load_blocks();
 
     // wrappers for Genome functions
-    void set_contig_lengths();
-    void link_block_corners();
-    void set_contig_corners();
-    void merge_doubly_overlapping_blocks();
-    void set_overlap_group();
-    void link_adjacent_blocks();
-    void link_contiguous_blocks(long k);
+    void link_blocks();
 
     /** Checks invariants - dies if anything goes wrong */
     void validate();
 
 public:
-
-    Genome * genome[2];
 
     /** Build synteny tree from specially formatted file.
      *
@@ -57,34 +51,13 @@ public:
 
     Contig* get_contig(size_t gid, char* contig_name);
 
-    Genome* get_genome(size_t gid);
-
     /** Recursively print a synteny map. */
     void print(bool forward=true);
 
     void dump_blocks();
 
-    /** Count blocks overlapping intervals in intfile
-     *
-     * Prints the input sequence name and count to STDOUT in TAB-delimited format.
-     *
-     * @param syn synmap, where the query and gff_file reference the same genome.
-     * @param gff_file GFF format file, 9th column is treated as the interval name.
-     */
-    void count(FILE* gff_file);
-
-    /** Write blocks overlapping intervals in intfile
-     *
-     * Prints the following TAB-delimited columns to STDOUT:
-     * - query entry name, this should be unique for input interval
-     * - target contig name
-     * - target start position
-     * - target stop position
-     *
-     * @param syn synmap, where the query and gff_file reference the same genome.
-     * @param gff_file GFF format file, 9th column is treated as the interval name.
-     */
-    void map(FILE* gff_file);
+    /** Reads a GFF file and calls the appropriate command on each line */
+    bool process_gff(FILE* intfile, Command cmd);
 
 };
 

@@ -2,62 +2,54 @@
 #define __CONTIG_H__
 
 #include "global.h"
-#include "block.h"
-#include "contiguous_set.h"
-#include "itree.h"
-#include "contig_result.h"
+#include "search_interval.h"
+#include "many_blocks.h"
+#include "many_contiguous_sets.h"
+#include "feature.h"
 
+#include <memory>
 #include <array>
 #include <vector>
 #include <string>
-#include <list> 
-
+#include <list>
+#include <set>
 
 class Contig {
-private:
-    IntervalTree * itree;
-    IntervalTree * ctree;
-    void build_block_itree();
-    void build_cset_itree();
-    const static long default_length = 1000000000;
 public:
-    long length;
-    std::string name;
-    Genome* parent;
-    std::array<Block*,4> cor;
-    std::vector<Block*> block;
-    ContiguousSet* cset;
+    ManyBlocks block;
+    ManyContiguousSets cset;
+    Feature feat;
 
     Contig();
-    Contig(std::string name, Genome* parent);
-    ~Contig();
 
-    void merge_doubly_overlapping_blocks();
+    Contig(
+        const char* t_genome_name,
+        const char* t_contig_name,
+        long t_length=1000000000
+    );
+
+    void set_length(long length);
 
     void print(bool forward=true, bool print_blocks=true);
 
-    /** Given two points, find all blocks overlapping or flanking them
-     *
-     * If there is at least one overlapping block, return all overlapping blocks
-     *
-     * Otherwise, return the blocks above and below the input region
-     *
-     * If there is only one flanking interval (i.e., the query is beyond any
-     * syntenic interval), return just the nearest interval.
-     *
-     * */
-    ResultContig *get_region(long a, long b, bool is_cset);
+    /** Print target regions from a given query */
+    void find_search_intervals(Feature& feat);
 
-    void link_contiguous_blocks(long k, size_t &setid);
+    /** Write blocks overlapping intervals in intfile
+     *
+     * Prints the following TAB-delimited columns to STDOUT:
+     * - query entry name, this should be unique for input interval
+     * - target contig name
+     * - target start position
+     * - target stop position
+     */
+    void map(Feature& feat);
 
-    /** Given two points, find the number of blocks they overlap */
-    long count_overlaps(long a, long b);
-
-    /** This should be called whenever an operation corrupts an itree */
-    void clear_cset_tree();
-
-    /** Sort Block objects */
-    static void sort_blocks(Block** blocks, size_t size, bool by_stop);
+    /** Count blocks overlapping intervals in intfile
+     *
+     * Prints the input sequence name and count to STDOUT in TAB-delimited format.
+     */
+    void count(Feature& feat);
 
 };
 

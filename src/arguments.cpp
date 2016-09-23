@@ -1,111 +1,89 @@
 #include "arguments.h"
 
-void Arguments::set_defaults()
-{
-    synfile     = NULL;
-    intfile     = NULL;
-    hitfile     = NULL;
-    tclfile     = NULL;
-    qclfile     = NULL;
-    cmd         = "";
-    offsets[0]  = 0;
-    offsets[1]  = 0;
-    offsets[2]  = 0;
-    offsets[3]  = 0;
-    k           = 0;
-    trans       = 'i';
-    dump_blks   = false;
-    swap        = false;
-    debug       = false;
-}
-
 Arguments::Arguments(int argc, char *argv[])
 {
-    set_defaults();
 
-    if (argc == 1)
-    {
+    if (argc == 1) {
         print_help();
         exit(EXIT_FAILURE);
     }
 
     int opt;
 
-    while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:q:t:")) != -1)
-    {
-        switch (opt)
-        {
-        case 'h':
-            print_help();
-            exit(EXIT_SUCCESS);
-            break;
-        case 'v':
-            print_version();
-            exit(EXIT_SUCCESS);
-            break;
-        case 'D':
-            debug = true;
-            break;
-        case 'B':
-            dump_blks = true;
-            break;
-        case 'x':
-            trans = optarg[0];
-            if (! (
-                        trans == 'i' ||
-                        trans == 'd' ||
-                        trans == 'p' ||
-                        trans == 'l'))
-            {
-                fprintf(stderr, "-x only takes arguments 'i', 'n', 'l' and 'm'\n");
+    while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:q:t:")) != -1) {
+        switch (opt) {
+            case 'h':
+                print_help();
+                exit(EXIT_SUCCESS);
+                break;
+            case 'v':
+                print_version();
+                exit(EXIT_SUCCESS);
+                break;
+            case 'D':
+                cmd = C_DEBUG;
+                break;
+            case 'B':
+                cmd = C_DUMP;
+                break;
+            case 'x':
+                trans = optarg[0];
+                if (! (trans == 'i' || trans == 'd' || trans == 'p' || trans == 'l')) {
+                    fprintf(stderr, "-x only takes arguments 'i', 'n', 'l' and 'm'\n");
+                    exit(EXIT_FAILURE);
+                }
+                break;
+            case 's':
+                synfile = fopen(optarg, "r");
+                Arguments::check_file(synfile, optarg);
+                break;
+            case 'i':
+                intfile = fopen(optarg, "r");
+                Arguments::check_file(intfile, optarg);
+                break;
+            case 'f':
+                hitfile = fopen(optarg, "r");
+                Arguments::check_file(hitfile, optarg);
+                break;
+            case 't':
+                tclfile = fopen(optarg, "r");
+                Arguments::check_file(tclfile, optarg);
+                break;
+            case 'q':
+                qclfile = fopen(optarg, "r");
+                Arguments::check_file(qclfile, optarg);
+                break;
+            case 'c':
+                if (strcmp(optarg, "filter") == 0) {
+                    cmd = C_FILTER;
+                } else if (strcmp(optarg, "count") == 0) {
+                    cmd = C_COUNT;
+                } else if (strcmp(optarg, "map") == 0) {
+                    cmd = C_MAP;
+                } else if (strcmp(optarg, "search") == 0) {
+                    cmd = C_SEARCH;
+                }
+                break;
+            case 'r':
+                swap = true;
+                break;
+            case 'b':
+                Arguments::set_offsets(optarg);
+                break;
+            case 'k':
+                errno = 0;
+                k = strtol(optarg, nullptr, 0);
+                if ((errno == ERANGE && (k == LONG_MAX || k == LONG_MIN)) || (errno != 0 && k == 0)) {
+                    perror("In argument -k NUM, NUM must be an integer");
+                }
+                break;
+            case '?':
+                fprintf(stderr, "Argument '%c' not recognized\n", opt);
                 exit(EXIT_FAILURE);
-            }
-            break;
-        case 's':
-            synfile = fopen(optarg, "r");
-            Arguments::check_file(synfile, optarg);
-            break;
-        case 'i':
-            intfile = fopen(optarg, "r");
-            Arguments::check_file(intfile, optarg);
-            break;
-        case 'f':
-            hitfile = fopen(optarg, "r");
-            Arguments::check_file(hitfile, optarg);
-            break;
-        case 't':
-            tclfile = fopen(optarg, "r");
-            Arguments::check_file(tclfile, optarg);
-            break;
-        case 'q':
-            qclfile = fopen(optarg, "r");
-            Arguments::check_file(qclfile, optarg);
-            break;
-        case 'c':
-            cmd = optarg;
-            break;
-        case 'r':
-            swap = true;
-            break;
-        case 'b':
-            Arguments::set_offsets(optarg);
-            break;
-        case 'k':
-            errno = 0;
-            k = strtol(optarg, NULL, 0);
-            if ((errno == ERANGE && (k == LONG_MAX || k == LONG_MIN)) || (errno != 0 && k == 0))
-            {
-                perror("In argument -k NUM, NUM must be an integer");
-            }
-            break;
-        case '?':
-            fprintf(stderr, "Argument '%c' not recognized\n", opt);
-            exit(EXIT_FAILURE);
         }
     }
 
-    for (; optind < argc; optind++)
-    {
+    for (; optind < argc; optind++) {
         std::string arg = argv[optind];
         pos.push_back(arg);
     }
@@ -114,23 +92,22 @@ Arguments::Arguments(int argc, char *argv[])
 
 Arguments::~Arguments()
 {
-    if (synfile != NULL)
+    if (synfile != nullptr)
         fclose(synfile);
-    if (intfile != NULL)
+    if (intfile != nullptr)
         fclose(intfile);
-    if (hitfile != NULL)
+    if (hitfile != nullptr)
         fclose(hitfile);
-    if (tclfile != NULL)
+    if (tclfile != nullptr)
         fclose(tclfile);
-    if (qclfile != NULL)
+    if (qclfile != nullptr)
         fclose(qclfile);
 }
 
 
-void Arguments::set_offsets(char * optarg)
+void Arguments::set_offsets(char* optarg)
 {
-    for (int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
         switch (optarg[i]) {
             case '0':
                 offsets[i] = 0;
@@ -150,21 +127,20 @@ void Arguments::print()
 {
     fprintf(
         stderr,
-        "arguments: k=%ld offsets=%d%d%d%d cmd=%s\n",
+        "arguments: k=%ld offsets=%d%d%d%d cmd=%c\n",
         k,
         offsets[0],
         offsets[1],
         offsets[2],
         offsets[3],
-        cmd.c_str()
+        cmd
     );
 }
 
 
-void Arguments::check_file(FILE * fp, char *name)
+void Arguments::check_file(FILE* fp, char *name)
 {
-    if (fp == NULL)
-    {
+    if (fp == nullptr) {
         fprintf(stderr, "ERROR: Failed to open '%s'\n", name);
         exit(EXIT_FAILURE);
     }

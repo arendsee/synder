@@ -48,8 +48,8 @@ ARCHIVE=ark
 # * links valgrind output
 .PHONY: dtest
 dtest:
-	${MAKE} ddclean
-	mkdir ${ARCHIVE}
+	# ${MAKE} ddclean
+	mkdir -p ${ARCHIVE}
 	./test/runtests.sh -xmdv -o log -a ${ARCHIVE} | tee ${ARCHIVE}/log
 
 # Same as above, but does not test memory
