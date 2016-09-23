@@ -9,6 +9,8 @@
 class ManyContiguousSets : public IntervalSet<ContiguousSet>
 {
 public:
+    ManyContiguousSets();
+    ~ManyContiguousSets();
     void link_contiguous_blocks(
         Block*  front,
         long    k,

@@ -18,12 +18,14 @@ public:
 
     std::array<long, 2> pos = {{ 0 }};
 
-    Interval() {}
+    Interval() { }
 
     Interval(long t_start, long t_stop)
         :
         pos ( { t_start, t_stop }  )
-    {}
+    { }
+
+    ~Interval() { }
 
     long start() { return pos[0]; }
     long stop()  { return pos[1]; }

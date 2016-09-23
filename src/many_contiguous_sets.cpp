@@ -1,5 +1,13 @@
 #include "many_contiguous_sets.h"
 
+ManyContiguousSets::ManyContiguousSets() { }
+
+ManyContiguousSets::~ManyContiguousSets() {
+    for(auto &c : inv){
+        delete c;
+    }
+}
+
 void ManyContiguousSets::link_contiguous_blocks(
     Block* b,
     long k,

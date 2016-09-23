@@ -23,7 +23,6 @@ public:
     Block* back();
     bool   empty();
     size_t size();
-    void   clear();
 
     Block* front(size_t i);
     Block* corner(size_t i);

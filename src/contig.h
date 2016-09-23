@@ -28,6 +28,8 @@ public:
         long t_length=1000000000
     );
 
+    ~Contig();
+
     void set_length(long length);
 
     void print(bool forward=true, bool print_blocks=true);

@@ -68,6 +68,9 @@ protected:
     static bool cmp_stop_reverse  (T* a, T* b) { return ( a->pos[1] > b->pos[1] ); }
 
 public:
+
+    IntervalSet(){ }
+
     virtual ~IntervalSet()
     {
         delete tree;

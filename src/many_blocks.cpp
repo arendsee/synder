@@ -2,9 +2,7 @@
 
 ManyBlocks::ManyBlocks() { }
 
-ManyBlocks::~ManyBlocks(){
-    delete tree;
-}
+ManyBlocks::~ManyBlocks(){ }
 
 Block* ManyBlocks::front()
 {
@@ -42,12 +40,6 @@ bool ManyBlocks::empty()
 size_t ManyBlocks::size()
 {
     return inv.size();
-}
-
-void ManyBlocks::clear()
-{
-    inv.clear();
-    delete tree;
 }
 
 void ManyBlocks::link_block_corners()

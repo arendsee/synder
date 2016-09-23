@@ -1,6 +1,8 @@
 #ifndef __INTERVAL_RESULT_HPP__
 #define __INTERVAL_RESULT_HPP__
 
+#include "global.h"
+
 #include <vector>
 
 // Forward declaration
@@ -15,17 +17,14 @@ class IntervalResult
 {
 public:
     std::vector<T*> iv;
-    IntervalTree<T>* tree;
-    bool inbetween;
-    bool leftmost;
-    bool rightmost;
+    IntervalTree<T>* tree = nullptr;
+    bool inbetween        = false;
+    bool leftmost         = false;
+    bool rightmost        = false;
 
-    IntervalResult(){
-        tree      = NULL;
-        inbetween = false;
-        leftmost  = false;
-        rightmost = false;
-    };
+    IntervalResult(){ };
+
+    ~IntervalResult(){ }
 
     void print()
     {
