@@ -2,6 +2,11 @@
 #include "arguments.h"
 #include "synmap.h"
 
+int Offsets::in_start;
+int Offsets::in_stop;
+int Offsets::out_start;
+int Offsets::out_stop;
+
 int main(int argc, char *argv[])
 {
 
@@ -14,9 +19,9 @@ int main(int argc, char *argv[])
     Arguments args = Arguments(argc, argv);
 
     Offsets::in_start  = args.offsets[0];
-    Offsets::in_start  = args.offsets[1];
+    Offsets::in_stop   = args.offsets[1];
     Offsets::out_start = args.offsets[2];
-    Offsets::out_start = args.offsets[3];
+    Offsets::out_stop  = args.offsets[3];
 
     // ------------------------------------------------------------------------
     // Do stuff

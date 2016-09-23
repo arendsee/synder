@@ -17,7 +17,7 @@ Contig* Genome::add_contig(std::string contig_name)
     Contig* con;
     auto it = contig.find(contig_name.c_str());
     if (it == contig.end()) {
-        con = new Contig(contig_name.c_str(), name.c_str());
+        con = new Contig(name.c_str(), contig_name.c_str());
         contig[contig_name.c_str()] = con;
     } else {
         con = (*it).second;

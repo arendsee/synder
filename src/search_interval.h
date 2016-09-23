@@ -38,7 +38,6 @@ public:
         Feature* t_feat,
         bool t_inbetween
     );
-    ~SearchInterval();
 
     void build_search_interval(
         ContiguousSet* t_cset,
