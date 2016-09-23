@@ -143,105 +143,85 @@ void Genome::link_contiguous_blocks(long k, size_t& setid)
 
 void Genome::validate()
 {
-    /*
-    #define ASSERT_CON(t, con)                                   \
+    #define ASSERT_CON(t)                                        \
             if(!(t)){                                            \
               is_good=false;                                     \
               fprintf(stderr, "Assert failed: `" #t "`\n");      \
-              if(blk != nullptr)                                    \
-                con->print(false, false);                        \
             }
-    #define ASSERT_BLK(t, blk)                                   \
+    #define ASSERT_BLK(t)                                        \
             if(!(t)){                                            \
               is_good=false;                                     \
               fprintf(stderr, "Assert failed: `" #t "`\n");      \
-              if(blk != nullptr){print_Block(blk);}                 \
-              else {fprintf(stderr, "nullptr\n");}                  \
             }
 
-        size_t  nblks   = 0;
-        Contig* con     = nullptr;
-        Block*  blk     = nullptr;
-        bool    is_good = true;
+        bool is_good = true;
 
         for (auto &pair : contig)
         {
-            con = pair.second;
+            Contig* con = pair.second;
 
-            ASSERT_CON(con->cor[0] != nullptr, con);
-            ASSERT_CON(con->cor[1] != nullptr, con);
-            ASSERT_CON(con->cor[2] != nullptr, con);
-            ASSERT_CON(con->cor[3] != nullptr, con);
+            ASSERT_CON(con->block.corner(0) != nullptr);
+            ASSERT_CON(con->block.corner(1) != nullptr);
+            ASSERT_CON(con->block.corner(2) != nullptr);
+            ASSERT_CON(con->block.corner(3) != nullptr);
 
-            blk = con->cor[0];
-            nblks = 0;
-            for (; blk != nullptr; blk = blk->cor[1])
+            Block* blk = con->block.corner(0);
+            for (; blk != nullptr; blk = blk->corner(1))
             {
-                if (!(blk->pos[1] < con->length))
-                {
-                    fprintf(stderr,
-                            "WARNING: stop greater than contig length: %zu vs %zu\n",
-                            blk->pos[1], con->length);
-                }
+                ASSERT_BLK(blk->stop() <= con->feat.parent_length)
 
-                nblks++;
+                ASSERT_BLK(blk == blk->over->over);
+                ASSERT_BLK(blk->cset->id == blk->over->cset->id);
+                ASSERT_BLK(blk->cset->over == blk->over->cset);
+                ASSERT_BLK(blk->score == blk->over->score);
 
-                ASSERT_BLK(blk->over != nullptr, blk);
-                ASSERT_BLK(blk->cset != nullptr, blk);
-                ASSERT_BLK(blk == blk->over->over, blk);
-                ASSERT_BLK(blk->cset->id == blk->over->cset->id, blk);
-                ASSERT_BLK(blk->cset->over == blk->over->cset, blk);
-                ASSERT_BLK(blk->score == blk->over->score, blk);
+                ASSERT_BLK(blk->pos[0] >= con->block.corner(0)->pos[0]);
+                ASSERT_BLK(blk->pos[0] <= con->block.corner(1)->pos[0]);
+                ASSERT_BLK(blk->pos[1] >= con->block.corner(2)->pos[1]);
+                ASSERT_BLK(blk->pos[1] <= con->block.corner(3)->pos[1]);
 
-                ASSERT_BLK(blk->pos[0] >= con->cor[0]->pos[0], blk);
-                ASSERT_BLK(blk->pos[0] <= con->cor[1]->pos[0], blk);
-                ASSERT_BLK(blk->pos[1] >= con->cor[2]->pos[1], blk);
-                ASSERT_BLK(blk->pos[1] <= con->cor[3]->pos[1], blk);
-
-                if (blk->cor[0] != nullptr)
+                if (blk->corner(0) != nullptr)
                 {
-                    ASSERT_BLK(blk->pos[0] >= blk->cor[0]->pos[0], blk);
-                    ASSERT_BLK(blk->cor[0]->cor[1]->pos[0] == blk->pos[0], blk);
+                    ASSERT_BLK(blk->pos[0] >= blk->corner(0)->pos[0]);
+                    ASSERT_BLK(blk->corner(0)->corner(1)->pos[0] == blk->pos[0]);
                 }
-                if (blk->cor[1] != nullptr)
+                if (blk->corner(1) != nullptr)
                 {
-                    ASSERT_BLK(blk->pos[0] <= blk->cor[1]->pos[0], blk);
-                    ASSERT_BLK(blk->cor[1]->cor[0]->pos[0] == blk->pos[0], blk);
+                    ASSERT_BLK(blk->pos[0] <= blk->corner(1)->pos[0]);
+                    ASSERT_BLK(blk->corner(1)->corner(0)->pos[0] == blk->pos[0]);
                 }
-                if (blk->cor[2] != nullptr)
+                if (blk->corner(2) != nullptr)
                 {
-                    ASSERT_BLK(blk->pos[1] >= blk->cor[2]->pos[1], blk);
-                    ASSERT_BLK(blk->cor[2]->cor[3]->pos[1] == blk->pos[1], blk);
+                    ASSERT_BLK(blk->pos[1] >= blk->corner(2)->pos[1]);
+                    ASSERT_BLK(blk->corner(2)->corner(3)->pos[1] == blk->pos[1]);
                 }
-                if (blk->cor[3] != nullptr)
+                if (blk->corner(3) != nullptr)
                 {
-                    ASSERT_BLK(blk->pos[1] <= blk->cor[3]->pos[1], blk);
-                    ASSERT_BLK(blk->cor[3]->cor[2]->pos[1] == blk->pos[1], blk);
+                    ASSERT_BLK(blk->pos[1] <= blk->corner(3)->pos[1]);
+                    ASSERT_BLK(blk->corner(3)->corner(2)->pos[1] == blk->pos[1]);
                 }
 
                 // grpid == 0 only if unset
-                ASSERT_BLK(blk->grpid != 0, blk);
+                ASSERT_BLK(blk->grpid != 0);
 
                 for (size_t i = 0; i < 2; i++)
                 {
                     if (blk->cnr[i] != nullptr)
                     {
-                        ASSERT_BLK(blk->grpid != blk->cnr[i]->grpid, blk);
-                        ASSERT_BLK(blk->cset == blk->cnr[i]->cset, blk);
-                        ASSERT_BLK(blk->cnr[i]->over->cnr[!i]->over == blk, blk);
+                        ASSERT_BLK(blk->grpid != blk->cnr[i]->grpid);
+                        ASSERT_BLK(blk->cset == blk->cnr[i]->cset);
+                        ASSERT_BLK(blk->cnr[i]->over->cnr[!i]->over == blk);
                     }
                 }
 
             }
-            // blocks may be deleted, so nblks == con->size may not hold
-            // however no blocks should ever be added
-            ASSERT_CON(nblks <= con->block.size(), con);
         }
 
-        if (! is_good)
-            exit(EXIT_FAILURE);
+
+        if (! is_good){
+            throw "Synmap invariants did";
+        }
 
     #undef ASSERT_BLK
     #undef ASSERT_CON
-    */
 }
