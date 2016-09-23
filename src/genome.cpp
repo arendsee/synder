@@ -176,9 +176,10 @@ void Genome::validate()
                 ASSERT_BLK(blk->score      == blk->over->score);
 
                 ASSERT_BLK(blk->pos[0] >= con->block.corner(0)->pos[0]);
-                ASSERT_BLK(blk->pos[0] <= con->block.corner(1)->pos[0]);
                 ASSERT_BLK(blk->pos[1] >= con->block.corner(2)->pos[1]);
-                ASSERT_BLK(blk->pos[1] <= con->block.corner(3)->pos[1]);
+
+                // ASSERT_BLK(blk->pos[0] <= con->block.corner(1)->pos[0]);
+                // ASSERT_BLK(blk->pos[1] <= con->block.corner(3)->pos[1]);
 
                 if (blk->corner(0) != nullptr)
                 {

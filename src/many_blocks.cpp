@@ -39,7 +39,6 @@ bool ManyBlocks::empty()
     return cor[0] == nullptr;
 }
 
-// TODO: set up a constant time alternative
 size_t ManyBlocks::size()
 {
     return inv.size();
@@ -211,14 +210,10 @@ void ManyBlocks::merge_overlaps()
         }
     }
 
+    // get first unmerged block
     size_t i = 0;
     for(; inv[i] == nullptr; i++){ }
     lo = inv[i];
-
-    // rewind
-    while(lo->prev() != nullptr){
-        lo = lo->prev();
-    }
 
     // clear pointer array
     inv.clear();
