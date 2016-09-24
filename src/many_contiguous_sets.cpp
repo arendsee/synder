@@ -34,3 +34,13 @@ void ManyContiguousSets::link_contiguous_blocks(
         }
     }
 }
+
+void ManyContiguousSets::add_from_homolog(ContiguousSet* a)
+{
+    ContiguousSet* b = new ContiguousSet(a);
+
+    b->over = a;
+    a->over = b;
+
+    inv.push_back(b);
+}

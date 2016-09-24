@@ -8,6 +8,8 @@
 
 #include <array>
 
+class ContiguousSet;
+
 class Block : public LinkedInterval<Block>, public Interval<Block>
 {
 friend class ManyBlocks;
@@ -21,7 +23,7 @@ private:
 public:
     // adjacent block in contiguous set
     std::array<Block*, 2> cnr = {{ nullptr }};
-    size_t csetid = 0;
+    ContiguousSet* cset = nullptr;
 
     Block();
     Block(

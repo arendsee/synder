@@ -118,6 +118,7 @@ void Synmap::link_blocks()
 
     size_t setid = 0;
     genome[0]->link_contiguous_blocks(k, setid);
+    genome[0]->transfer_contiguous_sets(genome[1]);
 }
 
 

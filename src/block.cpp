@@ -89,7 +89,9 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
     double olen = a->overlap_length(b);
     double al = a->pos[1] - a->pos[0] + 1;
     double bl = b->pos[1] - b->pos[0] + 1;
-    double score = ((al - olen) / (al)) * a->score + ((bl - olen) / (bl)) * b->score + olen * (a->score / al + b->score / bl) / 2;
+    double score = ((al - olen) / (al)) * a->score +
+                   ((bl - olen) / (bl)) * b->score +
+                   olen * (a->score / al + b->score / bl) / 2;
 
     b->score = score;
     b->over->score = score;

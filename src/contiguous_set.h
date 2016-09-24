@@ -9,6 +9,8 @@
 #include "block.h"
 
 #include <array>
+#include <algorithm>
+
 
 /** Contiguous set of non-overlapping adjacent homologous pairs of Blocks */
 class ContiguousSet : public LinkedInterval<ContiguousSet>, public Interval<ContiguousSet>
@@ -21,12 +23,16 @@ private:
 public:
 
     size_t               size = 0;
+    // TODO Use LinkedInterval cor
     ContiguousSet*       next = nullptr;
     ContiguousSet*       prev = nullptr;
     std::array<Block*,2> ends = {{ nullptr }};
 
     ContiguousSet();
-    ContiguousSet(Block* blk);
+
+    /** Homolog constructor */
+    ContiguousSet(ContiguousSet* cset);
+    ContiguousSet(Block* blk, size_t t_id);
 
     Block* front() { return ends[0]; }
     Block* back()  { return ends[1]; }
@@ -41,8 +47,6 @@ public:
      *
      */
     ~ContiguousSet();
-
-    ContiguousSet* make_pair(Block* blk);
 
     void print();
 
@@ -70,7 +74,14 @@ public:
      */
     bool are_contiguous(Block* blk_a, Block* blk_b, long k);
 
+    /** Add a new block to the set if it is contiguous
+     *
+     * @return bool - true if block is contiguous and was added, false otherwise
+     */
     bool add_block(Block* blk, long k);
+
+    /** Add a block without checking for contiguity */
+    void force_add_block(Block* blk);
 
     static bool strictly_forbidden(Block* a, Block* b, long k);
 };

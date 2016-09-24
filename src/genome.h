@@ -65,6 +65,8 @@ public:
 
     void link_contiguous_blocks(long k, size_t& setid);
 
+    void transfer_contiguous_sets(Genome*);
+
     void validate();
 
 };

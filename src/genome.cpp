@@ -141,6 +141,18 @@ void Genome::link_contiguous_blocks(long k, size_t& setid)
     }
 }
 
+
+void Genome::transfer_contiguous_sets(Genome* other){
+    for(auto &pair : contig){
+        Contig* qcon = pair.second;
+        for(auto &c : qcon->cset.inv){
+            // for each ContiguousSet in each Contig, do:
+            Contig* tcon = other->get_contig(c->ends[0]->over->parent->name);
+            tcon->cset.add_from_homolog(c);
+        }
+    }
+}
+
 void Genome::validate()
 {
     #define ASSERT_CON(t)                                        \
@@ -168,18 +180,23 @@ void Genome::validate()
             Block* blk = con->block.corner(0);
             for (; blk != nullptr; blk = blk->corner(1))
             {
+
                 ASSERT_BLK(blk->stop() <= con->feat.parent_length)
 
-                ASSERT_BLK(blk == blk->over->over);
+                ASSERT_BLK(blk->cset       != nullptr);
+                ASSERT_BLK(blk->over       != nullptr);
+                ASSERT_BLK(blk->over->cset != nullptr);
+
+                ASSERT_BLK(blk             == blk->over->over);
                 ASSERT_BLK(blk->cset->id   == blk->over->cset->id);
-                // ASSERT_BLK(blk->cset->over == blk->over->cset);
+                ASSERT_BLK(blk->cset->over == blk->over->cset);
                 ASSERT_BLK(blk->score      == blk->over->score);
 
                 ASSERT_BLK(blk->pos[0] >= con->block.corner(0)->pos[0]);
                 ASSERT_BLK(blk->pos[1] >= con->block.corner(2)->pos[1]);
 
-                // ASSERT_BLK(blk->pos[0] <= con->block.corner(1)->pos[0]);
-                // ASSERT_BLK(blk->pos[1] <= con->block.corner(3)->pos[1]);
+                ASSERT_BLK(blk->pos[0] <= con->block.corner(1)->pos[0]);
+                ASSERT_BLK(blk->pos[1] <= con->block.corner(3)->pos[1]);
 
                 if (blk->corner(0) != nullptr)
                 {
@@ -211,6 +228,7 @@ void Genome::validate()
                     {
                         ASSERT_BLK(blk->grpid != blk->cnr[i]->grpid);
                         ASSERT_BLK(blk->cset == blk->cnr[i]->cset);
+                        ASSERT_BLK(blk->cnr[i]->over->cnr[!i] != nullptr);
                         ASSERT_BLK(blk->cnr[i]->over->cnr[!i]->over == blk);
                     }
                 }

@@ -2,17 +2,50 @@
 
 ContiguousSet::ContiguousSet() { }
 
+/** Initialize a ContiguousSet from its first constituent
+ *
+ * Explicitly instantiating the ContiguousSet homolog is not really necessary,
+ * since all information needed for its construction is present here.
+ *
+ */
 ContiguousSet::ContiguousSet(Block* t_blk, size_t t_id)
     :
-    pos(t_blk->pos),
-    parent(t_blk->parent),
-    strand(t_blk->strand),
-    id(t_id),
+    LinkedInterval(
+        t_blk->parent,
+        0,
+        t_blk->strand,
+        t_id
+    ),
+    Interval(t_blk->pos[0], t_blk->pos[1]),
     size(1),
-    ends({ t_blk, t_blk })
+    ends({t_blk, t_blk})
 {
-   t_blk->csetid = id; 
-   t_blk->over->csetid = id;
+    t_blk->cset = this;
+}
+
+ContiguousSet::ContiguousSet(ContiguousSet* cset)
+    :
+    LinkedInterval(
+        cset->ends[0]->over->parent,
+        cset->score,
+        cset->ends[0]->over->strand,
+        cset->id
+    ),
+    size(cset->size),
+    ends({cset->ends[0]->over, cset->ends[1]->over})
+{
+    if(strand == '-'){
+        std::swap(ends[0], ends[1]);
+    }
+
+    for(Block* blk = cset->ends[0]; blk != nullptr; blk = blk->cnr[1]){
+        blk->over->cnr[0] = blk->cnr[0] == nullptr ? nullptr : blk->cnr[0]->over;
+        blk->over->cnr[1] = blk->cnr[1] == nullptr ? nullptr : blk->cnr[1]->over;
+        blk->over->cset = this;
+    }
+
+    pos[0] = ends[0]->pos[0];
+    pos[1] = ends[1]->pos[1];
 }
 
 ContiguousSet::~ContiguousSet()
@@ -122,12 +155,16 @@ bool ContiguousSet::add_block(Block* blk_b, long k)
     may_add = are_contiguous(blk_a, blk_b, k);
 
     if (may_add) {
-        // build query and target side sets
-        this->add_side_(blk_b);
-        over->add_side_(blk_b->over);
-        size++;
+        force_add_block(blk_b);
     }
     return may_add;
+}
+
+void ContiguousSet::force_add_block(Block* blk_b)
+{
+    add_side_(blk_b);
+    blk_b->cset = this;
+    size++;
 }
 
 void ContiguousSet::add_side_(Block* b)
@@ -137,9 +174,7 @@ void ContiguousSet::add_side_(Block* b)
 
     Block* a;
 
-    // TODO continue from here - where does strand come from?
-
-    Direction d = static_cast<Direction> (strand == '+');
+    Direction d = static_cast<Direction> (b->strand == '+');
 
     if (b->pos[0] > pos[1]) {
         pos[1]     = b->pos[1];
@@ -158,7 +193,6 @@ void ContiguousSet::add_side_(Block* b)
     }
 
     size++;
-    b->cset = this;
 }
 
 /* Determine if any non-overlapping target elements mapping to query exist
@@ -213,8 +247,7 @@ void ContiguousSet::add_side_(Block* b)
 bool ContiguousSet::blocks_conflict(Block* a, Block* b)
 {
     int up = (a->strand == '+') ? NEXT_START : PREV_STOP;
-    Block* x = a->corner(up);
-    for (; x != b; x = x->corner(up)) {
+    for (Block* x = a->corner(up); x != b; x = x->corner(up)) {
         if (x == nullptr) {
             throw "Foul magic in __func__:__LINE__";
         }
