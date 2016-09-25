@@ -31,16 +31,14 @@ private:
                     tmp_b->iv.end()
                 );
             } else {
-                fprintf(stderr, "itree is broken, should return exactly 2 intervals for inbetween cases\n");
-                exit(EXIT_FAILURE);
+                throw "itree is broken, should return exactly 2 intervals for inbetween cases";
             }
         } else if (res->leftmost || res->rightmost) {
             if (res->iv.size() == 1) {
                 tmp_a = res->tree->get_overlaps(res->iv[0]);
                 res->iv = tmp_a->iv;
             } else {
-                fprintf(stderr, "itree is broken, should return only 1 interval for left/rightmost cases\n");
-                exit(EXIT_FAILURE);
+                throw "itree is broken, should return only 1 interval for left/rightmost cases";
             }
         }
 
@@ -58,9 +56,7 @@ private:
     }
 
 protected:
-    std::vector<T*> inv;
     IntervalTree<T>* tree = nullptr;
-    Feature* parent = nullptr;
 
     static bool cmp_start         (T* a, T* b) { return ( a->pos[0] < b->pos[0] ); }
     static bool cmp_stop          (T* a, T* b) { return ( a->pos[1] < b->pos[1] ); }
@@ -68,6 +64,11 @@ protected:
     static bool cmp_stop_reverse  (T* a, T* b) { return ( a->pos[1] > b->pos[1] ); }
 
 public:
+    std::vector<T*> inv;
+    Feature* parent = nullptr;
+
+    IntervalSet(){ }
+
     virtual ~IntervalSet()
     {
         delete tree;

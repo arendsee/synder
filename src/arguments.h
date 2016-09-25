@@ -44,6 +44,7 @@ public:
 
     Arguments(int argc, char *argv[]);
     ~Arguments();
+
     void print();
     void print_help();
     void print_version();

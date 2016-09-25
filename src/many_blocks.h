@@ -23,7 +23,6 @@ public:
     Block* back();
     bool   empty();
     size_t size();
-    void   clear();
 
     Block* front(size_t i);
     Block* corner(size_t i);
@@ -34,10 +33,11 @@ public:
     void link_corners();
 
     void link_block_corners();
-    void set_overlap_group();
+    void set_overlap_group(long& offset);
     void link_adjacent_blocks_directed(Direction d);
     void link_adjacent_blocks();
     void merge_overlaps();
+    void refresh();
 
 };
 

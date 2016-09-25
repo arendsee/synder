@@ -57,13 +57,17 @@ public:
     void set_contig_corners();
 
     /** Set a unique index for each set of overlapping sequences */
-    void set_overlap_group();
+    void set_overlap_group(long& offset);
 
     void link_adjacent_blocks();
 
     void merge_overlaps();
 
+    void refresh();
+
     void link_contiguous_blocks(long k, size_t& setid);
+
+    void transfer_contiguous_sets(Genome*);
 
     void validate();
 

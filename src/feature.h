@@ -2,6 +2,7 @@
 #define __FEATURE_H__
 
 #include "interval.hpp"
+#include "global.h"
 
 #include <string>
 #include <iostream>
@@ -17,6 +18,13 @@ public:
     long parent_length      = LONG_MAX;
     char strand             = '.';
 
+    Feature()
+    {
+#ifdef DEBUG
+cerr << "+Feature()\n";
+#endif
+    }
+
     Feature(
         const char* t_parent_name,
         long        t_start,
@@ -31,9 +39,17 @@ public:
         name(t_name),
         parent_length(t_parent_length),
         strand(t_strand)
-    { }
+    {
+#ifdef DEBUG
+fprintf(stderr, "+Feature(const char*, long, long, const char*, long, char)\n");
+#endif 
+    }
 
-    ~Feature() { };
+    ~Feature() {
+#ifdef DEBUG
+fprintf(stderr, "-Feature\n");
+#endif 
+    };
 };
 
 #endif

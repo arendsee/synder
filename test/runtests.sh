@@ -212,7 +212,7 @@ runtest(){
     if [[ $valgrind -eq 1 ]]
     then
         # append valgrind messages to any synder error messages
-        valgrind --leak-check=full $synder_cmd > $obs 2> $val
+        valgrind --leak-check=full --show-leak-kinds=all $synder_cmd > $obs 2> $val
         grep "ERROR SUMMARY: 0 errors" $val > /dev/null
         valgrind_exit_status=$?
         if [[ $valgrind_exit_status -ne 0 ]]

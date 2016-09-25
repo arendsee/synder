@@ -1,5 +1,13 @@
 #include "many_contiguous_sets.h"
 
+ManyContiguousSets::ManyContiguousSets() { }
+
+ManyContiguousSets::~ManyContiguousSets() {
+    for(auto &c : inv){
+        delete c;
+    }
+}
+
 void ManyContiguousSets::link_contiguous_blocks(
     Block* b,
     long k,
@@ -11,7 +19,7 @@ void ManyContiguousSets::link_contiguous_blocks(
         for (iter = inv.rbegin(); ; iter++) {
             if (iter == inv.rend()) {
                 // if block fits in no set, create a new one
-                inv.push_back(new ContiguousSet(b));
+                inv.push_back(new ContiguousSet(b, setid++));
                 break;
             }
             // if block successfully joins a set
@@ -20,15 +28,19 @@ void ManyContiguousSets::link_contiguous_blocks(
             }
             // if set terminates
             else if (ContiguousSet::strictly_forbidden((*iter)->ends[1], b, k)) {
-                inv.push_back(new ContiguousSet(b));
+                inv.push_back(new ContiguousSet(b, setid++));
                 break;
             }
         }
     }
+}
 
-    for(auto c : inv){
-        setid++;
-        c->id = setid;
-        c->over->id = setid;
-    }
+void ManyContiguousSets::add_from_homolog(ContiguousSet* a)
+{
+    ContiguousSet* b = new ContiguousSet(a);
+
+    b->over = a;
+    a->over = b;
+
+    inv.push_back(b);
 }

@@ -7,6 +7,7 @@ class Bound : public Interval<Bound>
 {
 public:
     Bound();
+    ~Bound();
     Bound(long start, long stop);
 };
 

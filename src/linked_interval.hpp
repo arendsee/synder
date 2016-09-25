@@ -37,7 +37,7 @@ public:
     // unique id for element
     size_t id = 0;
 
-    LinkedInterval() {}
+    LinkedInterval() { }
 
     LinkedInterval(
         Feature* t_parent,
@@ -50,7 +50,9 @@ public:
         score  ( t_score  ),
         strand ( t_strand ),
         id     ( t_linkid )
-    {}
+    { }
+
+    ~LinkedInterval() { }
 
     T* prev()        { return cor[0]; }
     T* next()        { return cor[1]; }

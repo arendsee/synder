@@ -1,9 +1,13 @@
 #include "contig.h"
 
+Contig::Contig() { }
+
 Contig::Contig(const char* t_genome_name, const char* t_contig_name, long t_length)
     :
     feat(t_genome_name, 0, t_length, t_contig_name, t_length)
 { }
+
+Contig::~Contig() { }
 
 void Contig::set_length(long t_length)
 {
@@ -90,10 +94,10 @@ void Contig::find_search_intervals(Feature& t_feat)
     // Iterate through each contiguous set, for each find the search interval
     // For each contiguous set, there is exactly one search interval, or into a new SearchIntervalSet class
     bool inbetween = rc->inbetween || rc->leftmost || rc->rightmost;
-    SearchInterval* si;
     for(auto &c : csets) {
-        si = new SearchInterval(c->ends, &t_feat, inbetween);
-        si->print();
-        delete si;
+        SearchInterval si(c->ends, &t_feat, inbetween);
+        si.print();
     }
+    delete rc;
+    delete crc;
 }
