@@ -186,37 +186,32 @@ void ManyBlocks::link_adjacent_blocks()
 
 void ManyBlocks::merge_overlaps()
 {
-    Block *lo, *hi;
+    Block *lo, *hi, *first_blk;
+
+    first_blk = front();
+
+    // merging may invalidate the corners, so set to null
+    cor = {{ nullptr }};
+
+    // likewise, the Block array is invalidated, so clear this memory
+    inv.clear();
 
     // iterate through all blocks
-    for (lo = front(); lo != nullptr; lo = lo->next()) {
+    for (lo = first_blk; lo != nullptr; lo = lo->next()) {
         // look ahead to find all doubly-overlapping blocks
         for (hi = lo->next(); hi != nullptr; hi = hi->next()) {
-            if (! hi->overlap(lo)) {
+            if (hi->grpid != lo->grpid) {
                 break;
             }
-            if (hi->over->overlap(lo->over) && hi->over->parent == lo->over->parent) {
+            if (hi->over->grpid == lo->over->grpid) {
                 Block::merge_block_a_into_b(hi, lo);
                 hi = lo;
             }
         }
     }
 
-    // get first unmerged block
-    size_t i = 0;
-    for(; inv[i] == nullptr; i++){ }
-    lo = inv[i];
-
-    // clear pointer array
-    inv.clear();
-
     // refill it with the overlap-merged remaining blocks
-    while(lo != nullptr){
+    for(lo = first_blk; lo != nullptr; lo = lo->next()){
         inv.push_back(lo);    
-        lo = lo->next();
     }
-
-    // adjust corners as necessary
-    link_corners();
-
 }

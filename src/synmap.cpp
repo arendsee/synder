@@ -108,10 +108,14 @@ void Synmap::link_blocks()
     genome[0]->set_contig_corners();
     genome[1]->set_contig_corners();
 
-    genome[0]->merge_overlaps();
-
     genome[0]->set_overlap_group();
     genome[1]->set_overlap_group();
+
+    genome[0]->merge_overlaps();
+
+    // Need to reset these since merge_overlaps invalidates them
+    genome[0]->set_contig_corners();
+    genome[1]->set_contig_corners();
 
     genome[0]->link_adjacent_blocks();
     genome[1]->link_adjacent_blocks();

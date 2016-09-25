@@ -12,7 +12,8 @@ break -function Genome::validate
 # break -function find_search_intervals
 # break -function get_region
 # break -function add_block
-break -function Genome::transfer_contiguous_sets
+# break -function Genome::transfer_contiguous_sets
+break -function ManyBlocks::merge_overlaps
 
 # set print repeats 100
 # 
