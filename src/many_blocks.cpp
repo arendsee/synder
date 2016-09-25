@@ -61,14 +61,12 @@ void ManyBlocks::link_block_corners()
 }
 
 void ManyBlocks::link_corners(){
-    Block * b;
-    size_t k;
     size_t N = inv.size();
     try {
         for (size_t i = 0; i < 4; i++)
         {
-            k = i % 2 == 0 ? 0 : N - 1;
-            b = inv.at(k);
+            size_t k = i % 2 == 0 ? 0 : N - 1;
+            Block* b = inv.at(k);
             while (b->corner(i) != nullptr)
             {
                 b = b->corner(i);
@@ -83,14 +81,11 @@ void ManyBlocks::link_corners(){
 void ManyBlocks::set_overlap_group(long &grpid)
 {
     // Needed for determining overlaps and thus setids
-    long maximum_stop = 0;
-    // The stop position of the current interval
-    long this_stop = 0;
-
-    maximum_stop = -1;
+    long maximum_stop = -1;
     // Loop through each Block in the linked list
     for (Block* blk = front(); blk != nullptr; blk = blk->next()) {
-        this_stop = blk->pos[1];
+        // The stop position of the current interval
+        long this_stop = blk->pos[1];
         // If the start is greater than the maximum stop, then the block is in
         // a new adjacency group. For this to work, Contig->block must be
         // sorted by start. This sort is performed in build_tree.

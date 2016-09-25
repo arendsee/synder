@@ -46,7 +46,7 @@ void Contig::print(bool forward, bool print_blocks)
 void Contig::count(Feature& t_feat)
 {
     long count = block.count_overlaps(&t_feat);
-    printf("%s\t%zu\n", t_feat.name.c_str(), count);
+    printf("%s\t%ld\n", t_feat.name.c_str(), count);
 }
 
 void Contig::map(Feature& t_feat)

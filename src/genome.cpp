@@ -1,9 +1,8 @@
 #include "genome.h"
 
-Genome::Genome(std::string new_name)
-{
-    name = new_name;
-}
+Genome::Genome(std::string t_name)
+    : name(t_name)
+{ }
 
 Genome::~Genome()
 {
@@ -56,7 +55,6 @@ void Genome::set_contig_lengths(FILE* clfile)
 {
     if(clfile != nullptr) {
         // read loop variables
-        int     status = 0;
         char*   line   = nullptr;
         size_t  len    = 0;
         ssize_t read;
@@ -64,14 +62,13 @@ void Genome::set_contig_lengths(FILE* clfile)
         char contig_name[NAME_BUFFER_SIZE];
         long contig_length;
 
-        Contig* con;
         while ((read = getline(&line, &len, clfile)) != EOF) {
-            status = sscanf(line, "%s %ld", contig_name, &contig_length);
+            int status = sscanf(line, "%s %ld", contig_name, &contig_length);
             if(status == EOF) {
                 fprintf(stderr, "Failed to read contig length file\n");
                 exit(EXIT_FAILURE);
             }
-            con = get_contig(contig_name);
+            Contig* con = get_contig(contig_name);
             if(con != nullptr) {
                 con->set_length(contig_length);
             }
@@ -89,7 +86,7 @@ void Genome::dump_blocks()
 
 void Genome::print(bool print_blocks, bool forward)
 {
-    fprintf(stderr, ">%s size=%lu\n", name.c_str(), contig.size());
+    fprintf(stderr, ">%s size=%zu\n", name.c_str(), contig.size());
     for (auto &pair : contig) {
         pair.second->print(forward, print_blocks);
     }
@@ -139,11 +136,9 @@ void Genome::refresh()
 
 void Genome::link_contiguous_blocks(long k, size_t& setid)
 {
-    Contig * con;
-    Block * first_blk;
     for (auto &pair : contig) {
-        con = pair.second;
-        first_blk = con->block.front();
+        Contig* con = pair.second;
+        Block* first_blk = con->block.front();
         con->cset.link_contiguous_blocks(first_blk, k, setid);
     }
 }

@@ -275,13 +275,13 @@ private:
     /* write tree and center */
     void print_verbosity_1(IntervalTree<T>* n, int depth, char pos)
     {
-        printf("%*d - %c%zu\n", depth * 2, depth, pos, n->center);
+        printf("%*d - %c%dl\n", depth * 2, depth, pos, n->center);
     }
 
     /* write tree, center, and start-sorted */
     void print_verbosity_2(IntervalTree<T>* n, int depth, char pos)
     {
-        printf("%*d   %*s\t%c%zu:",
+        printf("%*d   %*s\t%c%dl:",
                depth * 2, depth,
                10 - depth * 2, "", pos, n->center);
         for(size_t i = 0; i < n->by_start.size(); i++) {
