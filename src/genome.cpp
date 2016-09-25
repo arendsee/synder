@@ -80,7 +80,21 @@ void Genome::set_contig_lengths(FILE* clfile)
 void Genome::dump_blocks()
 {
     for (auto &pair : contig) {
-        pair.second->block.print();
+        Block* b = pair.second->block.front();
+        for(; b != nullptr; b = b->next()){
+            printf(
+                "%s\t%ld\t%ld\t%s\t%ld\t%ld\t%lf\t%c\t%zu\n",
+                b->parent->name.c_str(),               // query chromosome
+                b->pos[0] + Offsets::out_start,        // query start
+                b->pos[1] + Offsets::out_stop,         // query stop
+                b->over->parent->name.c_str(),         // target chromosome
+                b->over->pos[0] + Offsets::out_start,  // target start
+                b->over->pos[1] + Offsets::out_stop,   // target stop
+                b->score,                              // score
+                b->strand,                             // strand
+                b->cset->id                            // contiguous set id
+            );
+        }
     }
 }
 

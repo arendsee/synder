@@ -18,14 +18,17 @@ Block::~Block() { }
 
 void Block::print()
 {
-    printf("%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\n",
-        parent->name.c_str(),
-        pos[0] + Offsets::out_start,
-        pos[1] + Offsets::out_stop,
-        over->parent->name.c_str(),
-        over->pos[0] + Offsets::out_start,
-        over->pos[1] + Offsets::out_stop,
-        strand);
+    printf(
+        "%s\t%ld\t%ld\t%s\t%ld\t%ld\t%lf\t%c\n",
+        parent->name.c_str(),               // query chromosome
+        pos[0] + Offsets::out_start,        // query start
+        pos[1] + Offsets::out_stop,         // query stop
+        over->parent->name.c_str(),         // target chromosome
+        over->pos[0] + Offsets::out_start,  // target start
+        over->pos[1] + Offsets::out_stop,   // target stop
+        score,                              // score
+        strand                              // strand
+    );
 }
 
 void Block::unlink(Block* blk, int u, int d)
