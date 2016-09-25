@@ -31,7 +31,6 @@ public:
     Command cmd = C_UNSET;
     FILE *synfile = nullptr;
     FILE *intfile = nullptr;
-    FILE *hitfile = nullptr;
     FILE *tclfile = nullptr;
     FILE *qclfile = nullptr;
     bool dump_blks = false;

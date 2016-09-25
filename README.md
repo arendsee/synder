@@ -123,14 +123,15 @@ One table with the following fields:
  - [x] write search interval score to output
  - [x] write contiguous set id to output
  - [ ] write test code for scores
- - [ ] test against fagin
- - [ ] refactor to c++
+ - [x] test against fagin
+ - [x] refactor to c++
  - [ ] clean up IO
  - [ ]  - replace getopt
  - [ ]  - incorporate subcommands
  - [x]  - allow reading of GFF files with string sequence names
  - [x] directly parse synteny files, no database Bash script
- - [ ] implement filter
+ - [x] implement filter
+ - [ ] write tests for filter
  - [ ] reimplement dump blocks
  - [ ] add quiet mode to runtests.sh
  - [ ] implement assembly checking

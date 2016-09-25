@@ -1,11 +1,7 @@
 #include "arguments.h"
 
-Arguments::Arguments(int argc, char *argv[])
-{
-    if (argc == 1) {
-        print_help();
-        exit(EXIT_FAILURE);
-    }
+Arguments::Arguments(int argc, char *argv[]) { if (argc == 1) { print_help();
+    exit(EXIT_FAILURE); }
 
     int opt;
 
@@ -39,10 +35,6 @@ Arguments::Arguments(int argc, char *argv[])
             case 'i':
                 intfile = fopen(optarg, "r");
                 Arguments::check_file(intfile, optarg);
-                break;
-            case 'f':
-                hitfile = fopen(optarg, "r");
-                Arguments::check_file(hitfile, optarg);
                 break;
             case 't':
                 tclfile = fopen(optarg, "r");
@@ -95,8 +87,6 @@ Arguments::~Arguments()
         fclose(synfile);
     if (intfile != nullptr)
         fclose(intfile);
-    if (hitfile != nullptr)
-        fclose(hitfile);
     if (tclfile != nullptr)
         fclose(tclfile);
     if (qclfile != nullptr)
@@ -159,7 +149,6 @@ void Arguments::print_help()
            "  synder -f <GFF_FILE> -s <SYNTENY_DB> -c <COMMAND>\n"
            " \n"
            "\t-d \t Convert synteny file into synteny database.\n"
-           "\t-f \t Filter using provided gff file.\n"
            "\t-i \t GFF search interval file, if not provided, uses stdin\n"
            "\t-t \t Target chromosome lengths file\n"
            "\t-q \t Query chromosome lengths file\n"
@@ -182,6 +171,9 @@ void Arguments::print_help()
            "\t\t print target intervals overlapping each query interval\n"
            "\tcount\n"
            "\t\t like map but prints only the number that overlap\n"
+           "\tfilter\n"
+           "\t\t Filter input through synteny map, input file must have the following 6 initial fields:\n"
+           "\t\t query_name | qstart | qstop | target_name | tstart | tstop\n"
            "EXAMPLES\n"
            "  synder -b 1100 -i a.gff -s a-b.map -c map\n"
            "  synder -b 1111 -i a.gff -s a-b.map -c count\n"

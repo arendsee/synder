@@ -22,6 +22,14 @@ SearchInterval::SearchInterval(
 
 SearchInterval::~SearchInterval() { }
 
+
+bool SearchInterval::feature_overlap(Feature* other)
+{
+    bool same_contig = other->parent_name == m_bnds[0]->over->parent->name;
+    bool search_interval_overlap = overlap(other);
+    return search_interval_overlap && same_contig;
+}
+
 void SearchInterval::reduce_side(const Direction d){
     while(m_bnds[d]->cnr[!d] != nullptr && REL_GT(m_bnds[d]->cnr[!d]->pos[d], m_feat->pos[d], d)){
         m_bnds[d] = m_bnds[d]->cnr[!d];

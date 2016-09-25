@@ -1,14 +1,14 @@
 #include "synmap.h"
 
 Synmap::Synmap(Arguments& args)
+    :
+    synfile(args.synfile),
+    tclfile(args.tclfile),
+    qclfile(args.qclfile),
+    swap(args.swap),
+    k(args.k),
+    trans(args.trans)
 {
-    synfile = args.synfile;
-    tclfile = args.tclfile;
-    qclfile = args.qclfile;
-    swap    = args.swap;
-    k       = args.k;
-    trans   = args.trans;
-
     load_blocks();
     validate();
 }
@@ -170,6 +170,46 @@ void Synmap::validate()
     genome[1]->validate();
 }
 
+void Synmap::filter(FILE* intfile)
+{
+    // read loop variables
+    char*   line   = nullptr;
+    size_t  len    = 0;
+    ssize_t read;
+
+    // Contig name
+    char qseqid[NAME_BUFFER_SIZE];
+    char tseqid[NAME_BUFFER_SIZE];
+    char* seqid[2] = {qseqid, tseqid};
+    long start[2], stop[2];
+
+    while ((read = getline(&line, &len, intfile)) != EOF) {
+
+        sscanf(line, "%s %ld %ld %s %ld %ld",
+               seqid[0], &start[0], &stop[0],
+               seqid[1], &start[1], &stop[1]);
+
+        Feature qfeat(seqid[0], start[0], stop[0]);
+        Feature tfeat(seqid[1], start[1], stop[1]);
+
+        Contig* qcon = get_contig(0, seqid[0]);
+        if(qcon == nullptr){
+            // Absence of a particular contig does not necessarily imply bad
+            // input. So no need to throw an exception.
+            cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
+        } else {
+            std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat);
+
+            for(auto &s : si){
+                if(s.feature_overlap(&tfeat)){
+                    printf("%s", line);
+                    break;
+                }
+            }
+        }
+    }
+    free(line);
+}
 
 bool Synmap::process_gff(FILE* intfile, Command cmd)
 {

@@ -34,6 +34,7 @@ using std::endl;
 
 #define LINE_BUFFER_SIZE 512
 #define NAME_BUFFER_SIZE 128
+
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
 class Offsets
 {

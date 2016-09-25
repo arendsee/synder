@@ -28,7 +28,7 @@ private:
     void reduce_side(const Direction d);
     void get_si_bound(const Direction d);
 
-    void set_bound(Direction d); 
+    void set_bound(Direction d);
     double flank_area(long near, long far, double k);
     double calculate_score(Block* blk);
 
@@ -46,6 +46,8 @@ public:
         const Feature& t_feat,
         bool t_inbetween
     );
+
+    bool feature_overlap(Feature* other);
 
     void print();
 

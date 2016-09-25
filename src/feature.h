@@ -18,12 +18,17 @@ public:
     long parent_length      = LONG_MAX;
     char strand             = '.';
 
-    Feature()
-    {
-#ifdef DEBUG
-cerr << "+Feature()\n";
-#endif
-    }
+    Feature() { }
+
+    Feature(
+        const char* t_parent_name,
+        long        t_start,
+        long        t_stop
+    )
+        :
+        Interval(t_start, t_stop),
+        parent_name(t_parent_name)
+    { }
 
     Feature(
         const char* t_parent_name,
@@ -39,17 +44,15 @@ cerr << "+Feature()\n";
         name(t_name),
         parent_length(t_parent_length),
         strand(t_strand)
+    { }
+
+    ~Feature() { };
+
+    bool feature_overlap(Feature* other)
     {
-#ifdef DEBUG
-fprintf(stderr, "+Feature(const char*, long, long, const char*, long, char)\n");
-#endif 
+        return overlap(other) && parent_name == other->parent_name;
     }
 
-    ~Feature() {
-#ifdef DEBUG
-fprintf(stderr, "-Feature\n");
-#endif 
-    };
 };
 
 #endif
