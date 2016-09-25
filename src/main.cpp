@@ -34,6 +34,9 @@ int main(int argc, char *argv[])
     if (args.synfile) {
         Synmap syn(args);
         switch(args.cmd) {
+            case C_FILTER:
+                syn.filter(args.intfile);
+                break;
             case C_DEBUG:
                 args.print();
                 syn.print(true);

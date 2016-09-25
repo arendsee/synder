@@ -101,6 +101,8 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
     merge_block_a_into_b_edge_(a->over, b->over, 0);
     merge_block_a_into_b_edge_(a->over, b->over, 1);
 
-    memset(a->over, 0, sizeof(Block));
-    memset(a, 0, sizeof(Block));
+    // Declare these blocks broken. A null `over` tags these blocks for
+    // exclusion and will break asserts in Genome::validate
+    a->over->over = nullptr;
+    a->over = nullptr;
 }

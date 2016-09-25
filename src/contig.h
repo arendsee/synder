@@ -37,6 +37,9 @@ public:
     /** Print target regions from a given query */
     void find_search_intervals(Feature& feat);
 
+    /** Print target regions from a given query */
+    std::vector<SearchInterval> list_search_intervals(Feature& feat);
+
     /** Write blocks overlapping intervals in intfile
      *
      * Prints the following TAB-delimited columns to STDOUT:
@@ -52,7 +55,6 @@ public:
      * Prints the input sequence name and count to STDOUT in TAB-delimited format.
      */
     void count(Feature& feat);
-
 };
 
 #endif

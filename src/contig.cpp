@@ -46,7 +46,7 @@ void Contig::print(bool forward, bool print_blocks)
 void Contig::count(Feature& t_feat)
 {
     long count = block.count_overlaps(&t_feat);
-    printf("%s\t%zu\n", t_feat.name.c_str(), count);
+    printf("%s\t%ld\n", t_feat.name.c_str(), count);
 }
 
 void Contig::map(Feature& t_feat)
@@ -68,9 +68,8 @@ void Contig::map(Feature& t_feat)
     delete rc;
 }
 
-void Contig::find_search_intervals(Feature& t_feat)
+std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat)
 {
-
     // TODO -- need to move this back up to Contig
 
     std::set<ContiguousSet*> csets;
@@ -94,10 +93,21 @@ void Contig::find_search_intervals(Feature& t_feat)
     // Iterate through each contiguous set, for each find the search interval
     // For each contiguous set, there is exactly one search interval, or into a new SearchIntervalSet class
     bool inbetween = rc->inbetween || rc->leftmost || rc->rightmost;
+    std::vector<SearchInterval> si;
     for(auto &c : csets) {
-        SearchInterval si(c->ends, &t_feat, inbetween);
-        si.print();
+        si.push_back( SearchInterval(c->ends, &t_feat, inbetween) );
     }
+
     delete rc;
     delete crc;
+
+    return si;
+}
+
+void Contig::find_search_intervals(Feature& t_feat)
+{
+    std::vector<SearchInterval> si = list_search_intervals(t_feat);
+    for(auto &s : si) {
+        s.print();
+    }
 }

@@ -32,11 +32,9 @@ using std::endl;
 #define REL_ADD(a, b, d)  ((d) ? (a) + (b) : (a) - (b))
 #define REL_SUB(a, b, d)  ((d) ? (a) - (b) : (a) + (b))
 
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-
 #define LINE_BUFFER_SIZE 512
 #define NAME_BUFFER_SIZE 128
+
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
 class Offsets
 {

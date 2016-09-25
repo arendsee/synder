@@ -18,7 +18,6 @@ protected:
     std::array<T*, 2> adj = {{ nullptr }};
 
 public:
-
     // homologous element
     T* over = nullptr;
 

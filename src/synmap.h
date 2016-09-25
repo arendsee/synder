@@ -17,13 +17,13 @@ class Synmap
 {
 private:
 
-    Genome* genome[2];
-    FILE* synfile;
-    FILE* tclfile;
-    FILE* qclfile;
-    int swap;
-    long k;
-    char trans;
+    Genome* genome[2] = { nullptr, nullptr };
+    FILE* synfile     = nullptr;
+    FILE* tclfile     = nullptr;
+    FILE* qclfile     = nullptr;
+    int swap          = 0;
+    long k            = 0;
+    char trans        = 'i';
 
     // loads synfile and calls the below functions in proper order
     void load_blocks();
@@ -47,6 +47,7 @@ public:
      * @return pointer to a complete Synmap object
      */
     Synmap(Arguments& args);
+
     ~Synmap();
 
     Contig* get_contig(size_t gid, char* contig_name);
@@ -58,6 +59,8 @@ public:
 
     /** Reads a GFF file and calls the appropriate command on each line */
     bool process_gff(FILE* intfile, Command cmd);
+
+    void filter(FILE* hitfile);
 
 };
 

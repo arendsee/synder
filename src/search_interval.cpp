@@ -22,6 +22,14 @@ SearchInterval::SearchInterval(
 
 SearchInterval::~SearchInterval() { }
 
+
+bool SearchInterval::feature_overlap(Feature* other)
+{
+    bool same_contig = other->parent_name == m_bnds[0]->over->parent->name;
+    bool search_interval_overlap = overlap(other);
+    return search_interval_overlap && same_contig;
+}
+
 void SearchInterval::reduce_side(const Direction d){
     while(m_bnds[d]->cnr[!d] != nullptr && REL_GT(m_bnds[d]->cnr[!d]->pos[d], m_feat->pos[d], d)){
         m_bnds[d] = m_bnds[d]->cnr[!d];
@@ -208,15 +216,9 @@ double SearchInterval::flank_area(long near, long far, double k)
 double SearchInterval::calculate_score(Block* b)
 {
 
-    long a1, b1, b2;
-
-    Feature* a = m_feat;
-
-    a1 = a->start();
-
-    double weighted_length;
-    long actual_length;
+    // TODO ASSIGN THIS AS AN INPUT PARAMETER
     double k = 0.001;
+
     double score = 0;
 
     if(b == nullptr)
@@ -227,9 +229,12 @@ double SearchInterval::calculate_score(Block* b)
         b = b->cnr[0];
     }
 
+    Feature* a  = m_feat;
+    long     a1 = a->start();
+
     for(; b != nullptr ; b = b->cnr[1]) {
-        b1 = b->start();
-        b2 = b->stop();
+        long b1 = b->start();
+        long b2 = b->stop();
 
         //               a1        a2
         //      b1  b2   |=========|    query interval
@@ -238,7 +243,7 @@ double SearchInterval::calculate_score(Block* b)
         // near difference := i1 = a1 - b2
         // far difference  := i2 = a1 - b1
         // i1 and i2 may be negative, if query is not in the above position
-        weighted_length = flank_area(a1 - b2, a1 - b1, k) +
+        double weighted_length = flank_area(a1 - b2, a1 - b1, k) +
 
                           //    a1        a2
                           //    |=========|    b1  b2     query interval
@@ -264,7 +269,7 @@ double SearchInterval::calculate_score(Block* b)
         // overlapping segment length by the score, gives the overlapping
         // segmental score.
 
-        actual_length = b->pos[1] - b->pos[0] + 1;
+        long actual_length = b->pos[1] - b->pos[0] + 1;
 
         score += b->score * weighted_length / actual_length;
     }
