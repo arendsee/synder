@@ -68,15 +68,19 @@ void Synmap::load_blocks()
 
         switch (trans) {
             case 'l':
+                // l := -log(S) (e-values or p-values)\n"
                 score = -1 * log(score);
                 break;
             case 'd':
-                score = score * MIN((stop[0] - start[0] + 1), (stop[1] - start[1] + 1));
+                // d := L * S (score densities)\n"
+                score = score * std::min((stop[0] - start[0] + 1), (stop[1] - start[1] + 1));
                 break;
             case 'p':
-                score = score * MIN((stop[0] - start[0] + 1), (stop[0] - start[0] + 1)) / 100.0;
+                // p := L * S / 100 (percent identity)\n"
+                score = score * std::min((stop[0] - start[0] + 1), (stop[1] - start[1] + 1)) / 100.0;
                 break;
             case 'i':
+                // i := S  (default, no transformation)\n"
                 // no transformation
                 break;
             default:
