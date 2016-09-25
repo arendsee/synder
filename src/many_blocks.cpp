@@ -80,16 +80,14 @@ void ManyBlocks::link_corners(){
     }
 }
 
-void ManyBlocks::set_overlap_group()
+void ManyBlocks::set_overlap_group(long &grpid)
 {
-    // Holds current overlapping group id
-    size_t grpid = 1;
     // Needed for determining overlaps and thus setids
     long maximum_stop = 0;
     // The stop position of the current interval
     long this_stop = 0;
 
-    maximum_stop = 0;
+    maximum_stop = -1;
     // Loop through each Block in the linked list
     for (Block* blk = front(); blk != nullptr; blk = blk->next()) {
         this_stop = blk->pos[1];
@@ -186,18 +184,10 @@ void ManyBlocks::link_adjacent_blocks()
 
 void ManyBlocks::merge_overlaps()
 {
-    Block *lo, *hi, *first_blk;
-
-    first_blk = front();
-
-    // merging may invalidate the corners, so set to null
-    cor = {{ nullptr }};
-
-    // likewise, the Block array is invalidated, so clear this memory
-    inv.clear();
+    Block *lo, *hi;
 
     // iterate through all blocks
-    for (lo = first_blk; lo != nullptr; lo = lo->next()) {
+    for (lo = front(); lo != nullptr; lo = lo->next()) {
         // look ahead to find all doubly-overlapping blocks
         for (hi = lo->next(); hi != nullptr; hi = hi->next()) {
             if (hi->grpid != lo->grpid) {
@@ -209,9 +199,26 @@ void ManyBlocks::merge_overlaps()
             }
         }
     }
+}
+
+void ManyBlocks::refresh()
+{
+    Block* first = front();
+
+    // merging may invalidate the corners, so set to null
+    cor = {{ nullptr }};
+
+    // likewise, the Block array is invalidated, so clear this memory
+    inv.clear();
 
     // refill it with the overlap-merged remaining blocks
-    for(lo = first_blk; lo != nullptr; lo = lo->next()){
-        inv.push_back(lo);    
+    for(Block* b = first; b != nullptr; b = b->next()){
+        // This works since the Blocks are zeroed in merge_block_a_into_b
+        // And over must be defined in a well-formed block
+        if(b->over != 0){
+            inv.push_back(b);
+        }
     }
+
+    link_corners();
 }

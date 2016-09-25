@@ -109,10 +109,10 @@ void Genome::set_contig_corners()
     }
 }
 
-void Genome::set_overlap_group()
+void Genome::set_overlap_group(long& offset)
 {
     for (auto &pair : contig) {
-        pair.second->block.set_overlap_group();
+        pair.second->block.set_overlap_group(offset);
     }
 }
 
@@ -127,6 +127,13 @@ void Genome::merge_overlaps()
 {
     for (auto &pair : contig) {
         pair.second->block.merge_overlaps();
+    }
+}
+
+void Genome::refresh()
+{
+    for (auto &pair : contig) {
+        pair.second->block.refresh();
     }
 }
 
