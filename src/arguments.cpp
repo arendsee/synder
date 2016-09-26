@@ -5,7 +5,7 @@ Arguments::Arguments(int argc, char *argv[]) { if (argc == 1) { print_help();
 
     int opt;
 
-    while ((opt = getopt(argc, argv, "hvrDBd:s:i:c:f:b:k:x:q:t:")) != -1) {
+    while ((opt = getopt(argc, argv, "hvrDd:s:i:c:f:b:k:x:q:t:")) != -1) {
         switch (opt) {
             case 'h':
                 print_help();
@@ -17,9 +17,6 @@ Arguments::Arguments(int argc, char *argv[]) { if (argc == 1) { print_help();
                 break;
             case 'D':
                 cmd = C_DEBUG;
-                break;
-            case 'B':
-                cmd = C_DUMP;
                 break;
             case 'x':
                 trans = optarg[0];
@@ -53,6 +50,8 @@ Arguments::Arguments(int argc, char *argv[]) { if (argc == 1) { print_help();
                     cmd = C_MAP;
                 } else if (strcmp(optarg, "search") == 0) {
                     cmd = C_SEARCH;
+                } else if (strcmp(optarg, "dump") == 0) {
+                    cmd = C_DUMP;
                 }
                 break;
             case 'r':

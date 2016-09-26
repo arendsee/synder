@@ -161,7 +161,6 @@ void Synmap::print(bool forward)
 void Synmap::dump_blocks()
 {
     genome[0]->dump_blocks();
-    genome[1]->dump_blocks();
 }
 
 void Synmap::validate()
