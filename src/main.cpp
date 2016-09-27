@@ -14,15 +14,16 @@ int main(int argc, char *argv[])
         {
             UNKNOWN, 0, "", "", option::Arg::None,
             "synder - Explore genomes using a synteny map\n"
-            "Usage: synder [SUBCOMMAND] [OPTIONS]\n"
-            "Usage: synder [SUBCOMMAND] --help\n"
+            "Usage:\n"
+            "  synder [SUBCOMMAND] [OPTIONS]\n"
+            "  synder [SUBCOMMAND] --help\n"
             "Subcommands:\n"
-            " search - predict search intervals\n"
-            " filter - remove links that disagree with the synteny map\n"
-            " map    - trace intervals across genomes\n"
-            " count  - count overlaps\n"
-            " dump   - dump of synteny map with contiguous group annotations\n"
-            "Arguments:\n"
+            "  search - predict search intervals\n"
+            "  filter - remove links that disagree with the synteny map\n"
+            "  map    - trace intervals across genomes\n"
+            "  count  - count overlaps\n"
+            "  dump   - print all blocks with contiguous set ids\n"
+            "Arguments:"
         },
         {
             HELP, 0, "h", "help", option::Arg::None,

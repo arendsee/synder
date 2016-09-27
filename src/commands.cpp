@@ -81,32 +81,32 @@ option::Descriptor synmap = {
 
 option::Descriptor tclfile = {
     TCLFILE, 0, "t", "tcl", Arg::Filename,
-    "  -t, --tcl, \tTarget chromosome lengths file"
+    "  -t, --tcl \tTarget chromosome lengths file"
 };
 
 option::Descriptor qclfile = {
     QCLFILE, 0, "q", "qcl", Arg::Filename,
-    "  -q, --qcl, \tQuery chromosome lengths file"
+    "  -q, --qcl \tQuery chromosome lengths file"
 };
 
 option::Descriptor reverse = {
     REVERSE, 0, "r", "reverse", option::Arg::None,
-    "  -r, --reverse, \tSwitch target and query in synteny map"
+    "  -r, --reverse \tSwitch target and query in synteny map"
 };
 
 option::Descriptor base_offsets = {
     BASE_OFFSETS, 0, "b", "base-offsets", Arg::Required,
-    "  -b, --base-offsets, \tStart and stop offsets for input and output (e.g. 1100)"
+    "  -b, --base-offsets \tStart and stop offsets for input and output (e.g. 1100)"
 };
 
 option::Descriptor k = {
     K, 0, "k", "--interruption-fuzz", Arg::Numeric,
-    "  -k, --interruption-fuzz, \tNumber of interrupting intervals allowed before breaking contiguous set (default=0)"
+    "  -k, --interruption-fuzz \tNumber of interrupting intervals allowed before breaking contiguous set (default=0)"
 };
 
 option::Descriptor transform = {
     TRANSFORM, 0, "x", "--transform", Arg::Required,
-    "  -x, --transform, \tTransform score (Synder requires additive scores):\n"
+    "  -x, --transform \tTransform score (Synder requires additive scores):\n"
     "                 \t -'i' := S            (default, no transformation)\n"
     "                 \t -'d' := L * S        (score densities)\n"
     "                 \t -'p' := L * S / 100  (percent identity)\n"
@@ -120,11 +120,15 @@ bool subcommand_dump(int argc, char* argv[])
     const option::Descriptor usage[] = {
         {
             UNKNOWN, 0, "", "", option::Arg::None,
-            "Usage: synder dump\n"
-            "Dump processed blocks to stdout and exit. The output contains\n"
-            "all the fields in the synteny map, with preserved order, and\n"
-            "adds a column of contiguous set ids. Also, doubly overlapping\n"
-            "bocks are also merged."
+            "synder dump - print all blocks with contiguous set ids\n"
+            "Usage:\n"
+            "  synder dump -s SYNTENY_MAP\n"
+            "Description:\n"
+            "  Dump processed blocks to stdout and exit. The output contains\n"
+            "  all the fields in the synteny map, with preserved order, and\n"
+            "  adds a column of contiguous set ids. Also, doubly overlapping\n"
+            "  bocks are also merged.\n"
+            "Arguments:"
         },
         descriptors::synmap,
         descriptors::reverse,
@@ -147,11 +151,15 @@ bool subcommand_filter(int argc, char* argv[])
     const option::Descriptor usage[] = {
         {
             UNKNOWN, 0, "", "", option::Arg::None,
-            "Usage: synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Remove input links that disagree with the synteny map Given a map\n"
-            "between the target and query (e.g. BLAST output) and a synteny map,\n"
-            "remove all entries in the map that do not overlap search intervals\n"
-            "in the query."
+            "synder filter - remove links that disagree with the synteny map\n"
+            "Usage:\n"
+            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "Description:\n"
+            "  Remove input links that disagree with the synteny map Given a map\n"
+            "  between the target and query (e.g. BLAST output) and a synteny map,\n"
+            "  remove all entries in the map that do not overlap search intervals\n"
+            "  in the query.\n"
+            "Arguments:"
         },
         descriptors::synmap,
         descriptors::input_map,
@@ -178,9 +186,13 @@ bool subcommand_map(int argc, char* argv[])
     const option::Descriptor usage[] = {
         {
             UNKNOWN, 0, "", "", option::Arg::None,
-            "Usage: synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Given a set of query intervals, find all synmap queries that\n"
-            "overlap and map to homologous target intervals."
+            "synder map - trace intervals across genomes\n"
+            "Usage:\n"
+            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "Description:\n"
+            "  Given a set of query intervals, find all synmap queries that\n"
+            "  overlap and map to homologous target intervals.\n"
+            "Arguments:"
         },
         descriptors::synmap,
         descriptors::input_gff,
@@ -204,9 +216,13 @@ bool subcommand_count(int argc, char* argv[])
     const option::Descriptor usage[] = {
         {
             UNKNOWN, 0, "", "", option::Arg::None,
-            "Usage: synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Given a set of query intervals, count all synmap queries that\n"
-            "overlap and map to homologous target intervals."
+            "synder count - count overlaps\n"
+            "Usage:\n"
+            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "Description:\n"
+            "  Given a set of query intervals, count all synmap queries that\n"
+            "  overlap and map to homologous target intervals.\n"
+            "Arguments:"
         },
         descriptors::synmap,
         descriptors::input_gff,
@@ -230,8 +246,12 @@ bool subcommand_search(int argc, char* argv[])
     const option::Descriptor usage[] = {
         {
             UNKNOWN, 0, "", "", option::Arg::None,
-            "Usage: synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Given an input GFF and a synteny, find search intervals.\n"
+            "synder search - predict search intervals\n"
+            "Usage\n"
+            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "Description:\n"
+            "  Given an input GFF and a synteny, find search intervals.\n"
+            "Arguments:"
         },
         descriptors::synmap,
         descriptors::input_map,
