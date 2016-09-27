@@ -2,23 +2,43 @@
 set -u
 
 announce(){
-    [[ -t 1 ]] && o="\e[1;33m$1\e[0m" || o=$1
-    echo -e $o
+    if [[ $quiet -eq 0 ]]
+    then
+        [[ -t 1 ]] && o="\e[1;33m$1\e[0m" || o=$1
+        echo -e $o
+    fi
 }
 
 warn(){
-    [[ -t 1 ]] && o="\e[1;31m$1\e[0m" || o=$1
-    echo -en $o
+    if [[ $quiet -eq 0 ]]
+    then
+        [[ -t 1 ]] && o="\e[1;31m$1\e[0m" || o=$1
+        echo -en $o
+    fi
 }
 
 emphasize(){
-   emphasize_n "$1" 
-   echo
+    if [[ $quiet -eq 0 ]]
+    then
+        emphasize_n "$1" 
+        echo
+    fi
 }
 
 emphasize_n(){
-    [[ -t 1 ]] && o="\e[1;39m$1\e[0m" || o=$1
-    echo -ne $o
+    if [[ $quiet -eq 0 ]]
+    then
+        [[ -t 1 ]] && o="\e[1;39m$1\e[0m" || o=$1
+        echo -ne $o
+    fi
+}
+
+say_n(){
+    [[ $quiet -eq 0 ]] && echo -n "$@"
+}
+
+say(){
+    [[ $quiet -eq 0 ]] && echo "$@"
 }
 
 usage (){
@@ -32,6 +52,7 @@ OPTIONAL ARGUMENTS
   -v  print verbose debugging info
   -o  redirect gdb output to this file (or tty)
   -a  archive all results
+  -q  quiet, print no output
 EOF
     exit 0
 }
@@ -42,7 +63,8 @@ debug=0
 verbose=0
 gdb_out="none"
 archive=0
-while getopts "hdxvma:o:" opt; do
+quiet=0
+while getopts "hdqxvma:o:" opt; do
     case $opt in
         h)
             usage ;;
@@ -67,8 +89,10 @@ while getopts "hdxvma:o:" opt; do
             archive=$OPTARG
             mkdir -p $archive
             ;;
+        q)
+            quiet=1 ;;
         ?)
-            echo "Illegal arguments"
+            warn "Illegal arguments"
             exit 1
     esac 
 done
@@ -117,7 +141,7 @@ runtest(){
 
     synder_cmd=
 
-    echo -n "Testing $msg ... "
+    say_n "Testing $msg ... "
 
     [[ -z $g_exp_ext ]] && g_exp_ext=exp
 
@@ -255,7 +279,7 @@ runtest(){
 
     if [[ $fail -eq 0 ]]
     then
-        echo "OK"
+        say "OK"
         total_passed=$(( $total_passed + 1 ))
     else
         warn "FAIL\n"
@@ -267,7 +291,7 @@ runtest(){
     # ===============================================================
     # --- Build error report
     # Print expected and observed output, for successful failures
-    if [[ $fail -ne 0 && $diff_exit_status -ne 0 ]]
+    if [[ $fail -ne 0 && $diff_exit_status -ne 0 && $quiet -eq 0 ]]
     then
         [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
         echo "======================================="
@@ -534,7 +558,7 @@ g_map="map-9.syn"
 runtest a "Overlap - double overlap on different target contigs"
 
 # ---------------------------------------------------------------------
-echo
+say
 
 total=$(( total_passed + total_failed))
 emphasize "$total_passed tests successful out of $total"

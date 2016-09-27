@@ -125,15 +125,15 @@ One table with the following fields:
  - [ ] write test code for scores
  - [x] test against fagin
  - [x] refactor to c++
- - [ ] clean up IO
- - [ ]  - replace getopt
- - [ ]  - incorporate subcommands
+ - [x] clean up IO
+ - [x]  - replace getopt
+ - [x]  - incorporate subcommands
  - [x]  - allow reading of GFF files with string sequence names
  - [x] directly parse synteny files, no database Bash script
  - [x] implement filter
  - [ ] write tests for filter
- - [ ] reimplement dump blocks
- - [ ] add quiet mode to runtests.sh
+ - [x] reimplement dump blocks
+ - [x] add quiet mode to runtests.sh
  - [ ] implement assembly checking
  - [ ] update README documentation
  - [ ] update Doxygen documentation
