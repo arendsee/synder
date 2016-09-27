@@ -30,7 +30,7 @@ Contig* Genome::get_contig(std::string t_name)
     try {
         con = contig.at(t_name);
     } catch (const std::out_of_range& e) {
-        cerr << "Index error in " << __func__ << endl;
+        std::cerr << "Index error in " << __func__ << std::endl;
         con = nullptr;
     }
     return con;

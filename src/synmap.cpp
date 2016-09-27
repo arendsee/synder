@@ -24,7 +24,7 @@ Synmap::~Synmap()
 void Synmap::load_blocks()
 {
     if (synfile == nullptr) {
-        fprintf(stderr, "NULL synteny input file (%s:%d in %s)", __FILE__, __LINE__, __func__);
+        fprintf(stderr, "NULL synteny input file (%s:%d in %s)\n", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
 
@@ -195,7 +195,7 @@ void Synmap::filter(FILE* intfile)
         if(qcon == nullptr){
             // Absence of a particular contig does not necessarily imply bad
             // input. So no need to throw an exception.
-            cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
+            std::cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
         } else {
             std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat);
 

@@ -113,16 +113,11 @@ runtest(){
     synder_dump_exit_status=0
     diff_exit_status=0
 
+    fail=0
+
     synder_cmd=
 
-    # temp file for special error messages that need to be sent to user
-    tmpmsg=/tmp/m
-
-    >$tmpmsg
-
     echo -n "Testing $msg ... "
-
-    fail=0
 
     [[ -z $g_exp_ext ]] && g_exp_ext=exp
 
@@ -150,13 +145,12 @@ runtest(){
         cat $g_dir/${base}-${g_exp_ext}.txt | filter > $exp
     fi
 
-    synder_cmd=$synder
+    offset=0000
+    [[ $out_base == 1 ]] && offset=0011
 
-    [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
-    synder_cmd="$synder_cmd -i $gff"
-    synder_cmd="$synder_cmd -s $map"
-    synder_cmd="$synder_cmd -c search"
-    synder_cmd="$synder_cmd $g_arg"
+    synder_cmd="$synder search -s $map -b $offset -i $gff $g_arg "
+
+    synder_dump_cmd="$synder dump -s $map -b $offset"
 
     # Query genome length file
     tgen=$g_dir/tgen.tab
@@ -190,7 +184,7 @@ runtest(){
     fi
 
     # Ensure all input files are readable
-    for f in $gff $exp $map;
+    for f in $gff $exp $map
     do
         if [[ ! -r "$f" ]]
         then
@@ -199,16 +193,28 @@ runtest(){
         fi
     done
 
+
+    # ===============================================================
+    # Test 1 - straight synder runtime check
     $synder_cmd > $obs 2> $log
     synder_exit_status=$?
-
     if [[ $synder_exit_status -ne 0 ]]
     then
         warn "runtime:"
         echo $synder_cmd > zzz
         fail=1
     fi
+    # ---------------------------------------------------------------
 
+    # ===============================================================
+    # Test 2 - straight synder logic check
+    filter < $obs > /tmp/z && mv /tmp/z $obs
+    diff $exp $obs 2>&1 > /dev/null
+    diff_exit_status=$?
+    # ---------------------------------------------------------------
+
+    # ===============================================================
+    # Test 3 - valgrind memory test (optional)
     if [[ $valgrind -eq 1 ]]
     then
         # append valgrind messages to any synder error messages
@@ -221,22 +227,26 @@ runtest(){
             fail=1
         fi
     fi
+    # ---------------------------------------------------------------
 
-    $synder_cmd -D > /dev/null 2> $syn
-    if [[ $? -ne 0 ]]
+    # ===============================================================
+    # Test 4 - memory dump (kind of a test, mostly for getting data)
+    $synder_dump_cmd > /dev/null 2> $syn
+    synder_dump_exit_status=$?
+    if [[ $synder_dump_exit_status -ne 0 ]]
     then
-        if [[ $valgrind_exit_status -eq 0 || $synder_dump_exit_status -eq 0 ]]
+        if [[ $valgrind_exit_status -eq 0 ]]
         then
             warn "dump:"
             synder_dump_exit_status=1
             fail=1
         fi
     fi
+    # ---------------------------------------------------------------
 
-    filter < $obs > /tmp/z && mv /tmp/z $obs
-    diff $exp $obs 2>&1 > /dev/null
-    diff_exit_status=$?
 
+    # ===============================================================
+    # Determine last cases
     if [[ $fail -eq 0 && $diff_exit_status -ne 0 ]]
     then
         warn "logic:"
@@ -251,7 +261,11 @@ runtest(){
         warn "FAIL\n"
         total_failed=$(( $total_failed + 1 ))
     fi
+    # ---------------------------------------------------------------
 
+
+    # ===============================================================
+    # --- Build error report
     # Print expected and observed output, for successful failures
     if [[ $fail -ne 0 && $diff_exit_status -ne 0 ]]
     then
@@ -266,11 +280,6 @@ runtest(){
         column -t $gff
         emphasize_n "synteny map"; echo ": (map.syn)"
         column -t $map
-        if [[ -s $tmpmsg ]]
-        then
-            emphasize "messages:"
-            cat $tmpmsg
-        fi
         if [[ $debug -eq 1 && $verbose -eq 1 ]]
         then
             echo "Debugging files:"
@@ -289,6 +298,7 @@ runtest(){
         fi
         echo -e "---------------------------------------\n"
     fi
+    # ---------------------------------------------------------------
 
     if [[ -d $archive ]]
     then
