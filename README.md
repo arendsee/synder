@@ -129,6 +129,9 @@ One table with the following fields:
  - [x]  - replace getopt
  - [x]  - incorporate subcommands
  - [x]  - allow reading of GFF files with string sequence names
+ - [ ]  - improve input file type checking, fail on misformatted files
+ - [ ]  - extract name from GFF 9th column, i.e `s/.*ID=([^;]+).*/\1/`.
+ - [ ]  - if we get an argument that is not in the subcommands list, should die
  - [x] directly parse synteny files, no database Bash script
  - [x] implement filter
  - [ ] write tests for filter
@@ -139,7 +142,6 @@ One table with the following fields:
  - [ ] update Doxygen documentation
  - [ ] make Github wiki
  - [ ] make Github pages site
- - [ ] merge into Win code
 
 # Theoretical stuff
 

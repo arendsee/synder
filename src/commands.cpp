@@ -333,7 +333,7 @@ void set_arguments(Arguments& arg, std::vector<option::Option> options)
     if(options[TRANSFORM].desc != 0) {
         char trans = options[TRANSFORM].arg[0];
         if (! (trans == 'i' || trans == 'd' || trans == 'p' || trans == 'l')) {
-            fprintf(stderr, "-x only takes arguments 'i', 'n', 'l' and 'm'\n");
+            fprintf(stderr, "-x only takes arguments 'i', 'd', 'p' and 'l'\n");
             exit(EXIT_FAILURE);
         }
         arg.trans = trans;
