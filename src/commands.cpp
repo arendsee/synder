@@ -1,5 +1,6 @@
 #include "commands.h"
 
+// Adapted from Lean Mean C++ Parser example scripts
 struct Arg: public option::Arg {
     static void printError(const char* msg1, const option::Option& opt, const char* msg2)
     {
@@ -30,7 +31,13 @@ struct Arg: public option::Arg {
         }
         return option::ARG_ILLEGAL;
     }
-    
+
+    static option::ArgStatus Forbidden(const option::Option& option, bool msg)
+    {
+        if (msg) printError("Option '", option, "' illegal within this subcommand\n");
+        return option::ARG_ILLEGAL;
+    }
+
     static option::ArgStatus Filename_or_STDIN(const option::Option& option, bool msg)
     {
         if (option.arg != 0) {
@@ -97,6 +104,9 @@ option::Descriptor reverse = {
 option::Descriptor base_offsets = {
     BASE_OFFSETS, 0, "b", "base-offsets", Arg::Required,
     "  -b, --base-offsets \tStart and stop offsets for input and output (e.g. 1100)"
+};
+option::Descriptor forbid_base_offsets = {
+    BASE_OFFSETS, 0, "", "", Arg::Forbidden, ""
 };
 
 option::Descriptor k = {
@@ -167,7 +177,6 @@ bool subcommand_filter(int argc, char* argv[])
         descriptors::qclfile,
         descriptors::k,
         descriptors::reverse,
-        descriptors::base_offsets,
         descriptors::help,
         {0,0,0,0,0,0}
     };
@@ -322,7 +331,7 @@ void set_arguments(Arguments& arg, std::vector<option::Option> options)
     }
 
     if(options[TRANSFORM].desc != 0) {
-        char trans = options[K].arg[0];
+        char trans = options[TRANSFORM].arg[0];
         if (! (trans == 'i' || trans == 'd' || trans == 'p' || trans == 'l')) {
             fprintf(stderr, "-x only takes arguments 'i', 'n', 'l' and 'm'\n");
             exit(EXIT_FAILURE);
