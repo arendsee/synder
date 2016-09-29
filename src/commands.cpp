@@ -142,6 +142,7 @@ bool subcommand_dump(int argc, char* argv[])
         },
         descriptors::synmap,
         descriptors::reverse,
+        descriptors::transform,
         descriptors::base_offsets,
         descriptors::help,
         {0,0,0,0,0,0}
