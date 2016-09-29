@@ -2,8 +2,8 @@
 # CFLAGS=-Wall -O2 -std=c++11
 
 # debug build
-CFLAGS=-Wall -pedantic -gdwarf-4 -g3 -std=c++11 -DDEBUG
-INSUFFERABLE=#-Wshadow -Wextra -Wold-style-cast -Wcast-align -Weffc++ -Wmisleading-indentation
+CFLAGS=-Wall -pedantic -gdwarf-4 -g3 -std=c++11 #-DDEBUG
+INSUFFERABLE=-Wshadow -Wextra #-Wcast-align -Weffc++ -Wmisleading-indentation
 
 # # profiling build
 # # NOTE: GNU profiler leaks memory, so turn off memory tests
