@@ -534,28 +534,60 @@ runtest simple "Between the weird"
 # g_dir="$PWD/test/test-data/build/big"
 # build-test "$g_dir/c.syn" "$g_dir/c.gff" "Stress test"
 
+dump_test() {
+    f=$g_dir/$1
+    msg=$2
+    say_n "Testing $msg ... "
+    $synder dump -s $f > /dev/null 2> /dev/null
+    if [[ $? -ne 0 ]]
+    then
+        total_failed=$(( total_failed + 1 ))
+        fail=1
+        if [[ $archive -ne 0 ]]
+        then
+            [[ -d ark ]] || mkdir ark
+            cp $f ark
+        fi
+        warn "FAIL\n"
+    else
+        total_passed=$(( total_passed + 1 ))
+        say OK
+    fi 
+}
+
 # ---------------------------------------------------------------------
 set_defaults
 announce "\ndouble overlapping tests"
 g_dir="$PWD/test/test-data/build/overlap-tests"
 g_map="map-1.syn"
-runtest a "Overlap - single nesting"
+dump_test map-1.syn "Overlap - single nesting"
 g_map="map-2.syn"
-runtest a "Overlap - triple identical"
+dump_test map-2.syn "Overlap - triple identical"
 g_map="map-3.syn"
-runtest a "Overlap - left"
+dump_test map-3.syn "Overlap - left"
 g_map="map-4.syn"
-runtest a "Overlap - left-right"
+dump_test map-4.syn "Overlap - left-right"
 g_map="map-5.syn"
-runtest a "Overlap - double nest"
+dump_test map-5.syn "Overlap - double nest"
 g_map="map-6.syn"
-runtest a "Overlap - double nest left"
+dump_test map-6.syn "Overlap - double nest left"
 g_map="map-7.syn"
-runtest a "Overlap - Q-inside T-right"
+dump_test map-7.syn "Overlap - Q-inside T-right"
 g_map="map-8.syn"
-runtest a "Overlap - Tangles"
+dump_test map-8.syn "Overlap - Tangles"
 g_map="map-9.syn"
-runtest a "Overlap - double overlap on different target contigs"
+dump_test map-9.syn "Overlap - double overlap on different target contigs"
+
+#  T                ===C===
+#      ===A===   ==B==  |
+#         __\ _____/    |
+#        /   \          |
+#  Q   ==a==  \  ====c====
+#        ======b=====
+# overlapping groups: (abc), (A), (BC)
+# ((BC), (ac)) should NOT be merged
+g_map="map-10.syn"
+dump_test map-10.syn "Overlap - transitive group ids"
 
 # ---------------------------------------------------------------------
 say

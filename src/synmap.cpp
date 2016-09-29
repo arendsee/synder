@@ -241,12 +241,12 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
 
         qcon = get_contig(0, contig_seqname);
 
-        Feature feat(contig_seqname, start, stop, seqname, 0);
-
         if(qcon == nullptr) {
             fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
             continue;
         }
+
+        Feature feat(contig_seqname, start, stop, seqname, 0);
 
         switch(cmd){
             case C_FILTER:

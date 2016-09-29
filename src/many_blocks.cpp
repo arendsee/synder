@@ -185,10 +185,10 @@ void ManyBlocks::merge_overlaps()
     for (lo = front(); lo != nullptr; lo = lo->next()) {
         // look ahead to find all doubly-overlapping blocks
         for (hi = lo->next(); hi != nullptr; hi = hi->next()) {
-            if (hi->grpid != lo->grpid) {
+            if (!hi->overlap(lo)) {
                 break;
             }
-            if (hi->over->grpid == lo->over->grpid) {
+            if (hi->over->overlap(lo->over) && hi->over->parent == lo->over->parent) {
                 Block::merge_block_a_into_b(hi, lo);
                 hi = lo;
             }

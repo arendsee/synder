@@ -86,7 +86,7 @@ void Block::move_b_to_a(Block* a, Block* b, int u, int d)
 void Block::merge_block_a_into_b(Block* a, Block* b)
 {
     if (!(a->overlap(b) && a->over->overlap(b->over))) {
-        fprintf(stderr, "Blocks are not doubly overlapping, I don't know how to merge them\n");
+        throw "Blocks are not doubly overlapping, I don't know how to merge them";
     }
 
     double olen = a->overlap_length(b);

@@ -65,7 +65,7 @@ public:
         try {
             return cor.at(i);
         } catch (const std::out_of_range& e) {
-            std::cerr << "Index error in " << __func__ << std::endl;
+            std::cerr << "Attempted to access illegal element (i=" << i << ") in " << __FILE__ << ":" << __func__ << std::endl;
             return nullptr;
         }
     }
