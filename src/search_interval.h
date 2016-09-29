@@ -1,6 +1,7 @@
 #ifndef __SEARCH_INTERVAL_H__
 #define __SEARCH_INTERVAL_H__
 
+#include "global.h"
 #include "interval.hpp"
 #include "feature.h"
 #include "block.h"

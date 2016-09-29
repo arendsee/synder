@@ -55,9 +55,21 @@ public:
         }
     }
 
-    /** Determine whether intervals */
+    /** Determine whether intervals overlap */
     template <class U>
     bool overlap(U* other)
+    {
+        long a1 = pos[0];
+        long a2 = pos[1];
+        long b1 = other->pos[0];
+        long b2 = other->pos[1];
+
+        return (a1 <= b2) && (a2 >= b1);
+    }
+
+    /** Calculate the length of the overlap of two intervals */
+    template <class U>
+    long overlap_length(U* other)
     {
         long a1 = pos[0];
         long a2 = pos[1];
@@ -75,18 +87,6 @@ public:
         } else {
             return 0;
         }
-    }
-
-    /** Calculate the length of the overlap of two intervals */
-    template <class U>
-    long overlap_length(U* other)
-    {
-        long a1 = pos[0];
-        long a2 = pos[1];
-        long b1 = other->pos[0];
-        long b2 = other->pos[1];
-
-        return (a1 <= b2) && (a2 >= b1);
     }
 
 };

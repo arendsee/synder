@@ -24,7 +24,7 @@ Synmap::~Synmap()
 void Synmap::load_blocks()
 {
     if (synfile == nullptr) {
-        fprintf(stderr, "NULL synteny input file (%s:%d in %s)", __FILE__, __LINE__, __func__);
+        fprintf(stderr, "NULL synteny input file (%s:%d in %s)\n", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
 
@@ -138,7 +138,7 @@ Contig* Synmap::get_contig(size_t gid, char* contig_name)
     }
 }
 
-void Synmap::print(bool forward)
+void Synmap::print()
 {
     // only print the query Genome, the print_verbose_Block function will print
     // the target information as well
@@ -150,12 +150,7 @@ void Synmap::print(bool forward)
         genome[1]->get_name().c_str(),
         genome[1]->size()
     );
-    fprintf(stderr, "---------------------------------------------------------\n");
-    fprintf(stderr, "Target contigs:\n");
-    genome[1]->print(forward, false);
-    fprintf(stderr, "---------------------------------------------------------\n");
-    fprintf(stderr, "Query contigs and blocks:\n");
-    genome[0]->print(forward, true);
+    dump_blocks();
 }
 
 void Synmap::dump_blocks()
@@ -195,7 +190,7 @@ void Synmap::filter(FILE* intfile)
         if(qcon == nullptr){
             // Absence of a particular contig does not necessarily imply bad
             // input. So no need to throw an exception.
-            cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
+            std::cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
         } else {
             std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat);
 
@@ -241,12 +236,12 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
 
         qcon = get_contig(0, contig_seqname);
 
-        Feature feat(contig_seqname, start, stop, seqname, 0);
-
         if(qcon == nullptr) {
             fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
             continue;
         }
+
+        Feature feat(contig_seqname, start, stop, seqname, 0);
 
         switch(cmd){
             case C_FILTER:

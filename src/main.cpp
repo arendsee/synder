@@ -1,6 +1,7 @@
-#include "global.h"
-#include "arguments.h"
-#include "synmap.h"
+#include "commands.h"
+#include "version.h"
+
+#include <string>
 
 int Offsets::in_start;
 int Offsets::in_stop;
@@ -9,50 +10,51 @@ int Offsets::out_stop;
 
 int main(int argc, char *argv[])
 {
+    const option::Descriptor usage[] = {
+        {
+            UNKNOWN, 0, "", "", option::Arg::None,
+            "synder - Explore genomes using a synteny map\n"
+            "Usage:\n"
+            "  synder [SUBCOMMAND] [OPTIONS]\n"
+            "  synder [SUBCOMMAND] --help\n"
+            "Subcommands:\n"
+            "  search - predict search intervals\n"
+            "  filter - remove links that disagree with the synteny map\n"
+            "  map    - trace intervals across genomes\n"
+            "  count  - count overlaps\n"
+            "  dump   - print all blocks with contiguous set ids\n"
+            "Arguments:"
+        },
+        {
+            HELP, 0, "h", "help", option::Arg::None,
+            "  -h, --help \tPrint usage and exit."
+        },
+        {
+            VERSION, 0, "v", "version", option::Arg::None,
+            "  -v, --version \tPrint version and exit."
+        },
+        {0,0,0,0,0,0}
+    };
 
-    int exit_status = 0;
+    SHIFT 
+    BOILERPLATE
+    SHIFT 
 
-    // ------------------------------------------------------------------------
-    // Prep input
-    // ------------------------------------------------------------------------
-
-    Arguments args = Arguments(argc, argv);
-
-    Offsets::in_start  = args.offsets[0];
-    Offsets::in_stop   = args.offsets[1];
-    Offsets::out_start = args.offsets[2];
-    Offsets::out_stop  = args.offsets[3];
-
-    // ------------------------------------------------------------------------
-    // Do stuff
-    // ------------------------------------------------------------------------
-
-    // If no file given by -i, use STDIN
-    if (args.intfile == nullptr)
-        args.intfile = stdin;
-
-    if (args.synfile) {
-        Synmap syn(args);
-        switch(args.cmd) {
-            case C_FILTER:
-                syn.filter(args.intfile);
-                break;
-            case C_DEBUG:
-                args.print();
-                syn.print(true);
-                break;
-            case C_DUMP:
-                syn.dump_blocks();
-                break;
-            default:
-                exit_status = !syn.process_gff(args.intfile, args.cmd);
-        }
-    }
-    else {
-        printf("Nothing to do ...\n");
-        args.print_help();
-        exit_status = 1;
+    if(options[VERSION]){
+        std::cout << SYNDER_VERSION << std::endl;
+        return EXIT_SUCCESS;
     }
 
-    return exit_status;
+    std::string subcommand(parse.nonOption(0));
+
+    if( subcommand == "search" ) return !subcommand_search ( argc, argv );
+    if( subcommand == "filter" ) return !subcommand_filter ( argc, argv );
+    if( subcommand == "map"    ) return !subcommand_map    ( argc, argv );
+    if( subcommand == "count"  ) return !subcommand_count  ( argc, argv );
+    if( subcommand == "dump"   ) return !subcommand_dump   ( argc, argv );
+
+    std::cerr << "Failed to parse arguments, subcommand '" << parse.nonOption(0) << "' is not defined\n\n";
+    option::printUsage(std::cout, usage);
+
+    return EXIT_FAILURE;
 }

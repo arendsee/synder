@@ -14,35 +14,6 @@ void Contig::set_length(long t_length)
     feat.parent_length = t_length;
 }
 
-void Contig::print(bool forward, bool print_blocks)
-{
-    // fprintf(
-    //     stderr,
-    //     "$ %s size=%lu length=%lu cor=[%zu,%zu,%zu,%zu]\n",
-    //     name.c_str(),
-    //     block.size(),
-    //     length,
-    //     cor[0]->linkid,
-    //     cor[1]->linkid,
-    //     cor[2]->linkid,
-    //     cor[3]->linkid
-    // );
-    //
-    // ContiguousSet* c = cset;
-    // for (; c != nullptr; c = c->next) {
-    //     fprintf(stderr, "  -- ");
-    //     print_ContiguousSet(c);
-    // }
-    //
-    // if (print_blocks) {
-    //     int d = forward ? 1 : 3; // next by start or next by stop
-    //     Block* blk = cor[d - 1]; // prev by start or prev by stop
-    //     for (; blk != nullptr; blk = blk->cor[d]) {
-    //         print_Block(blk);
-    //     }
-    // }
-}
-
 void Contig::count(Feature& t_feat)
 {
     long count = block.count_overlaps(&t_feat);

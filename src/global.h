@@ -16,9 +16,6 @@
 #include <exception>
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))

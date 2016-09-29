@@ -32,8 +32,6 @@ public:
 
     void set_length(long length);
 
-    void print(bool forward=true, bool print_blocks=true);
-
     /** Print target regions from a given query */
     void find_search_intervals(Feature& feat);
 

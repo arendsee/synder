@@ -45,11 +45,6 @@ public:
 
     void dump_blocks();
 
-    void print(
-        bool print_blocks=true,     // recursively print all blocks
-        bool print_backwards=false  // print blocks sorted by stop position
-    );
-
     /** Link blocks by next and prev stop and next and prev start */
     void link_block_corners();
 

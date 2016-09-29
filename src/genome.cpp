@@ -30,7 +30,12 @@ Contig* Genome::get_contig(std::string t_name)
     try {
         con = contig.at(t_name);
     } catch (const std::out_of_range& e) {
-        cerr << "Index error in " << __func__ << endl;
+#ifdef DEGUB
+        // A contig may be present in an assembly but not represented in the
+        // synteny map so an attempt to access an element that doesn't exist
+        // should not raise an exception.
+        std::cerr << "Failed to access contig '" << t_name << "' in " __FILE__ << ":" << __func__ << std::endl;
+#endif
         con = nullptr;
     }
     return con;
@@ -95,14 +100,6 @@ void Genome::dump_blocks()
                 b->cset->id                            // contiguous set id
             );
         }
-    }
-}
-
-void Genome::print(bool print_blocks, bool forward)
-{
-    fprintf(stderr, ">%s size=%zu\n", name.c_str(), contig.size());
-    for (auto &pair : contig) {
-        pair.second->print(forward, print_blocks);
     }
 }
 

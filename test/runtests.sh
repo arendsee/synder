@@ -2,23 +2,43 @@
 set -u
 
 announce(){
-    [[ -t 1 ]] && o="\e[1;33m$1\e[0m" || o=$1
-    echo -e $o
+    if [[ $quiet -eq 0 ]]
+    then
+        [[ -t 1 ]] && o="\e[1;33m$1\e[0m" || o=$1
+        echo -e $o
+    fi
 }
 
 warn(){
-    [[ -t 1 ]] && o="\e[1;31m$1\e[0m" || o=$1
-    echo -en $o
+    if [[ $quiet -eq 0 ]]
+    then
+        [[ -t 1 ]] && o="\e[1;31m$1\e[0m" || o=$1
+        echo -en $o
+    fi
 }
 
 emphasize(){
-   emphasize_n "$1" 
-   echo
+    if [[ $quiet -eq 0 ]]
+    then
+        emphasize_n "$1" 
+        echo
+    fi
 }
 
 emphasize_n(){
-    [[ -t 1 ]] && o="\e[1;39m$1\e[0m" || o=$1
-    echo -ne $o
+    if [[ $quiet -eq 0 ]]
+    then
+        [[ -t 1 ]] && o="\e[1;39m$1\e[0m" || o=$1
+        echo -ne $o
+    fi
+}
+
+say_n(){
+    [[ $quiet -eq 0 ]] && echo -n "$@"
+}
+
+say(){
+    [[ $quiet -eq 0 ]] && echo "$@"
 }
 
 usage (){
@@ -32,6 +52,7 @@ OPTIONAL ARGUMENTS
   -v  print verbose debugging info
   -o  redirect gdb output to this file (or tty)
   -a  archive all results
+  -q  quiet, print no output
 EOF
     exit 0
 }
@@ -42,7 +63,8 @@ debug=0
 verbose=0
 gdb_out="none"
 archive=0
-while getopts "hdxvma:o:" opt; do
+quiet=0
+while getopts "hdqxvma:o:" opt; do
     case $opt in
         h)
             usage ;;
@@ -67,13 +89,15 @@ while getopts "hdxvma:o:" opt; do
             archive=$OPTARG
             mkdir -p $archive
             ;;
+        q)
+            quiet=1 ;;
         ?)
-            echo "Illegal arguments"
+            warn "Illegal arguments"
             exit 1
     esac 
 done
 
-synder=$PWD/synder
+g_synder=$PWD/synder
 
 total_passed=0
 total_failed=0
@@ -113,16 +137,11 @@ runtest(){
     synder_dump_exit_status=0
     diff_exit_status=0
 
+    fail=0
+
     synder_cmd=
 
-    # temp file for special error messages that need to be sent to user
-    tmpmsg=/tmp/m
-
-    >$tmpmsg
-
-    echo -n "Testing $msg ... "
-
-    fail=0
+    say_n "Testing $msg ... "
 
     [[ -z $g_exp_ext ]] && g_exp_ext=exp
 
@@ -150,13 +169,12 @@ runtest(){
         cat $g_dir/${base}-${g_exp_ext}.txt | filter > $exp
     fi
 
-    synder_cmd=$synder
+    offset=0000
+    [[ $out_base == 1 ]] && offset=0011
 
-    [[ $out_base == 1 ]] && synder_cmd="$synder_cmd -b 0011 "
-    synder_cmd="$synder_cmd -i $gff"
-    synder_cmd="$synder_cmd -s $map"
-    synder_cmd="$synder_cmd -c search"
-    synder_cmd="$synder_cmd $g_arg"
+    synder_cmd="$g_synder search -s $map -b $offset -i $gff $g_arg "
+
+    synder_dump_cmd="$g_synder dump -s $map -b $offset"
 
     # Query genome length file
     tgen=$g_dir/tgen.tab
@@ -177,7 +195,7 @@ runtest(){
     # command for loading into gdb
     echo "set args $synder_cmd"  >  $gdbcmd
     # this must go before sourcing .cmds.gdb for breakpoints to work
-    echo "file $synder"          >> $gdbcmd
+    echo "file $g_synder"        >> $gdbcmd
     echo "source $PWD/.cmds.gdb" >> $gdbcmd
     if [[ $gdb_out != "none" ]]
     then
@@ -190,7 +208,7 @@ runtest(){
     fi
 
     # Ensure all input files are readable
-    for f in $gff $exp $map;
+    for f in $gff $exp $map
     do
         if [[ ! -r "$f" ]]
         then
@@ -199,16 +217,28 @@ runtest(){
         fi
     done
 
+
+    # ===============================================================
+    # Test 1 - straight synder runtime check
     $synder_cmd > $obs 2> $log
     synder_exit_status=$?
-
     if [[ $synder_exit_status -ne 0 ]]
     then
         warn "runtime:"
         echo $synder_cmd > zzz
         fail=1
     fi
+    # ---------------------------------------------------------------
 
+    # ===============================================================
+    # Test 2 - straight synder logic check
+    filter < $obs > /tmp/z && mv /tmp/z $obs
+    diff $exp $obs 2>&1 > /dev/null
+    diff_exit_status=$?
+    # ---------------------------------------------------------------
+
+    # ===============================================================
+    # Test 3 - valgrind memory test (optional)
     if [[ $valgrind -eq 1 ]]
     then
         # append valgrind messages to any synder error messages
@@ -221,22 +251,26 @@ runtest(){
             fail=1
         fi
     fi
+    # ---------------------------------------------------------------
 
-    $synder_cmd -D > /dev/null 2> $syn
-    if [[ $? -ne 0 ]]
+    # ===============================================================
+    # Test 4 - memory dump (kind of a test, mostly for getting data)
+    $synder_dump_cmd > $syn 2> /dev/null
+    synder_dump_exit_status=$?
+    if [[ $synder_dump_exit_status -ne 0 ]]
     then
-        if [[ $valgrind_exit_status -eq 0 || $synder_dump_exit_status -eq 0 ]]
+        if [[ $valgrind_exit_status -eq 0 ]]
         then
             warn "dump:"
             synder_dump_exit_status=1
             fail=1
         fi
     fi
+    # ---------------------------------------------------------------
 
-    filter < $obs > /tmp/z && mv /tmp/z $obs
-    diff $exp $obs 2>&1 > /dev/null
-    diff_exit_status=$?
 
+    # ===============================================================
+    # Determine last cases
     if [[ $fail -eq 0 && $diff_exit_status -ne 0 ]]
     then
         warn "logic:"
@@ -245,15 +279,19 @@ runtest(){
 
     if [[ $fail -eq 0 ]]
     then
-        echo "OK"
+        say "OK"
         total_passed=$(( $total_passed + 1 ))
     else
         warn "FAIL\n"
         total_failed=$(( $total_failed + 1 ))
     fi
+    # ---------------------------------------------------------------
 
+
+    # ===============================================================
+    # --- Build error report
     # Print expected and observed output, for successful failures
-    if [[ $fail -ne 0 && $diff_exit_status -ne 0 ]]
+    if [[ $fail -ne 0 && $diff_exit_status -ne 0 && $quiet -eq 0 ]]
     then
         [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
         echo "======================================="
@@ -266,11 +304,6 @@ runtest(){
         column -t $gff
         emphasize_n "synteny map"; echo ": (map.syn)"
         column -t $map
-        if [[ -s $tmpmsg ]]
-        then
-            emphasize "messages:"
-            cat $tmpmsg
-        fi
         if [[ $debug -eq 1 && $verbose -eq 1 ]]
         then
             echo "Debugging files:"
@@ -289,6 +322,7 @@ runtest(){
         fi
         echo -e "---------------------------------------\n"
     fi
+    # ---------------------------------------------------------------
 
     if [[ -d $archive ]]
     then
@@ -500,31 +534,91 @@ runtest simple "Between the weird"
 # g_dir="$PWD/test/test-data/build/big"
 # build-test "$g_dir/c.syn" "$g_dir/c.gff" "Stress test"
 
+dump_filter() {
+    cut -f1-8 | sed 's/\.[0-9]\+//' | sort
+}
+
+dump_test() {
+    map=$g_dir/${1}.syn
+    exp=$g_dir/${1}.exp
+    msg=$2
+    obs=/tmp/synderobs
+    log=/tmp/synderlog
+    fail=0
+
+    say_n "Testing $msg ... "
+
+    synder_cmd="$g_synder dump -x p -s $map"
+
+    $synder_cmd 2> $log | dump_filter > $obs
+    if [[ $? -ne 0 ]]
+    then
+        warn "runtime:"
+        fail=1
+    fi
+
+    diff <($synder_cmd 2> /dev/null | dump_filter ) <(dump_filter < $exp) 2>&1 > /dev/null
+    if [[ $? -ne 0 ]]
+    then
+        warn "logic:"
+        fail=1
+    fi 
+
+    if [[ $fail -ne 0 ]]
+    then
+        warn "FAIL\n"
+        total_failed=$(( total_failed + 1 ))
+        if [[ $archive -ne 0 ]]
+        then
+            [[ -d ark ]] || mkdir ark
+            cp $f ark
+        fi
+        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
+        echo "======================================="
+        emphasize_n "map"; echo ": ${map}" 
+        emphasize_n "expected output"; echo ": (${base}-exp.txt)"
+        dump_filter < $exp
+        emphasize "observed output:"
+        cat $obs
+        emphasize_n "synteny map"; echo ": (map.syn)"
+        column -t $map
+        emphasize "log"
+        cat $log
+        echo -e "---------------------------------------\n"
+    else
+        total_passed=$(( total_passed + 1 ))
+        say OK
+    fi
+
+    rm $log $obs
+}
+
 # ---------------------------------------------------------------------
 set_defaults
 announce "\ndouble overlapping tests"
 g_dir="$PWD/test/test-data/build/overlap-tests"
-g_map="map-1.syn"
-runtest a "Overlap - single nesting"
-g_map="map-2.syn"
-runtest a "Overlap - triple identical"
-g_map="map-3.syn"
-runtest a "Overlap - left"
-g_map="map-4.syn"
-runtest a "Overlap - left-right"
-g_map="map-5.syn"
-runtest a "Overlap - double nest"
-g_map="map-6.syn"
-runtest a "Overlap - double nest left"
-g_map="map-7.syn"
-runtest a "Overlap - Q-inside T-right"
-g_map="map-8.syn"
-runtest a "Overlap - Tangles"
-g_map="map-9.syn"
-runtest a "Overlap - double overlap on different target contigs"
+dump_test "map-1" "Overlap - single nesting"
+dump_test "map-2" "Overlap - triple identical"
+dump_test "map-3" "Overlap - left"
+dump_test "map-4" "Overlap - left-right"
+dump_test "map-5" "Overlap - double nest"
+dump_test "map-6" "Overlap - double nest left"
+dump_test "map-7" "Overlap - Q-inside T-right"
+dump_test "map-8" "Overlap - Tangles"
+dump_test "map-9" "Overlap - double overlap on different target contigs"
+
+#  T                ===C===
+#      ===A===   ==B==  |
+#         __\ _____/    |
+#        /   \          |
+#  Q   ==a==  \  ====c====
+#        ======b=====
+# overlapping groups: (abc), (A), (BC)
+# ((BC), (ac)) should NOT be merged
+dump_test "map-10" "Overlap - transitive group ids"
 
 # ---------------------------------------------------------------------
-echo
+say
 
 total=$(( total_passed + total_failed))
 emphasize "$total_passed tests successful out of $total"
