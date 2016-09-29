@@ -97,7 +97,7 @@ while getopts "hdqxvma:o:" opt; do
     esac 
 done
 
-synder=$PWD/synder
+g_synder=$PWD/synder
 
 total_passed=0
 total_failed=0
@@ -172,9 +172,9 @@ runtest(){
     offset=0000
     [[ $out_base == 1 ]] && offset=0011
 
-    synder_cmd="$synder search -s $map -b $offset -i $gff $g_arg "
+    synder_cmd="$g_synder search -s $map -b $offset -i $gff $g_arg "
 
-    synder_dump_cmd="$synder dump -s $map -b $offset"
+    synder_dump_cmd="$g_synder dump -s $map -b $offset"
 
     # Query genome length file
     tgen=$g_dir/tgen.tab
@@ -195,7 +195,7 @@ runtest(){
     # command for loading into gdb
     echo "set args $synder_cmd"  >  $gdbcmd
     # this must go before sourcing .cmds.gdb for breakpoints to work
-    echo "file $synder"          >> $gdbcmd
+    echo "file $g_synder"        >> $gdbcmd
     echo "source $PWD/.cmds.gdb" >> $gdbcmd
     if [[ $gdb_out != "none" ]]
     then
@@ -255,7 +255,7 @@ runtest(){
 
     # ===============================================================
     # Test 4 - memory dump (kind of a test, mostly for getting data)
-    $synder_dump_cmd > /dev/null 2> $syn
+    $synder_dump_cmd > $syn 2> /dev/null
     synder_dump_exit_status=$?
     if [[ $synder_dump_exit_status -ne 0 ]]
     then
@@ -534,49 +534,78 @@ runtest simple "Between the weird"
 # g_dir="$PWD/test/test-data/build/big"
 # build-test "$g_dir/c.syn" "$g_dir/c.gff" "Stress test"
 
+dump_filter() {
+    cut -f1-8 | sed 's/\.[0-9]\+//' | sort
+}
+
 dump_test() {
-    f=$g_dir/$1
+    map=$g_dir/${1}.syn
+    exp=$g_dir/${1}.exp
     msg=$2
+    obs=/tmp/synderobs
+    log=/tmp/synderlog
+    fail=0
+
     say_n "Testing $msg ... "
-    $synder dump -s $f > /dev/null 2> /dev/null
+
+    synder_cmd="$g_synder dump -x p -s $map"
+
+    $synder_cmd 2> $log | dump_filter > $obs
     if [[ $? -ne 0 ]]
     then
-        total_failed=$(( total_failed + 1 ))
+        warn "runtime:"
         fail=1
+    fi
+
+    diff <($synder_cmd 2> /dev/null | dump_filter ) <(dump_filter < $exp) 2>&1 > /dev/null
+    if [[ $? -ne 0 ]]
+    then
+        warn "logic:"
+        fail=1
+    fi 
+
+    if [[ $fail -ne 0 ]]
+    then
+        warn "FAIL\n"
+        total_failed=$(( total_failed + 1 ))
         if [[ $archive -ne 0 ]]
         then
             [[ -d ark ]] || mkdir ark
             cp $f ark
         fi
-        warn "FAIL\n"
+        [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
+        echo "======================================="
+        emphasize_n "map"; echo ": ${map}" 
+        emphasize_n "expected output"; echo ": (${base}-exp.txt)"
+        dump_filter < $exp
+        emphasize "observed output:"
+        cat $obs
+        emphasize_n "synteny map"; echo ": (map.syn)"
+        column -t $map
+        emphasize "log"
+        cat $log
+        echo -e "---------------------------------------\n"
     else
         total_passed=$(( total_passed + 1 ))
         say OK
-    fi 
+    fi
+
+    rm $log $obs
 }
 
 # ---------------------------------------------------------------------
 set_defaults
 announce "\ndouble overlapping tests"
 g_dir="$PWD/test/test-data/build/overlap-tests"
-g_map="map-1.syn"
-dump_test map-1.syn "Overlap - single nesting"
-g_map="map-2.syn"
-dump_test map-2.syn "Overlap - triple identical"
-g_map="map-3.syn"
-dump_test map-3.syn "Overlap - left"
-g_map="map-4.syn"
-dump_test map-4.syn "Overlap - left-right"
-g_map="map-5.syn"
-dump_test map-5.syn "Overlap - double nest"
-g_map="map-6.syn"
-dump_test map-6.syn "Overlap - double nest left"
-g_map="map-7.syn"
-dump_test map-7.syn "Overlap - Q-inside T-right"
-g_map="map-8.syn"
-dump_test map-8.syn "Overlap - Tangles"
-g_map="map-9.syn"
-dump_test map-9.syn "Overlap - double overlap on different target contigs"
+dump_test "map-1" "Overlap - single nesting"
+dump_test "map-2" "Overlap - triple identical"
+dump_test "map-3" "Overlap - left"
+dump_test "map-4" "Overlap - left-right"
+dump_test "map-5" "Overlap - double nest"
+dump_test "map-6" "Overlap - double nest left"
+dump_test "map-7" "Overlap - Q-inside T-right"
+dump_test "map-8" "Overlap - Tangles"
+dump_test "map-9" "Overlap - double overlap on different target contigs"
 
 #  T                ===C===
 #      ===A===   ==B==  |
@@ -586,8 +615,7 @@ dump_test map-9.syn "Overlap - double overlap on different target contigs"
 #        ======b=====
 # overlapping groups: (abc), (A), (BC)
 # ((BC), (ac)) should NOT be merged
-g_map="map-10.syn"
-dump_test map-10.syn "Overlap - transitive group ids"
+dump_test "map-10" "Overlap - transitive group ids"
 
 # ---------------------------------------------------------------------
 say

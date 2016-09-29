@@ -143,6 +143,18 @@ One table with the following fields:
  - [ ] make Github wiki
  - [ ] make Github pages site
 
+# Commands that are surprising
+
+## Forgot to include a subcommand
+
+```
+$ synder -x p -s a.syn
+Failed to parse arguments, subcommand 'p' is not defined
+```
+
+I would expect it to say "Missing subcommand", but instead it is interpretting
+`p` is the first positional, thus the subcommand.
+
 # Theoretical stuff
 
 I do not know a good way to do these, nor am I certain of their value.
