@@ -103,14 +103,6 @@ void Genome::dump_blocks()
     }
 }
 
-void Genome::print(bool print_blocks, bool forward)
-{
-    fprintf(stderr, ">%s size=%zu\n", name.c_str(), contig.size());
-    for (auto &pair : contig) {
-        pair.second->print(forward, print_blocks);
-    }
-}
-
 void Genome::link_block_corners()
 {
     for (auto &pair : contig) {

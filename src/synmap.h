@@ -53,7 +53,7 @@ public:
     Contig* get_contig(size_t gid, char* contig_name);
 
     /** Recursively print a synteny map. */
-    void print(bool forward=true);
+    void print();
 
     void dump_blocks();
 

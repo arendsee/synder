@@ -138,7 +138,7 @@ Contig* Synmap::get_contig(size_t gid, char* contig_name)
     }
 }
 
-void Synmap::print(bool forward)
+void Synmap::print()
 {
     // only print the query Genome, the print_verbose_Block function will print
     // the target information as well
@@ -150,12 +150,7 @@ void Synmap::print(bool forward)
         genome[1]->get_name().c_str(),
         genome[1]->size()
     );
-    fprintf(stderr, "---------------------------------------------------------\n");
-    fprintf(stderr, "Target contigs:\n");
-    genome[1]->print(forward, false);
-    fprintf(stderr, "---------------------------------------------------------\n");
-    fprintf(stderr, "Query contigs and blocks:\n");
-    genome[0]->print(forward, true);
+    dump_blocks();
 }
 
 void Synmap::dump_blocks()
