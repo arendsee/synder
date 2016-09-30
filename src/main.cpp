@@ -2,6 +2,7 @@
 #include "version.h"
 
 #include <string>
+#include <iostream>
 
 int Offsets::in_start;
 int Offsets::in_stop;
@@ -37,14 +38,20 @@ int main(int argc, char *argv[])
     };
 
     SHIFT 
+
     BOILERPLATE
-    SHIFT 
 
     if(options[VERSION]){
         std::cout << SYNDER_VERSION << std::endl;
         return EXIT_SUCCESS;
     }
 
+    if(argv[0][0] == '-'){
+        std::cerr << "Please provide a subcommand\n";  
+        return EXIT_FAILURE;
+    }
+
+    SHIFT 
     std::string subcommand(parse.nonOption(0));
 
     if( subcommand == "search" ) return !subcommand_search ( argc, argv );

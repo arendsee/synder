@@ -122,7 +122,8 @@ One table with the following fields:
  - [x] add score transforms to positive additive
  - [x] write search interval score to output
  - [x] write contiguous set id to output
- - [ ] write test code for scores
+ - [x] write test code for merge scores
+ - [ ] write test code for search interval scores
  - [x] test against fagin
  - [x] refactor to c++
  - [x] clean up IO
@@ -131,7 +132,7 @@ One table with the following fields:
  - [x]  - allow reading of GFF files with string sequence names
  - [ ]  - improve input file type checking, fail on misformatted files
  - [ ]  - extract name from GFF 9th column, i.e `s/.*ID=([^;]+).*/\1/`.
- - [ ]  - if we get an argument that is not in the subcommands list, should die
+ - [x]  - if we get an argument that is not in the subcommands list, should die
  - [x] directly parse synteny files, no database Bash script
  - [x] implement filter
  - [ ] write tests for filter
@@ -143,18 +144,6 @@ One table with the following fields:
  - [ ] update Doxygen documentation
  - [ ] make Github wiki
  - [ ] make Github pages site
-
-# Commands that are surprising
-
-## Forgot to include a subcommand
-
-```
-$ synder -x p -s a.syn
-Failed to parse arguments, subcommand 'p' is not defined
-```
-
-I would expect it to say "Missing subcommand", but instead it is interpretting
-`p` is the first positional, thus the subcommand.
 
 # Theoretical stuff
 
