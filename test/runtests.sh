@@ -617,6 +617,13 @@ dump_test "map-9" "Overlap - double overlap on different target contigs"
 # ((BC), (ac)) should NOT be merged
 dump_test "map-10" "Overlap - transitive group ids"
 
+#  T   =======A=======
+#          ===B===  |
+#          /        |
+#  Q      /  ====a===
+#       ===b====
+dump_test "map-11" "Overlap - transitive group ids"
+
 # ---------------------------------------------------------------------
 say
 
