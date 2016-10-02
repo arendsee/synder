@@ -1,8 +1,8 @@
 # # production build
-# CFLAGS=-Wall -O2 -std=c++11
+CFLAGS=-Wall -O3 -std=c++11
 
-# debug build
-CFLAGS=-Wall -pedantic -gdwarf-4 -g3 -std=c++11 #-DDEBUG
+# # debug build
+# CFLAGS=-Wall -pg -pedantic -std=c++11 #-gdwarf-4 -g3 #-DDEBUG
 INSUFFERABLE=-Wshadow -Wextra #-Wcast-align -Weffc++ -Wmisleading-indentation
 
 # # profiling build

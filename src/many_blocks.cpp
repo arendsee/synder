@@ -198,7 +198,7 @@ void ManyBlocks::merge_overlaps()
 
 void ManyBlocks::refresh()
 {
-    Block* first;
+    Block* first = inv[0];
 
     // NOTE: You cannot simply call front() to get the first defined block.
 
@@ -206,9 +206,12 @@ void ManyBlocks::refresh()
     for(auto &b : inv){
         if(b->over != nullptr){
             first = b;
-            break;
+            goto found;
         }
     }
+throw "No legal blocks remain\n";
+found:
+
     // Rewind (should be unnecessary, but I don't require the pool to be sorted)
     while(first->prev() != nullptr){
         first = first->prev();
