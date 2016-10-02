@@ -1,10 +1,9 @@
 [![Build Status](https://travis-ci.org/arendsee/synder.svg?branch=master)](https://travis-ci.org/arendsee/synder)
 
-**This program is under development**
-
 # Synder
 
     Map query intervals to target search spaces using a synteny map
+
 
 # Installation
 
@@ -14,12 +13,15 @@ make test
 make install
 ```
 
-This will install the program into /usr/local. To install elsewhere, run (for
-example)
+This will install the program into /usr/local. To install elsewhere, specifiy
+an installation prefix, e.g.
 
 ``` bash
 make install PREFIX=$HOME
 ```
+
+This command will create a folder  `$HOME/bin` and move the `synder` executable
+to it.
 
 To uninstall Synder, run
 
@@ -33,46 +35,79 @@ Or
 make uninstall PREFIX=<PATH>
 ```
 
+
 # Getting help
 
-To get a usage statement and descriptions of commands, type
+`synder` is composed of several subcommands, each with a specific function and
+set of legal parameters. For a toplevel overview of the available commands, run
+`synder` with no arguments. Help messages for each subcommand can be accessed
+by calling without arguments, e.g. `synder search` or `synder map`.
 
-`synder -h`
+
+# Subcommands
+
+## Search
+
+This is the primary function of `synder` 
+
+## Filter
+
+## Map
+
+## Count
+
+## Dump
+
 
 # Definitions
 
- * query interval - an interval on the query genome
+ * query genome - the reference genome of input intervals
 
- * block - a syntenic pair of intervals linking a query and target genome
+ * target genome - the genome to which input intervals are mapped
 
- * synteny map - a set of blocks for a pair of genomes
+ * synteny map - a set of query/target interval pairs inferred to be syntenic
+ 
+ * block - a single pair of intervals from the synteny map
+
+ * contig - a chromosome, scaffold, contig (`synder` doesn't distinguish between them)
 
  * interval adjacency - two intervals are adjacent if they are on the same
-   chromosome (or scaffold) and no other interval is fully contained between
-   them
+   contig and no other interval is fully contained between them
 
  * block adjacency - two blocks are adjacent if 1) the intervals are adjacent on
-   both the query and target sides and 2) both have the same sign.
+   both the query and target sides and 2) both have the same sign
 
  * query context - all blocks that overlap or are adjacent to the query interval
 
- * contiguous set - a set of blocks where block *i* is adjacent to block *i+1*
+ * contiguous set - a set where block *i* is adjacent to block *i+1*
 
  * search intervals - a set of intervals on the target genome where the
    ortholog of the query interval is expected to be (the ortholog search space)
+
 
 # Getting contiguous sets from query context
 
 Build an interval adjacency matrix for the query context intervals and for the
 target context intervals. AND them together to get a block adjacency matrix.
 From this matrix, extract paths of adjacent blocks. Synder will merge any
-blocks that overlap on both genomes, this ensures there is a unque path through
-the adjacency matrix.
+blocks that overlap on both genomes, this ensures there is a unique path
+through the adjacency matrix.
+
 
 # Getting search intervals from contiguous sets
 
-No more than one search interval will be contained within a given contiguous set. 
+ 1. Find input interval, *i*, context in the query genome. This context consists of
+    all query intervals *Sq* that either overlap or flank the input.
 
+ 2. From *Sq* determine which contiguous sets ,*Sc*, the query overlaps or borders.
+
+ 3. For each contiguous set, *c*, in *Sc*, classify each bound of *i* as:
+
+    - **anchored** - if overlaps a member of *c*
+    - **bound** - if is inbetween two members of *c*
+    - **unbound** - if is more extreme than any member of the set, but is inbetween two contiguous sets
+    - **extreme** - No entr is found
+ 
 ## Cases
 
 The cases can be described pretty easily with a picture, see figure 1. Note
@@ -122,7 +157,8 @@ One table with the following fields:
  - [x] add score transforms to positive additive
  - [x] write search interval score to output
  - [x] write contiguous set id to output
- - [ ] write test code for scores
+ - [x] write test code for merge scores
+ - [ ] write test code for search interval scores
  - [x] test against fagin
  - [x] refactor to c++
  - [x] clean up IO
@@ -131,7 +167,7 @@ One table with the following fields:
  - [x]  - allow reading of GFF files with string sequence names
  - [ ]  - improve input file type checking, fail on misformatted files
  - [ ]  - extract name from GFF 9th column, i.e `s/.*ID=([^;]+).*/\1/`.
- - [ ]  - if we get an argument that is not in the subcommands list, should die
+ - [x]  - if we get an argument that is not in the subcommands list, should die
  - [x] directly parse synteny files, no database Bash script
  - [x] implement filter
  - [ ] write tests for filter
@@ -143,18 +179,6 @@ One table with the following fields:
  - [ ] update Doxygen documentation
  - [ ] make Github wiki
  - [ ] make Github pages site
-
-# Commands that are surprising
-
-## Forgot to include a subcommand
-
-```
-$ synder -x p -s a.syn
-Failed to parse arguments, subcommand 'p' is not defined
-```
-
-I would expect it to say "Missing subcommand", but instead it is interpretting
-`p` is the first positional, thus the subcommand.
 
 # Theoretical stuff
 

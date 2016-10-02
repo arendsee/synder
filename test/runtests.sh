@@ -570,8 +570,9 @@ dump_test() {
         total_failed=$(( total_failed + 1 ))
         if [[ $archive -ne 0 ]]
         then
-            [[ -d ark ]] || mkdir ark
-            cp $f ark
+            l_ark=ark/F_$1
+            [[ -d $l_ark ]] || mkdir $l_ark
+            cp $map $l_ark
         fi
         [[ $errmsg == 0 ]] || (echo -e $errmsg | fmt)
         echo "======================================="
@@ -616,6 +617,15 @@ dump_test "map-9" "Overlap - double overlap on different target contigs"
 # overlapping groups: (abc), (A), (BC)
 # ((BC), (ac)) should NOT be merged
 dump_test "map-10" "Overlap - transitive group ids"
+
+#  T   =======A=======
+#          ===B===  |
+#          /        |
+#  Q      /  ====a===
+#       ===b====
+# This caused problems when A was merged into B, this left ManyBlocks::front
+# pointing to a broken Block
+dump_test "map-11" "Overlap - causal locus of mysterious failure"
 
 # ---------------------------------------------------------------------
 say
