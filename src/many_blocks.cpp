@@ -125,7 +125,7 @@ void ManyBlocks::link_adjacent_blocks_directed(Direction d)
     if (cor[0] == nullptr || cor[1] == nullptr || cor[2] == nullptr || cor[3] == nullptr) {
         fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
         // fprintf(stderr, "genome=(%s) contig=(%s)\n", parent->parent->name.c_str(), parent->name.c_str());
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
 
     // Transformed indices for Block->cor and Contig->cor
@@ -198,7 +198,21 @@ void ManyBlocks::merge_overlaps()
 
 void ManyBlocks::refresh()
 {
-    Block* first = front();
+    Block* first;
+
+    // NOTE: You cannot simply call front() to get the first defined block.
+
+    // Get the first block that is defined
+    for(auto &b : inv){
+        if(b->over != nullptr){
+            first = b;
+            break;
+        }
+    }
+    // Rewind (should be unnecessary, but I don't require the pool to be sorted)
+    while(first->prev() != nullptr){
+        first = first->prev();
+    }
 
     // merging may invalidate the corners, so set to null
     cor = {{ nullptr }};
