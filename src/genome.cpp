@@ -194,7 +194,9 @@ void Genome::validate()
             for (; blk != nullptr; blk = blk->corner(1))
             {
 
-                ASSERT_BLK(blk->stop() <= con->feat.parent_length)
+                if(blk->stop() <= con->feat.parent_length){
+                    std::cerr << "Block stop is greater than contig length\n";
+                }
 
                 ASSERT_BLK(blk->cset       != nullptr);
                 ASSERT_BLK(blk->over       != nullptr);
