@@ -194,7 +194,7 @@ void Genome::validate()
             for (; blk != nullptr; blk = blk->corner(1))
             {
 
-                if(blk->stop() <= con->feat.parent_length){
+                if(blk->stop() > con->feat.parent_length){
                     std::cerr << "Block stop is greater than contig length\n";
                 }
 
