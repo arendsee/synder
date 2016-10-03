@@ -25,7 +25,7 @@ public:
     Contig(
         const char* t_genome_name,
         const char* t_contig_name,
-        long t_length=1000000000
+        long t_length=DEFAULT_CONTIG_LENGTH
     );
 
     ~Contig();

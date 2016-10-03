@@ -15,7 +15,7 @@ public:
 
     std::string parent_name = ".";
     std::string name        = ".";
-    long parent_length      = LONG_MAX;
+    long parent_length      = DEFAULT_CONTIG_LENGTH;
     char strand             = '.';
 
     Feature() { }
