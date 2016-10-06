@@ -78,7 +78,9 @@ option::Descriptor input_gff = {
 
 option::Descriptor input_map = {
     INPUT_MAP, 0, "i", "input", Arg::Filename_or_STDIN,
-    "  -i, --input \tA map file (default: STDIN)"
+    "  -i, --input \tA map file (default: STDIN)\n"
+    "              \tFields, in BLAST parlance (see blastn -help)
+    "              \t[ qseqid qstart qstop sseqid sstart sstop ... ]\n"
 };
 
 option::Descriptor synmap = {

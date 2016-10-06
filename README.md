@@ -173,6 +173,7 @@ One table with the following fields:
  - [ ] write tests for filter
  - [x] reimplement dump blocks
  - [x] add quiet mode to runtests.sh
+ - [ ] add score to filter
  - [ ] add print statements to Contig, ManyContiguousSet, ManyBlocks, etc
  - [ ] implement assembly checking
  - [ ] update README documentation
