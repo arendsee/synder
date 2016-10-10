@@ -73,29 +73,48 @@ option::Descriptor help = {
 
 option::Descriptor input_gff = {
     INPUT_GFF, 0, "i", "input", Arg::Filename_or_STDIN,
-    "  -i, --input \tA GFF file (default: STDIN)"
+    "  -i, --input \tGFF file of input intervals (default: STDIN)"
 };
 
 option::Descriptor input_map = {
     INPUT_MAP, 0, "i", "input", Arg::Filename_or_STDIN,
-    "  -i, --input \tA map file (default: STDIN)\n"
-    "              \tFields, in BLAST parlance (see blastn -help)
-    "              \t[ qseqid qstart qstop sseqid sstart sstop ... ]\n"
+    "  -i, --input \tA TAB-delimited map file (default: STDIN)\n"
+    "              \tThe first 6 fields must be:\n"
+    "              \t  1. qseqid - query contig id (e.g. Chr1)\n"
+    "              \t  2. qstart - query interval start\n"
+    "              \t  3. qstop  - query interval stop\n"
+    "              \t  4. sseqid - target contig id\n"
+    "              \t  5. sstart - target interval start\n"
+    "              \t  6. sstop  - target interval stop\n"
+    "              \t"
+    "Any number of additional columns may follow, they will be printed without alteration"
 };
-
 option::Descriptor synmap = {
     SYNMAP, 0, "s", "synmap", Arg::Filename,
-    "  -s, --synmap \tThe primary synteny map"
+    "  -s, --synmap \tThe primary synteny map (e.g. output of Satsuma)\n"
+    "               \tTAB-delimited, no header, with fields\n"
+    "               \t  1. qseqid - query contig id (e.g. Chr1)\n"
+    "               \t  2. qstart - query interval start\n"
+    "               \t  3. qstop  - query interval stop\n"
+    "               \t  4. sseqid - target contig id\n"
+    "               \t  5. sstart - target interval start\n"
+    "               \t  6. sstop  - target interval stop\n"
+    "               \t  7. score  - score of the syntenic match*\n"
+    "               \t  8. strand - relative orientation\n"
+    "               \t  * score can be any numeric value, it will be\n"
+    "               \t    transformed as specified by the -x option"
 };
 
 option::Descriptor tclfile = {
     TCLFILE, 0, "t", "tcl", Arg::Filename,
-    "  -t, --tcl \tTarget chromosome lengths file"
+    "  -t, --tcl \tTarget chromosome lengths file\n"
+    "            \tTAB-delimited with columns: <name>, <length>"
 };
 
 option::Descriptor qclfile = {
     QCLFILE, 0, "q", "qcl", Arg::Filename,
-    "  -q, --qcl \tQuery chromosome lengths file"
+    "  -q, --qcl \tQuery chromosome lengths file\n"
+    "            \tTAB-delimited with columns: <name>, <length>"
 };
 
 option::Descriptor reverse = {
@@ -120,9 +139,9 @@ option::Descriptor transform = {
     TRANSFORM, 0, "x", "--transform", Arg::Required,
     "  -x, --transform \tTransform score (Synder requires additive scores):\n"
     "                 \t -'i' := S            (default, no transformation)\n"
-    "                 \t -'d' := L * S        (score densities)\n"
-    "                 \t -'p' := L * S / 100  (percent identity)\n"
-    "                 \t -'l' := -log(S)      (e-values or p-values)\n"
+    "                 \t -'d' := L * S        (transform from score densities)\n"
+    "                 \t -'p' := L * S / 100  (transform from percent identity)\n"
+    "                 \t -'l' := -log(S)      (transform from e-values or p-values)\n"
     "                 \t   Where S is input score and L interval length"
 };
 }
@@ -133,14 +152,14 @@ bool subcommand_dump(int argc, char* argv[])
         {
             UNKNOWN, 0, "", "", option::Arg::None,
             "synder dump - print all blocks with contiguous set ids\n"
-            "Usage:\n"
+            "USAGE\n"
             "  synder dump -s SYNTENY_MAP\n"
-            "Description:\n"
+            "DESCRIPTION\n"
             "  Dump processed blocks to stdout and exit. The output contains\n"
             "  all the fields in the synteny map, with preserved order, and\n"
             "  adds a column of contiguous set ids. Also, doubly overlapping\n"
             "  bocks are also merged.\n"
-            "Arguments:"
+            "ARGUMENTS"
         },
         descriptors::synmap,
         descriptors::reverse,
@@ -165,14 +184,14 @@ bool subcommand_filter(int argc, char* argv[])
         {
             UNKNOWN, 0, "", "", option::Arg::None,
             "synder filter - remove links that disagree with the synteny map\n"
-            "Usage:\n"
-            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Description:\n"
+            "USAGE\n"
+            "  synder filter -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "DESCRIPTION\n"
             "  Remove input links that disagree with the synteny map Given a map\n"
             "  between the target and query (e.g. BLAST output) and a synteny map,\n"
             "  remove all entries in the map that do not overlap search intervals\n"
             "  in the query.\n"
-            "Arguments:"
+            "ARGUMENTS"
         },
         descriptors::synmap,
         descriptors::input_map,
@@ -199,12 +218,12 @@ bool subcommand_map(int argc, char* argv[])
         {
             UNKNOWN, 0, "", "", option::Arg::None,
             "synder map - trace intervals across genomes\n"
-            "Usage:\n"
-            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Description:\n"
+            "USAGE\n"
+            "  synder map -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "DESCRIPTION\n"
             "  Given a set of query intervals, find all synmap queries that\n"
             "  overlap and map to homologous target intervals.\n"
-            "Arguments:"
+            "ARGUMENTS"
         },
         descriptors::synmap,
         descriptors::input_gff,
@@ -229,12 +248,12 @@ bool subcommand_count(int argc, char* argv[])
         {
             UNKNOWN, 0, "", "", option::Arg::None,
             "synder count - count overlaps\n"
-            "Usage:\n"
-            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Description:\n"
+            "USAGE\n"
+            "  synder count -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "DESCRIPTION\n"
             "  Given a set of query intervals, count all synmap queries that\n"
             "  overlap and map to homologous target intervals.\n"
-            "Arguments:"
+            "ARGUMENTS"
         },
         descriptors::synmap,
         descriptors::input_gff,
@@ -259,14 +278,15 @@ bool subcommand_search(int argc, char* argv[])
         {
             UNKNOWN, 0, "", "", option::Arg::None,
             "synder search - predict search intervals\n"
-            "Usage\n"
-            "  synder -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
-            "Description:\n"
-            "  Given an input GFF and a synteny, find search intervals.\n"
-            "Arguments:"
+            "USAGE\n"
+            "  synder search -i INPUT.gff -s SYNMAP.tab [OPTIONS]\n"
+            "DESCRIPTION\n"
+            "  Given an input GFF and a synteny, find search intervals. See README for\n"
+            "  algorithmic details and a discussion of scoring and argument -k.\n"
+            "ARGUMENTS"
         },
         descriptors::synmap,
-        descriptors::input_map,
+        descriptors::input_gff,
         descriptors::tclfile,
         descriptors::qclfile,
         descriptors::k,
@@ -274,6 +294,14 @@ bool subcommand_search(int argc, char* argv[])
         descriptors::base_offsets,
         descriptors::transform,
         descriptors::help,
+        {
+            UNKNOWN, 0, "", "", option::Arg::None,
+            "EXAMPLE\n"
+            "  # Using files in the sample-inputs/ folder\n"
+            "  synder search -i a.gff -s a-b.tab -b 0011 -x p\n"
+            "  # Search the opposite direction\n"
+            "  synder search -r -i b.gff -s a-b.tab\n"
+        },
         {0,0,0,0,0,0}
     };
 
