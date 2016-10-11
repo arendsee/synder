@@ -126,7 +126,7 @@ context.
 
 # Definitions
 
- * query genome - the reference genome of input intervals
+ * query genome - the genome referenced by the input intervals
 
  * target genome - the genome to which input intervals are mapped
 
@@ -156,7 +156,7 @@ Execution order for the `synder search` command
  2.  transform scores
  3.  merge doubly-overlapping blocks
  4.  determine contiguous sets
- 5.  find query-side overlapping and flanking blocks for each input sequence
+ 5.  find query-side, contextually-relevant blocks for each input sequence
  6.  map to overlapping contiguous sets
  7.  calculate score for input sequence relative to each contiguous set
  8.  calculate search interval relative to each contiguous set
@@ -251,29 +251,94 @@ solution for now.
 
 ## 4. Determine contiguous sets
 
-**OUT-OF-DATE**
-
 Build an interval adjacency matrix for the query context intervals and for the
 target context intervals. AND them together to get a block adjacency matrix.
 From this matrix, extract paths of adjacent blocks. Synder will merge any
 blocks that overlap on both genomes, this ensures there is a unique path
 through the adjacency matrix.
 
-## 5. Find overlapping/flanking blocks
+## 5. Find contextual blocks
 
-**INCOMPLETE**
+Mapping query intervals to target intervals would be trivial for a perfectly linear map, e.g.
+
+```
+                                      [-----------]
+=====      ============     ==========             ============
+  |              |               |                       |  
+  |              |               |                       |  
+=====      ============     ==========   <--->     ============
+
+Where <---> is the query interval and [----] the search interval
+```
+
+Synder reduces all blocks in the genome into into contiguous sets, which are
+non-overlapping sets of intervals where all blocks are adjacent.
+
+ * interval adjacency - two intervals are adjacent if they are on the same
+   contig and no other interval is fully contained between them
+
+ * block adjacency - two blocks are adjacent if 1) the intervals are adjacent on
+   both the query and target sides and 2) both have the same sign
+
+ * query context - all blocks that overlap or are adjacent to the query interval
+
+ * contiguous set - a set where block *i* is adjacent to block *i+1*
+
+ * search intervals - a set of intervals on the target genome where the
+   ortholog of the query interval is expected to be (the ortholog search space)
+
 
 ## 6. Reduce to overlapping sets
 
-**INCOMPLETE**
+Once all overlapping and flanking query-side blocks are identified.
 
 ## 7. Calculate scores relative to contiguous sets
 
-**INCOMPLETE**
+Especially with the high *k*, it is important to be able to rank search
+intervals. Queries that heavily overlap elements of contiguous sets are more
+reliable than ones that fall inbetween. Likewise, queries in dense contiguous
+sets, should rank higher than those in sparse ones (all else being equal).
+
+Input scores for syntenic blocks are additive (assuming the user entered the
+correct transformation).
+
+```
+s = 0
+for i in [a..b]
+    if i in any block in c AND i in q
+        s += d / L
+    else if i in any block in c
+        s += d * e^(-r * (dist(q, i)))
+where
+    c := the contiguous set
+    q := query interval
+    a := contig lower bound
+    b := contig upper bound
+    d := query syntenic score
+    L := query length
+    dist := function calculating distance
+```
+
+So all blocks in the contiguous set contribute to the total score. The scores
+of blocks that do not overlap the query decay exponentially with distance from
+the query bound.
+
+The score decay rate is controlled by the parameter *r*. A value of 0.001, the
+current default, indicates weight will fall to 0.5 by 1000 bases from the
+query. k=0 would give equal weight to all elements in the contiguous set, i.e.
+be more affected by context. A high value, e.g. r=100, would completely ignore
+context, basing score only on overlapping elements. 
+
 
 ## 8. Calculate search interval relative to contiguous set
 
-**INCOMPLETE**
+Exactly one search interval is created for each previously selected contiguous
+set.
+
+The chromosome length file tells synder how long each chromosome is. Then if
+some input query is closer to the end than anything in the synteny map, the
+search interval bound can be set to the end of the chromosome, rather than
+infinity.
 
  1. Find input interval, *i*, context in the query genome. This context consists of
     all query intervals *Sq* that either overlap or flank the input.
@@ -285,7 +350,71 @@ through the adjacency matrix.
     - **anchored** - if overlaps a member of *c*
     - **bound** - if is inbetween two members of *c*
     - **unbound** - if is more extreme than any member of the set, but is inbetween two contiguous sets
-    - **extreme** - No entr is found
+    - **extreme** - No entry is found
+
+The snapping rules are detailed below:
+
+```
+KEY:
+|x--  --y| - bounds of the contiguous block; start==x, stop==y
+a========b - a syntenic block with start == a and stop == b
+  <---q    - the query interval, with stop == q (start doesn't matter)
+a==b--c==d - query bounding blocks in the contiguous set
+[===]      - a non-bounding block in the same contiguous set
+ ...  F=== - nearest non-adjacent block ***ON THE TARGET***, F=start
+     ^     - search interval bound
+
+Possible snap positions (relative to query)
+  |x...[===]-----a=======b-----c=======d-----[===]...y|  ...  F===
+                 ^       ^     ^       ^     ^                ^
+
+We always snap to one bound of the relevant block. If the bound falls between
+the blocks (i1, j1) and (i2, j2), it would be reasonable to set the search
+interval to (j1 + 1, i2 - 1), however, this results in negative lenghts when
+the blocks are adjacent. So instead we set such intervals to to (j1, i2).
+
+=====================================================================
+Query bound is precedes both contiguous set bounds
+
+         |x-----y|
+      ...a=======b
+         ^
+  <---q
+
+-------------------------------------------------------------------------------
+Query bound falls within a contiguous set element
+
+  |x...a=======b...y|
+               ^
+       <--q
+
+-------------------------------------------------------------------------------
+Query bound falls between elements of the contiguous set
+
+  |x...a=======b-------c=======d...y|
+                       ^
+                 <--q
+
+-------------------------------------------------------------------------------
+Query is beyond the bounds of the contiguous set
+
+  Target side           A=======B      F===   1. map b-\>B   
+                                |------^      2. map B->F
+                                |             3. set F as SI bound
+  Query side     |x...--a=======b| ...
+                                <---q
+
+-------------------------------------------------------------------------------
+Query is beyond anything in the synteny map
+
+  Target side           A=======B      THE\_END   
+                                |------^      
+                                |             1. map b->B   
+  Query side     |x...--a=======b| ...        2. B is contig extremum
+                                <---q         3. set SI bound to contig length
+
+-------------------------------------------------------------------------------
+```
 
  
 # TODO list
@@ -317,6 +446,7 @@ through the adjacency matrix.
  - [x] directly parse synteny files, no database Bash script
  - [x] implement filter
  - [ ] write tests for filter
+ - [ ] remove hard-coding of score decay parameter
  - [x] reimplement dump blocks
  - [x] add quiet mode to runtests.sh
  - [ ] add score to filter
@@ -331,6 +461,4 @@ through the adjacency matrix.
 
 I do not know a good way to do these, nor am I certain of their value.
 
- - [ ] implement target side scoring
- - [ ] implement score thresholding
  - [ ] implement contiguous set scoring
