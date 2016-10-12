@@ -446,7 +446,7 @@ Query is beyond anything in the synteny map
  - [x] directly parse synteny files, no database Bash script
  - [x] implement filter
  - [ ] write tests for filter
- - [ ] remove hard-coding of score decay parameter
+ - [x] remove hard-coding of score decay parameter
  - [x] reimplement dump blocks
  - [x] add quiet mode to runtests.sh
  - [ ] add score to filter

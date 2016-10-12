@@ -39,7 +39,7 @@ void Contig::map(Feature& t_feat)
     delete rc;
 }
 
-std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat)
+std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat, double r)
 {
     // TODO -- need to move this back up to Contig
 
@@ -66,7 +66,7 @@ std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat)
     bool inbetween = rc->inbetween || rc->leftmost || rc->rightmost;
     std::vector<SearchInterval> si;
     for(auto &c : csets) {
-        si.push_back( SearchInterval(c->ends, &t_feat, inbetween) );
+        si.push_back( SearchInterval(c->ends, &t_feat, inbetween, r) );
     }
 
     delete rc;
@@ -75,9 +75,9 @@ std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat)
     return si;
 }
 
-void Contig::find_search_intervals(Feature& t_feat)
+void Contig::find_search_intervals(Feature& t_feat, double r)
 {
-    std::vector<SearchInterval> si = list_search_intervals(t_feat);
+    std::vector<SearchInterval> si = list_search_intervals(t_feat, r);
     for(auto &s : si) {
         s.print();
     }

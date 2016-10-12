@@ -30,14 +30,15 @@ private:
     void get_si_bound(const Direction d);
 
     void set_bound(Direction d);
-    double flank_area(long near, long far, double k);
-    double calculate_score(Block* blk);
+    double flank_area(long near, long far, double r);
+    double calculate_score(Block* blk, double r);
 
 public:
     SearchInterval(
         const std::array<Block*,2>& t_ends,
         Feature* t_feat,
-        bool t_inbetween
+        bool t_inbetween,
+        double t_r
     );
 
     ~SearchInterval();

@@ -33,10 +33,10 @@ public:
     void set_length(long length);
 
     /** Print target regions from a given query */
-    void find_search_intervals(Feature& feat);
+    void find_search_intervals(Feature& feat, double r);
 
     /** Print target regions from a given query */
-    std::vector<SearchInterval> list_search_intervals(Feature& feat);
+    std::vector<SearchInterval> list_search_intervals(Feature& feat, double r);
 
     /** Write blocks overlapping intervals in intfile
      *
