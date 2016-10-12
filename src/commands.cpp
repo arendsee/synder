@@ -135,6 +135,11 @@ option::Descriptor k = {
     "  -k, --interruption-fuzz \tNumber of interrupting intervals allowed before breaking contiguous set (default=0)"
 };
 
+option::Descriptor r = {
+    R, 0, "j", "--decay-rate", Arg::Numeric,
+    "  -j, --decay-rate \tScore decay rate (default=0.001)"
+};
+
 option::Descriptor transform = {
     TRANSFORM, 0, "x", "--transform", Arg::Required,
     "  -x, --transform \tTransform score (Synder requires additive scores):\n"
@@ -198,6 +203,7 @@ bool subcommand_filter(int argc, char* argv[])
         descriptors::tclfile,
         descriptors::qclfile,
         descriptors::k,
+        descriptors::r,
         descriptors::reverse,
         descriptors::help,
         {0,0,0,0,0,0}
@@ -290,6 +296,7 @@ bool subcommand_search(int argc, char* argv[])
         descriptors::tclfile,
         descriptors::qclfile,
         descriptors::k,
+        descriptors::r,
         descriptors::reverse,
         descriptors::base_offsets,
         descriptors::transform,

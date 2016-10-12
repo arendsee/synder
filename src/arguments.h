@@ -20,6 +20,7 @@ public:
     FILE *qclfile  = nullptr;
     bool swap      = false;
     long k         = 0;
+    double r       = 0.001;
     char trans     = 'i';
 
     ~Arguments()

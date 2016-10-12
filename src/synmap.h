@@ -23,6 +23,7 @@ private:
     FILE* qclfile     = nullptr;
     int swap          = 0;
     long k            = 0;
+    double r          = 0.001;
     char trans        = 'i';
 
     // loads synfile and calls the below functions in proper order

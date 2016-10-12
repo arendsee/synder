@@ -3,13 +3,14 @@
 SearchInterval::SearchInterval(
     const std::array<Block*,2>& t_ends,
     Feature* t_feat,
-    bool t_inbetween
+    bool t_inbetween,
+    double r
 )
     : m_feat(t_feat),
       m_inbetween(t_inbetween),
       m_bnds(t_ends)
 {
-    m_score = calculate_score(m_bnds[0]);
+    m_score = calculate_score(m_bnds[0], r);
 
     reduce_side(LO);
     reduce_side(HI);
@@ -190,7 +191,7 @@ void SearchInterval::get_si_bound(const Direction d)
 //      |===|    |             |                 |===|
 //      |<------>| far         |       near |<-->|
 //          |<-->| near        |        far |<------>|
-double SearchInterval::flank_area(long near, long far, double k)
+double SearchInterval::flank_area(long near, long far, double r)
 {
 
     // If far <= 0, this means there is no interval to score in this direction
@@ -208,16 +209,13 @@ double SearchInterval::flank_area(long near, long far, double k)
         // the weight falls exponentially with distance from the query, e.g.
         // $$ \int_{near}^{far} exp(-kx) dx $$
         // which evaluates to the following:
-        return (1 / k) * ( exp(-1 * k * near) - exp(-1 * k * far) );
+        return (1 / r) * ( exp(-1 * r * near) - exp(-1 * r * far) );
     }
     return 0;
 }
 
-double SearchInterval::calculate_score(Block* b)
+double SearchInterval::calculate_score(Block* b, double r)
 {
-
-    // TODO ASSIGN THIS AS AN INPUT PARAMETER
-    double k = 0.001;
 
     double score = 0;
 
@@ -243,7 +241,7 @@ double SearchInterval::calculate_score(Block* b)
         // near difference := i1 = a1 - b2
         // far difference  := i2 = a1 - b1
         // i1 and i2 may be negative, if query is not in the above position
-        double weighted_length = flank_area(a1 - b2, a1 - b1, k) +
+        double weighted_length = flank_area(a1 - b2, a1 - b1, r) +
 
                           //    a1        a2
                           //    |=========|    b1  b2     query interval
@@ -251,7 +249,7 @@ double SearchInterval::calculate_score(Block* b)
                           //                   |===|      interval to score
                           // near difference := i1 = b1 - a2
                           // far difference  := i2 = b1 - a1
-                          flank_area(b1 - a1, b2 - a1, k) +
+                          flank_area(b1 - a1, b2 - a1, r) +
 
                           //         a1        a2
                           //         |=========|         query interval

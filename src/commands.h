@@ -26,6 +26,7 @@ enum optionIndex {
     REVERSE,
     BASE_OFFSETS,
     K,
+    R,
     TRANSFORM,
     UNKNOWN,
     VERSION,

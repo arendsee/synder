@@ -7,6 +7,7 @@ Synmap::Synmap(Arguments& args)
     qclfile(args.qclfile),
     swap(args.swap),
     k(args.k),
+    r(args.r),
     trans(args.trans)
 {
     load_blocks();
@@ -192,7 +193,7 @@ void Synmap::filter(FILE* intfile)
             // input. So no need to throw an exception.
             std::cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
         } else {
-            std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat);
+            std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat, r);
 
             for(auto &s : si){
                 if(s.feature_overlap(&tfeat)){
@@ -251,7 +252,7 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
                 qcon->count(feat);
                 break;
             case C_SEARCH:
-                qcon->find_search_intervals(feat);
+                qcon->find_search_intervals(feat, r);
                 break;
             case C_MAP:
                 qcon->map(feat);
