@@ -627,6 +627,31 @@ dump_test "map-10" "Overlap - transitive group ids"
 # pointing to a broken Block
 dump_test "map-11" "Overlap - causal locus of mysterious failure"
 
+
+
+# ---------------------------------------------------------------------
+io_test (){
+    cmd=$1
+    msg=$2
+    say_n "Testing $msg ... "
+    $cmd > /dev/null 2> /dev/null
+    if [[ $? -ne 0 ]]
+    then
+        warn "FAIL\n"
+        echo $cmd
+        total_failed=$(( total_failed + 1 ))
+    else
+        total_passed=$(( total_passed + 1 ))
+        say OK
+    fi
+}
+
+announce "\nIO tests"
+
+# IO test, for Synder issue #2
+g_dir="$PWD/test/test-data/io"
+io_test "$g_synder -i $g_dir/a.gff -s $g_dir/map.syn" "long 9th GFF column"
+
 # ---------------------------------------------------------------------
 say
 
