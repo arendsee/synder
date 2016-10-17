@@ -62,6 +62,11 @@ void Synmap::load_blocks()
                         seqid[j], &start[j], &stop[j],
                         &score, &strand);
 
+        start[0] += Offsets::syn_start;
+        start[1] += Offsets::syn_start;
+        stop[0]  += Offsets::syn_stop;
+        stop[1]  += Offsets::syn_stop;
+
         if(status != 8) {
             fprintf(stderr, "Failed to read input line:\n%s", line);
             exit(EXIT_FAILURE);
