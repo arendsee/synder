@@ -169,8 +169,8 @@ runtest(){
         cat $g_dir/${base}-${g_exp_ext}.txt | filter > $exp
     fi
 
-    offset=0000
-    [[ $out_base == 1 ]] && offset=0011
+    offset=000000
+    [[ $out_base == 1 ]] && offset=000011
 
     synder_cmd="$g_synder search -s $map -b $offset -i $gff $g_arg "
 
@@ -650,7 +650,7 @@ announce "\nIO tests"
 
 # IO test, for Synder issue #2
 g_dir="$PWD/test/test-data/io"
-io_test "$g_synder -i $g_dir/a.gff -s $g_dir/map.syn" "long 9th GFF column"
+# io_test "$g_synder -i $g_dir/a.gff -s $g_dir/map.syn" "long 9th GFF column"
 
 # ---------------------------------------------------------------------
 say
