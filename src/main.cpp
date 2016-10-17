@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+int Offsets::syn_start;
+int Offsets::syn_stop;
 int Offsets::in_start;
 int Offsets::in_stop;
 int Offsets::out_start;

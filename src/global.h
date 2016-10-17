@@ -38,6 +38,8 @@ const long DEFAULT_CONTIG_LENGTH = 1e9;
 class Offsets
 {
 public:
+    static int syn_start;
+    static int syn_stop;
     static int in_start;
     static int in_stop;
     static int out_start;

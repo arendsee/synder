@@ -124,7 +124,7 @@ option::Descriptor reverse = {
 
 option::Descriptor base_offsets = {
     BASE_OFFSETS, 0, "b", "base-offsets", Arg::Required,
-    "  -b, --base-offsets \tStart and stop offsets for input and output (e.g. 1100)"
+    "  -b, --base-offsets \tStart and stop offsets for synteny map, input and output (e.g. 011100)"
 };
 option::Descriptor forbid_base_offsets = {
     BASE_OFFSETS, 0, "", "", Arg::Forbidden, ""
@@ -349,13 +349,15 @@ void set_arguments(Arguments& arg, std::vector<option::Option> options)
 
     if(options[BASE_OFFSETS].desc != 0) {
         std::string a(options[BASE_OFFSETS].arg);
-        if(a.length() == 4) {
-            Offsets::in_start  = a[0] == '0' ? 0 : 1;
-            Offsets::in_stop   = a[1] == '0' ? 0 : 1;
-            Offsets::out_start = a[2] == '0' ? 0 : 1;
-            Offsets::out_stop  = a[3] == '0' ? 0 : 1;
+        if(a.length() == 6) {
+            Offsets::syn_start  = a[0] == '0' ? 0 : 1;
+            Offsets::syn_stop   = a[1] == '0' ? 0 : 1;
+            Offsets::in_start   = a[2] == '0' ? 0 : 1;
+            Offsets::in_stop    = a[3] == '0' ? 0 : 1;
+            Offsets::out_start  = a[4] == '0' ? 0 : 1;
+            Offsets::out_stop   = a[5] == '0' ? 0 : 1;
         } else {
-            fprintf(stderr, "Offsets must be a string of length 4\n");
+            fprintf(stderr, "Offsets must be a string of length 6\n");
             exit(EXIT_FAILURE);
         }
     }
