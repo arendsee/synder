@@ -82,6 +82,57 @@ void Genome::set_contig_lengths(FILE* clfile)
     }
 }
 
+Rcpp::DataFrame Genome::as_data_frame()
+{
+    Block* b;
+    size_t N = 0;
+    for (auto &pair : contig) {
+        b = pair.second->block.front();
+        for(; b != nullptr; b = b->next()){
+            N++;
+        }
+    }
+
+    Rcpp::CharacterVector qchr(N);
+    Rcpp::IntegerVector   qstart(N);
+    Rcpp::IntegerVector   qstop(N);
+    Rcpp::CharacterVector tchr(N);
+    Rcpp::IntegerVector   tstart(N);
+    Rcpp::IntegerVector   tstop(N);
+    Rcpp::NumericVector   score(N);
+    Rcpp::LogicalVector   strand(N);
+    Rcpp::IntegerVector   cset(N);
+
+
+    size_t i = 0;
+    for (auto &pair : contig) {
+        b = pair.second->block.front();
+        for(; b != nullptr; b = b->next(), ++i){
+            qchr[i]   = b->parent->name;
+            qstart[i] = b->pos[0] + Offsets::out_start;
+            qstop[i]  = b->pos[1] + Offsets::out_stop;
+            tchr[i]   = b->over->parent->name;
+            tstart[i] = b->over->pos[0] + Offsets::out_start;
+            tstop[i]  = b->over->pos[1] + Offsets::out_stop;
+            score[i]  = b->score;
+            strand[i] = b->strand == '+';
+            cset[i]   = b->cset->id;
+        }
+    }
+
+    return Rcpp::DataFrame::create(
+        Rcpp::Named("qchr")   = qchr,
+        Rcpp::Named("qstart") = qstart,
+        Rcpp::Named("qstop")  = qstop,
+        Rcpp::Named("tchr")   = tchr,
+        Rcpp::Named("tstart") = tstart,
+        Rcpp::Named("tstop")  = tstop,
+        Rcpp::Named("score")  = score,
+        Rcpp::Named("strand") = strand,
+        Rcpp::Named("cset")   = cset
+    );
+}
+
 void Genome::dump_blocks()
 {
     for (auto &pair : contig) {

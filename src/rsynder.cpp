@@ -17,7 +17,7 @@ int Offsets::out_stop;
 //' @param filename synteny map file name
 //' @export
 // [[Rcpp::export]]
-void dump (std::string filename)
+Rcpp::DataFrame dump (std::string filename)
 {
     FILE* synfile = fopen(filename.c_str(), "r");
 
@@ -30,7 +30,7 @@ void dump (std::string filename)
         0.001,   // double r
         'i'      // char trans
     );
-    syn.dump_blocks();
+    return syn.as_data_frame();
 }
 
 //' predict search intervals

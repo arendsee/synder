@@ -7,6 +7,7 @@
 
 #include <map>
 #include <stack>
+#include <Rcpp.h>
 
 class Genome {
 private:
@@ -20,6 +21,8 @@ public:
 
     Genome(std::string name);
     ~Genome();
+
+    Rcpp::DataFrame as_data_frame();
 
     /** get contig by name, die if no matches */
     Contig* get_contig(std::string contig_name);

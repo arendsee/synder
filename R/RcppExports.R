@@ -6,7 +6,7 @@
 #' @param filename synteny map file name
 #' @export
 dump <- function(filename) {
-    invisible(.Call('synder_dump', PACKAGE = 'synder', filename))
+    .Call('synder_dump', PACKAGE = 'synder', filename)
 }
 
 #' predict search intervals

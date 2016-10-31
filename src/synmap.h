@@ -9,6 +9,7 @@
 
 #include <iterator>
 #include <list>
+#include <Rcpp.h>
 
 
 /** A pair of syntenically linked Genome objects  */
@@ -50,10 +51,7 @@ public:
 
     Contig* get_contig(size_t gid, char* contig_name);
 
-    /** Recursively print a synteny map. */
-    void print();
-
-    void dump_blocks();
+    Rcpp::DataFrame as_data_frame();
 
     /** Reads a GFF file and calls the appropriate command on each line */
     bool process_gff(FILE* intfile, Command cmd);

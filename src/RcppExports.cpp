@@ -6,13 +6,14 @@
 using namespace Rcpp;
 
 // dump
-void dump(std::string filename);
+Rcpp::DataFrame dump(std::string filename);
 RcppExport SEXP synder_dump(SEXP filenameSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    dump(filename);
-    return R_NilValue;
+    rcpp_result_gen = Rcpp::wrap(dump(filename));
+    return rcpp_result_gen;
 END_RCPP
 }
 // search

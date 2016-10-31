@@ -115,6 +115,11 @@ void Synmap::load_blocks()
     link_blocks();
 }
 
+Rcpp::DataFrame Synmap::as_data_frame()
+{
+    return genome[0]->as_data_frame();
+}
+
 void Synmap::link_blocks()
 {
     genome[0]->set_contig_lengths(qclfile);
@@ -150,26 +155,6 @@ Contig* Synmap::get_contig(size_t gid, char* contig_name)
     } else {
         return nullptr;
     }
-}
-
-void Synmap::print()
-{
-    // only print the query Genome, the print_verbose_Block function will print
-    // the target information as well
-    fprintf(
-        stderr,
-        "--- Query=(%s, %zu), Target=(%s, %zu)\n",
-        genome[0]->get_name().c_str(),
-        genome[0]->size(),
-        genome[1]->get_name().c_str(),
-        genome[1]->size()
-    );
-    dump_blocks();
-}
-
-void Synmap::dump_blocks()
-{
-    genome[0]->dump_blocks();
 }
 
 void Synmap::validate()
