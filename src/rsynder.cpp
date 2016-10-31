@@ -12,7 +12,7 @@ int Offsets::out_start;
 int Offsets::out_stop;
 
 
-//' Dump the synteny map
+//' print all blocks with contiguous set ids
 //'
 //' @param filename synteny map file name
 //' @export
@@ -32,6 +32,104 @@ void dump (std::string filename)
     );
     syn.dump_blocks();
 }
+
+//' predict search intervals
+//'
+//' @param synfilename synteny map file name
+//' @param gfffilename GFF file name
+//' @export
+// [[Rcpp::export]]
+void search(std::string synfilename, std::string intfilename)
+{
+    FILE* synfile = fopen(synfilename.c_str(), "r");
+    FILE* intfile = fopen(intfilename.c_str(), "r");
+
+    Synmap syn(
+        synfile, // FILE* synfile
+        nullptr, // FILE* tclfile
+        nullptr, // FILE* qclfile
+        false,   // bool swap
+        0,       // int k
+        0.001,   // double r
+        'i'      // char trans
+    );
+    
+    syn.process_gff(intfile, C_SEARCH);
+}
+
+
+//' remove links that disagree with the synteny map
+//'
+//' @param synfilename synteny map file name
+//' @param intfilename int file name
+//' @export
+// [[Rcpp::export]]
+void filter(std::string synfilename, std::string intfilename)
+{
+    FILE* synfile = fopen(synfilename.c_str(), "r");
+    FILE* intfile = fopen(intfilename.c_str(), "r");
+
+    Synmap syn(
+        synfile, // FILE* synfile
+        nullptr, // FILE* tclfile
+        nullptr, // FILE* qclfile
+        false,   // bool swap
+        0,       // int k
+        0.001,   // double r
+        'i'      // char trans
+    );
+    
+    syn.process_gff(intfile, C_FILTER);
+}
+
+//' trace intervals across genomes
+//'
+//' @param synfilename synteny map file name
+//' @param intfilename int file name
+//' @export
+// [[Rcpp::export]]
+void map(std::string synfilename, std::string intfilename)
+{
+    FILE* synfile = fopen(synfilename.c_str(), "r");
+    FILE* intfile = fopen(intfilename.c_str(), "r");
+
+    Synmap syn(
+        synfile, // FILE* synfile
+        nullptr, // FILE* tclfile
+        nullptr, // FILE* qclfile
+        false,   // bool swap
+        0,       // int k
+        0.001,   // double r
+        'i'      // char trans
+    );
+    
+    syn.process_gff(intfile, C_MAP);
+}
+
+//' count overlaps
+//'
+//' @param synfilename synteny map file name
+//' @param intfilename int file name
+//' @export
+// [[Rcpp::export]]
+void count(std::string synfilename, std::string intfilename)
+{
+    FILE* synfile = fopen(synfilename.c_str(), "r");
+    FILE* intfile = fopen(intfilename.c_str(), "r");
+
+    Synmap syn(
+        synfile, // FILE* synfile
+        nullptr, // FILE* tclfile
+        nullptr, // FILE* qclfile
+        false,   // bool swap
+        0,       // int k
+        0.001,   // double r
+        'i'      // char trans
+    );
+    
+    syn.process_gff(intfile, C_COUNT);
+}
+
 
 
 

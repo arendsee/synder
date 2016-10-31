@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{dump}
 \alias{dump}
-\title{Dump the synteny map}
+\title{print all blocks with contiguous set ids}
 \usage{
 dump(filename)
 }
@@ -10,6 +10,6 @@ dump(filename)
 \item{filename}{synteny map file name}
 }
 \description{
-Dump the synteny map
+print all blocks with contiguous set ids
 }
 
