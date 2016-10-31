@@ -1,14 +1,22 @@
 #include "synmap.h"
 
-Synmap::Synmap(Arguments& args)
+Synmap::Synmap(
+    FILE*  synfile,
+    FILE*  tclfile,
+    FILE*  qclfile,
+    bool   swap,
+    int    k,
+    double r,
+    char   trans
+)
     :
-    synfile(args.synfile),
-    tclfile(args.tclfile),
-    qclfile(args.qclfile),
-    swap(args.swap),
-    k(args.k),
-    r(args.r),
-    trans(args.trans)
+    synfile(synfile),
+    tclfile(tclfile),
+    qclfile(qclfile),
+    swap(swap),
+    k(k),
+    r(r),
+    trans(trans)
 {
     load_blocks();
     validate();

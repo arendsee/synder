@@ -1,2 +1,0 @@
-beside	que	225	275	tar	200	700	+	100	.	1	1	1
-beside	que	225	275	samarkand	23670	23700	+	100	.	2	2	1

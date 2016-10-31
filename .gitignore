@@ -1,33 +1,3 @@
-synder
-
-ark/
-
-# ctags file used internally by some editors
-tags
-
-*.log
-
-gmon.out
-
-*.un~
-
-README.pdf
-
-*.gch
-*.o
-*.a
-db*
-
-doc
-
-vgcore*
-
-big-sample-inputs/*syn
-big-sample-inputs/*gff
-big-sample-inputs/*tab
-
-# my temporary files
-z*
-[a-z]
-g[0-9]*
-d[0-9]*
+.Rproj.user
+.Rhistory
+.RData

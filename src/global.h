@@ -34,6 +34,8 @@ const long LINE_BUFFER_SIZE = 512;
 
 const long DEFAULT_CONTIG_LENGTH = 1e9;
 
+enum Command {C_FILTER, C_COUNT, C_SEARCH, C_MAP, C_UNSET};
+
 // A value of 0 or 1 with is added to the starts and stops of all printed intervals
 class Offsets
 {
