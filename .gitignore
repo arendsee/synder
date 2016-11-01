@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 ..Rcheck/
+
+# Personal temporary files
+zzz*

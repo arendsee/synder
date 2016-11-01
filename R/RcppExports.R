@@ -4,44 +4,39 @@
 #' print all blocks with contiguous set ids
 #'
 #' @param filename synteny map file name
-#' @export
-dump <- function(filename) {
-    .Call('synder_dump', PACKAGE = 'synder', filename)
+c_dump <- function(filename) {
+    .Call('synder_c_dump', PACKAGE = 'synder', filename)
 }
 
 #' predict search intervals
 #'
 #' @param synfilename synteny map file name
 #' @param gfffilename GFF file name
-#' @export
-search <- function(synfilename, intfilename) {
-    .Call('synder_search', PACKAGE = 'synder', synfilename, intfilename)
+c_search <- function(synfilename, gfffilename) {
+    .Call('synder_c_search', PACKAGE = 'synder', synfilename, gfffilename)
 }
 
 #' remove links that disagree with the synteny map
 #'
 #' @param synfilename synteny map file name
 #' @param intfilename int file name
-#' @export
-filter <- function(synfilename, intfilename) {
-    .Call('synder_filter', PACKAGE = 'synder', synfilename, intfilename)
+c_filter <- function(synfilename, intfilename) {
+    .Call('synder_c_filter', PACKAGE = 'synder', synfilename, intfilename)
 }
 
 #' trace intervals across genomes
 #'
 #' @param synfilename synteny map file name
-#' @param intfilename int file name
-#' @export
-map <- function(synfilename, intfilename) {
-    .Call('synder_map', PACKAGE = 'synder', synfilename, intfilename)
+#' @param gfffilename gff file name
+c_map <- function(synfilename, gfffilename) {
+    .Call('synder_c_map', PACKAGE = 'synder', synfilename, gfffilename)
 }
 
 #' count overlaps
 #'
 #' @param synfilename synteny map file name
-#' @param intfilename int file name
-#' @export
-count <- function(synfilename, intfilename) {
-    .Call('synder_count', PACKAGE = 'synder', synfilename, intfilename)
+#' @param gfffilename gff file name
+c_count <- function(synfilename, gfffilename) {
+    .Call('synder_c_count', PACKAGE = 'synder', synfilename, gfffilename)
 }
 

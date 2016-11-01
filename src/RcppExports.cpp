@@ -5,62 +5,62 @@
 
 using namespace Rcpp;
 
-// dump
-Rcpp::DataFrame dump(std::string filename);
-RcppExport SEXP synder_dump(SEXP filenameSEXP) {
+// c_dump
+Rcpp::DataFrame c_dump(std::string filename);
+RcppExport SEXP synder_c_dump(SEXP filenameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(dump(filename));
+    rcpp_result_gen = Rcpp::wrap(c_dump(filename));
     return rcpp_result_gen;
 END_RCPP
 }
-// search
-Rcpp::DataFrame search(std::string synfilename, std::string intfilename);
-RcppExport SEXP synder_search(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
+// c_search
+Rcpp::DataFrame c_search(std::string synfilename, std::string gfffilename);
+RcppExport SEXP synder_c_search(SEXP synfilenameSEXP, SEXP gfffilenameSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type gfffilename(gfffilenameSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_search(synfilename, gfffilename));
+    return rcpp_result_gen;
+END_RCPP
+}
+// c_filter
+Rcpp::CharacterVector c_filter(std::string synfilename, std::string intfilename);
+RcppExport SEXP synder_c_filter(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
     Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(search(synfilename, intfilename));
+    rcpp_result_gen = Rcpp::wrap(c_filter(synfilename, intfilename));
     return rcpp_result_gen;
 END_RCPP
 }
-// filter
-Rcpp::DataFrame filter(std::string synfilename, std::string intfilename);
-RcppExport SEXP synder_filter(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
+// c_map
+Rcpp::DataFrame c_map(std::string synfilename, std::string gfffilename);
+RcppExport SEXP synder_c_map(SEXP synfilenameSEXP, SEXP gfffilenameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(filter(synfilename, intfilename));
+    Rcpp::traits::input_parameter< std::string >::type gfffilename(gfffilenameSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_map(synfilename, gfffilename));
     return rcpp_result_gen;
 END_RCPP
 }
-// map
-Rcpp::DataFrame map(std::string synfilename, std::string intfilename);
-RcppExport SEXP synder_map(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
+// c_count
+Rcpp::DataFrame c_count(std::string synfilename, std::string gfffilename);
+RcppExport SEXP synder_c_count(SEXP synfilenameSEXP, SEXP gfffilenameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(map(synfilename, intfilename));
-    return rcpp_result_gen;
-END_RCPP
-}
-// count
-Rcpp::DataFrame count(std::string synfilename, std::string intfilename);
-RcppExport SEXP synder_count(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(count(synfilename, intfilename));
+    Rcpp::traits::input_parameter< std::string >::type gfffilename(gfffilenameSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_count(synfilename, gfffilename));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -37,22 +37,22 @@ void SearchInterval::reduce_side(const Direction d){
     }
 }
 
-void SearchInterval::print() {
-    printf("%s\t%s\t%zu\t%zu\t%s\t%zu\t%zu\t%c\t%lf\t%zu\t%i\t%i\t%i\n",
-                                                // Output column ids:
-         m_feat->name.c_str(),                  //  1
-         m_feat->parent_name.c_str(),           //  2
-         m_feat->start() + Offsets::out_start,  //  3
-         m_feat->stop() + Offsets::out_stop,    //  4
-         m_bnds[0]->over->parent->name.c_str(), //  5
-         start() + Offsets::out_start,          //  6
-         stop() + Offsets::out_stop,            //  7
-         m_bnds[0]->over->strand,               //  8
-         m_score,                               //  9
-         m_bnds[0]->cset->id,                   // 10
-         m_flag[0],                             // 11
-         m_flag[1],                             // 12
-         m_inbetween                            // 13
+void SearchInterval::add_row(SIType& stype) {
+    stype.add_row(
+                                               // Output column ids:
+         m_feat->name,                         //  1
+         m_feat->parent_name,                  //  2
+         m_feat->start() + Offsets::out_start, //  3
+         m_feat->stop() + Offsets::out_stop,   //  4
+         m_bnds[0]->over->parent->name,        //  5
+         start() + Offsets::out_start,         //  6
+         stop() + Offsets::out_stop,           //  7
+         m_bnds[0]->over->strand,              //  8
+         m_score,                              //  9
+         m_bnds[0]->cset->id,                  // 10
+         m_flag[0],                            // 11
+         m_flag[1],                            // 12
+         m_inbetween                           // 13
     );
 }
 
