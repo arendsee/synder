@@ -17,46 +17,50 @@ BEGIN_RCPP
 END_RCPP
 }
 // search
-void search(std::string synfilename, std::string intfilename);
+Rcpp::DataFrame search(std::string synfilename, std::string intfilename);
 RcppExport SEXP synder_search(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
     Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    search(synfilename, intfilename);
-    return R_NilValue;
+    rcpp_result_gen = Rcpp::wrap(search(synfilename, intfilename));
+    return rcpp_result_gen;
 END_RCPP
 }
 // filter
-void filter(std::string synfilename, std::string intfilename);
+Rcpp::DataFrame filter(std::string synfilename, std::string intfilename);
 RcppExport SEXP synder_filter(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
     Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    filter(synfilename, intfilename);
-    return R_NilValue;
+    rcpp_result_gen = Rcpp::wrap(filter(synfilename, intfilename));
+    return rcpp_result_gen;
 END_RCPP
 }
 // map
-void map(std::string synfilename, std::string intfilename);
+Rcpp::DataFrame map(std::string synfilename, std::string intfilename);
 RcppExport SEXP synder_map(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
     Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    map(synfilename, intfilename);
-    return R_NilValue;
+    rcpp_result_gen = Rcpp::wrap(map(synfilename, intfilename));
+    return rcpp_result_gen;
 END_RCPP
 }
 // count
-void count(std::string synfilename, std::string intfilename);
+Rcpp::DataFrame count(std::string synfilename, std::string intfilename);
 RcppExport SEXP synder_count(SEXP synfilenameSEXP, SEXP intfilenameSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
     Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
-    count(synfilename, intfilename);
-    return R_NilValue;
+    rcpp_result_gen = Rcpp::wrap(count(synfilename, intfilename));
+    return rcpp_result_gen;
 END_RCPP
 }

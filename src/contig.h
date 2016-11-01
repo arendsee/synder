@@ -6,6 +6,7 @@
 #include "many_blocks.h"
 #include "many_contiguous_sets.h"
 #include "feature.h"
+#include "types.h"
 
 #include <memory>
 #include <array>
@@ -13,6 +14,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <Rcpp.h>
 
 class Contig {
 public:
@@ -33,7 +35,7 @@ public:
     void set_length(long length);
 
     /** Print target regions from a given query */
-    void find_search_intervals(Feature& feat, double r);
+    void find_search_intervals(Feature& feat, double r, SIType& stype);
 
     /** Print target regions from a given query */
     std::vector<SearchInterval> list_search_intervals(Feature& feat, double r);
@@ -46,13 +48,13 @@ public:
      * - target start position
      * - target stop position
      */
-    void map(Feature& feat);
+    void map(Feature& feat, MapType& mtype);
 
     /** Count blocks overlapping intervals in intfile
      *
      * Prints the input sequence name and count to STDOUT in TAB-delimited format.
      */
-    void count(Feature& feat);
+    void count(Feature& feat, CountType& df);
 };
 
 #endif

@@ -148,7 +148,7 @@ void Synmap::link_blocks()
 }
 
 
-Contig* Synmap::get_contig(size_t gid, char* contig_name)
+Contig* Synmap::get_contig(size_t gid, const char* contig_name)
 {
     if (gid == 0 || gid == 1) {
         return genome[gid]->get_contig(contig_name);
@@ -163,7 +163,7 @@ void Synmap::validate()
     genome[1]->validate();
 }
 
-void Synmap::filter(FILE* intfile)
+Rcpp::CharacterVector Synmap::filter(FILE* intfile)
 {
     // read loop variables
     char*   line   = nullptr;
@@ -175,6 +175,8 @@ void Synmap::filter(FILE* intfile)
     char tseqid[NAME_BUFFER_SIZE];
     char* seqid[2] = {qseqid, tseqid};
     long start[2], stop[2];
+
+    Rcpp::CharacterVector out;
 
     while ((read = getline(&line, &len, intfile)) != EOF) {
 
@@ -189,23 +191,27 @@ void Synmap::filter(FILE* intfile)
         if(qcon == nullptr){
             // Absence of a particular contig does not necessarily imply bad
             // input. So no need to throw an exception.
-            std::cerr << "WARNING: Contig '" << seqid[0] << "' not found in synteny map, skipping\n";
+            std::cerr << "WARNING: Contig '"
+                      << seqid[0]
+                      << "' not found in synteny map, skipping\n";
         } else {
             std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat, r);
 
             for(auto &s : si){
                 if(s.feature_overlap(&tfeat)){
-                    printf("%s", line);
+                    out.push_back(line);
                     break;
                 }
             }
         }
     }
     free(line);
+
+    return out;
 }
 
-bool Synmap::process_gff(FILE* intfile, Command cmd)
-{
+
+std::vector<Feature> Synmap::gff2features(FILE* fh){
     // start and stop positions read from input line
     long start, stop;
     // Name of query input (e.g. AT1G01010)
@@ -215,8 +221,10 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
     // query contig
     Contig* qcon;
 
+    std::vector<Feature> feats;
+
     char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
-    while (fgets(line, LINE_BUFFER_SIZE, intfile) && !feof(intfile)) {
+    while (fgets(line, LINE_BUFFER_SIZE, fh) && !feof(fh)) {
 
         // skip comments
         if (line[0] == '#')
@@ -236,33 +244,73 @@ bool Synmap::process_gff(FILE* intfile, Command cmd)
         qcon = get_contig(0, contig_seqname);
 
         if(qcon == nullptr) {
-            fprintf(stderr, "SKIPPING ENTRY: Synteny map has no contig names '%s'\n", contig_seqname);
+            std::cerr
+                << "SKIPPING ENTRY: Synteny map has no contig named '"
+                << contig_seqname
+                << "'\n";
             continue;
         }
 
         Feature feat(contig_seqname, start, stop, seqname, 0);
 
-        switch(cmd){
-            case C_FILTER:
-                fprintf(stderr, "Filter function currently unavailable\n");
-                return false;
-            case C_COUNT:
-                qcon->count(feat);
-                break;
-            case C_SEARCH:
-                qcon->find_search_intervals(feat, r);
-                break;
-            case C_MAP:
-                qcon->map(feat);
-                break;
-            case C_UNSET:
-                fprintf(stderr, "Please, give me a command\n");
-                return false;
-            default:
-                fprintf(stderr, "Command not recognized\n");
-                return false;
-        }
+        feats.push_back(feat);
+
     }
     free(line);
-    return true;
+
+    return feats;
+}
+
+Rcpp::DataFrame Synmap::count(FILE* intfile)
+{
+
+    std::vector<Feature> feats = gff2features(intfile);
+
+    CountType out;
+
+    for(auto &feat : feats) {
+
+        Contig* qcon = get_contig(0, feat.parent_name.c_str());
+
+        qcon->count(feat, out);
+    }
+
+    return out.as_data_frame();
+
+}
+
+Rcpp::DataFrame Synmap::map(FILE* intfile)
+{
+
+    std::vector<Feature> feats = gff2features(intfile);
+
+    MapType out;
+
+    for(auto &feat : feats) {
+
+        Contig* qcon = get_contig(0, feat.parent_name.c_str());
+
+        qcon->map(feat, out);
+    }
+
+    return out.as_data_frame();
+
+}
+
+Rcpp::DataFrame Synmap::search(FILE* intfile)
+{
+
+    std::vector<Feature> feats = gff2features(intfile);
+
+    SIType out;
+
+    for(auto &feat : feats) {
+
+        Contig* qcon = get_contig(0, feat.parent_name.c_str());
+
+        qcon->find_search_intervals(feat, r, out);
+    }
+
+    return out.as_data_frame();
+
 }

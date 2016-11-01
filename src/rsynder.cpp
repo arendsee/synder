@@ -30,6 +30,7 @@ Rcpp::DataFrame dump (std::string filename)
         0.001,   // double r
         'i'      // char trans
     );
+
     return syn.as_data_frame();
 }
 
@@ -39,7 +40,7 @@ Rcpp::DataFrame dump (std::string filename)
 //' @param gfffilename GFF file name
 //' @export
 // [[Rcpp::export]]
-void search(std::string synfilename, std::string intfilename)
+Rcpp::DataFrame search(std::string synfilename, std::string intfilename)
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* intfile = fopen(intfilename.c_str(), "r");
@@ -53,8 +54,8 @@ void search(std::string synfilename, std::string intfilename)
         0.001,   // double r
         'i'      // char trans
     );
-    
-    syn.process_gff(intfile, C_SEARCH);
+
+    return syn.search(intfile);
 }
 
 
@@ -64,7 +65,7 @@ void search(std::string synfilename, std::string intfilename)
 //' @param intfilename int file name
 //' @export
 // [[Rcpp::export]]
-void filter(std::string synfilename, std::string intfilename)
+Rcpp::DataFrame filter(std::string synfilename, std::string intfilename)
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* intfile = fopen(intfilename.c_str(), "r");
@@ -78,8 +79,8 @@ void filter(std::string synfilename, std::string intfilename)
         0.001,   // double r
         'i'      // char trans
     );
-    
-    syn.process_gff(intfile, C_FILTER);
+
+    return syn.filter(intfile);
 }
 
 //' trace intervals across genomes
@@ -88,7 +89,7 @@ void filter(std::string synfilename, std::string intfilename)
 //' @param intfilename int file name
 //' @export
 // [[Rcpp::export]]
-void map(std::string synfilename, std::string intfilename)
+Rcpp::DataFrame map(std::string synfilename, std::string intfilename)
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* intfile = fopen(intfilename.c_str(), "r");
@@ -102,8 +103,8 @@ void map(std::string synfilename, std::string intfilename)
         0.001,   // double r
         'i'      // char trans
     );
-    
-    syn.process_gff(intfile, C_MAP);
+
+    return syn.map(intfile);
 }
 
 //' count overlaps
@@ -112,7 +113,7 @@ void map(std::string synfilename, std::string intfilename)
 //' @param intfilename int file name
 //' @export
 // [[Rcpp::export]]
-void count(std::string synfilename, std::string intfilename)
+Rcpp::DataFrame count(std::string synfilename, std::string intfilename)
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* intfile = fopen(intfilename.c_str(), "r");
@@ -126,8 +127,8 @@ void count(std::string synfilename, std::string intfilename)
         0.001,   // double r
         'i'      // char trans
     );
-    
-    syn.process_gff(intfile, C_COUNT);
+
+    return syn.count(intfile);
 }
 
 

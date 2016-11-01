@@ -6,6 +6,8 @@
 #include "genome.h"
 #include "linked_interval.hpp"
 #include "feature.h"
+#include "types.h"
+
 
 #include <iterator>
 #include <list>
@@ -16,7 +18,6 @@
 class Synmap
 {
 private:
-
     Genome* genome[2] = { nullptr, nullptr };
     FILE* synfile     = nullptr;
     FILE* tclfile     = nullptr;
@@ -25,6 +26,10 @@ private:
     long k            = 0;
     double r          = 0.001;
     char trans        = 'i';
+
+
+    // utility function for loading GFF files
+    std::vector<Feature> gff2features(FILE* fh);
 
     // loads synfile and calls the below functions in proper order
     void load_blocks();
@@ -36,27 +41,29 @@ private:
     void validate();
 
 public:
-
     Synmap(
-        FILE* synfile,
-        FILE* tclfile,
-        FILE* qclfile,
-        bool swap,
-        int k,
+        FILE*  synfile,
+        FILE*  tclfile,
+        FILE*  qclfile,
+        bool   swap,
+        int    k,
         double r,
-        char trans
+        char   trans
     );
 
     ~Synmap();
 
-    Contig* get_contig(size_t gid, char* contig_name);
+    Contig* get_contig(size_t gid, const char* contig_name);
 
     Rcpp::DataFrame as_data_frame();
 
-    /** Reads a GFF file and calls the appropriate command on each line */
-    bool process_gff(FILE* intfile, Command cmd);
+    Rcpp::DataFrame count(FILE* intfile);
 
-    void filter(FILE* hitfile);
+    Rcpp::DataFrame map(FILE* intfile);
+
+    Rcpp::DataFrame search(FILE* intfile);
+
+    Rcpp::CharacterVector filter(FILE* hitfile);
 
 };
 

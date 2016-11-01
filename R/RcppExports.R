@@ -15,7 +15,7 @@ dump <- function(filename) {
 #' @param gfffilename GFF file name
 #' @export
 search <- function(synfilename, intfilename) {
-    invisible(.Call('synder_search', PACKAGE = 'synder', synfilename, intfilename))
+    .Call('synder_search', PACKAGE = 'synder', synfilename, intfilename)
 }
 
 #' remove links that disagree with the synteny map
@@ -24,7 +24,7 @@ search <- function(synfilename, intfilename) {
 #' @param intfilename int file name
 #' @export
 filter <- function(synfilename, intfilename) {
-    invisible(.Call('synder_filter', PACKAGE = 'synder', synfilename, intfilename))
+    .Call('synder_filter', PACKAGE = 'synder', synfilename, intfilename)
 }
 
 #' trace intervals across genomes
@@ -33,7 +33,7 @@ filter <- function(synfilename, intfilename) {
 #' @param intfilename int file name
 #' @export
 map <- function(synfilename, intfilename) {
-    invisible(.Call('synder_map', PACKAGE = 'synder', synfilename, intfilename))
+    .Call('synder_map', PACKAGE = 'synder', synfilename, intfilename)
 }
 
 #' count overlaps
@@ -42,6 +42,6 @@ map <- function(synfilename, intfilename) {
 #' @param intfilename int file name
 #' @export
 count <- function(synfilename, intfilename) {
-    invisible(.Call('synder_count', PACKAGE = 'synder', synfilename, intfilename))
+    .Call('synder_count', PACKAGE = 'synder', synfilename, intfilename)
 }
 
