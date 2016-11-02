@@ -183,8 +183,15 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #' @export
 dump <- function(synfile, swap=FALSE, trans="i") {
   syn <- wrapper(c_dump, synfile, swap=swap, trans=trans)
+
+  # Cast strand from int [0,1,NA_INTEGER] to logical
   syn$strand <- as.logical(syn$strand)
-  class(syn) <- append('synmap', class(syn))
+
+  # Assign class and attributes
+  class(syn) <- append('dump_result', class(syn))
+  attributes(syn)$swap  = swap
+  attributes(syn)$trans = trans
+
   syn
 }
 
@@ -214,6 +221,13 @@ filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
   d$qstop  <- as.numeric(d$qstop)
   d$tstart <- as.numeric(d$tstart)
   d$tstop  <- as.numeric(d$tstop)
+
+  class(d) <- append('filter_result', class(d))
+  attributes(d)$swap  <- swap
+  attributes(d)$k     <- k
+  attributes(d)$r     <- r
+  attributes(d)$trans <- trans
+
   d
 }
 
@@ -232,7 +246,7 @@ search <- function(
   r       = 0,
   trans   = "i"
 ) {
-  wrapper(
+  d <- wrapper(
     c_search,
     synfilename,
     gfffilename,
@@ -243,6 +257,14 @@ search <- function(
     r       = r,
     trans   = trans
   )
+
+  class(d) <- append('search_result', class(d))
+  attributes(d)$swap  <- swap
+  attributes(d)$k     <- k
+  attributes(d)$r     <- r
+  attributes(d)$trans <- trans
+
+  d
 }
 
 #' trace intervals across genomes
@@ -255,7 +277,12 @@ map <- function(
   gfffilename,
   swap=FALSE
 ) {
-  wrapper(c_map, synfilename, gfffilename, swap=swap)
+  d <- wrapper(c_map, synfilename, gfffilename, swap=swap)
+
+  class(d) <- append('map_result', class(d))
+  attributes(d)$swap <- swap
+
+  d
 }
 
 #' count overlaps
@@ -268,5 +295,10 @@ count <- function(
   gfffilename,
   swap=FALSE
 ) {
-  wrapper(c_count, synfilename, gfffilename, swap=swap)
+  d <- wrapper(c_count, synfilename, gfffilename, swap=swap)
+
+  class(d) <- append('count_result', class(d))
+  attributes(d)$swap <- swap
+
+  d
 }
