@@ -5,8 +5,8 @@ Version: 0.19.0
 Date: 2016-10-25
 Author: Zebulun Arendsee
 Maintainer: Zebulun Arendsee <arendsee@iastate.edu>
-URL: https://github.com/arendsee/zwc
-BugReports: https://github.com/arendsee/zwc/issues
+URL: https://github.com/arendsee/synder
+BugReports: https://github.com/arendsee/synder/issues
 Description: STUB
 License: MIT + file LICENSE
 Depends:
