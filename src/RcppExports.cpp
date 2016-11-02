@@ -5,6 +5,17 @@
 
 using namespace Rcpp;
 
+// c_logical_strand
+Rcpp::IntegerVector c_logical_strand(Rcpp::CharacterVector cv);
+RcppExport SEXP synder_c_logical_strand(SEXP cvSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type cv(cvSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_logical_strand(cv));
+    return rcpp_result_gen;
+END_RCPP
+}
 // c_dump
 Rcpp::DataFrame c_dump(std::string filename, bool swap, char trans);
 RcppExport SEXP synder_c_dump(SEXP filenameSEXP, SEXP swapSEXP, SEXP transSEXP) {

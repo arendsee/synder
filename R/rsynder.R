@@ -2,6 +2,117 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
+SYNMAP_COLS <- c(
+  "qseqid" = "character",
+  "qstart" = "integer",
+  "qstop"  = "integer",
+  "tseqid" = "character",
+  "tstart" = "integer",
+  "tstop"  = "integer",
+  "score"  = "numeric",
+  "strand" = "logical"
+)
+
+GFF_COLS <- c(
+  "chrid"  = "character",
+  "source" = "character",
+  "type"   = "character",
+  "start"  = "integer",
+  "stop"   = "integer",
+  "score"  = "numeric",
+  "strand" = "logical",
+  "phase"  = "integer",
+  "attr"   = "character"
+)
+
+# Converts a character vector of '+' and '-' to a logical vector
+# where '+' -> TRUE, '-' -> FALSE, else -> NA
+logical_strand <- function(x) {
+  as.logical(c_logical_strand(x)) 
+}
+
+#' Read a synteny map
+#'
+#' @param file Synteny map file name
+#' @return A dataframe
+#' @export
+read_synmap <- function(file) {
+  d <- readr::read_tsv(file, col_names=FALSE)
+
+  # Assert the correct number of columns were read
+  stopifnot(ncol(d) == 8)  
+
+  # Set column names
+  names(d) <- names(SYNMAP_COLS)
+
+  # Set types (readr guesses the others correctly)
+  d$score <- as.numeric(d$score)
+  d$strand <- logical_strand(d$strand)
+
+  # Assert column types match expectations
+  stopifnot(SYNMAP_COLS == lapply(d, class))
+
+  # Assign class membership
+  class(d) <- append('synmap', class(d))
+
+  return(d)
+}
+
+#' Read a GFF file 
+#'
+#' @param file GFF file name
+#' @return A dataframe
+#' @export
+read_gff <- function(file) {
+  d <- readr::read_tsv(file, col_names=FALSE)
+
+  # Assert the correct number of columns were read
+  stopifnot(ncol(d) == 9)
+
+  # Set column names
+  names(d) <- names(GFF_COLS)
+
+  # Set types (readr guesses the others correctly)
+  d$score <- as.numeric(d$score)
+  d$phase <- as.integer(d$phase)
+  d$strand <- logical_strand(d$strand)
+
+  # Assert column types match expectations
+  stopifnot(GFF_COLS == lapply(d, class))
+
+  # Assign class membership
+  class(d) <- append('gff', class(d))
+
+  return(d)
+}
+
+#' Read a hit file 
+#'
+#' A hit file is required to have the same first 6 columns as a synteny map,
+#' i.e. qchr, qstart, qstop, tchr, tstart, tstop. There can be any number of
+#' additional columns.
+#'
+#' @param file hit file name
+#' @return A dataframe
+#' @export
+read_hitmap <- function(file) {
+  d <- readr::read_tsv(file, col_names=FALSE)
+
+  # Assert the correct number of columns were read
+  stopifnot(ncol(d) >= 6)
+
+  # Set column names
+  names(d)[1:6] <- names(SYNMAP_COLS)[1:6]
+
+  # Assert column types match expectations
+  stopifnot(SYNMAP_COLS[1:6] == lapply(d[,1:6], class))
+
+  # Assign class membership
+  class(d) <- append('hitmap', class(d))
+
+  return(d)
+}
+
 # Changes data.frames to temporary files
 df2file <- function(x) {
   if(!is.null(x) && 'data.frame' %in% class(x)){
@@ -73,7 +184,7 @@ filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
     strsplit(split="\t")                 %>%
     do.call(what=rbind)                  %>%
     as.data.frame(stringsAsFactors=FALSE)
-  names(d)[1:6] <- c("qseqid", "qstart", "qstop", "tseqid", "tstart", "tstop")
+  names(d)[1:6] <- names(SYNMAP_COLS)[1:6]
   d$qstart <- as.numeric(d$qstart)
   d$qstop  <- as.numeric(d$qstop)
   d$tstart <- as.numeric(d$tstart)

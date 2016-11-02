@@ -11,6 +11,23 @@ int Offsets::in_stop;
 int Offsets::out_start;
 int Offsets::out_stop;
 
+// [[Rcpp::export]]
+Rcpp::IntegerVector c_logical_strand (Rcpp::CharacterVector cv) {
+    size_t N = cv.size();
+    Rcpp::IntegerVector iv(N);
+    for(int i = 0; i < N; i++){
+        if(cv[i] == "+"){
+            iv[i] = 1;
+        } else if (cv[i] == "-"){
+            iv[i] = 0;
+        } else {
+            iv[i] = NA_INTEGER;
+        }
+    }
+    // Recast as a logical vector in the R-side function
+    return iv;
+}
+
 //' print all blocks with contiguous set ids
 //'
 //' @param filename synteny map file name
