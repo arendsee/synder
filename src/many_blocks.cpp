@@ -74,7 +74,7 @@ void ManyBlocks::link_corners(){
             cor[i] = b;
         }
     } catch (const std::out_of_range& e) {
-        std::cerr << "Index error in " << __func__ << std::endl;
+        Rcpp::stop("Index error in ManyBlocks::link_corners()\n");
     }
 }
 

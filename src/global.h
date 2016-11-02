@@ -1,21 +1,19 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
-#include <math.h>
+#include <assert.h>
 #include <errno.h>
+#include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <errno.h>
-#include <limits.h>
-#include <assert.h>
 
+#include <exception>
+#include <iostream>
 #include <cstring>
 #include <string>
 #include <vector>
-#include <exception>
-
-#include <iostream>
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))

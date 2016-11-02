@@ -184,9 +184,7 @@ Rcpp::CharacterVector Synmap::filter(FILE* intfile)
         if(qcon == nullptr){
             // Absence of a particular contig does not necessarily imply bad
             // input. So no need to throw an exception.
-            std::cerr << "WARNING: Contig '"
-                      << seqid[0]
-                      << "' not found in synteny map, skipping\n";
+            Rcpp::warning("Contig '" + std::string(seqid[0]) + "' not found in synteny map, skipping");
         } else {
             std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat, r);
 

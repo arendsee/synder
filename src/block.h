@@ -36,9 +36,6 @@ public:
     );
     ~Block();
 
-    /** A clean TAB-delimited output suitable for giving to the user */
-    void print();
-
     /** Transform b into (a U b), relink as needed
      *
      * After calling this function, a is removed from the datastructure and

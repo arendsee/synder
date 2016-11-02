@@ -85,14 +85,6 @@ public:
         delete tree;
     }
 
-    // Iterate through intervals, calling print on each
-    virtual void print()
-    {
-        for(auto &x : inv) {
-            x->print();
-        }
-    }
-
     // wrapper for std::vector.push_back(T*)
     virtual void add(T* x)
     {
