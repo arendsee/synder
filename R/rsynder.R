@@ -3,10 +3,10 @@
 NULL
 
 SYNMAP_COLS <- c(
-  "qseqid" = "character",
+  "qconid" = "character",
   "qstart" = "integer",
   "qstop"  = "integer",
-  "tseqid" = "character",
+  "tconid" = "character",
   "tstart" = "integer",
   "tstop"  = "integer",
   "score"  = "numeric",
@@ -14,7 +14,7 @@ SYNMAP_COLS <- c(
 )
 
 GFF_COLS <- c(
-  "chrid"  = "character",
+  "conid"  = "character",
   "source" = "character",
   "type"   = "character",
   "start"  = "integer",
@@ -23,6 +23,11 @@ GFF_COLS <- c(
   "strand" = "logical",
   "phase"  = "integer",
   "attr"   = "character"
+)
+
+CON_LENGTH <- c(
+  "conid"  = "character",
+  "length" = "integer"
 )
 
 # Converts a character vector of '+' and '-' to a logical vector
@@ -89,7 +94,7 @@ read_gff <- function(file) {
 #' Read a hit file 
 #'
 #' A hit file is required to have the same first 6 columns as a synteny map,
-#' i.e. qchr, qstart, qstop, tchr, tstart, tstop. There can be any number of
+#' i.e. qcon, qstart, qstop, tcon, tstart, tstop. There can be any number of
 #' additional columns.
 #'
 #' @param file hit file name
@@ -109,6 +114,29 @@ read_hitmap <- function(file) {
 
   # Assign class membership
   class(d) <- append('hitmap', class(d))
+
+  return(d)
+}
+
+#' Read a contig length file 
+#'
+#' @param file contig length file
+#' @return A dataframe
+#' @export
+read_conlen <- function(file) {
+  d <- readr::read_tsv(file, col_names=FALSE)
+
+  # Assert the correct number of columns were read
+  stopifnot(ncol(d) == 2)
+
+  # Set column names
+  names(d) <- names(CON_LENGTH)
+
+  # Assert column types match expectations
+  stopifnot(CON_LENGTH == lapply(d, class))
+
+  # Assign class membership
+  class(d) <- append('conlen', class(d))
 
   return(d)
 }
