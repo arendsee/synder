@@ -92,37 +92,37 @@ Rcpp::DataFrame Genome::as_data_frame()
         }
     }
 
-    Rcpp::CharacterVector qchr(N);
+    Rcpp::CharacterVector qseqid(N);
     Rcpp::IntegerVector   qstart(N);
     Rcpp::IntegerVector   qstop(N);
-    Rcpp::CharacterVector tchr(N);
+    Rcpp::CharacterVector tseqid(N);
     Rcpp::IntegerVector   tstart(N);
     Rcpp::IntegerVector   tstop(N);
     Rcpp::NumericVector   score(N);
-    Rcpp::LogicalVector   strand(N);
+    Rcpp::IntegerVector   strand(N);
     Rcpp::IntegerVector   cset(N);
 
     size_t i = 0;
     for (auto &pair : contig) {
         b = pair.second->block.front();
         for(; b != nullptr; b = b->next(), ++i){
-            qchr[i]   = b->parent->name;
+            qseqid[i] = b->parent->name;
             qstart[i] = b->pos[0] + Offsets::out_start;
             qstop[i]  = b->pos[1] + Offsets::out_stop;
-            tchr[i]   = b->over->parent->name;
+            tseqid[i] = b->over->parent->name;
             tstart[i] = b->over->pos[0] + Offsets::out_start;
             tstop[i]  = b->over->pos[1] + Offsets::out_stop;
             score[i]  = b->score;
-            strand[i] = b->strand == '+';
+            strand[i] = b->strand == '+' ? 1 : (b->strand == '-' ? 0 : NA_INTEGER);
             cset[i]   = b->cset->id;
         }
     }
 
     return Rcpp::DataFrame::create(
-        Rcpp::Named("qchr")   = qchr,
+        Rcpp::Named("qseqid") = qseqid,
         Rcpp::Named("qstart") = qstart,
         Rcpp::Named("qstop")  = qstop,
-        Rcpp::Named("tchr")   = tchr,
+        Rcpp::Named("tseqid") = tseqid,
         Rcpp::Named("tstart") = tstart,
         Rcpp::Named("tstop")  = tstop,
         Rcpp::Named("score")  = score,

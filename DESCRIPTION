@@ -13,7 +13,9 @@ Depends:
     R (>= 3.3.1)
 Imports:
     Rcpp (>= 0.12.7),
-    readr
+    readr,
+    tibble,
+    magrittr
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
 Suggests: testthat

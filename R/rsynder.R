@@ -70,6 +70,7 @@ read_synmap <- function(file) {
 #' @export
 read_gff <- function(file) {
   d <- readr::read_tsv(file, col_names=FALSE)
+  class(d) <- 'data.frame'
 
   # Assert the correct number of columns were read
   stopifnot(ncol(d) == 9)
@@ -145,14 +146,7 @@ read_conlen <- function(file) {
 df2file <- function(x) {
   if(!is.null(x) && 'data.frame' %in% class(x)){
     xfile <- tempfile()
-    write.table(
-      x,
-      file      = xfile,
-      quote     = FALSE,
-      sep       = "\t",
-      row.names = FALSE,
-      col.names = FALSE
-    )
+    readr::write_tsv(x, path = xfile, col_names = FALSE)
     x <- xfile
     class(x) <- append(class(x), 'tmp')
   }
@@ -167,9 +161,9 @@ wrapper <- function(FUN, x, y=NULL, ...) {
     d <- NULL
     warning("x is NULL")
   } else if(file.exists(x) && is.null(y)){
-    d <- FUN(x, ...)
+    d <- FUN(x, ...) %>% tibble::as_data_frame()
   } else if (file.exists(x) && file.exists(y)) {
-    d <- FUN(x, y, ...)
+    d <- FUN(x, y, ...) %>% tibble::as_data_frame()
   } else {
     warning("Failed to open files")
     d <- NULL
@@ -188,7 +182,10 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #' @param filename synteny map file name
 #' @export
 dump <- function(synfile, swap=FALSE, trans="i") {
-  wrapper(c_dump, synfile, swap=swap, trans=trans)
+  syn <- wrapper(c_dump, synfile, swap=swap, trans=trans)
+  syn$strand <- as.logical(syn$strand)
+  class(syn) <- append('synmap', class(syn))
+  syn
 }
 
 #' remove links that disagree with the synteny map
