@@ -70,8 +70,7 @@ void Genome::set_contig_lengths(FILE* clfile)
         while ((read = getline(&line, &len, clfile)) != EOF) {
             int status = sscanf(line, "%s %ld", contig_name, &contig_length);
             if(status == EOF) {
-                fprintf(stderr, "Failed to read contig length file\n");
-                exit(EXIT_FAILURE);
+                Rcpp::stop("Failed to read contig length file");
             }
             Contig* con = get_contig(contig_name);
             if(con != nullptr) {
@@ -103,7 +102,6 @@ Rcpp::DataFrame Genome::as_data_frame()
     Rcpp::LogicalVector   strand(N);
     Rcpp::IntegerVector   cset(N);
 
-
     size_t i = 0;
     for (auto &pair : contig) {
         b = pair.second->block.front();
@@ -131,27 +129,6 @@ Rcpp::DataFrame Genome::as_data_frame()
         Rcpp::Named("strand") = strand,
         Rcpp::Named("cset")   = cset
     );
-}
-
-void Genome::dump_blocks()
-{
-    for (auto &pair : contig) {
-        Block* b = pair.second->block.front();
-        for(; b != nullptr; b = b->next()){
-            printf(
-                "%s\t%ld\t%ld\t%s\t%ld\t%ld\t%lf\t%c\t%zu\n",
-                b->parent->name.c_str(),               // query chromosome
-                b->pos[0] + Offsets::out_start,        // query start
-                b->pos[1] + Offsets::out_stop,         // query stop
-                b->over->parent->name.c_str(),         // target chromosome
-                b->over->pos[0] + Offsets::out_start,  // target start
-                b->over->pos[1] + Offsets::out_stop,   // target stop
-                b->score,                              // score
-                b->strand,                             // strand
-                b->cset->id                            // contiguous set id
-            );
-        }
-    }
 }
 
 void Genome::link_block_corners()

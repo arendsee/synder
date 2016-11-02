@@ -32,11 +32,6 @@ Synmap::~Synmap()
 
 void Synmap::load_blocks()
 {
-    if (synfile == nullptr) {
-        fprintf(stderr, "NULL synteny input file (%s:%d in %s)\n", __FILE__, __LINE__, __func__);
-        exit(EXIT_FAILURE);
-    }
-
     genome[0] = new Genome("Q");
     genome[1] = new Genome("T");
 
@@ -76,8 +71,7 @@ void Synmap::load_blocks()
         stop[1]  -= Offsets::syn_stop;
 
         if(status != 8) {
-            fprintf(stderr, "Failed to read input line:\n%s", line);
-            exit(EXIT_FAILURE);
+            Rcpp::stop("Failed to read input line:\n" + std::string(line));
         }
 
         switch (trans) {
@@ -98,8 +92,7 @@ void Synmap::load_blocks()
                 // no transformation
                 break;
             default:
-                fprintf(stderr, "Unexpected transformation '%c'\n", trans);
-                exit(EXIT_FAILURE);
+                Rcpp::stop("Unexpected value of transform (trans argument)");
                 break;
         }
 
