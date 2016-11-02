@@ -145,7 +145,7 @@ read_conlen <- function(file) {
 df2file <- function(x) {
   if(!is.null(x) && 'data.frame' %in% class(x)){
     xfile <- tempfile()
-    wite.table(
+    write.table(
       x,
       file      = xfile,
       quote     = FALSE,
