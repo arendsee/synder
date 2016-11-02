@@ -6,14 +6,15 @@
 using namespace Rcpp;
 
 // c_dump
-Rcpp::DataFrame c_dump(std::string filename, bool swap);
-RcppExport SEXP synder_c_dump(SEXP filenameSEXP, SEXP swapSEXP) {
+Rcpp::DataFrame c_dump(std::string filename, bool swap, char trans);
+RcppExport SEXP synder_c_dump(SEXP filenameSEXP, SEXP swapSEXP, SEXP transSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_dump(filename, swap));
+    Rcpp::traits::input_parameter< char >::type trans(transSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_dump(filename, swap, trans));
     return rcpp_result_gen;
 END_RCPP
 }

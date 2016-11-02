@@ -48,8 +48,8 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #'
 #' @param filename synteny map file name
 #' @export
-dump <- function(synfile, swap=FALSE) {
-  wrapper(c_dump, synfile, swap=swap)
+dump <- function(synfile, swap=FALSE, trans="i") {
+  wrapper(c_dump, synfile, swap=swap, trans=trans)
 }
 
 #' remove links that disagree with the synteny map

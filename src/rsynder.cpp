@@ -15,15 +15,17 @@ int Offsets::out_stop;
 //'
 //' @param filename synteny map file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
+//' @param trans    STUB
 // [[Rcpp::export]]
 Rcpp::DataFrame c_dump (
     std::string filename,
-    bool swap
+    bool swap,
+    char trans
 )
 {
     FILE* synfh = fopen(filename.c_str(), "r");
 
-    Synmap syn(synfh, nullptr, nullptr, swap, 0, 0, 'i');
+    Synmap syn(synfh, nullptr, nullptr, swap, 0, 0, trans);
 
     return syn.as_data_frame();
 }

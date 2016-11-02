@@ -5,8 +5,9 @@
 #'
 #' @param filename synteny map file name
 #' @param swap     reverse direction of synteny map (e.g. swap query and target) 
-c_dump <- function(filename, swap) {
-    .Call('synder_c_dump', PACKAGE = 'synder', filename, swap)
+#' @param trans    STUB
+c_dump <- function(filename, swap, trans) {
+    .Call('synder_c_dump', PACKAGE = 'synder', filename, swap, trans)
 }
 
 #' predict search intervals
