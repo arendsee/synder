@@ -4,7 +4,7 @@
 \alias{dump}
 \title{print all blocks with contiguous set ids}
 \usage{
-dump(filename)
+dump(synfile, swap = FALSE)
 }
 \arguments{
 \item{filename}{synteny map file name}

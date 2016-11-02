@@ -4,12 +4,14 @@
 \alias{c_map}
 \title{trace intervals across genomes}
 \usage{
-c_map(synfilename, gfffilename)
+c_map(synfilename, gfffilename, swap)
 }
 \arguments{
 \item{synfilename}{synteny map file name}
 
 \item{gfffilename}{gff file name}
+
+\item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 }
 \description{
 trace intervals across genomes

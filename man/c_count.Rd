@@ -4,12 +4,14 @@
 \alias{c_count}
 \title{count overlaps}
 \usage{
-c_count(synfilename, gfffilename)
+c_count(synfilename, gfffilename, swap)
 }
 \arguments{
 \item{synfilename}{synteny map file name}
 
 \item{gfffilename}{gff file name}
+
+\item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 }
 \description{
 count overlaps

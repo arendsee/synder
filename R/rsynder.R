@@ -6,7 +6,14 @@ NULL
 df2file <- function(x) {
   if(!is.null(x) && 'data.frame' %in% class(x)){
     xfile <- tempfile()
-    write.table(x, file=xfile, quote=FALSE, sep="\t", row.names=FALSE, col.names=FALSE)
+    wite.table(
+      x,
+      file      = xfile,
+      quote     = FALSE,
+      sep       = "\t",
+      row.names = FALSE,
+      col.names = FALSE
+    )
     x <- xfile
     class(x) <- append(class(x), 'tmp')
   }
@@ -17,7 +24,10 @@ wrapper <- function(FUN, x, y=NULL, ...) {
   x <- df2file(x)
   y <- df2file(y)
 
-  if(file.exists(x) && is.null(y)){
+  if(is.null(x)){
+    d <- NULL
+    warning("x is NULL")
+  } else if(file.exists(x) && is.null(y)){
     d <- FUN(x, ...)
   } else if (file.exists(x) && file.exists(y)) {
     d <- FUN(x, y, ...)
@@ -38,8 +48,8 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #'
 #' @param filename synteny map file name
 #' @export
-dump <- function(synfile) {
-  wrapper(c_dump, synfile)
+dump <- function(synfile, swap=FALSE) {
+  wrapper(c_dump, synfile, swap=swap)
 }
 
 #' remove links that disagree with the synteny map
@@ -47,8 +57,16 @@ dump <- function(synfile) {
 #' @param synfilename synteny map file name
 #' @param intfilename int file name
 #' @export
-filter <- function(synfilename, intfilename) {
-  d <- wrapper(c_filter, synfilename, intfilename)
+filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
+  d <- wrapper(
+    c_filter,
+    synfilename,
+    intfilename,
+    swap  = swap,
+    k     = k,
+    r     = r,
+    trans = trans
+  )
   if(is.null(d)) return(NULL)
 
   d <- sub(pattern="\n", replacement="") %>%
@@ -68,8 +86,27 @@ filter <- function(synfilename, intfilename) {
 #' @param synfilename synteny map file name
 #' @param intfilename int file name
 #' @export
-search <- function(synfilename, gfffilename) {
-  wrapper(c_search, synfilename, gfffilename)
+search <- function(
+  synfilename,
+  gfffilename,
+  tclfile = "",
+  qclfile = "",
+  swap    = FALSE,
+  k       = 0,
+  r       = 0,
+  trans   = "i"
+) {
+  wrapper(
+    c_search,
+    synfilename,
+    gfffilename,
+    tclfile = tclfile,
+    qclfile = qclfile,
+    swap    = swap,
+    k       = k,
+    r       = r,
+    trans   = trans
+  )
 }
 
 #' trace intervals across genomes
@@ -77,8 +114,12 @@ search <- function(synfilename, gfffilename) {
 #' @param synfilename synteny map file name
 #' @param intfilename int file name
 #' @export
-map <- function(synfilename, gfffilename) {
-  wrapper(c_map, synfilename, gfffilename)
+map <- function(
+  synfilename,
+  gfffilename,
+  swap=FALSE
+) {
+  wrapper(c_map, synfilename, gfffilename, swap=swap)
 }
 
 #' count overlaps
@@ -86,6 +127,10 @@ map <- function(synfilename, gfffilename) {
 #' @param synfilename synteny map file name
 #' @param intfilename int file name
 #' @export
-count <- function(synfilename, gfffilename) {
-  wrapper(c_count, synfilename, gfffilename)
+count <- function(
+  synfilename,
+  gfffilename,
+  swap=FALSE
+) {
+  wrapper(c_count, synfilename, gfffilename, swap=swap)
 }

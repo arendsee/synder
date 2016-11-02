@@ -4,7 +4,7 @@
 \alias{map}
 \title{trace intervals across genomes}
 \usage{
-map(synfilename, gfffilename)
+map(synfilename, gfffilename, swap = FALSE)
 }
 \arguments{
 \item{synfilename}{synteny map file name}

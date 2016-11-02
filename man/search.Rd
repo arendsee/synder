@@ -4,7 +4,8 @@
 \alias{search}
 \title{trace intervals to target search intervals}
 \usage{
-search(synfilename, gfffilename)
+search(synfilename, gfffilename, tclfile = "", qclfile = "", swap = FALSE,
+  k = 0, r = 0, trans = "i")
 }
 \arguments{
 \item{synfilename}{synteny map file name}

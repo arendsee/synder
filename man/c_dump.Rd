@@ -4,10 +4,12 @@
 \alias{c_dump}
 \title{print all blocks with contiguous set ids}
 \usage{
-c_dump(filename)
+c_dump(filename, swap)
 }
 \arguments{
 \item{filename}{synteny map file name}
+
+\item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 }
 \description{
 print all blocks with contiguous set ids
