@@ -1,6 +1,6 @@
 Required for Rcpp merge with master
-[ ] determine when to use factors in outputs
-[ ] fix screwy search output
+[x] determine when to use factors in outputs
+[x] fix screwy search output
 [ ] add offset handling
 [ ] add all tests from test_data
 [ ] add tests for all read_* functions

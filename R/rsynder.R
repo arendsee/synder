@@ -10,31 +10,25 @@ SYNMAP_COLS <- c(
   "tstart" = "integer",
   "tstop"  = "integer",
   "score"  = "numeric",
-  "strand" = "logical"
+  "strand" = "character"
 )
 
 GFF_COLS <- c(
-  "conid"  = "character",
-  "source" = "character",
-  "type"   = "character",
-  "start"  = "integer",
-  "stop"   = "integer",
-  "score"  = "numeric",
-  "strand" = "logical",
-  "phase"  = "integer",
-  "attr"   = "character"
+  "conid"   = "character",
+  "source"  = "character",
+  "type"    = "character",
+  "start"   = "integer",
+  "stop"    = "integer",
+  "score"   = "numeric",
+  "strand"  = "character",
+  "phase"   = "integer",
+  "seqname" = "character"
 )
 
 CON_LENGTH <- c(
   "conid"  = "character",
   "length" = "integer"
 )
-
-# Converts a character vector of '+' and '-' to a logical vector
-# where '+' -> TRUE, '-' -> FALSE, else -> NA
-logical_strand <- function(x) {
-  as.logical(c_logical_strand(x)) 
-}
 
 #' Read a synteny map
 #'
@@ -52,7 +46,6 @@ read_synmap <- function(file) {
 
   # Set types (readr guesses the others correctly)
   d$score <- as.numeric(d$score)
-  d$strand <- logical_strand(d$strand)
 
   # Assert column types match expectations
   stopifnot(SYNMAP_COLS == lapply(d, class))
@@ -81,7 +74,6 @@ read_gff <- function(file) {
   # Set types (readr guesses the others correctly)
   d$score <- as.numeric(d$score)
   d$phase <- as.integer(d$phase)
-  d$strand <- logical_strand(d$strand)
 
   # Assert column types match expectations
   stopifnot(GFF_COLS == lapply(d, class))
@@ -186,9 +178,6 @@ dump <- function(synfile, swap=FALSE, trans="i") {
   syn$qseqid <- as.character(syn$qseqid)
   syn$tseqid <- as.character(syn$tseqid)
 
-  # Cast strand from int [0,1,NA_INTEGER] to logical
-  syn$strand <- as.logical(syn$strand)
-
   # Assign class and attributes
   class(syn) <- append('dump_result', class(syn))
   attributes(syn)$swap  = swap
@@ -214,10 +203,10 @@ filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
   )
   if(is.null(d)) return(NULL)
 
-  d <- sub(pattern="\n", replacement="") %>%
-    strsplit(split="\t")                 %>%
-    do.call(what=rbind)                  %>%
-    as.data.frame(stringsAsFactors=FALSE)
+  d <- sub(d, pattern="\n", replacement="") %>%
+    strsplit(split="\t")                    %>%
+    do.call(what=rbind)                     %>%
+    tibble::as_data_frame()
   names(d)[1:6] <- names(SYNMAP_COLS)[1:6]
   d$qstart <- as.numeric(d$qstart)
   d$qstop  <- as.numeric(d$qstop)
@@ -260,6 +249,11 @@ search <- function(
     trans   = trans
   )
 
+  d$seqname <- as.character(d$seqname)
+  d$qcon    <- as.character(d$qcon)
+  d$tcon    <- as.character(d$tcon)
+  d$strand  <- as.character(d$strand)
+
   class(d) <- append('search_result', class(d))
   attributes(d)$swap  <- swap
   attributes(d)$k     <- k
@@ -286,6 +280,11 @@ map <- function(
     swap = swap
   )
 
+  d$seqname <- as.character(d$seqname)
+  d$qcon    <- as.character(d$qcon)
+  d$tcon    <- as.character(d$tcon)
+  d$strand  <- as.character(d$strand)
+
   class(d) <- append('map_result', class(d))
   attributes(d)$swap <- swap
 
@@ -308,6 +307,8 @@ count <- function(
     y    = gfffilename,
     swap = swap
   )
+
+  d$seqname = as.character(d$seqname)
 
   class(d) <- append('count_result', class(d))
   attributes(d)$swap <- swap

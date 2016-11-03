@@ -83,52 +83,25 @@ void Genome::set_contig_lengths(FILE* clfile)
 
 Rcpp::DataFrame Genome::as_data_frame()
 {
-    Block* b;
-    size_t N = 0;
+    DumpType d;
+
     for (auto &pair : contig) {
-        b = pair.second->block.front();
-        for(; b != nullptr; b = b->next()){
-            N++;
+        for(Block* b = pair.second->block.front(); b != nullptr; b = b->next()){
+            d.add_row(
+                b->parent->name,
+                b->pos[0] + Offsets::out_start,
+                b->pos[1] + Offsets::out_stop,
+                b->over->parent->name,
+                b->over->pos[0] + Offsets::out_start,
+                b->over->pos[1] + Offsets::out_stop,
+                b->score,
+                b->strand,
+                b->cset->id
+            );
         }
     }
 
-    Rcpp::CharacterVector qseqid(N);
-    Rcpp::IntegerVector   qstart(N);
-    Rcpp::IntegerVector   qstop(N);
-    Rcpp::CharacterVector tseqid(N);
-    Rcpp::IntegerVector   tstart(N);
-    Rcpp::IntegerVector   tstop(N);
-    Rcpp::NumericVector   score(N);
-    Rcpp::IntegerVector   strand(N);
-    Rcpp::IntegerVector   cset(N);
-
-    size_t i = 0;
-    for (auto &pair : contig) {
-        b = pair.second->block.front();
-        for(; b != nullptr; b = b->next(), ++i){
-            qseqid[i] = b->parent->name;
-            qstart[i] = b->pos[0] + Offsets::out_start;
-            qstop[i]  = b->pos[1] + Offsets::out_stop;
-            tseqid[i] = b->over->parent->name;
-            tstart[i] = b->over->pos[0] + Offsets::out_start;
-            tstop[i]  = b->over->pos[1] + Offsets::out_stop;
-            score[i]  = b->score;
-            strand[i] = b->strand == '+' ? 1 : (b->strand == '-' ? 0 : NA_INTEGER);
-            cset[i]   = b->cset->id;
-        }
-    }
-
-    return Rcpp::DataFrame::create(
-        Rcpp::Named("qseqid") = qseqid,
-        Rcpp::Named("qstart") = qstart,
-        Rcpp::Named("qstop")  = qstop,
-        Rcpp::Named("tseqid") = tseqid,
-        Rcpp::Named("tstart") = tstart,
-        Rcpp::Named("tstop")  = tstop,
-        Rcpp::Named("score")  = score,
-        Rcpp::Named("strand") = strand,
-        Rcpp::Named("cset")   = cset
-    );
+    d.as_data_frame();
 }
 
 void Genome::link_block_corners()

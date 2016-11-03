@@ -222,7 +222,7 @@ std::vector<Feature> Synmap::gff2features(FILE* fh){
             continue;
 
         if (!sscanf(line,
-                    "%s %*s %*s %ld %ld %*s %*s %*s %s\n",
+                    "%s %*s %*s %ld %ld %*s %*c %*s %s\n",
                     contig_seqname, &start, &stop, seqname))
         {
             throw "invalid input in Synmap::process_gff";

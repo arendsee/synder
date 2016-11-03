@@ -4,6 +4,57 @@
 #include <vector>
 #include <Rcpp.h>
 
+class DumpType {
+private:
+    std::vector<std::string> qcon;
+    std::vector<long>        qstart;
+    std::vector<long>        qstop;
+    std::vector<std::string> tcon;
+    std::vector<long>        tstart;
+    std::vector<long>        tstop;
+    std::vector<double>      score;
+    std::vector<char>        strand;
+    std::vector<size_t>      cset;
+
+public:
+    void add_row(
+        std::string t_qcon,
+        long        t_qstart,
+        long        t_qstop,
+        std::string t_tcon,
+        long        t_tstart,
+        long        t_tstop,
+        double      t_score,
+        char        t_strand,
+        size_t      t_cset
+    )
+    {
+        qcon.push_back      ( t_qcon      );
+        qstart.push_back    ( t_qstart    );
+        qstop.push_back     ( t_qstop     );
+        tcon.push_back      ( t_tcon      );
+        tstart.push_back    ( t_tstart    );
+        tstop.push_back     ( t_tstop     );
+        score.push_back     ( t_score     );
+        strand.push_back    ( t_strand    );
+        cset.push_back      ( t_cset      );
+    }
+
+    Rcpp::DataFrame as_data_frame() {
+        return Rcpp::DataFrame::create(
+            Rcpp::Named("qcon")      = qcon,
+            Rcpp::Named("qstart")    = qstart,
+            Rcpp::Named("qstop")     = qstop,
+            Rcpp::Named("tcon")      = tcon,
+            Rcpp::Named("tstart")    = tstart,
+            Rcpp::Named("tstop")     = tstop,
+            Rcpp::Named("score")     = score,
+            Rcpp::Named("strand")    = strand,
+            Rcpp::Named("cset")      = cset
+        );
+    }
+};
+
 class CountType {
 private:
     std::vector<std::string> seqname;
@@ -25,11 +76,11 @@ public:
 
 class MapType {
 private:
-    std::vector<std::string> qname;
-    std::vector<std::string> qchr;
+    std::vector<std::string> seqname;
+    std::vector<std::string> qcon;
     std::vector<long>        qstart;
     std::vector<long>        qstop;
-    std::vector<std::string> tchr;
+    std::vector<std::string> tcon;
     std::vector<long>        tstart;
     std::vector<long>        tstop;
     std::vector<char>        strand;
@@ -37,22 +88,22 @@ private:
 
 public:
     void add_row(
-        std::string t_qname,
-        std::string t_qchr,
+        std::string t_seqname,
+        std::string t_qcon,
         long        t_qstart,
         long        t_qstop,
-        std::string t_tchr,
+        std::string t_tcon,
         long        t_tstart,
         long        t_tstop,
         char        t_strand,
         bool        t_missing
     )
     {
-        qname.push_back   ( t_qname   );
-        qchr.push_back    ( t_qchr    );
+        seqname.push_back ( t_seqname );
+        qcon.push_back    ( t_qcon    );
         qstart.push_back  ( t_qstart  );
         qstop.push_back   ( t_qstop   );
-        tchr.push_back    ( t_tchr    );
+        tcon.push_back    ( t_tcon    );
         tstart.push_back  ( t_tstart  );
         tstop.push_back   ( t_tstop   );
         strand.push_back  ( t_strand  );
@@ -61,11 +112,11 @@ public:
 
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
-            Rcpp::Named("qname")   = qname,
-            Rcpp::Named("qchr")    = qchr,
+            Rcpp::Named("seqname") = seqname,
+            Rcpp::Named("qcon")    = qcon,
             Rcpp::Named("qstart")  = qstart,
             Rcpp::Named("qstop")   = qstop,
-            Rcpp::Named("tchr")    = tchr,
+            Rcpp::Named("tcon")    = tcon,
             Rcpp::Named("tstart")  = tstart,
             Rcpp::Named("tstop")   = tstop,
             Rcpp::Named("strand")  = strand,
@@ -76,11 +127,11 @@ public:
 
 class SIType {
 private:
-    std::vector<std::string> name;
-    std::vector<std::string> qchr;
+    std::vector<std::string> seqname;
+    std::vector<std::string> qcon;
     std::vector<long>        qstart;
     std::vector<long>        qstop;
-    std::vector<std::string> tchr;
+    std::vector<std::string> tcon;
     std::vector<long>        tstart;
     std::vector<long>        tstop;
     std::vector<char>        strand;
@@ -92,11 +143,11 @@ private:
 
 public:
     void add_row(
-        std::string t_name,
-        std::string t_qchr,
+        std::string t_seqname,
+        std::string t_qcon,
         long        t_qstart,
         long        t_qstop,
-        std::string t_tchr,
+        std::string t_tcon,
         long        t_tstart,
         long        t_tstop,
         char        t_strand,
@@ -107,11 +158,11 @@ public:
         bool        t_inbetween
     )
     {
-        name.push_back      ( t_name      );
-        qchr.push_back      ( t_qchr      );
+        seqname.push_back   ( t_seqname   );
+        qcon.push_back      ( t_qcon      );
         qstart.push_back    ( t_qstart    );
         qstop.push_back     ( t_qstop     );
-        tchr.push_back      ( t_tchr      );
+        tcon.push_back      ( t_tcon      );
         tstart.push_back    ( t_tstart    );
         tstop.push_back     ( t_tstop     );
         strand.push_back    ( t_strand    );
@@ -124,11 +175,11 @@ public:
 
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
-            Rcpp::Named("name")      = name,
-            Rcpp::Named("qchr")      = qchr,
+            Rcpp::Named("seqname")   = seqname,
+            Rcpp::Named("qcon")      = qcon,
             Rcpp::Named("qstart")    = qstart,
             Rcpp::Named("qstop")     = qstop,
-            Rcpp::Named("tchr")      = tchr,
+            Rcpp::Named("tcon")      = tcon,
             Rcpp::Named("tstart")    = tstart,
             Rcpp::Named("tstop")     = tstop,
             Rcpp::Named("strand")    = strand,
