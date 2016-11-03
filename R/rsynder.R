@@ -33,7 +33,7 @@ CON_LENGTH <- c(
 defaults <- list(
   tclfile = "",
   qclfile = "",
-  offsets = c(0,1,0,0,1,1),
+  offsets = c(0,0,0,0,0,0),
   k       = 0,
   r       = 0.001,
   trans   = 'i',
