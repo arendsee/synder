@@ -182,7 +182,9 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #' @param filename synteny map file name
 #' @export
 dump <- function(synfile, swap=FALSE, trans="i") {
-  syn <- wrapper(c_dump, synfile, swap=swap, trans=trans)
+  syn <- wrapper(FUN=c_dump, x=synfile, swap=swap, trans=trans)
+  syn$qseqid <- as.character(syn$qseqid)
+  syn$tseqid <- as.character(syn$tseqid)
 
   # Cast strand from int [0,1,NA_INTEGER] to logical
   syn$strand <- as.logical(syn$strand)
@@ -202,9 +204,9 @@ dump <- function(synfile, swap=FALSE, trans="i") {
 #' @export
 filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
   d <- wrapper(
-    c_filter,
-    synfilename,
-    intfilename,
+    FUN   = c_filter,
+    x     = synfilename,
+    y     = intfilename,
     swap  = swap,
     k     = k,
     r     = r,
@@ -247,9 +249,9 @@ search <- function(
   trans   = "i"
 ) {
   d <- wrapper(
-    c_search,
-    synfilename,
-    gfffilename,
+    FUN     = c_search,
+    x       = synfilename,
+    y       = gfffilename,
     tclfile = tclfile,
     qclfile = qclfile,
     swap    = swap,
@@ -277,7 +279,12 @@ map <- function(
   gfffilename,
   swap=FALSE
 ) {
-  d <- wrapper(c_map, synfilename, gfffilename, swap=swap)
+  d <- wrapper(
+    FUN  = c_map,
+    x    = synfilename,
+    y    = gfffilename,
+    swap = swap
+  )
 
   class(d) <- append('map_result', class(d))
   attributes(d)$swap <- swap
@@ -295,7 +302,12 @@ count <- function(
   gfffilename,
   swap=FALSE
 ) {
-  d <- wrapper(c_count, synfilename, gfffilename, swap=swap)
+  d <- wrapper(
+    FUN  = c_count,
+    x    = synfilename,
+    y    = gfffilename,
+    swap = swap
+  )
 
   class(d) <- append('count_result', class(d))
   attributes(d)$swap <- swap

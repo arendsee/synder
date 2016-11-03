@@ -9,4 +9,4 @@
 #' t. tgen   - lengths of target contigs/scaffolds/chromosomes
 #' 
 #' @format List
-"synder_toy"
+"toy"
