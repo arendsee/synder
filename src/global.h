@@ -32,18 +32,6 @@ const long LINE_BUFFER_SIZE = 512;
 
 const long DEFAULT_CONTIG_LENGTH = 1e9;
 
-// A value of 0 or 1 with is added to the starts and stops of all printed intervals
-class Offsets
-{
-public:
-    static int syn_start;
-    static int syn_stop;
-    static int in_start;
-    static int in_stop;
-    static int out_start;
-    static int out_stop;
-};
-
 typedef enum direction { LO = 0, HI = 1 } Direction;
 
 typedef enum genome_idx { QUERY = 0, TARGET = 1 } Genome_idx;

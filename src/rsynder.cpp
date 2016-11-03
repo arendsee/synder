@@ -4,13 +4,6 @@
 #include "global.h"
 #include "synmap.h"
 
-int Offsets::syn_start;
-int Offsets::syn_stop;
-int Offsets::in_start;
-int Offsets::in_stop;
-int Offsets::out_start;
-int Offsets::out_stop;
-
 //' print all blocks with contiguous set ids
 //'
 //' @param filename synteny map file name
@@ -20,12 +13,13 @@ int Offsets::out_stop;
 Rcpp::DataFrame c_dump (
     std::string filename,
     bool swap,
-    char trans
+    char trans,
+    std::vector<int> offsets
 )
 {
     FILE* synfh = fopen(filename.c_str(), "r");
 
-    Synmap syn(synfh, nullptr, nullptr, swap, 0, 0, trans);
+    Synmap syn(synfh, nullptr, nullptr, swap, 0, 0, trans, offsets);
 
     return syn.as_data_frame();
 }
@@ -47,7 +41,8 @@ Rcpp::DataFrame c_search(
     bool swap,
     int k,
     double r,
-    char trans
+    char trans,
+    std::vector<int> offsets
 )
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
@@ -55,7 +50,7 @@ Rcpp::DataFrame c_search(
     FILE* tclfile = fopen(tclfilename.c_str(), "r");
     FILE* qclfile = fopen(qclfilename.c_str(), "r");
 
-    Synmap syn(synfile, tclfile, qclfile, swap, k, r, trans);
+    Synmap syn(synfile, tclfile, qclfile, swap, k, r, trans, offsets);
 
     return syn.search(gfffile);
 }
@@ -76,13 +71,14 @@ Rcpp::CharacterVector c_filter(
     bool swap,
     int k,
     double r,
-    char trans
+    char trans,
+    std::vector<int> offsets
 )
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* intfile = fopen(intfilename.c_str(), "r");
 
-    Synmap syn(synfile, nullptr, nullptr, swap, k, r, trans);
+    Synmap syn(synfile, nullptr, nullptr, swap, k, r, trans, offsets);
 
     return syn.filter(intfile);
 }
@@ -96,13 +92,14 @@ Rcpp::CharacterVector c_filter(
 Rcpp::DataFrame c_map(
     std::string synfilename,
     std::string gfffilename,
-    bool swap
+    bool swap,
+    std::vector<int> offsets
 )
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* gfffile = fopen(gfffilename.c_str(), "r");
 
-    Synmap syn(synfile, nullptr, nullptr, swap, 0, 0, 'i');
+    Synmap syn(synfile, nullptr, nullptr, swap, 0, 0, 'i', offsets);
 
     return syn.map(gfffile);
 }
@@ -116,13 +113,14 @@ Rcpp::DataFrame c_map(
 Rcpp::DataFrame c_count(
     std::string synfilename,
     std::string gfffilename,
-    bool swap
+    bool swap,
+    std::vector<int> offsets
 )
 {
     FILE* synfile = fopen(synfilename.c_str(), "r");
     FILE* gfffile = fopen(gfffilename.c_str(), "r");
 
-    Synmap syn(synfile, nullptr, nullptr, swap, 0, 0, 'i');
+    Synmap syn(synfile, nullptr, nullptr, swap, 0, 0, 'i', offsets);
 
     return syn.count(gfffile);
 }

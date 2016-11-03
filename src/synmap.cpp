@@ -1,23 +1,30 @@
 #include "synmap.h"
 
 Synmap::Synmap(
-    FILE*  synfile,
-    FILE*  tclfile,
-    FILE*  qclfile,
-    bool   swap,
-    int    k,
-    double r,
-    char   trans
+    FILE*  t_synfile,
+    FILE*  t_tclfile,
+    FILE*  t_qclfile,
+    bool   t_swap,
+    int    t_k,
+    double t_r,
+    char   t_trans,
+    std::vector<int> t_offsets
 )
     :
-    synfile(synfile),
-    tclfile(tclfile),
-    qclfile(qclfile),
-    swap(swap),
-    k(k),
-    r(r),
-    trans(trans)
+    synfile(t_synfile),
+    tclfile(t_tclfile),
+    qclfile(t_qclfile),
+    swap(t_swap),
+    k(t_k),
+    r(t_r),
+    trans(t_trans)
 {
+    if(t_offsets.size() != offsets.size()){
+        Rcpp::stop("Offsets must be an integer vector of 4 elements");
+    }
+    for(int i = 0; i < offsets.size(); i++){
+       offsets[i] = t_offsets[i];
+    }
     load_blocks();
     validate();
 }
@@ -42,12 +49,12 @@ void Synmap::load_blocks()
     ssize_t read;
 
     // Contig name
-    char qseqid[NAME_BUFFER_SIZE];
-    char tseqid[NAME_BUFFER_SIZE];
-    char* seqid[2] = {qseqid, tseqid};
+    char   qseqid[NAME_BUFFER_SIZE];
+    char   tseqid[NAME_BUFFER_SIZE];
+    char*  seqid[2] = {qseqid, tseqid};
     double score;
-    char strand;
-    long start[2], stop[2];
+    char   strand;
+    long   start[2], stop[2];
 
     Block *qblk, *tblk;
 
@@ -65,10 +72,10 @@ void Synmap::load_blocks()
                         seqid[j], &start[j], &stop[j],
                         &score, &strand);
 
-        start[0] -= Offsets::syn_start;
-        start[1] -= Offsets::syn_start;
-        stop[0]  -= Offsets::syn_stop;
-        stop[1]  -= Offsets::syn_stop;
+        start[0] -= offsets[0];
+        start[1] -= offsets[0];
+        stop[0]  -= offsets[1];
+        stop[1]  -= offsets[1];
 
         if(status != 8) {
             Rcpp::stop("Failed to read input line:\n" + std::string(line));
@@ -177,6 +184,11 @@ Rcpp::CharacterVector Synmap::filter(FILE* intfile)
                seqid[0], &start[0], &stop[0],
                seqid[1], &start[1], &stop[1]);
 
+        start[0] -= offsets[2];
+        start[1] -= offsets[2];
+        stop[0]  -= offsets[3];
+        stop[1]  -= offsets[3];
+
         Feature qfeat(seqid[0], start[0], stop[0]);
         Feature tfeat(seqid[1], start[1], stop[1]);
 
@@ -229,8 +241,8 @@ std::vector<Feature> Synmap::gff2features(FILE* fh){
         }
 
         // check_in_offset(start, stop);
-        start -= Offsets::in_start;
-        stop -= Offsets::in_stop;
+        start -= offsets[2];
+        stop  -= offsets[3];
 
         qcon = get_contig(0, contig_seqname);
 

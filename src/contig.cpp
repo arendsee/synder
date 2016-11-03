@@ -31,11 +31,11 @@ void Contig::map(Feature& t_feat, MapType& df)
             df.add_row(
                 t_feat.name,
                 qblk->parent->parent_name,
-                qblk->pos[0] + Offsets::out_start,
-                qblk->pos[1] + Offsets::out_stop,
+                qblk->pos[0],
+                qblk->pos[1],
                 t_feat.parent_name,
-                qblk->over->pos[0] + Offsets::out_start,
-                qblk->over->pos[1] + Offsets::out_stop,
+                qblk->over->pos[0],
+                qblk->over->pos[1],
                 qblk->over->strand,
                 missing
             );

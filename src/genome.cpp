@@ -89,11 +89,11 @@ Rcpp::DataFrame Genome::as_data_frame()
         for(Block* b = pair.second->block.front(); b != nullptr; b = b->next()){
             d.add_row(
                 b->parent->name,
-                b->pos[0] + Offsets::out_start,
-                b->pos[1] + Offsets::out_stop,
+                b->pos[0],
+                b->pos[1],
                 b->over->parent->name,
-                b->over->pos[0] + Offsets::out_start,
-                b->over->pos[1] + Offsets::out_stop,
+                b->over->pos[0],
+                b->over->pos[1],
                 b->score,
                 b->strand,
                 b->cset->id
@@ -101,7 +101,7 @@ Rcpp::DataFrame Genome::as_data_frame()
         }
     }
 
-    d.as_data_frame();
+    return d.as_data_frame();
 }
 
 void Genome::link_block_corners()

@@ -4,7 +4,8 @@
 \alias{count}
 \title{count overlaps}
 \usage{
-count(synfilename, gfffilename, swap = FALSE)
+count(synfilename, gfffilename, swap = defaults$swap,
+  offsets = defaults$offsets)
 }
 \arguments{
 \item{synfilename}{synteny map file name}

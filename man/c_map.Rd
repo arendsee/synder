@@ -4,7 +4,7 @@
 \alias{c_map}
 \title{trace intervals across genomes}
 \usage{
-c_map(synfilename, gfffilename, swap)
+c_map(synfilename, gfffilename, swap, offsets)
 }
 \arguments{
 \item{synfilename}{synteny map file name}

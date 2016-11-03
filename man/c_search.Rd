@@ -4,7 +4,8 @@
 \alias{c_search}
 \title{predict search intervals}
 \usage{
-c_search(synfilename, gfffilename, tclfilename, qclfilename, swap, k, r, trans)
+c_search(synfilename, gfffilename, tclfilename, qclfilename, swap, k, r, trans,
+  offsets)
 }
 \arguments{
 \item{synfilename}{synteny map file name}

@@ -11,6 +11,7 @@
 
 #include <iterator>
 #include <list>
+#include <array>
 #include <Rcpp.h>
 
 
@@ -19,14 +20,15 @@ class Synmap
 {
 private:
     Genome* genome[2] = { nullptr, nullptr };
-    FILE* synfile     = nullptr;
-    FILE* tclfile     = nullptr;
-    FILE* qclfile     = nullptr;
-    int swap          = 0;
-    long k            = 0;
-    double r          = 0.001;
-    char trans        = 'i';
+    FILE*   synfile   = nullptr;
+    FILE*   tclfile   = nullptr;
+    FILE*   qclfile   = nullptr;
+    int     swap      = 0;
+    long    k         = 0;
+    double  r         = 0.001;
+    char    trans     = 'i';
 
+    std::array<int,4> offsets = {0,1,0,0};
 
     // utility function for loading GFF files
     std::vector<Feature> gff2features(FILE* fh);
@@ -48,7 +50,8 @@ public:
         bool   swap,
         int    k,
         double r,
-        char   trans
+        char   trans,
+        std::vector<int> offsets
     );
 
     ~Synmap();

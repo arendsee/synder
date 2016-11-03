@@ -29,15 +29,15 @@ public:
         size_t      t_cset
     )
     {
-        qcon.push_back      ( t_qcon      );
-        qstart.push_back    ( t_qstart    );
-        qstop.push_back     ( t_qstop     );
-        tcon.push_back      ( t_tcon      );
-        tstart.push_back    ( t_tstart    );
-        tstop.push_back     ( t_tstop     );
-        score.push_back     ( t_score     );
-        strand.push_back    ( t_strand    );
-        cset.push_back      ( t_cset      );
+        qcon.push_back   ( t_qcon   );
+        qstart.push_back ( t_qstart );
+        qstop.push_back  ( t_qstop  );
+        tcon.push_back   ( t_tcon   );
+        tstart.push_back ( t_tstart );
+        tstop.push_back  ( t_tstop  );
+        score.push_back  ( t_score  );
+        strand.push_back ( t_strand );
+        cset.push_back   ( t_cset   );
     }
 
     Rcpp::DataFrame as_data_frame() {

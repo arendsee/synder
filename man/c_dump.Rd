@@ -4,7 +4,7 @@
 \alias{c_dump}
 \title{print all blocks with contiguous set ids}
 \usage{
-c_dump(filename, swap, trans)
+c_dump(filename, swap, trans, offsets)
 }
 \arguments{
 \item{filename}{synteny map file name}

@@ -4,8 +4,9 @@
 \alias{filter}
 \title{remove links that disagree with the synteny map}
 \usage{
-filter(synfilename, intfilename, swap = FALSE, k = 0, r = 0,
-  trans = "i")
+filter(synfilename, intfilename, swap = defaults$swap,
+  trans = defaults$trans, k = defaults$k, r = defaults$r,
+  offsets = defaults$offsets)
 }
 \arguments{
 \item{synfilename}{synteny map file name}

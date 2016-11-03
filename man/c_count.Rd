@@ -4,7 +4,7 @@
 \alias{c_count}
 \title{count overlaps}
 \usage{
-c_count(synfilename, gfffilename, swap)
+c_count(synfilename, gfffilename, swap, offsets)
 }
 \arguments{
 \item{synfilename}{synteny map file name}

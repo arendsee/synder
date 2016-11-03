@@ -30,6 +30,34 @@ CON_LENGTH <- c(
   "length" = "integer"
 )
 
+defaults <- list(
+  tclfile = "",
+  qclfile = "",
+  offsets = c(0,1,0,0,1,1),
+  k       = 0,
+  r       = 0.001,
+  trans   = 'i',
+  swap    = FALSE
+)
+
+# NOTE: Handling of offsets:
+# --------------------------
+# Start and stop base offsets (0 or 1) vary between between formats.  The main
+# synteny build I use, Satsuma, is 0-based relative to start, and 1-based
+# relative to stop. GFF files are required to be 0-based. bioconductor (and R
+# in general) is 1-based. Internally, Synder is 0-based. There are 3 sets of
+# start/stop offsets to consider: synteny map base, input GFF or hitmap base,
+# and output base. I will let C-side synder handle input bases, and R-side
+# Synder handle output base.
+
+do_offsets <- function(d, offsets){
+  d$qstart <- d$qstart + offsets[5]
+  d$qstop  <- d$qstop  + offsets[6]
+  d$tstart <- d$tstart + offsets[5]
+  d$tstop  <- d$tstop  + offsets[6]
+  d
+}
+
 #' Read a synteny map
 #'
 #' @param file Synteny map file name
@@ -145,9 +173,27 @@ df2file <- function(x) {
   x
 }
 
+check_parameters <- function(
+  offsets = NULL,
+  k       = NULL,
+  r       = NULL,
+  swap    = NULL,
+  trans   = NULL,
+  ...
+){
+  stopifnot(is.null(offsets) || all(offsets %in% c(1,0)))
+  stopifnot(is.null(k)       || is.numeric(k))
+  stopifnot(is.null(r)       || is.numeric(r))
+  stopifnot(is.null(swap)    || is.logical(swap))
+  stopifnot(is.null(trans)   || trans %in% c('i', 'd', 'p', 'l'))
+}
+
 wrapper <- function(FUN, x, y=NULL, ...) {
+
   x <- df2file(x)
   y <- df2file(y)
+
+  check_parameters(...)
 
   if(is.null(x)){
     d <- NULL
@@ -173,15 +219,28 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #'
 #' @param filename synteny map file name
 #' @export
-dump <- function(synfile, swap=FALSE, trans="i") {
-  syn <- wrapper(FUN=c_dump, x=synfile, swap=swap, trans=trans)
-  syn$qseqid <- as.character(syn$qseqid)
-  syn$tseqid <- as.character(syn$tseqid)
+dump <- function(
+  synfile,
+  swap    = defaults$swap,
+  trans   = defaults$trans,
+  offsets = defaults$offsets
+) {
+  syn <- wrapper(
+    FUN     = c_dump,
+    x       = synfile,
+    swap    = swap,
+    trans   = trans,
+    offsets = offsets[1:4]
+  )
+  syn$qcon <- as.character(syn$qcon)
+  syn$tcon <- as.character(syn$tcon)
 
   # Assign class and attributes
   class(syn) <- append('dump_result', class(syn))
   attributes(syn)$swap  = swap
   attributes(syn)$trans = trans
+
+  syn <- do_offsets(syn, offsets)
 
   syn
 }
@@ -191,15 +250,24 @@ dump <- function(synfile, swap=FALSE, trans="i") {
 #' @param synfilename synteny map file name
 #' @param intfilename int file name
 #' @export
-filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
+filter <- function(
+  synfilename,
+  intfilename,
+  swap    = defaults$swap,
+  trans   = defaults$trans,
+  k       = defaults$k,
+  r       = defaults$r,
+  offsets = defaults$offsets
+) {
   d <- wrapper(
-    FUN   = c_filter,
-    x     = synfilename,
-    y     = intfilename,
-    swap  = swap,
-    k     = k,
-    r     = r,
-    trans = trans
+    FUN     = c_filter,
+    x       = synfilename,
+    y       = intfilename,
+    swap    = swap,
+    k       = k,
+    r       = r,
+    trans   = trans,
+    offsets = offsets[1:4]
   )
   if(is.null(d)) return(NULL)
 
@@ -219,6 +287,8 @@ filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
   attributes(d)$r     <- r
   attributes(d)$trans <- trans
 
+  d <- do_offsets(d, offsets)
+
   d
 }
 
@@ -230,12 +300,13 @@ filter <- function(synfilename, intfilename, swap=FALSE, k=0, r=0, trans="i") {
 search <- function(
   synfilename,
   gfffilename,
-  tclfile = "",
-  qclfile = "",
-  swap    = FALSE,
-  k       = 0,
-  r       = 0,
-  trans   = "i"
+  tclfile = defaults$tclfile,
+  qclfile = defaults$qclfile,
+  swap    = defaults$swap,
+  trans   = defaults$trans,
+  k       = defaults$k,
+  r       = defaults$r,
+  offsets = defaults$offsets
 ) {
   d <- wrapper(
     FUN     = c_search,
@@ -246,7 +317,8 @@ search <- function(
     swap    = swap,
     k       = k,
     r       = r,
-    trans   = trans
+    trans   = trans,
+    offsets = offsets[1:4]
   )
 
   d$seqname <- as.character(d$seqname)
@@ -260,6 +332,8 @@ search <- function(
   attributes(d)$r     <- r
   attributes(d)$trans <- trans
 
+  d <- do_offsets(d, offsets)
+
   d
 }
 
@@ -271,13 +345,15 @@ search <- function(
 map <- function(
   synfilename,
   gfffilename,
-  swap=FALSE
+  swap    = defaults$swap,
+  offsets = defaults$offsets
 ) {
   d <- wrapper(
-    FUN  = c_map,
-    x    = synfilename,
-    y    = gfffilename,
-    swap = swap
+    FUN     = c_map,
+    x       = synfilename,
+    y       = gfffilename,
+    swap    = swap,
+    offsets = offsets[1:4]
   )
 
   d$seqname <- as.character(d$seqname)
@@ -287,6 +363,8 @@ map <- function(
 
   class(d) <- append('map_result', class(d))
   attributes(d)$swap <- swap
+
+  d <- do_offsets(d, offsets)
 
   d
 }
@@ -299,13 +377,15 @@ map <- function(
 count <- function(
   synfilename,
   gfffilename,
-  swap=FALSE
+  swap    = defaults$swap,
+  offsets = defaults$offsets
 ) {
   d <- wrapper(
-    FUN  = c_count,
-    x    = synfilename,
-    y    = gfffilename,
-    swap = swap
+    FUN     = c_count,
+    x       = synfilename,
+    y       = gfffilename,
+    swap    = swap,
+    offsets = offsets[1:4]
   )
 
   d$seqname = as.character(d$seqname)
