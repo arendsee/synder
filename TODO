@@ -2,9 +2,12 @@ Required for Rcpp merge with master
 [x] determine when to use factors in outputs
 [x] fix screwy search output
 [x] add offset handling
-[ ] add all tests from test_data
+[x] add all tests from test_data
+[ ] debug last broken test cases
 [ ] add tests for all read_* functions
 [ ] add test for read_synmap ~= dump
+[ ] add tests to cover UI
+[ ] refactor R code into more modular files
 [ ] write simple vignette
 [ ] complete documentation for each function
 [ ] update README (with links to vignettes and manual)
