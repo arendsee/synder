@@ -10,25 +10,41 @@ df_equal <- function(obs, exp, skip=NULL){
   obs <- obs[do.call(order, as.list(obs)),]
   exp <- exp[do.call(order, as.list(exp)),]
   if(all(dim(obs) != dim(exp))){
-    FALSE
+    are_equal = FALSE
   } else {
     indices = 1:nrow(obs)
     if(!is.null(skip)){
       obs <- obs[-skip]
       exp <- exp[-skip]
     }
-    (obs == exp) %>% lapply(all) %>% unlist %>% all
+    are_equal = (obs == exp) %>% lapply(all) %>% unlist %>% all
   }
+  are_equal
+}
+
+get_obs_exp <- function(dir, base, offsets=OFFSET, ext="", tcl=FALSE, qcl=FALSE, ...){
+    syn_file <- file.path(dir, 'map.syn')
+    gff_file <- file.path(dir, paste0(base, '.gff'))
+    exp_file <- file.path(dir, paste0(base, ext, '-exp.txt'))
+    tcl_file <- if(tcl) file.path(dir, 'tgen.tab') else ""
+    qcl_file <- if(qcl) file.path(dir, 'qgen.tab') else ""
+
+    obs <- synder::search(
+      syn_file,
+      gff_file,
+      offsets = offsets,
+      tclfile = tcl_file,
+      qclfile = qcl_file,
+      ...
+    )
+    exp <- readr::read_tsv(exp_file, col_names=FALSE)
+    list(obs=obs, exp=exp)
 }
 
 compare_factory <- function(dir){
-  function(base, skip=c(9,10), offsets=OFFSET, ...){
-      syn_file <- file.path(dir, 'map.syn')
-      gff_file <- file.path(dir, paste0(base, '.gff'))
-      exp_file <- file.path(dir, paste0(base, '-exp.txt'))
-      obs <- synder::search(syn_file, gff_file, offsets=offsets, ...)
-      exp <- readr::read_tsv(exp_file, col_names=FALSE)
-      df_equal(obs, exp, skip=skip)
+  function(base, skip=c(9,10), ...){
+      res <- get_obs_exp(dir, base, ...)
+      df_equal(res$obs, res$exp, skip=skip)
   }
 }
 
@@ -37,61 +53,61 @@ compare_factory <- function(dir){
 # Tests
 # ------------------------------------------------------------------------------
 
-# test_that(
-#   "Mappings beyond the edges of target scaffold",
-#   {
-#     comp <- compare_factory("unassembled")
-#     expect(comp('lo'),     "query is below scaffold")
-#     expect(comp('adj-lo'), "query is just below the scaffold")
-#     expect(comp('adj-hi'), "query is just above the scaffold")
-#     expect(comp('hi'),     "query is above the scaffold")
-#     expect(comp('lo', offsets=c(0,0,0,0,1,1), "test with 1-base"))
-#   }
-# )
+test_that(
+  "Mappings beyond the edges of target scaffold",
+  {
+    comp <- compare_factory("unassembled")
+    expect(comp('lo'),     "query is below scaffold")
+    expect(comp('adj-lo'), "query is just below the scaffold")
+    expect(comp('adj-hi', tcl=TRUE), "query is just above the scaffold")
+    expect(comp('hi',     tcl=TRUE), "query is above the scaffold")
+    expect(comp('lo', offsets=c(0,0,0,0,1,1), ext='-o000011'), "test with 1-base")
+  }
+)
 
-# test_that(
-#   "Test multi-chromosome cases for varying k",
-#   {
-#     #  T   =====[-------------]=====
-#     #        |                   |
-#     #  Q   ===== <->   =====   =====
-#     #                    |
-#     #  T        ===[--]=====
-#     #            |
-#     #  Q        ===
-#     comp <- compare_factory("interruptions/one-query-side")
-#     expect(comp('beside', k=0), "query side")
-#
-#     #           [----------------]
-#     # T             ===    ===
-#     #                |      |
-#     # Q    =====    ===    ===    =====
-#     #        |                      |
-#     # T    =====   <-->           =====
-#     comp <- compare_factory("interruptions/two-target-side")
-#     expect(comp('beside', k=0), "target side, k=0")
-#     expect(comp('beside', k=1), "target side, k=1 (should be same k=2)")
-#
-#     # T    =====[--------------------]=====
-#     #        |                          |
-#     # Q    =====   ===== <--> =====   =====
-#     #                |          |
-#     # T            =====[----]=====
-#     comp <- compare_factory("interruptions/two-query-side")
-#     expect(comp('between', k=0), "between two interior query-side intervals (k=0)")
-#
-#     # T    =====[------------------------------------]=====
-#     #        |                                          |
-#     # Q    =====   =====   ===== <--> =====   =====   =====
-#     #                |       |          |       |
-#     # T            =====[----|----------|----]=====
-#     #                        |          |
-#     #                      =====[----]=====
-#     comp <- compare_factory("interruptions/nested")
-#     expect(comp('between', k=4), "query nested two pairs of interrupting intervals (k=4)")
-#     expect(comp('between', k=3), "query nested two pairs of interrupting intervals (k=3)")
-#   }
-# )
+test_that(
+  "Test multi-chromosome cases for varying k",
+  {
+    #  T   =====[-------------]=====
+    #        |                   |
+    #  Q   ===== <->   =====   =====
+    #                    |
+    #  T        ===[--]=====
+    #            |
+    #  Q        ===
+    comp <- compare_factory("interruptions/one-query-side")
+    expect(comp('beside', k=0), "query side")
+
+    #           [----------------]
+    # T             ===    ===
+    #                |      |
+    # Q    =====    ===    ===    =====
+    #        |                      |
+    # T    =====   <-->           =====
+    comp <- compare_factory("interruptions/two-target-side")
+    expect(comp('beside', k=0), "target side, k=0")
+    expect(comp('beside', k=1), "target side, k=1 (should be same k=2)")
+
+    # T    =====[--------------------]=====
+    #        |                          |
+    # Q    =====   ===== <--> =====   =====
+    #                |          |
+    # T            =====[----]=====
+    comp <- compare_factory("interruptions/two-query-side")
+    expect(comp('between', k=0), "between two interior query-side intervals (k=0)")
+
+    # T    =====[------------------------------------]=====
+    #        |                                          |
+    # Q    =====   =====   ===== <--> =====   =====   =====
+    #                |       |          |       |
+    # T            =====[----|----------|----]=====
+    #                        |          |
+    #                      =====[----]=====
+    comp <- compare_factory("interruptions/nested")
+    expect(comp('between', k=4, ext='-k4'), "query nested two pairs of interrupting intervals (k=4)")
+    expect(comp('between', k=3, ext='-k3'), "query nested two pairs of interrupting intervals (k=3)")
+  }
+)
 
 # test_that(
 #   "Long 9th column in GFF",

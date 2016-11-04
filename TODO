@@ -3,7 +3,7 @@ Required for Rcpp merge with master
 [x] fix screwy search output
 [x] add offset handling
 [x] add all tests from test_data
-[ ] debug last broken test cases
+[x] debug last broken test cases
 [ ] add tests for all read_* functions
 [ ] add test for read_synmap ~= dump
 [ ] add tests to cover UI
