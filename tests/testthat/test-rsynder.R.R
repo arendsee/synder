@@ -22,19 +22,19 @@ df_equal <- function(obs, exp, skip=NULL){
   are_equal
 }
 
-get_obs_exp <- function(dir, base, offsets=OFFSET, ext="", tcl=FALSE, qcl=FALSE, ...){
+get_obs_exp <- function(dir, base, offsets=OFFSET, ext="", add_tcl=FALSE, add_qcl=FALSE, ...){
     syn_file <- file.path(dir, 'map.syn')
     gff_file <- file.path(dir, paste0(base, '.gff'))
     exp_file <- file.path(dir, paste0(base, ext, '-exp.txt'))
-    tcl_file <- if(tcl) file.path(dir, 'tgen.tab') else ""
-    qcl_file <- if(qcl) file.path(dir, 'qgen.tab') else ""
+    tcl_file <- if(add_tcl) file.path(dir, 'tgen.tab') else ""
+    qcl_file <- if(add_qcl) file.path(dir, 'qgen.tab') else ""
 
     obs <- synder::search(
-      syn_file,
-      gff_file,
+      syn     = syn_file,
+      gff     = gff_file,
       offsets = offsets,
-      tclfile = tcl_file,
-      qclfile = qcl_file,
+      tcl     = tcl_file,
+      qcl     = qcl_file,
       ...
     )
     exp <- readr::read_tsv(exp_file, col_names=FALSE)
@@ -59,8 +59,8 @@ test_that(
     comp <- compare_factory("unassembled")
     expect(comp('lo'),     "query is below scaffold")
     expect(comp('adj-lo'), "query is just below the scaffold")
-    expect(comp('adj-hi', tcl=TRUE), "query is just above the scaffold")
-    expect(comp('hi',     tcl=TRUE), "query is above the scaffold")
+    expect(comp('adj-hi', add_tcl=TRUE), "query is just above the scaffold")
+    expect(comp('hi',     add_tcl=TRUE), "query is above the scaffold")
     expect(comp('lo', offsets=c(0,0,0,0,1,1), ext='-o000011'), "test with 1-base")
   }
 )

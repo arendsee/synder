@@ -4,13 +4,12 @@
 \alias{c_search}
 \title{predict search intervals}
 \usage{
-c_search(synfilename, gfffilename, tclfilename, qclfilename, swap, k, r, trans,
-  offsets)
+c_search(syn, gff, tcl, qcl, swap, k, r, trans, offsets)
 }
 \arguments{
-\item{synfilename}{synteny map file name}
+\item{syn}{synteny map file name}
 
-\item{gfffilename}{GFF file name}
+\item{gff}{GFF file name}
 
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 

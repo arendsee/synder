@@ -6,49 +6,49 @@
 #' @param filename synteny map file name
 #' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 #' @param trans    STUB
-c_dump <- function(filename, swap, trans, offsets) {
-    .Call('synder_c_dump', PACKAGE = 'synder', filename, swap, trans, offsets)
+c_dump <- function(syn, swap, trans, offsets) {
+    .Call('synder_c_dump', PACKAGE = 'synder', syn, swap, trans, offsets)
 }
 
 #' predict search intervals
 #'
-#' @param synfilename synteny map file name
-#' @param gfffilename GFF file name
+#' @param syn synteny map file name
+#' @param gff GFF file name
 #' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 #' @param k        STUB
 #' @param r        STUB
 #' @param trans    stuB
-c_search <- function(synfilename, gfffilename, tclfilename, qclfilename, swap, k, r, trans, offsets) {
-    .Call('synder_c_search', PACKAGE = 'synder', synfilename, gfffilename, tclfilename, qclfilename, swap, k, r, trans, offsets)
+c_search <- function(syn, gff, tcl, qcl, swap, k, r, trans, offsets) {
+    .Call('synder_c_search', PACKAGE = 'synder', syn, gff, tcl, qcl, swap, k, r, trans, offsets)
 }
 
 #' remove links that disagree with the synteny map
 #'
-#' @param synfilename synteny map file name
-#' @param intfilename int file name
+#' @param syn synteny map file name
+#' @param hit int file name
 #' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 #' @param k        STUB
 #' @param r        STUB
 #' @param trans    stuB
-c_filter <- function(synfilename, intfilename, swap, k, r, trans, offsets) {
-    .Call('synder_c_filter', PACKAGE = 'synder', synfilename, intfilename, swap, k, r, trans, offsets)
+c_filter <- function(syn, hit, swap, k, r, trans, offsets) {
+    .Call('synder_c_filter', PACKAGE = 'synder', syn, hit, swap, k, r, trans, offsets)
 }
 
 #' trace intervals across genomes
 #'
-#' @param synfilename synteny map file name
-#' @param gfffilename gff file name
+#' @param syn synteny map file name
+#' @param gff gff file name
 #' @param swap        reverse direction of synteny map (e.g. swap query and target) 
-c_map <- function(synfilename, gfffilename, swap, offsets) {
-    .Call('synder_c_map', PACKAGE = 'synder', synfilename, gfffilename, swap, offsets)
+c_map <- function(syn, gff, swap, offsets) {
+    .Call('synder_c_map', PACKAGE = 'synder', syn, gff, swap, offsets)
 }
 
 #' count overlaps
 #'
-#' @param synfilename synteny map file name
-#' @param gfffilename gff file name
+#' @param syn synteny map file name
+#' @param gff gff file name
 #' @param swap        reverse direction of synteny map (e.g. swap query and target) 
-c_count <- function(synfilename, gfffilename, swap, offsets) {
-    .Call('synder_c_count', PACKAGE = 'synder', synfilename, gfffilename, swap, offsets)
+c_count <- function(syn, gff, swap, offsets) {
+    .Call('synder_c_count', PACKAGE = 'synder', syn, gff, swap, offsets)
 }
 

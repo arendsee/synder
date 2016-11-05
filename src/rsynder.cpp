@@ -11,33 +11,33 @@
 //' @param trans    STUB
 // [[Rcpp::export]]
 Rcpp::DataFrame c_dump (
-    std::string filename,
+    std::string syn,
     bool swap,
     char trans,
     std::vector<int> offsets
 )
 {
-    FILE* synfh = fopen(filename.c_str(), "r");
+    FILE* synfh = fopen(syn.c_str(), "r");
 
-    Synmap syn(synfh, nullptr, nullptr, swap, 0, 0, trans, offsets);
+    Synmap synmap(synfh, nullptr, nullptr, swap, 0, 0, trans, offsets);
 
-    return syn.as_data_frame();
+    return synmap.as_data_frame();
 }
 
 //' predict search intervals
 //'
-//' @param synfilename synteny map file name
-//' @param gfffilename GFF file name
+//' @param syn synteny map file name
+//' @param gff GFF file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 //' @param k        STUB
 //' @param r        STUB
 //' @param trans    stuB
 // [[Rcpp::export]]
 Rcpp::DataFrame c_search(
-    std::string synfilename,
-    std::string gfffilename,
-    std::string tclfilename,
-    std::string qclfilename,
+    std::string syn,
+    std::string gff,
+    std::string tcl,
+    std::string qcl,
     bool swap,
     int k,
     double r,
@@ -45,29 +45,29 @@ Rcpp::DataFrame c_search(
     std::vector<int> offsets
 )
 {
-    FILE* synfile = fopen(synfilename.c_str(), "r");
-    FILE* gfffile = fopen(gfffilename.c_str(), "r");
-    FILE* tclfile = fopen(tclfilename.c_str(), "r");
-    FILE* qclfile = fopen(qclfilename.c_str(), "r");
+    FILE* synfh = fopen(syn.c_str(), "r");
+    FILE* gfffh = fopen(gff.c_str(), "r");
+    FILE* tclfh = fopen(tcl.c_str(), "r");
+    FILE* qclfh = fopen(qcl.c_str(), "r");
 
-    Synmap syn(synfile, tclfile, qclfile, swap, k, r, trans, offsets);
+    Synmap synmap(synfh, tclfh, qclfh, swap, k, r, trans, offsets);
 
-    return syn.search(gfffile);
+    return synmap.search(gfffh);
 }
 
 
 //' remove links that disagree with the synteny map
 //'
-//' @param synfilename synteny map file name
-//' @param intfilename int file name
+//' @param syn synteny map file name
+//' @param hit int file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 //' @param k        STUB
 //' @param r        STUB
 //' @param trans    stuB
 // [[Rcpp::export]]
 Rcpp::CharacterVector c_filter(
-    std::string synfilename,
-    std::string intfilename,
+    std::string syn,
+    std::string hit,
     bool swap,
     int k,
     double r,
@@ -75,52 +75,52 @@ Rcpp::CharacterVector c_filter(
     std::vector<int> offsets
 )
 {
-    FILE* synfile = fopen(synfilename.c_str(), "r");
-    FILE* intfile = fopen(intfilename.c_str(), "r");
+    FILE* synfh = fopen(syn.c_str(), "r");
+    FILE* hitfh = fopen(hit.c_str(), "r");
 
-    Synmap syn(synfile, nullptr, nullptr, swap, k, r, trans, offsets);
+    Synmap synmap(synfh, nullptr, nullptr, swap, k, r, trans, offsets);
 
-    return syn.filter(intfile);
+    return synmap.filter(hitfh);
 }
 
 //' trace intervals across genomes
 //'
-//' @param synfilename synteny map file name
-//' @param gfffilename gff file name
+//' @param syn synteny map file name
+//' @param gff gff file name
 //' @param swap        reverse direction of synteny map (e.g. swap query and target) 
 // [[Rcpp::export]]
 Rcpp::DataFrame c_map(
-    std::string synfilename,
-    std::string gfffilename,
+    std::string syn,
+    std::string gff,
     bool swap,
     std::vector<int> offsets
 )
 {
-    FILE* synfile = fopen(synfilename.c_str(), "r");
-    FILE* gfffile = fopen(gfffilename.c_str(), "r");
+    FILE* synfh = fopen(syn.c_str(), "r");
+    FILE* gfffh = fopen(gff.c_str(), "r");
 
-    Synmap syn(synfile, nullptr, nullptr, swap, 0, 0, 'i', offsets);
+    Synmap synmap(synfh, nullptr, nullptr, swap, 0, 0, 'i', offsets);
 
-    return syn.map(gfffile);
+    return synmap.map(gfffh);
 }
 
 //' count overlaps
 //'
-//' @param synfilename synteny map file name
-//' @param gfffilename gff file name
+//' @param syn synteny map file name
+//' @param gff gff file name
 //' @param swap        reverse direction of synteny map (e.g. swap query and target) 
 // [[Rcpp::export]]
 Rcpp::DataFrame c_count(
-    std::string synfilename,
-    std::string gfffilename,
+    std::string syn,
+    std::string gff,
     bool swap,
     std::vector<int> offsets
 )
 {
-    FILE* synfile = fopen(synfilename.c_str(), "r");
-    FILE* gfffile = fopen(gfffilename.c_str(), "r");
+    FILE* synfh = fopen(syn.c_str(), "r");
+    FILE* gfffh = fopen(gff.c_str(), "r");
 
-    Synmap syn(synfile, nullptr, nullptr, swap, 0, 0, 'i', offsets);
+    Synmap synmap(synfh, nullptr, nullptr, swap, 0, 0, 'i', offsets);
 
-    return syn.count(gfffile);
+    return synmap.count(gfffh);
 }

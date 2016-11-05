@@ -4,12 +4,12 @@
 \alias{c_filter}
 \title{remove links that disagree with the synteny map}
 \usage{
-c_filter(synfilename, intfilename, swap, k, r, trans, offsets)
+c_filter(syn, hit, swap, k, r, trans, offsets)
 }
 \arguments{
-\item{synfilename}{synteny map file name}
+\item{syn}{synteny map file name}
 
-\item{intfilename}{int file name}
+\item{hit}{int file name}
 
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 

@@ -6,80 +6,80 @@
 using namespace Rcpp;
 
 // c_dump
-Rcpp::DataFrame c_dump(std::string filename, bool swap, char trans, std::vector<int> offsets);
-RcppExport SEXP synder_c_dump(SEXP filenameSEXP, SEXP swapSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+Rcpp::DataFrame c_dump(std::string syn, bool swap, char trans, std::vector<int> offsets);
+RcppExport SEXP synder_c_dump(SEXP synSEXP, SEXP swapSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type syn(synSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< char >::type trans(transSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type offsets(offsetsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_dump(filename, swap, trans, offsets));
+    rcpp_result_gen = Rcpp::wrap(c_dump(syn, swap, trans, offsets));
     return rcpp_result_gen;
 END_RCPP
 }
 // c_search
-Rcpp::DataFrame c_search(std::string synfilename, std::string gfffilename, std::string tclfilename, std::string qclfilename, bool swap, int k, double r, char trans, std::vector<int> offsets);
-RcppExport SEXP synder_c_search(SEXP synfilenameSEXP, SEXP gfffilenameSEXP, SEXP tclfilenameSEXP, SEXP qclfilenameSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+Rcpp::DataFrame c_search(std::string syn, std::string gff, std::string tcl, std::string qcl, bool swap, int k, double r, char trans, std::vector<int> offsets);
+RcppExport SEXP synder_c_search(SEXP synSEXP, SEXP gffSEXP, SEXP tclSEXP, SEXP qclSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type gfffilename(gfffilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type tclfilename(tclfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type qclfilename(qclfilenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type syn(synSEXP);
+    Rcpp::traits::input_parameter< std::string >::type gff(gffSEXP);
+    Rcpp::traits::input_parameter< std::string >::type tcl(tclSEXP);
+    Rcpp::traits::input_parameter< std::string >::type qcl(qclSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< double >::type r(rSEXP);
     Rcpp::traits::input_parameter< char >::type trans(transSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type offsets(offsetsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_search(synfilename, gfffilename, tclfilename, qclfilename, swap, k, r, trans, offsets));
+    rcpp_result_gen = Rcpp::wrap(c_search(syn, gff, tcl, qcl, swap, k, r, trans, offsets));
     return rcpp_result_gen;
 END_RCPP
 }
 // c_filter
-Rcpp::CharacterVector c_filter(std::string synfilename, std::string intfilename, bool swap, int k, double r, char trans, std::vector<int> offsets);
-RcppExport SEXP synder_c_filter(SEXP synfilenameSEXP, SEXP intfilenameSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+Rcpp::CharacterVector c_filter(std::string syn, std::string hit, bool swap, int k, double r, char trans, std::vector<int> offsets);
+RcppExport SEXP synder_c_filter(SEXP synSEXP, SEXP hitSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type intfilename(intfilenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type syn(synSEXP);
+    Rcpp::traits::input_parameter< std::string >::type hit(hitSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< double >::type r(rSEXP);
     Rcpp::traits::input_parameter< char >::type trans(transSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type offsets(offsetsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_filter(synfilename, intfilename, swap, k, r, trans, offsets));
+    rcpp_result_gen = Rcpp::wrap(c_filter(syn, hit, swap, k, r, trans, offsets));
     return rcpp_result_gen;
 END_RCPP
 }
 // c_map
-Rcpp::DataFrame c_map(std::string synfilename, std::string gfffilename, bool swap, std::vector<int> offsets);
-RcppExport SEXP synder_c_map(SEXP synfilenameSEXP, SEXP gfffilenameSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
+Rcpp::DataFrame c_map(std::string syn, std::string gff, bool swap, std::vector<int> offsets);
+RcppExport SEXP synder_c_map(SEXP synSEXP, SEXP gffSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type gfffilename(gfffilenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type syn(synSEXP);
+    Rcpp::traits::input_parameter< std::string >::type gff(gffSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type offsets(offsetsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_map(synfilename, gfffilename, swap, offsets));
+    rcpp_result_gen = Rcpp::wrap(c_map(syn, gff, swap, offsets));
     return rcpp_result_gen;
 END_RCPP
 }
 // c_count
-Rcpp::DataFrame c_count(std::string synfilename, std::string gfffilename, bool swap, std::vector<int> offsets);
-RcppExport SEXP synder_c_count(SEXP synfilenameSEXP, SEXP gfffilenameSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
+Rcpp::DataFrame c_count(std::string syn, std::string gff, bool swap, std::vector<int> offsets);
+RcppExport SEXP synder_c_count(SEXP synSEXP, SEXP gffSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type synfilename(synfilenameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type gfffilename(gfffilenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type syn(synSEXP);
+    Rcpp::traits::input_parameter< std::string >::type gff(gffSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type offsets(offsetsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_count(synfilename, gfffilename, swap, offsets));
+    rcpp_result_gen = Rcpp::wrap(c_count(syn, gff, swap, offsets));
     return rcpp_result_gen;
 END_RCPP
 }
