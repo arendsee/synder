@@ -16,7 +16,8 @@ Imports:
     dplyr,
     readr,
     tibble,
-    magrittr
+    magrittr,
+    ggplot2
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
 Suggests: testthat,

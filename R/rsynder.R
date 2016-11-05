@@ -544,14 +544,14 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #'
 #' @param syn synteny map file or object
 #' @param a,b start and stop locations
-#' @param conid the name of the reference query contig
+#' @param con the name of the reference query contig
 #' @export
-anon_search <- function(syn, a, b, conid, ...){
+anon_search <- function(syn, a, b, con, ...){
   stopifnot(length(a) == c(length(b)))
   stopifnot(b >= a)
   N <- length(a)
   gff <- tibble::data_frame(
-    conid   = conid,
+    con     = con,
     source  = '.',
     type    = '.',
     start   = as.integer(a),

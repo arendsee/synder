@@ -1,8 +1,8 @@
 SYNMAP_COLS <- c(
-  "qconid" = "character",
+  "qcon"   = "character",
   "qstart" = "integer",
   "qstop"  = "integer",
-  "tconid" = "character",
+  "tcon"   = "character",
   "tstart" = "integer",
   "tstop"  = "integer",
   "score"  = "numeric",
@@ -10,7 +10,7 @@ SYNMAP_COLS <- c(
 )
 
 GFF_COLS <- c(
-  "conid"   = "character",
+  "con"     = "character",
   "source"  = "character",
   "type"    = "character",
   "start"   = "integer",
@@ -22,6 +22,6 @@ GFF_COLS <- c(
 )
 
 CON_LENGTH <- c(
-  "conid"  = "character",
+  "con"    = "character",
   "length" = "integer"
 )
