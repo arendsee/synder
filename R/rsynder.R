@@ -534,6 +534,35 @@ wrapper <- function(FUN, x, y=NULL, ...) {
   d
 }
 
+#' Wrapper for search allowing simple interval inputs
+#'
+#' The function \code{search} allows powerful mapping to target search
+#' intervals using a feature table (GFF). This approach requires building a GFF
+#' table, which is a needless hassle if you want to search your own intervals
+#' (rather than known features). \code{anon_search} addresses this problem by
+#' allowing searches given only start and stop positions and contig name.
+#'
+#' @param syn synteny map file or object
+#' @param a,b start and stop locations
+#' @param conid the name of the reference query contig
+#' @export
+anon_search <- function(syn, a, b, conid, ...){
+  stopifnot(length(a) == c(length(b)))
+  stopifnot(b >= a)
+  N <- length(a)
+  gff <- tibble::data_frame(
+    conid   = conid,
+    source  = '.',
+    type    = '.',
+    start   = as.integer(a),
+    stop    = as.integer(b),
+    score   = '.',
+    strand  = '.',
+    phase   = '.',
+    seqname = paste0('seq_', 1:N)
+  )
+  search(syn, gff, ...)
+}
 
 #' @rdname synder_commands
 #' @export
