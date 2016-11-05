@@ -53,8 +53,8 @@ plot.synmap <- function(x){
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
   ggplot2::ggplot(x) +
-    geom_segment(
-      aes(
+    ggplot2::geom_segment(
+      ggplot2::aes(
         x=qstart, xend=qstop,
         y=tstart, yend=tstop
       )
@@ -89,16 +89,16 @@ plot.dump_result <- function(x){
     )
 
   ggplot2::ggplot() +
-    geom_segment(
+    ggplot2::geom_segment(
       data=x,
-      aes(
+      ggplot2::aes(
         x=qstart, xend=qstop,
         y=tstart, yend=tstop
       )
     ) +
-    geom_segment(
+    ggplot2::geom_segment(
       data=csets,
-      aes(
+      ggplot2::aes(
         x=qstart, xend=qstop,
         y=tstart, yend=tstop
       ),
@@ -125,16 +125,16 @@ plot.search_result <- function(x, y){
   x <- subset(z, group == 'search')
 
   ggplot2::ggplot() +
-    geom_segment(
+    ggplot2::geom_segment(
       data=y,
-      aes(
+      ggplot2::aes(
         x=qstart, xend=qstop,
         y=tstart, yend=tstop
       )
     ) +
-    geom_rect(
+    ggplot2::geom_rect(
       data=x,
-      aes(
+      ggplot2::aes(
         xmin=qstart, xmax=qstop,
         ymin=tstart, ymax=tstop
       ),

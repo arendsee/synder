@@ -60,19 +60,17 @@ See `?search` for full documentation
  - [ ] add test for read\_synmap ~= dump
  - [ ] add tests to cover UI
  - [x] refactor R code into more modular files
- - [ ] write simple vignette
+ - [x] write simple vignette
  - [x] complete documentation for each function
  - [x] update README (with links to vignettes and manual)
  - [ ] write standalone command line script
  - [ ] add more interesting dataset
  - [ ] write generic diagnose and diagnose.\* functions
- - [ ] write plot.\* functions
- - [ ] write summary.\* functions
- - [ ] write print.\* functions
- - [ ] write plot\_context function
+ - [x] write plot.\* functions
+ - [x] write print.\* functions
+ - [x] write plot\_context function
  - [ ] write fna to scaflen function
  - [ ] write n-strings function
- - [ ] add plotting to Rscript abilities
 
 # Theoretical stuff
 

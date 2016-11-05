@@ -20,16 +20,18 @@
 
 \method{plot}{dump_result}(x)
 
-\method{plot}{search_result}(x)
+\method{plot}{search_result}(x, y)
 
-\method{plot}{filter_result}(x)
+\method{plot}{filter_result}(x, y)
 
-\method{plot}{map_result}(x)
+\method{plot}{map_result}(x, y)
 
-\method{plot}{count_result}(x)
+\method{plot}{count_result}(x, y)
 }
 \arguments{
 \item{x}{table of a synder class}
+
+\item{y}{synmap object (for context)}
 }
 \description{
 plots synder classes

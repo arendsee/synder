@@ -10,3 +10,12 @@
 #' 
 #' @format List
 "toy"
+
+#' Intro vignette dataset 1
+#'
+#' Contains 2 files:
+#' 1. synmap - simple linear synteny map
+#' 2. tgen   - lengths of target scaffold
+#' 
+#' @format List
+"intro_1"
