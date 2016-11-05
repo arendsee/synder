@@ -3,6 +3,7 @@
 #' plots synder classes
 #'
 #' @param x table of a synder class
+#' @param y synmap object (for context)
 #' @name synder_plot
 NULL
 
@@ -108,16 +109,48 @@ plot.dump_result <- function(x){
 
 #' @rdname synder_plot
 #' @export
-plot.search_result <- function(x){ }
+plot.search_result <- function(x, y){
+  stopifnot('synmap' %in% class(y))
+  x <- x[2:8]
+  x$group <- 'search'
+  y$group <- 'synmap'
+  y$score <- NULL
+  z <- rbind(x, y)
+
+  z <- to_global(z, prefix='q')
+  z <- to_global(z, prefix='t')
+  z <- zero_base(z)
+
+  y <- subset(z, group == 'synmap')
+  x <- subset(z, group == 'search')
+
+  ggplot2::ggplot() +
+    geom_segment(
+      data=y,
+      aes(
+        x=qstart, xend=qstop,
+        y=tstart, yend=tstop
+      )
+    ) +
+    geom_rect(
+      data=x,
+      aes(
+        xmin=qstart, xmax=qstop,
+        ymin=tstart, ymax=tstop
+      ),
+      color='red',
+      alpha=0.2
+    )
+}
 
 #' @rdname synder_plot
 #' @export
-plot.filter_result <- function(x){ }
+plot.filter_result <- function(x, y){ }
 
 #' @rdname synder_plot
 #' @export
-plot.map_result <- function(x){ }
+plot.map_result <- function(x, y){ }
 
 #' @rdname synder_plot
 #' @export
-plot.count_result <- function(x){ }
+plot.count_result <- function(x, y){ }
