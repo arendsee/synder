@@ -1,0 +1,36 @@
+---
+title: "Introduction to Synder"
+author: "Zebulun Arendsee"
+date: "`r Sys.Date()`"
+output:
+    rmarkdown::html_vignette:
+        fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Introduction to Synder}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The primary function of synder is to map genomic intervals of interest from a
+query genome to search intervals in the target genome. In this vignetter, I
+will showcase the basic functionallity using a toy data set.
+
+## Installation
+
+Synder is available from github, installation requires devtools:
+
+```
+devtools::install_github('arendsee/synder')
+```
+
+## Toy dataset
+
+```{r}
+data(toy)
+```
+
+This dataset contains the following synteny map:
+
+```{r, echo=TRUE, results='asis'}
+knitr::kable(toy$synmap)
+```

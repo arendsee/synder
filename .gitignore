@@ -2,10 +2,10 @@
 .Rhistory
 .RData
 ..Rcheck/
+inst/doc
 
 # Personal temporary files
 zzz*
-
 # Test files that I may use in debugging
 a-b.syn
 a.gff
