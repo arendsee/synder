@@ -1,0 +1,13 @@
+language: R
+sudo: false
+cache: packages
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
+
+before_install:
+  mkdir ~/.R && echo "CXX=g++-4.9" > ~/.R/Makevars

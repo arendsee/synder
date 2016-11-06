@@ -1,3 +1,5 @@
+[![Travis-CI Build Status](https://travis-ci.org/arendsee/synder.svg?branch=master)](https://travis-ci.org/arendsee/synder)
+
 # Synder
 
     Map query intervals to target search spaces using a synteny map
