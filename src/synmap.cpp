@@ -247,10 +247,12 @@ std::vector<Feature> Synmap::gff2features(FILE* fh){
         qcon = get_contig(0, contig_seqname);
 
         if(qcon == nullptr) {
-            std::cerr
-                << "SKIPPING ENTRY: Synteny map has no contig named '"
-                << contig_seqname
-                << "'\n";
+            char* msg;
+            Rcpp::warning(
+                "SKIPPING ENTRY: Synteny map has no contig named '" +
+                std::string(contig_seqname) +
+                "'\n"
+            );
             continue;
         }
 
