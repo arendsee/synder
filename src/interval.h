@@ -1,5 +1,5 @@
-#ifndef __INTERVAL_HPP__
-#define __INTERVAL_HPP__
+#ifndef __INTERVAL_H__
+#define __INTERVAL_H__
 
 #include <stdio.h>
 #include <stdlib.h>

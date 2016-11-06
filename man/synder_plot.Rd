@@ -12,24 +12,26 @@
 \alias{synder_plot}
 \title{Synder plot functions}
 \usage{
-\method{plot}{synmap}(x)
+\method{plot}{synmap}(x, ...)
 
-\method{plot}{gff}(x)
+\method{plot}{gff}(x, ...)
 
-\method{plot}{hitmap}(x)
+\method{plot}{hitmap}(x, ...)
 
-\method{plot}{dump_result}(x)
+\method{plot}{dump_result}(x, ...)
 
-\method{plot}{search_result}(x, y)
+\method{plot}{search_result}(x, y, ...)
 
-\method{plot}{filter_result}(x, y)
+\method{plot}{filter_result}(x, y, ...)
 
-\method{plot}{map_result}(x, y)
+\method{plot}{map_result}(x, y, ...)
 
-\method{plot}{count_result}(x, y)
+\method{plot}{count_result}(x, y, ...)
 }
 \arguments{
 \item{x}{table of a synder class}
+
+\item{...}{additional arguments that are currently ignored}
 
 \item{y}{synmap object (for context)}
 }

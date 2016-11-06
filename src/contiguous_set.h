@@ -2,10 +2,10 @@
 #define __CONTIGUOUS_SET_H__
 
 #include "global.h"
-#include "interval.hpp"
+#include "interval.h"
 #include "feature.h"
-#include "linked_interval.hpp"
-#include "interval_tree.hpp"
+#include "linked_interval.h"
+#include "interval_tree.h"
 #include "block.h"
 
 #include <array>

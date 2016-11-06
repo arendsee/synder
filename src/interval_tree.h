@@ -1,11 +1,11 @@
-#ifndef __INTERVAL_TREE_HPP__
-#define __INTERVAL_TREE_HPP__
+#ifndef __INTERVAL_TREE_H__
+#define __INTERVAL_TREE_H__
 
 #include <array>
 #include <algorithm>
 
 #include "global.h"
-#include "interval_result.hpp"
+#include "interval_result.h"
 
 
 #define LAST_STOP(tree)   tree->by_stop.back()

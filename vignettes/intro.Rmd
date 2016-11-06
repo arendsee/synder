@@ -23,6 +23,16 @@ Synder is available from github, installation requires devtools:
 devtools::install_github('arendsee/synder')
 ```
 
+```{r, echo=TRUE}
+# imports required for this vignette
+library(synder)
+library(knitr)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(readr)
+```
+
 ## Mapping intervals on the simple linear synteny map 
 
 ```{r}

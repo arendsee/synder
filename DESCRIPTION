@@ -1,13 +1,14 @@
 Package: synder
 Type: Package
-Title: STUB
-Version: 0.19.0
+Title: use synteny to inform searches 
+Version: 0.19.1
 Date: 2016-10-25
 Author: Zebulun Arendsee
 Maintainer: Zebulun Arendsee <arendsee@iastate.edu>
 URL: https://github.com/arendsee/synder
 BugReports: https://github.com/arendsee/synder/issues
-Description: STUB
+Description:
+    Map query intervals to target search spaces using a synteny map.
 License: MIT + file LICENSE
 Depends:
     R (>= 3.3.1)

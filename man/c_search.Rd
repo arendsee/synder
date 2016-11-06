@@ -11,13 +11,19 @@ c_search(syn, gff, tcl, qcl, swap, k, r, trans, offsets)
 
 \item{gff}{GFF file name}
 
+\item{tcl}{target contig lengths file name}
+
+\item{qcl}{target contig lengths file name}
+
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 
-\item{k}{STUB}
+\item{k}{match fuziness, integer}
 
-\item{r}{STUB}
+\item{r}{score decay rate, 0 means no context, high means more context}
 
-\item{trans}{stuB}
+\item{trans}{score transform methods, single character}
+
+\item{offsets}{6-element integer vector of [01] offsets}
 }
 \description{
 predict search intervals

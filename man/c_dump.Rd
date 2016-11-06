@@ -7,11 +7,13 @@
 c_dump(syn, swap, trans, offsets)
 }
 \arguments{
+\item{syn}{synteny map file name}
+
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 
-\item{trans}{STUB}
+\item{trans}{score transform methods, single character}
 
-\item{filename}{synteny map file name}
+\item{offsets}{6-element integer vector of [01] offsets}
 }
 \description{
 print all blocks with contiguous set ids

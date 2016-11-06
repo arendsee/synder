@@ -13,11 +13,13 @@ c_filter(syn, hit, swap, k, r, trans, offsets)
 
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 
-\item{k}{STUB}
+\item{k}{match fuziness, integer}
 
-\item{r}{STUB}
+\item{r}{score decay rate, 0 means no context, high means more context}
 
-\item{trans}{stuB}
+\item{trans}{score transform methods, single character}
+
+\item{offsets}{6-element integer vector of [01] offsets}
 }
 \description{
 remove links that disagree with the synteny map

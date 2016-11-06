@@ -1,5 +1,5 @@
-#ifndef __INTERVAL_RESULT_HPP__
-#define __INTERVAL_RESULT_HPP__
+#ifndef __INTERVAL_RESULT_H__
+#define __INTERVAL_RESULT_H__
 
 #include "global.h"
 

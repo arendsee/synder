@@ -66,7 +66,7 @@ public:
         try {
             return cor.at(i);
         } catch (const std::out_of_range& e) {
-            Rcpp::warning("Attempted to access illegal element in linked_interval.hpp::corner()");
+            Rcpp::warning("Attempted to access illegal element in linked_interval.h::corner()");
             return nullptr;
         }
     }
@@ -76,7 +76,7 @@ public:
         try {
             return adj.at(i);
         } catch (const std::out_of_range& e) {
-            Rcpp::stop("Index error in linked_interval.hpp::corner_adj");
+            Rcpp::stop("Index error in linked_interval.h::corner_adj");
             return nullptr;
         }
     }

@@ -12,24 +12,26 @@
 \alias{synder_print}
 \title{Synder print functions}
 \usage{
-\method{print}{synmap}(x)
+\method{print}{synmap}(x, ...)
 
-\method{print}{gff}(x)
+\method{print}{gff}(x, ...)
 
-\method{print}{hitmap}(x)
+\method{print}{hitmap}(x, ...)
 
-\method{print}{dump_result}(x)
+\method{print}{dump_result}(x, ...)
 
-\method{print}{search_result}(x)
+\method{print}{search_result}(x, ...)
 
-\method{print}{filter_result}(x)
+\method{print}{filter_result}(x, ...)
 
-\method{print}{map_result}(x)
+\method{print}{map_result}(x, ...)
 
-\method{print}{count_result}(x)
+\method{print}{count_result}(x, ...)
 }
 \arguments{
 \item{x}{table of a synder class}
+
+\item{...}{additional arguments that are currently ignored}
 }
 \description{
 Prints the special attributes of the class and then prints a parent class.

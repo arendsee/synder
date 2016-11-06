@@ -6,9 +6,10 @@
 
 //' print all blocks with contiguous set ids
 //'
-//' @param filename synteny map file name
+//' @param syn      synteny map file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
-//' @param trans    STUB
+//' @param trans    score transform methods, single character
+//' @param offsets  6-element integer vector of [01] offsets
 // [[Rcpp::export]]
 Rcpp::DataFrame c_dump (
     std::string syn,
@@ -26,12 +27,15 @@ Rcpp::DataFrame c_dump (
 
 //' predict search intervals
 //'
-//' @param syn synteny map file name
-//' @param gff GFF file name
-//' @param swap     reverse direction of synteny map (e.g. swap query and target) 
-//' @param k        STUB
-//' @param r        STUB
-//' @param trans    stuB
+//' @param syn     synteny map file name
+//' @param gff     GFF file name
+//' @param tcl     target contig lengths file name
+//' @param qcl     target contig lengths file name
+//' @param swap    reverse direction of synteny map (e.g. swap query and target) 
+//' @param k       match fuziness, integer
+//' @param r       score decay rate, 0 means no context, high means more context
+//' @param trans   score transform methods, single character
+//' @param offsets 6-element integer vector of [01] offsets
 // [[Rcpp::export]]
 Rcpp::DataFrame c_search(
     std::string syn,
@@ -58,12 +62,13 @@ Rcpp::DataFrame c_search(
 
 //' remove links that disagree with the synteny map
 //'
-//' @param syn synteny map file name
-//' @param hit int file name
+//' @param syn      synteny map file name
+//' @param hit      int file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
-//' @param k        STUB
-//' @param r        STUB
-//' @param trans    stuB
+//' @param k        match fuziness, integer
+//' @param r        score decay rate, 0 means no context, high means more context
+//' @param trans    score transform methods, single character
+//' @param offsets  6-element integer vector of [01] offsets
 // [[Rcpp::export]]
 Rcpp::CharacterVector c_filter(
     std::string syn,
@@ -85,9 +90,10 @@ Rcpp::CharacterVector c_filter(
 
 //' trace intervals across genomes
 //'
-//' @param syn synteny map file name
-//' @param gff gff file name
-//' @param swap        reverse direction of synteny map (e.g. swap query and target) 
+//' @param syn     synteny map file name
+//' @param gff     GFF file name
+//' @param swap    reverse direction of synteny map (e.g. swap query and target) 
+//' @param offsets 6-element integer vector of [01] offsets
 // [[Rcpp::export]]
 Rcpp::DataFrame c_map(
     std::string syn,
@@ -106,9 +112,10 @@ Rcpp::DataFrame c_map(
 
 //' count overlaps
 //'
-//' @param syn synteny map file name
-//' @param gff gff file name
-//' @param swap        reverse direction of synteny map (e.g. swap query and target) 
+//' @param syn      synteny map file name
+//' @param gff      GFF file name
+//' @param swap     reverse direction of synteny map (e.g. swap query and target) 
+//' @param offsets  6-element integer vector of [01] offsets
 // [[Rcpp::export]]
 Rcpp::DataFrame c_count(
     std::string syn,

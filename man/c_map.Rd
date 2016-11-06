@@ -9,9 +9,11 @@ c_map(syn, gff, swap, offsets)
 \arguments{
 \item{syn}{synteny map file name}
 
-\item{gff}{gff file name}
+\item{gff}{GFF file name}
 
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
+
+\item{offsets}{6-element integer vector of [01] offsets}
 }
 \description{
 trace intervals across genomes

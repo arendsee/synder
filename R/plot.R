@@ -4,6 +4,7 @@
 #'
 #' @param x table of a synder class
 #' @param y synmap object (for context)
+#' @param ... additional arguments that are currently ignored 
 #' @name synder_plot
 NULL
 
@@ -48,7 +49,7 @@ zero_base <- function(x) {
 
 #' @rdname synder_plot
 #' @export
-plot.synmap <- function(x){
+plot.synmap <- function(x, ...){
   x <- to_global(x, prefix='q')
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
@@ -63,15 +64,15 @@ plot.synmap <- function(x){
 
 #' @rdname synder_plot
 #' @export
-plot.gff <- function(x){ }
+plot.gff <- function(x, ...){ }
 
 #' @rdname synder_plot
 #' @export
-plot.hitmap <- function(x){ }
+plot.hitmap <- function(x, ...){ }
 
 #' @rdname synder_plot
 #' @export
-plot.dump_result <- function(x){
+plot.dump_result <- function(x, ...){
   x <- to_global(x, prefix='q')
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
@@ -109,7 +110,7 @@ plot.dump_result <- function(x){
 
 #' @rdname synder_plot
 #' @export
-plot.search_result <- function(x, y){
+plot.search_result <- function(x, y, ...){
   stopifnot('synmap' %in% class(y))
   x <- x[2:8]
   x$group <- 'search'
@@ -145,12 +146,12 @@ plot.search_result <- function(x, y){
 
 #' @rdname synder_plot
 #' @export
-plot.filter_result <- function(x, y){ }
+plot.filter_result <- function(x, y, ...){ }
 
 #' @rdname synder_plot
 #' @export
-plot.map_result <- function(x, y){ }
+plot.map_result <- function(x, y, ...){ }
 
 #' @rdname synder_plot
 #' @export
-plot.count_result <- function(x, y){ }
+plot.count_result <- function(x, y, ...){ }
