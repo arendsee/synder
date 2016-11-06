@@ -8,6 +8,7 @@
 
 #include <list>
 #include <array>
+#include <Rcpp.h>
 
 
 class ManyBlocks : public IntervalSet<Block>

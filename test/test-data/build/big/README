@@ -1,4 +1,0 @@
-This is a largish messy map that will break terribly if the overlap merger
-is relinking incorrectly.
-
-To fail successfully the validate_synmap function must be run

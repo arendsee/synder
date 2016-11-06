@@ -34,7 +34,7 @@ Contig* Genome::get_contig(std::string t_name)
         // A contig may be present in an assembly but not represented in the
         // synteny map so an attempt to access an element that doesn't exist
         // should not raise an exception.
-        std::cerr << "Failed to access contig '" << t_name << "' in " __FILE__ << ":" << __func__ << std::endl;
+        Rcpp::warning("Failed to access contig '" t_name "' in " genome.cpp "::get_contig");
 #endif
         con = nullptr;
     }
@@ -70,8 +70,7 @@ void Genome::set_contig_lengths(FILE* clfile)
         while ((read = getline(&line, &len, clfile)) != EOF) {
             int status = sscanf(line, "%s %ld", contig_name, &contig_length);
             if(status == EOF) {
-                fprintf(stderr, "Failed to read contig length file\n");
-                exit(EXIT_FAILURE);
+                Rcpp::stop("Failed to read contig length file");
             }
             Contig* con = get_contig(contig_name);
             if(con != nullptr) {
@@ -82,25 +81,27 @@ void Genome::set_contig_lengths(FILE* clfile)
     }
 }
 
-void Genome::dump_blocks()
+Rcpp::DataFrame Genome::as_data_frame()
 {
+    DumpType d;
+
     for (auto &pair : contig) {
-        Block* b = pair.second->block.front();
-        for(; b != nullptr; b = b->next()){
-            printf(
-                "%s\t%ld\t%ld\t%s\t%ld\t%ld\t%lf\t%c\t%zu\n",
-                b->parent->name.c_str(),               // query chromosome
-                b->pos[0] + Offsets::out_start,        // query start
-                b->pos[1] + Offsets::out_stop,         // query stop
-                b->over->parent->name.c_str(),         // target chromosome
-                b->over->pos[0] + Offsets::out_start,  // target start
-                b->over->pos[1] + Offsets::out_stop,   // target stop
-                b->score,                              // score
-                b->strand,                             // strand
-                b->cset->id                            // contiguous set id
+        for(Block* b = pair.second->block.front(); b != nullptr; b = b->next()){
+            d.add_row(
+                b->parent->name,
+                b->pos[0],
+                b->pos[1],
+                b->over->parent->name,
+                b->over->pos[0],
+                b->over->pos[1],
+                b->score,
+                b->strand,
+                b->cset->id
             );
         }
     }
+
+    return d.as_data_frame();
 }
 
 void Genome::link_block_corners()
@@ -168,15 +169,15 @@ void Genome::transfer_contiguous_sets(Genome* other){
 
 void Genome::validate()
 {
-    #define ASSERT_CON(t)                                        \
-            if(!(t)){                                            \
-              is_good=false;                                     \
-              fprintf(stderr, "Assert failed: `" #t "`\n");      \
+    #define ASSERT_CON(t)                              \
+            if(!(t)){                                  \
+              is_good=false;                           \
+              Rcpp::stop("Assert failed: `" #t "`\n"); \
             }
-    #define ASSERT_BLK(t)                                        \
-            if(!(t)){                                            \
-              is_good=false;                                     \
-              fprintf(stderr, "Assert failed: `" #t "`\n");      \
+    #define ASSERT_BLK(t)                              \
+            if(!(t)){                                  \
+              is_good=false;                           \
+              Rcpp::stop("Assert failed: `" #t "`\n"); \
             }
 
         bool is_good = true;
@@ -195,7 +196,7 @@ void Genome::validate()
             {
 
                 if(blk->stop() > con->feat.parent_length){
-                    std::cerr << "Block stop is greater than contig length\n";
+                    Rcpp::warning("Block stop is greater than contig length");
                 }
 
                 ASSERT_BLK(blk->cset       != nullptr);

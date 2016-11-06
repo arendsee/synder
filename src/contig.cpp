@@ -14,26 +14,31 @@ void Contig::set_length(long t_length)
     feat.parent_length = t_length;
 }
 
-void Contig::count(Feature& t_feat)
+void Contig::count(Feature& t_feat, CountType& df)
 {
     long count = block.count_overlaps(&t_feat);
-    printf("%s\t%ld\n", t_feat.name.c_str(), count);
+
+    df.add_row(t_feat.name, count);
 }
 
-void Contig::map(Feature& t_feat)
+void Contig::map(Feature& t_feat, MapType& df)
 {
     auto rc = block.get_region(t_feat, true);
     bool missing = rc->inbetween || rc->leftmost || rc->rightmost;
 
     for (auto &qblk : rc->iv) {
         if (qblk != nullptr) {
-            printf("%s %s %zu %zu %d\n",
-                   t_feat.name.c_str(),
-                   t_feat.parent_name.c_str(),
-                   qblk->over->pos[0] + Offsets::out_start,
-                   qblk->over->pos[1] + Offsets::out_stop,
-                   missing
-                  );
+            df.add_row(
+                t_feat.name,
+                qblk->parent->parent_name,
+                qblk->pos[0],
+                qblk->pos[1],
+                t_feat.parent_name,
+                qblk->over->pos[0],
+                qblk->over->pos[1],
+                qblk->over->strand,
+                missing
+            );
         }
     }
     delete rc;
@@ -75,10 +80,10 @@ std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat, doubl
     return si;
 }
 
-void Contig::find_search_intervals(Feature& t_feat, double r)
+void Contig::find_search_intervals(Feature& t_feat, double r, SIType& stype)
 {
     std::vector<SearchInterval> si = list_search_intervals(t_feat, r);
     for(auto &s : si) {
-        s.print();
+        s.add_row(stype);
     }
 }

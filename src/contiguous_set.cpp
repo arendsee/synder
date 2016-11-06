@@ -59,23 +59,6 @@ ContiguousSet::~ContiguousSet()
     }
 }
 
-void ContiguousSet::print()
-{
-    fprintf(
-        stderr,
-        "cset (n=%zu) - (%s, %zu, %zu, %c) <-> (%s, %zu, %zu, %c)\n",
-        size,
-        parent->name.c_str(),
-        pos[0],
-        pos[1],
-        ends[0]->strand,
-        over->parent->name.c_str(),
-        over->pos[0],
-        over->pos[1],
-        over->ends[0]->strand
-    );
-}
-
 bool ContiguousSet::strictly_forbidden(Block* a, Block* b, long k)
 {
     return a->parent == b->parent &&

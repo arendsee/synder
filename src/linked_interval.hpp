@@ -5,6 +5,7 @@
 #include "feature.h"
 #include "bound.h"
 
+#include <Rcpp.h>
 #include <array>
 
 
@@ -65,7 +66,7 @@ public:
         try {
             return cor.at(i);
         } catch (const std::out_of_range& e) {
-            std::cerr << "Attempted to access illegal element (i=" << i << ") in " << __FILE__ << ":" << __func__ << std::endl;
+            Rcpp::warning("Attempted to access illegal element in linked_interval.hpp::corner()");
             return nullptr;
         }
     }
@@ -75,7 +76,7 @@ public:
         try {
             return adj.at(i);
         } catch (const std::out_of_range& e) {
-            std::cerr << "Index error in " << __func__ << std::endl;
+            Rcpp::stop("Index error in linked_interval.hpp::corner_adj");
             return nullptr;
         }
     }

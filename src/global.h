@@ -1,21 +1,19 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
-#include <math.h>
+#include <assert.h>
 #include <errno.h>
+#include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <errno.h>
-#include <limits.h>
-#include <assert.h>
 
+#include <exception>
+#include <iostream>
 #include <cstring>
 #include <string>
 #include <vector>
-#include <exception>
-
-#include <iostream>
 
 #define REL_GT(x, y, d)   ((d) ? (x) >  (y) : (x) <  (y))
 #define REL_LT(x, y, d)   ((d) ? (x) <  (y) : (x) >  (y))
@@ -33,18 +31,6 @@ const long NAME_BUFFER_SIZE = 128;
 const long LINE_BUFFER_SIZE = 512;
 
 const long DEFAULT_CONTIG_LENGTH = 1e9;
-
-// A value of 0 or 1 with is added to the starts and stops of all printed intervals
-class Offsets
-{
-public:
-    static int syn_start;
-    static int syn_stop;
-    static int in_start;
-    static int in_stop;
-    static int out_start;
-    static int out_stop;
-};
 
 typedef enum direction { LO = 0, HI = 1 } Direction;
 

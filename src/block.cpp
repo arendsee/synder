@@ -16,21 +16,6 @@ Block::Block(
 
 Block::~Block() { }
 
-void Block::print()
-{
-    printf(
-        "%s\t%ld\t%ld\t%s\t%ld\t%ld\t%lf\t%c\n",
-        parent->name.c_str(),               // query chromosome
-        pos[0] + Offsets::out_start,        // query start
-        pos[1] + Offsets::out_stop,         // query stop
-        over->parent->name.c_str(),         // target chromosome
-        over->pos[0] + Offsets::out_start,  // target start
-        over->pos[1] + Offsets::out_stop,   // target stop
-        score,                              // score
-        strand                              // strand
-    );
-}
-
 void Block::unlink(Block* blk, int u, int d)
 {
     if (blk->cor[u] != nullptr) {
@@ -83,10 +68,14 @@ void Block::move_b_to_a(Block* a, Block* b, int u, int d)
     replace_edge(a, b, d, u);
 }
 
+// NOTE: for debuging messages, look back to commit #eee599f4
 void Block::merge_block_a_into_b(Block* a, Block* b)
 {
     if (!(a->overlap(b) && a->over->overlap(b->over))) {
-        throw "Blocks are not doubly overlapping, I don't know how to merge them";
+        Rcpp::stop(
+            "I shouldn't be here. Blocks are not doubly overlapping,"
+            "I don't know how to merge them"
+        );
     }
 
     double olen = a->overlap_length(b);
@@ -96,17 +85,6 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
                    ((bl - olen) / (bl)) * b->score +
                    std::max(a->score / al, b->score / bl) * olen;
 
-#ifdef DEBUG
-    std::cerr << "merging a into b: \n"
-              << "  -- intermediate values:\n"
-              << "  len=(a:" << al << ",b:" << bl << ") overlap_len = " << olen << " scores=(a:" << a->score << ",b:" << b->score << ")\n"
-              << "  -- original block\n"
-              << "  Q:a = (score:" << a->score       << " id:" << a->id       << " bounds=[" << a->pos[0]       << "," << a->pos[1]       << ")\n"
-              << "  Q:b = (score:" << b->score       << " id:" << b->id       << " bounds=[" << b->pos[0]       << "," << b->pos[1]       << ")\n"
-              << "  T:a = (score:" << a->over->score << " id:" << a->over->id << " bounds=[" << a->over->pos[0] << "," << a->over->pos[1] << ")\n"
-              << "  T:b = (score:" << b->over->score << " id:" << b->over->id << " bounds=[" << b->over->pos[0] << "," << b->over->pos[1] << ")\n";
-#endif
-
     b->score = score;
     b->over->score = score;
 
@@ -114,12 +92,6 @@ void Block::merge_block_a_into_b(Block* a, Block* b)
     merge_block_a_into_b_edge_(a, b, 1);
     merge_block_a_into_b_edge_(a->over, b->over, 0);
     merge_block_a_into_b_edge_(a->over, b->over, 1);
-
-#ifdef DEBUG
-    std::cerr << "  -- merged blocks\n"
-              << "  Q:ab = (score:" << b->score       << " id:" << b->id       << " bounds=[" << b->pos[0]       << "," << b->pos[1] << ")\n"
-              << "  T:ab = (score:" << b->over->score << " id:" << b->over->id << " bounds=[" << b->over->pos[0] << "," << b->over->pos[1] << ")\n";
-#endif
 
     // Declare these blocks broken. A null `over` tags these blocks for
     // exclusion and will break asserts in Genome::validate

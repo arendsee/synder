@@ -4,27 +4,34 @@
 #include "global.h"
 #include "bound.h"
 #include "genome.h"
-#include "arguments.h"
 #include "linked_interval.hpp"
 #include "feature.h"
+#include "types.h"
+
 
 #include <iterator>
 #include <list>
+#include <array>
+#include <Rcpp.h>
 
 
 /** A pair of syntenically linked Genome objects  */
 class Synmap
 {
 private:
-
     Genome* genome[2] = { nullptr, nullptr };
-    FILE* synfile     = nullptr;
-    FILE* tclfile     = nullptr;
-    FILE* qclfile     = nullptr;
-    int swap          = 0;
-    long k            = 0;
-    double r          = 0.001;
-    char trans        = 'i';
+    FILE*   synfile   = nullptr;
+    FILE*   tclfile   = nullptr;
+    FILE*   qclfile   = nullptr;
+    int     swap      = 0;
+    long    k         = 0;
+    double  r         = 0.001;
+    char    trans     = 'i';
+
+    std::array<int,4> offsets = {0,1,0,0};
+
+    // utility function for loading GFF files
+    std::vector<Feature> gff2features(FILE* fh);
 
     // loads synfile and calls the below functions in proper order
     void load_blocks();
@@ -36,32 +43,30 @@ private:
     void validate();
 
 public:
-
-    /** Build synteny tree from specially formatted file.
-     *
-     * @warning This function is VERY picky about input. It expects input to be
-     * formatted exactly as util/prepare-data.sh produces. You must not feed this
-     * function raw synteny files. I currently have no input checks.
-     *
-     * @param synfile specially formatted synteny file
-     *
-     * @return pointer to a complete Synmap object
-     */
-    Synmap(Arguments& args);
+    Synmap(
+        FILE*  synfile,
+        FILE*  tclfile,
+        FILE*  qclfile,
+        bool   swap,
+        int    k,
+        double r,
+        char   trans,
+        std::vector<int> offsets
+    );
 
     ~Synmap();
 
-    Contig* get_contig(size_t gid, char* contig_name);
+    Contig* get_contig(size_t gid, const char* contig_name);
 
-    /** Recursively print a synteny map. */
-    void print();
+    Rcpp::DataFrame as_data_frame();
 
-    void dump_blocks();
+    Rcpp::DataFrame count(FILE* intfile);
 
-    /** Reads a GFF file and calls the appropriate command on each line */
-    bool process_gff(FILE* intfile, Command cmd);
+    Rcpp::DataFrame map(FILE* intfile);
 
-    void filter(FILE* hitfile);
+    Rcpp::DataFrame search(FILE* intfile);
+
+    Rcpp::CharacterVector filter(FILE* hitfile);
 
 };
 

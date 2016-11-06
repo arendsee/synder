@@ -23,13 +23,7 @@ public:
     bool rightmost        = false;
 
     IntervalResult(){ };
-
     ~IntervalResult(){ }
-
-    void print()
-    {
-        printf("inbetween=%i leftmost=%i rightmost=%i\n", inbetween, leftmost, rightmost);
-    }
 };
 
 #endif

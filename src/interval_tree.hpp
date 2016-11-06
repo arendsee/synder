@@ -271,68 +271,6 @@ private:
         }
     }
 
-    // printer dispatcher
-    /* write tree and center */
-    void print_verbosity_1(IntervalTree<T>* n, int depth, char pos)
-    {
-        printf("%*d - %c%dl\n", depth * 2, depth, pos, n->center);
-    }
-
-    /* write tree, center, and start-sorted */
-    void print_verbosity_2(IntervalTree<T>* n, int depth, char pos)
-    {
-        printf("%*d   %*s\t%c%dl:",
-               depth * 2, depth,
-               10 - depth * 2, "", pos, n->center);
-        for(size_t i = 0; i < n->by_start.size(); i++) {
-            printf("(%zu,%zu) ",
-                   START(n->by_start[i]),
-                   STOP(n->by_start[i]));
-        }
-        printf("\n");
-    }
-
-
-    /* write start- and stop-sorted vectors for each node */
-    void print_verbosity_3(IntervalTree<T>* n, int depth, char pos)
-    {
-        print_verbosity_1(n, depth, pos);
-        for(size_t i = 0; i < n->by_start.size(); i++) {
-            printf("\t\t(%zu,%zu) ",
-                   START(n->by_start[i]),
-                   STOP(n->by_start[i]));
-            printf("(%zu,%zu)\n",
-                   START(n->by_stop[i]),
-                   STOP(n->by_stop[i]));
-        }
-    }
-
-    /* local print function */
-    void print(IntervalTree<T>* n, int depth, char pos, int verbosity)
-    {
-        switch(verbosity) {
-            case 1:
-                print_verbosity_1(n, depth, pos);
-                break;
-            case 2:
-                print_verbosity_2(n, depth, pos);
-                break;
-            case 3:
-                print_verbosity_3(n, depth, pos);
-                break;
-            default:
-                fprintf(stderr, "verbosity must be 1, 2, or 3\n");
-                exit(EXIT_FAILURE);
-        }
-        depth++;
-        if(LEFT(n) != nullptr) {
-            print(LEFT(n), depth, 'l', verbosity);
-        }
-        if(RIGHT(n) != nullptr) {
-            print(RIGHT(n), depth, 'r', verbosity);
-        }
-    }
-
 protected:
     // the center position for this node
     long center = 0;
@@ -431,13 +369,6 @@ public:
         res->tree = this;
         get_overlaps(pnt, this, res);
         return res;
-    }
-
-
-    /* public wrapper for real print function */
-    void print(int verbosity)
-    {
-        print(this, 0, 'c', verbosity);
     }
 
 };

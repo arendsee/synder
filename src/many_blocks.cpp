@@ -74,7 +74,7 @@ void ManyBlocks::link_corners(){
             cor[i] = b;
         }
     } catch (const std::out_of_range& e) {
-        std::cerr << "Index error in " << __func__ << std::endl;
+        Rcpp::stop("Index error in ManyBlocks::link_corners()\n");
     }
 }
 
@@ -123,9 +123,7 @@ void ManyBlocks::link_adjacent_blocks_directed(Direction d)
     // All diagrams and comments relative to the d==HI direction
 
     if (cor[0] == nullptr || cor[1] == nullptr || cor[2] == nullptr || cor[3] == nullptr) {
-        fprintf(stderr, "Contig head must be set before link_adjacent_blocks is called\n");
-        // fprintf(stderr, "genome=(%s) contig=(%s)\n", parent->parent->name.c_str(), parent->name.c_str());
-        // exit(EXIT_FAILURE);
+        Rcpp::stop("Contig head must be set before link_adjacent_blocks is called\n");
     }
 
     // Transformed indices for Block->cor and Contig->cor

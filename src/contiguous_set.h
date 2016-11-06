@@ -48,8 +48,6 @@ public:
      */
     ~ContiguousSet();
 
-    void print();
-
     /** Determine whether two blocks are contiguous
      *
      * Each block consists of query and target intervals

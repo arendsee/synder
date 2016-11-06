@@ -6,6 +6,7 @@
 #include "feature.h"
 #include "block.h"
 #include "contiguous_set.h"
+#include "types.h"
 
 enum Flag {
     ANCHORED = 0, // bound in inside a syntenic interval
@@ -51,7 +52,7 @@ public:
 
     bool feature_overlap(Feature* other);
 
-    void print();
+    void add_row(SIType& stype);
 
 };
 
