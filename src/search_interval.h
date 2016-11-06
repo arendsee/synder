@@ -2,7 +2,7 @@
 #define __SEARCH_INTERVAL_H__
 
 #include "global.h"
-#include "interval.hpp"
+#include "interval.h"
 #include "feature.h"
 #include "block.h"
 #include "contiguous_set.h"

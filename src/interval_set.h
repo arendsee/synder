@@ -1,10 +1,10 @@
-#ifndef __INTERVAL_SET_HPP__
-#define __INTERVAL_SET_HPP__
+#ifndef __INTERVAL_SET_H__
+#define __INTERVAL_SET_H__
 
 #include <vector>
 
 #include "global.h"
-#include "interval_tree.hpp"
+#include "interval_tree.h"
 
 /** A container for LinkedIntervals */
 template <class T>

@@ -2,9 +2,9 @@
 #define __MANY_BLOCKS_H__
 
 #include "global.h"
-#include "linked_interval.hpp"
+#include "linked_interval.h"
 #include "block.h"
-#include "interval_set.hpp"
+#include "interval_set.h"
 
 #include <list>
 #include <array>

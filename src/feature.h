@@ -1,7 +1,7 @@
 #ifndef __FEATURE_H__
 #define __FEATURE_H__
 
-#include "interval.hpp"
+#include "interval.h"
 #include "global.h"
 
 #include <string>

@@ -4,7 +4,7 @@
 #include "global.h"
 #include "bound.h"
 #include "genome.h"
-#include "linked_interval.hpp"
+#include "linked_interval.h"
 #include "feature.h"
 #include "types.h"
 
