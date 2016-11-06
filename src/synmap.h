@@ -28,7 +28,8 @@ private:
     double  r         = 0.001;
     char    trans     = 'i';
 
-    std::array<int,4> offsets = {0,1,0,0};
+    // The {{ is needed to workaround a bug in old g++ compilers
+    std::array<int,4> offsets = {{0,1,0,0}};
 
     // utility function for loading GFF files
     std::vector<Feature> gff2features(FILE* fh);
