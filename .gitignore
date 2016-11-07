@@ -6,10 +6,3 @@ inst/doc
 
 # Personal temporary files
 zzz*
-# Test files that I may use in debugging
-a-b.syn
-a.gff
-b.gff
-hits.syn
-qgen.tab
-tgen.tab
