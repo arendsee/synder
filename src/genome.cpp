@@ -56,28 +56,34 @@ Block* Genome::add_block(std::string contig_name, long start, long stop, double 
     return blk_ptr;
 }
 
-void Genome::set_contig_lengths(FILE* clfile)
+void Genome::set_contig_lengths(std::string clfile)
 {
-    if(clfile != nullptr) {
-        // read loop variables
-        char*   line   = nullptr;
-        size_t  len    = 0;
-        ssize_t read;
+    std::ifstream fh(clfile); 
 
-        char contig_name[NAME_BUFFER_SIZE];
+    if(fh) {
+
+        std::string contig_name;
         long contig_length;
 
-        while ((read = getline(&line, &len, clfile)) != EOF) {
-            int status = sscanf(line, "%s %ld", contig_name, &contig_length);
-            if(status == EOF) {
-                Rcpp::stop("Failed to read contig length file");
-            }
-            Contig* con = get_contig(contig_name);
-            if(con != nullptr) {
-                con->set_length(contig_length);
+        std::string line;
+        while (std::getline(fh, line)) {
+
+            // skip comments
+            if (line[0] == '#')
+                continue;
+
+            std::stringstream row(line);
+
+            if (row >> contig_name >> contig_length) {
+                Contig* con = get_contig(contig_name);
+
+                if(con != nullptr) {
+                    con->set_length(contig_length);
+                }
+            } else {
+                Rcpp::warning("Failed to parse line:\n\t" + line);
             }
         }
-        free(line);
     }
 }
 
