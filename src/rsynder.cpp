@@ -1,5 +1,4 @@
 #include <string>
-#include <iostream>
 
 #include "global.h"
 #include "synmap.h"
@@ -18,9 +17,7 @@ Rcpp::DataFrame c_dump (
     std::vector<int> offsets
 )
 {
-    FILE* synfh = fopen(syn.c_str(), "r");
-
-    Synmap synmap(synfh, nullptr, nullptr, swap, 0, 0, trans, offsets);
+    Synmap synmap(syn, "", "", swap, 0, 0, trans, offsets);
 
     return synmap.as_data_frame();
 }
@@ -49,14 +46,9 @@ Rcpp::DataFrame c_search(
     std::vector<int> offsets
 )
 {
-    FILE* synfh = fopen(syn.c_str(), "r");
-    FILE* gfffh = fopen(gff.c_str(), "r");
-    FILE* tclfh = fopen(tcl.c_str(), "r");
-    FILE* qclfh = fopen(qcl.c_str(), "r");
+    Synmap synmap(syn, tcl, qcl, swap, k, r, trans, offsets);
 
-    Synmap synmap(synfh, tclfh, qclfh, swap, k, r, trans, offsets);
-
-    return synmap.search(gfffh);
+    return synmap.search(gff);
 }
 
 
@@ -80,12 +72,9 @@ Rcpp::CharacterVector c_filter(
     std::vector<int> offsets
 )
 {
-    FILE* synfh = fopen(syn.c_str(), "r");
-    FILE* hitfh = fopen(hit.c_str(), "r");
+    Synmap synmap(syn, "", "", swap, k, r, trans, offsets);
 
-    Synmap synmap(synfh, nullptr, nullptr, swap, k, r, trans, offsets);
-
-    return synmap.filter(hitfh);
+    return synmap.filter(hit);
 }
 
 //' trace intervals across genomes
@@ -102,12 +91,9 @@ Rcpp::DataFrame c_map(
     std::vector<int> offsets
 )
 {
-    FILE* synfh = fopen(syn.c_str(), "r");
-    FILE* gfffh = fopen(gff.c_str(), "r");
+    Synmap synmap(syn, "", "", swap, 0, 0, 'i', offsets);
 
-    Synmap synmap(synfh, nullptr, nullptr, swap, 0, 0, 'i', offsets);
-
-    return synmap.map(gfffh);
+    return synmap.map(gff);
 }
 
 //' count overlaps
@@ -124,10 +110,7 @@ Rcpp::DataFrame c_count(
     std::vector<int> offsets
 )
 {
-    FILE* synfh = fopen(syn.c_str(), "r");
-    FILE* gfffh = fopen(gff.c_str(), "r");
+    Synmap synmap(syn, "", "", swap, 0, 0, 'i', offsets);
 
-    Synmap synmap(synfh, nullptr, nullptr, swap, 0, 0, 'i', offsets);
-
-    return synmap.count(gfffh);
+    return synmap.count(gff);
 }

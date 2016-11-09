@@ -1,7 +1,7 @@
 Package: synder
 Type: Package
 Title: use synteny to inform searches 
-Version: 0.19.5
+Version: 0.19.6
 Date: 2016-10-25
 Author: Zebulun Arendsee
 Maintainer: Zebulun Arendsee <arendsee@iastate.edu>

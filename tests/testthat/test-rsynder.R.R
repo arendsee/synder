@@ -54,6 +54,14 @@ compare_factory <- function(dir){
 # ------------------------------------------------------------------------------
 
 test_that(
+  "Test IO issues",
+  {
+    comp <- compare_factory('io')
+    expect(comp('long'), 'long GFF 9th column entries') 
+  }
+)
+
+test_that(
   "Mappings beyond the edges of target scaffold",
   {
     comp <- compare_factory("unassembled")

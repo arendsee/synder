@@ -5,6 +5,9 @@
 #include "contig.h"
 #include "many_contiguous_sets.h"
 
+#include <iostream>
+#include <sstream>
+#include <fstream>
 #include <map>
 #include <stack>
 #include <Rcpp.h>
@@ -36,7 +39,7 @@ public:
         char        strand
     );
 
-    void set_contig_lengths(FILE* clfile);
+    void set_contig_lengths(std::string clfile);
 
     size_t size() {
         return contig.size();

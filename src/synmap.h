@@ -8,7 +8,9 @@
 #include "feature.h"
 #include "types.h"
 
-
+#include <iostream>
+#include <sstream>
+#include <fstream>
 #include <iterator>
 #include <list>
 #include <array>
@@ -20,9 +22,9 @@ class Synmap
 {
 private:
     Genome* genome[2] = { nullptr, nullptr };
-    FILE*   synfile   = nullptr;
-    FILE*   tclfile   = nullptr;
-    FILE*   qclfile   = nullptr;
+    std::string synfile;
+    std::string tclfile;
+    std::string qclfile;
     int     swap      = 0;
     long    k         = 0;
     double  r         = 0.001;
@@ -32,7 +34,9 @@ private:
     std::array<int,4> offsets = {{0,1,0,0}};
 
     // utility function for loading GFF files
-    std::vector<Feature> gff2features(FILE* fh);
+    std::vector<Feature> gff2features(std::string fh);
+
+    void build_synmap();
 
     // loads synfile and calls the below functions in proper order
     void load_blocks();
@@ -45,9 +49,9 @@ private:
 
 public:
     Synmap(
-        FILE*  synfile,
-        FILE*  tclfile,
-        FILE*  qclfile,
+        std::string  synfile,
+        std::string  tclfile,
+        std::string  qclfile,
         bool   swap,
         int    k,
         double r,
@@ -61,13 +65,13 @@ public:
 
     Rcpp::DataFrame as_data_frame();
 
-    Rcpp::DataFrame count(FILE* intfile);
+    Rcpp::DataFrame count(std::string intfile);
 
-    Rcpp::DataFrame map(FILE* intfile);
+    Rcpp::DataFrame map(std::string intfile);
 
-    Rcpp::DataFrame search(FILE* intfile);
+    Rcpp::DataFrame search(std::string intfile);
 
-    Rcpp::CharacterVector filter(FILE* hitfile);
+    Rcpp::CharacterVector filter(std::string hitfile);
 
 };
 

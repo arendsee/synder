@@ -27,9 +27,6 @@
 #define REL_ADD(a, b, d)  ((d) ? (a) + (b) : (a) - (b))
 #define REL_SUB(a, b, d)  ((d) ? (a) - (b) : (a) + (b))
 
-const long NAME_BUFFER_SIZE = 128;
-const long LINE_BUFFER_SIZE = 512;
-
 const long DEFAULT_CONTIG_LENGTH = 1e9;
 
 typedef enum direction { LO = 0, HI = 1 } Direction;

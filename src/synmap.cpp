@@ -1,9 +1,9 @@
 #include "synmap.h"
 
 Synmap::Synmap(
-    FILE*  t_synfile,
-    FILE*  t_tclfile,
-    FILE*  t_qclfile,
+    std::string t_synfile,
+    std::string t_tclfile,
+    std::string t_qclfile,
     bool   t_swap,
     int    t_k,
     double t_r,
@@ -19,11 +19,11 @@ Synmap::Synmap(
     r(t_r),
     trans(t_trans)
 {
-    if(t_offsets.size() != offsets.size()){
+    if(t_offsets.size() != offsets.size()) {
         Rcpp::stop("Offsets must be an integer vector of 4 elements");
     }
-    for(int i = 0; i < offsets.size(); i++){
-       offsets[i] = t_offsets[i];
+    for(int i = 0; i < offsets.size(); i++) {
+        offsets[i] = t_offsets[i];
     }
     load_blocks();
     validate();
@@ -39,19 +39,14 @@ Synmap::~Synmap()
 
 void Synmap::load_blocks()
 {
+
+    std::ifstream fh(synfile);
+
     genome[0] = new Genome("Q");
     genome[1] = new Genome("T");
 
-    // read loop variables
-    int     status = 0;
-    char*   line   = nullptr;
-    size_t  len    = 0;
-    ssize_t read;
-
     // Contig name
-    char   qseqid[NAME_BUFFER_SIZE];
-    char   tseqid[NAME_BUFFER_SIZE];
-    char*  seqid[2] = {qseqid, tseqid};
+    std::array< std::string, 2 > seqid;
     double score;
     char   strand;
     long   start[2], stop[2];
@@ -61,25 +56,23 @@ void Synmap::load_blocks()
     size_t i = swap ? 1 : 0;
     size_t j = swap ? 0 : 1;
 
-    while ((read = getline(&line, &len, synfile)) != EOF) {
+    std::string line;
+    while (std::getline(fh, line)) {
 
         // skip comments
         if (line[0] == '#')
             continue;
 
-        status = sscanf(line, "%s %ld %ld %s %ld %ld %lf %c",
-                        seqid[i], &start[i], &stop[i],
-                        seqid[j], &start[j], &stop[j],
-                        &score, &strand);
+        std::istringstream row(line);
+
+        row >> seqid[i] >> start[i] >> stop[i]
+            >> seqid[j] >> start[j] >> stop[j]
+            >> score >> strand;
 
         start[0] -= offsets[0];
         start[1] -= offsets[0];
         stop[0]  -= offsets[1];
         stop[1]  -= offsets[1];
-
-        if(status != 8) {
-            Rcpp::stop("Failed to read input line:\n" + std::string(line));
-        }
 
         switch (trans) {
             case 'l':
@@ -110,7 +103,6 @@ void Synmap::load_blocks()
         LinkedInterval<Block>::link_homologs(qblk, tblk);
 
     }
-    free(line);
 
     link_blocks();
 }
@@ -163,110 +155,127 @@ void Synmap::validate()
     genome[1]->validate();
 }
 
-Rcpp::CharacterVector Synmap::filter(FILE* intfile)
+Rcpp::CharacterVector Synmap::filter(std::string intfile)
 {
-    // read loop variables
-    char*   line   = nullptr;
-    size_t  len    = 0;
-    ssize_t read;
 
-    // Contig name
-    char qseqid[NAME_BUFFER_SIZE];
-    char tseqid[NAME_BUFFER_SIZE];
-    char* seqid[2] = {qseqid, tseqid};
-    long start[2], stop[2];
+    std::ifstream fh(intfile);
+
+    if(! fh){
+        Rcpp::stop("Failed to open filter file\n");
+    }
+
+    std::string qseqid, tseqid;
+    long qstart, qstop, tstart, tstop;
 
     Rcpp::CharacterVector out;
 
-    while ((read = getline(&line, &len, intfile)) != EOF) {
-
-        sscanf(line, "%s %ld %ld %s %ld %ld",
-               seqid[0], &start[0], &stop[0],
-               seqid[1], &start[1], &stop[1]);
-
-        start[0] -= offsets[2];
-        start[1] -= offsets[2];
-        stop[0]  -= offsets[3];
-        stop[1]  -= offsets[3];
-
-        Feature qfeat(seqid[0], start[0], stop[0]);
-        Feature tfeat(seqid[1], start[1], stop[1]);
-
-        Contig* qcon = get_contig(0, seqid[0]);
-        if(qcon == nullptr){
-            // Absence of a particular contig does not necessarily imply bad
-            // input. So no need to throw an exception.
-            Rcpp::warning("Contig '" + std::string(seqid[0]) + "' not found in synteny map, skipping");
-        } else {
-            std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat, r);
-
-            for(auto &s : si){
-                if(s.feature_overlap(&tfeat)){
-                    out.push_back(line);
-                    break;
-                }
-            }
-        }
-    }
-    free(line);
-
-    return out;
-}
-
-
-std::vector<Feature> Synmap::gff2features(FILE* fh){
-    // start and stop positions read from input line
-    long start, stop;
-    // Name of query input (e.g. AT1G01010)
-    char seqname[NAME_BUFFER_SIZE];
-    // Index of query chromosome
-    char contig_seqname[NAME_BUFFER_SIZE];
-    // query contig
-    Contig* qcon;
-
-    std::vector<Feature> feats;
-
-    char *line = (char *) malloc(LINE_BUFFER_SIZE * sizeof(char));
-    while (fgets(line, LINE_BUFFER_SIZE, fh) && !feof(fh)) {
+    std::string line;
+    while (std::getline(fh, line)) {
 
         // skip comments
         if (line[0] == '#')
             continue;
 
-        if (!sscanf(line,
-                    "%s %*s %*s %ld %ld %*s %*c %*s %s\n",
-                    contig_seqname, &start, &stop, seqname))
-        {
-            throw "invalid input in Synmap::process_gff";
+        std::stringstream row(line);
+
+        if (
+            row >> qseqid >> qstart >> qstop
+                >> tseqid >> tstart >> tstop
+        ) {
+
+            qstart -= offsets[0];
+            tstart -= offsets[0];
+            qstop  -= offsets[1];
+            tstop  -= offsets[1];
+
+            Feature qfeat(qseqid.c_str(), qstart, qstop);
+            Feature tfeat(tseqid.c_str(), tstart, tstop);
+
+            Contig* qcon = get_contig(0, qseqid.c_str());
+            if(qcon == nullptr) {
+                // Absence of a particular contig does not necessarily imply bad
+                // input. So no need to throw an exception.
+                Rcpp::warning("Contig '" + qseqid + "' not found in synteny map, skipping");
+            } else {
+                std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat, r);
+                for(auto &s : si) {
+                    if(s.feature_overlap(&tfeat)) {
+                        out.push_back(line);
+                        break;
+                    }
+                }
+            }
+
+        } else {
+            Rcpp::warning("Failed to parse line:\n\t" + line);
         }
-
-        // check_in_offset(start, stop);
-        start -= offsets[2];
-        stop  -= offsets[3];
-
-        qcon = get_contig(0, contig_seqname);
-
-        if(qcon == nullptr) {
-            char* msg;
-            Rcpp::warning(
-                "SKIPPING ENTRY: Synteny map has no contig named '" +
-                std::string(contig_seqname) +
-                "'\n"
-            );
-            continue;
-        }
-
-        Feature feat(contig_seqname, start, stop, seqname, 0);
-
-        feats.push_back(feat);
-
     }
-    free(line);
+
+    return out;
+}
+
+
+std::vector<Feature> Synmap::gff2features(std::string gfffile)
+{
+
+    std::ifstream fh(gfffile);
+
+    if(! fh){
+        Rcpp::stop("Failed to open GFF file\n");
+    }
+
+    // start and stop positions read from input line
+    long start, stop;
+    // Name of query input (e.g. AT1G01010)
+    std::string seqname;
+    // Index of query chromosome
+    std::string contig_seqname;
+    // query contig
+    Contig* qcon;
+
+    std::vector<Feature> feats;
+
+    std::string line;
+    while (std::getline(fh, line)) {
+
+        // skip comments
+        if (line[0] == '#')
+            continue;
+
+        std::stringstream row(line);
+
+        std::string r2, r3, r6, r7, r8;
+
+        if (
+            row >> contig_seqname >> r2 >> r3
+                >> start >> stop
+                >> r6 >> r7 >> r8
+                >> seqname
+        ){
+            // check_in_offset(start, stop);
+            start -= offsets[2];
+            stop  -= offsets[3];
+            qcon = get_contig(0, contig_seqname.c_str());
+            if(qcon == nullptr) {
+                char* msg;
+                Rcpp::warning(
+                    "SKIPPING ENTRY: Synteny map has no contig named '" +
+                    std::string(contig_seqname) +
+                    "'\n"
+                );
+                continue;
+            }
+            Feature feat(contig_seqname.c_str(), start, stop, seqname.c_str(), 0);
+            feats.push_back(feat);
+        } else {
+            Rcpp::warning("Failed to parse line:\n\t" + line);
+        }
+    }
 
     return feats;
 }
 
-Rcpp::DataFrame Synmap::count(FILE* intfile)
+Rcpp::DataFrame Synmap::count(std::string intfile)
 {
 
     std::vector<Feature> feats = gff2features(intfile);
@@ -284,7 +293,7 @@ Rcpp::DataFrame Synmap::count(FILE* intfile)
 
 }
 
-Rcpp::DataFrame Synmap::map(FILE* intfile)
+Rcpp::DataFrame Synmap::map(std::string intfile)
 {
 
     std::vector<Feature> feats = gff2features(intfile);
@@ -302,7 +311,7 @@ Rcpp::DataFrame Synmap::map(FILE* intfile)
 
 }
 
-Rcpp::DataFrame Synmap::search(FILE* intfile)
+Rcpp::DataFrame Synmap::search(std::string intfile)
 {
 
     std::vector<Feature> feats = gff2features(intfile);
