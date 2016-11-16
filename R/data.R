@@ -19,3 +19,14 @@
 #' 
 #' @format List
 "intro_1"
+
+#' Intro vignette dataset 2
+#'
+#' Similar to intro_1, but with an inversion
+#'
+#' Contains 2 files:
+#' 1. synmap - simple linear synteny map
+#' 2. tgen   - lengths of target scaffold
+#' 
+#' @format List
+"intro_2"
