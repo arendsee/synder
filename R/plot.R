@@ -43,6 +43,14 @@ zero_base <- function(x) {
   x
 }
 
+handle_inversions <- function(x) {
+  tstart <- ifelse(x$strand == '+', x$tstart, x$tstop)
+  tstop <- ifelse(x$strand == '+', x$tstop, x$tstart)
+  x$tstart <- tstart
+  x$tstop <- tstop
+  x
+}
+
 # ----------------------
 # Plot functions
 # ----------------------
@@ -53,6 +61,7 @@ plot.synmap <- function(x, ...){
   x <- to_global(x, prefix='q')
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
+  x <- handle_inversions(x)
   ggplot2::ggplot(x) +
     ggplot2::geom_segment(
       ggplot2::aes(
@@ -88,6 +97,9 @@ plot.dump_result <- function(x, ...){
       tstop  = max(tstop),
       strand = strand[1]
     )
+
+  x     <- handle_inversions(x)
+  csets <- handle_inversions(csets)
 
   ggplot2::ggplot() +
     ggplot2::geom_segment(
