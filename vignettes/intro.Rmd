@@ -86,3 +86,15 @@ plot(x, intro_1$synmap)
 ```
 
 Both sides snap to the nearest target edge.
+
+## Inversions and contiguous sets
+
+`synder` breaks synteny maps into contiguous sets of syntenic intervals. The
+sets are defined as sequences of syntenic intervals that are adjacent on both
+the query and target side and are not overlapping.
+
+```{r}
+data(intro_2)
+plot(intro_2$synmap)
+plot(synder::dump(intro_2$synmap))
+```
