@@ -101,7 +101,7 @@ Rcpp::DataFrame Genome::as_data_frame()
                 b->over->pos[0],
                 b->over->pos[1],
                 b->score,
-                b->strand,
+                b->over->strand,
                 b->cset->id
             );
         }
