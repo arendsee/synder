@@ -1,5 +1,6 @@
 #' @useDynLib synder
 #' @importFrom Rcpp sourceCpp
+utils::globalVariables(c("%>%", "."))
 NULL
 
 #' Synder Commands
