@@ -12,5 +12,24 @@
 In an R session
 ``` R
 library(devtools)
-install_github('arendsee/synder')
+install_github('arendsee/synder', build_vignettes=TRUE)
+```
+
+# Documentation
+
+First read the "intro" vignette
+
+```
+library(synder)
+vignette("intro", package="synder")
+```
+
+Other vignettes can be listed with `vignette(package="synder")`.
+
+Information on specific command is available through normal channels:
+
+```
+library(synder)
+?synder::search
+?synder::anon_search
 ```
