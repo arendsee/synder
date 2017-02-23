@@ -64,9 +64,9 @@ plot.synmap <- function(x, ...){
   x <- handle_inversions(x)
   ggplot2::ggplot(x) +
     ggplot2::geom_segment(
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       )
     )
 }
@@ -104,16 +104,16 @@ plot.dump_result <- function(x, ...){
   ggplot2::ggplot() +
     ggplot2::geom_segment(
       data=x,
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       )
     ) +
     ggplot2::geom_segment(
       data=csets,
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       ),
       alpha=0.3,
       size=3
@@ -140,16 +140,16 @@ plot.search_result <- function(x, y, ...){
   ggplot2::ggplot() +
     ggplot2::geom_segment(
       data=y,
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       )
     ) +
     ggplot2::geom_rect(
       data=x,
-      ggplot2::aes(
-        xmin=qstart, xmax=qstop,
-        ymin=tstart, ymax=tstop
+      ggplot2::aes_string(
+        xmin="qstart", xmax="qstop",
+        ymin="tstart", ymax="tstop"
       ),
       color='red',
       alpha=0.2
