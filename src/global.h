@@ -1,7 +1,6 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
-#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <math.h>

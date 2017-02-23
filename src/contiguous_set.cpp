@@ -152,8 +152,8 @@ void ContiguousSet::force_add_block(Block* blk_b)
 
 void ContiguousSet::add_side_(Block* b)
 {
-    assert(b->parent == parent);
-    assert(b->strand == strand);
+    // assert(b->parent == parent);
+    // assert(b->strand == strand);
 
     Block* a;
 
