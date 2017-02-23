@@ -12,7 +12,7 @@ vignette: >
 ---
 
 The primary function of synder is to map genomic intervals of interest from a
-query genome to search intervals in the target genome. In this vignetter, I
+query genome to search intervals in the target genome. In this vignette, I
 will showcase the basic functionallity using a toy data set.
 
 ## Installation

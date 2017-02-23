@@ -30,7 +30,7 @@ void Block::unlink(Block* blk, int u, int d)
  */
 void Block::merge_block_a_into_b_edge_(Block* a, Block* b, int i)
 {
-    assert(i == 0 || i == 1);
+    // assert(i == 0 || i == 1);
     int u = 2 * i + i;
     int d = 2 * i + !i;
     if (REL_GE(a->pos[i], b->pos[i], i)) {

@@ -10,8 +10,10 @@ intro_1
 }
 \description{
 Contains 2 files:
-1. synmap - simple linear synteny map
-2. tgen   - lengths of target scaffold
+\enumerate{
+    \item synmap - simple linear synteny map
+    \item tgen   - lengths of target scaffold
+ }
 }
 \keyword{datasets}
 

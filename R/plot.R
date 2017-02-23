@@ -64,9 +64,9 @@ plot.synmap <- function(x, ...){
   x <- handle_inversions(x)
   ggplot2::ggplot(x) +
     ggplot2::geom_segment(
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       )
     )
 }
@@ -87,15 +87,15 @@ plot.dump_result <- function(x, ...){
   x <- zero_base(x)
 
   x$cset <- factor(as.integer(x$cset))
-  csets <- dplyr::group_by(x, cset) %>%
-    dplyr::summarize(
-      qcon   = qcon[1],
-      qstart = min(qstart),
-      qstop  = max(qstop),
-      tcon   = tcon[1],
-      tstart = min(tstart),
-      tstop  = max(tstop),
-      strand = strand[1]
+  csets <- dplyr::group_by_(x, "cset") %>%
+    dplyr::summarize_(
+      qcon   = "qcon[1]",
+      qstart = "min(qstart)",
+      qstop  = "max(qstop)",
+      tcon   = "tcon[1]",
+      tstart = "min(tstart)",
+      tstop  = "max(tstop)",
+      strand = "strand[1]"
     )
 
   x     <- handle_inversions(x)
@@ -104,16 +104,16 @@ plot.dump_result <- function(x, ...){
   ggplot2::ggplot() +
     ggplot2::geom_segment(
       data=x,
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       )
     ) +
     ggplot2::geom_segment(
       data=csets,
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       ),
       alpha=0.3,
       size=3
@@ -134,22 +134,22 @@ plot.search_result <- function(x, y, ...){
   z <- to_global(z, prefix='t')
   z <- zero_base(z)
 
-  y <- subset(z, group == 'synmap')
-  x <- subset(z, group == 'search')
+  y <- dplyr::filter_(z, "group == 'synmap'")
+  x <- dplyr::filter_(z, "group == 'search'")
 
   ggplot2::ggplot() +
     ggplot2::geom_segment(
       data=y,
-      ggplot2::aes(
-        x=qstart, xend=qstop,
-        y=tstart, yend=tstop
+      ggplot2::aes_string(
+        x="qstart", xend="qstop",
+        y="tstart", yend="tstop"
       )
     ) +
     ggplot2::geom_rect(
       data=x,
-      ggplot2::aes(
-        xmin=qstart, xmax=qstop,
-        ymin=tstart, ymax=tstop
+      ggplot2::aes_string(
+        xmin="qstart", xmax="qstop",
+        ymin="tstart", ymax="tstop"
       ),
       color='red',
       alpha=0.2
