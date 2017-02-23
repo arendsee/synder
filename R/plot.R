@@ -87,15 +87,15 @@ plot.dump_result <- function(x, ...){
   x <- zero_base(x)
 
   x$cset <- factor(as.integer(x$cset))
-  csets <- dplyr::group_by(x, cset) %>%
-    dplyr::summarize(
-      qcon   = qcon[1],
-      qstart = min(qstart),
-      qstop  = max(qstop),
-      tcon   = tcon[1],
-      tstart = min(tstart),
-      tstop  = max(tstop),
-      strand = strand[1]
+  csets <- dplyr::group_by_(x, "cset") %>%
+    dplyr::summarize_(
+      qcon   = "qcon[1]",
+      qstart = "min(qstart)",
+      qstop  = "max(qstop)",
+      tcon   = "tcon[1]",
+      tstart = "min(tstart)",
+      tstop  = "max(tstop)",
+      strand = "strand[1]"
     )
 
   x     <- handle_inversions(x)
@@ -134,8 +134,8 @@ plot.search_result <- function(x, y, ...){
   z <- to_global(z, prefix='t')
   z <- zero_base(z)
 
-  y <- subset(z, group == 'synmap')
-  x <- subset(z, group == 'search')
+  y <- dplyr::filter_(z, "group == 'synmap'")
+  x <- dplyr::filter_(z, "group == 'search'")
 
   ggplot2::ggplot() +
     ggplot2::geom_segment(
