@@ -77,7 +77,7 @@ void Synmap::load_blocks()
         switch (trans) {
             case 'l':
                 // l := -log(S) (e-values or p-values)\n"
-                score = -1 * log(score);
+                score = -1 * std::log(score);
                 break;
             case 'd':
                 // d := L * S (score densities)\n"
