@@ -19,6 +19,8 @@ Imports:
     tibble,
     magrittr,
     ggplot2
+SystemRequirements:
+    C++11
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
 Suggests: testthat,
