@@ -182,4 +182,19 @@ any filter or search operations.
 Also note the addition of a 9th column. This column specifies that contiguous
 set. In this case, all blocks, after merging, are in the same set.
 }
+\examples{
+
+data(toy)
+print(toy$synmap)
+print(toy$qgff)
+
+plot(toy$synmap)
+
+synder::search(toy$synmap, toy$qgff)
+
+TODO: Fix this
+result <- synder::search(toy$synmap, toy$qgff)
+plot(result[1,], toy$synmap)
+
+}
 

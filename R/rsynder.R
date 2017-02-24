@@ -176,6 +176,20 @@ NULL
 #' @param offsets Start and stop offsets (0 or 1) for synteny map, GFF file,
 #' and output.
 #' @param hit hit map or object
+#' @examples
+#'
+#' data(toy)
+#' print(toy$synmap)
+#' print(toy$qgff)
+#'
+#' plot(toy$synmap)
+#'
+#' synder::search(toy$synmap, toy$qgff)
+#' synder::anon_search(toy$synmap, 10, 100, "Chr1")
+#'
+#' # TODO: Fix this
+#' # result <- synder::search(toy$synmap, toy$qgff)
+#' # plot(result[1,], toy$synmap)
 #'
 #' @name synder_commands
 NULL
