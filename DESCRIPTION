@@ -1,14 +1,16 @@
 Package: synder
 Type: Package
-Title: use synteny to inform searches 
-Version: 0.19.10
+Title: Use Synteny to Filter Genomic Search 
+Version: 0.19.11
 Date: 2016-10-25
 Author: Zebulun Arendsee
 Maintainer: Zebulun Arendsee <arendsee@iastate.edu>
 URL: https://github.com/arendsee/synder
 BugReports: https://github.com/arendsee/synder/issues
 Description:
-    Map query intervals to target search spaces using a synteny map.
+    A synteny map is a set of linked intervals between two genomes.  The main
+    function of Synder is to use a synteny map to trace an interval in one
+    genome to a narrow search space on another genome.
 License: MIT + file LICENSE
 Depends:
     R (>= 3.3.1)
@@ -23,7 +25,8 @@ SystemRequirements:
     C++11
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
-Suggests: testthat,
+Suggests:
+    testthat,
     knitr,
     rmarkdown,
     covr

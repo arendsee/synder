@@ -4,5 +4,7 @@
 ..Rcheck/
 inst/doc
 
+tags
+
 # Personal temporary files
 zzz*
