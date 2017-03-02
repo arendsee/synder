@@ -4,7 +4,7 @@
 #' @return A dataframe
 #' @export
 read_synmap <- function(file) {
-  d <- readr::read_tsv(file, col_types='ciiciidc', col_names=FALSE)
+  d <- readr::read_tsv(file, col_types='ciiciidc', col_names=FALSE, comment="#")
 
   # Assert the correct number of columns were read
   stopifnot(ncol(d) == 8)  
@@ -30,7 +30,7 @@ read_synmap <- function(file) {
 #' @return A dataframe
 #' @export
 read_gff <- function(file) {
-  d <- readr::read_tsv(file, col_types='ccciicccc', col_names=FALSE)
+  d <- readr::read_tsv(file, col_types='ccciicccc', col_names=FALSE, comment="#")
   class(d) <- 'data.frame'
 
   # Assert the correct number of columns were read
@@ -62,7 +62,7 @@ read_gff <- function(file) {
 #' @return A dataframe
 #' @export
 read_hitmap <- function(file) {
-  d <- readr::read_tsv(file, col_names=FALSE)
+  d <- readr::read_tsv(file, col_names=FALSE, comment="#")
 
   # Assert the correct number of columns were read
   stopifnot(ncol(d) >= 6)
@@ -85,7 +85,7 @@ read_hitmap <- function(file) {
 #' @return A dataframe
 #' @export
 read_conlen <- function(file) {
-  d <- readr::read_tsv(file, col_names=FALSE)
+  d <- readr::read_tsv(file, col_names=FALSE, comment="#")
 
   # Assert the correct number of columns were read
   stopifnot(ncol(d) == 2)
