@@ -191,10 +191,7 @@ print(toy$qgff)
 plot(toy$synmap)
 
 synder::search(toy$synmap, toy$qgff)
-
-TODO: Fix this
-result <- synder::search(toy$synmap, toy$qgff)
-plot(result[1,], toy$synmap)
+synder::anon_search(toy$synmap, 10, 100, "Chr1")
 
 }
 

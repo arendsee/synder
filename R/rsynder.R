@@ -1,5 +1,6 @@
 #' @useDynLib synder
 #' @importFrom Rcpp sourceCpp
+#' @importFrom magrittr "%>%"
 utils::globalVariables(c("%>%", "."))
 NULL
 
@@ -186,10 +187,6 @@ NULL
 #'
 #' synder::search(toy$synmap, toy$qgff)
 #' synder::anon_search(toy$synmap, 10, 100, "Chr1")
-#'
-#' # TODO: Fix this
-#' # result <- synder::search(toy$synmap, toy$qgff)
-#' # plot(result[1,], toy$synmap)
 #'
 #' @name synder_commands
 NULL
