@@ -1,0 +1,68 @@
+---
+title: "Yeast Ty1 mobile element case study"
+author: "Zebulun Arendsee"
+date: "`r Sys.Date()`"
+output:
+    rmarkdown::html_vignette:
+        fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Ty1 case study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Synder traces orthology independent of sequence similarity. This allows unique
+mappings of sequences even when they are members of large families.
+
+The `ty1` dataset includes synteny maps built between *S. cerivisiae* and 8
+other yeast species. These maps were built using mummer.
+
+```{r}
+data(ty1)
+```
+
+Quality cutoff
+
+```{r}
+syn500 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 500)
+syn400 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 400)
+syn300 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 300)
+syn200 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 200)
+syn100 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 100)
+syn000 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 0)
+```
+
+
+```{r}
+results500 <- lapply(syn500, function(x) search(x, ty1$gff))
+results400 <- lapply(syn400, function(x) search(x, ty1$gff))
+results300 <- lapply(syn300, function(x) search(x, ty1$gff))
+results200 <- lapply(syn200, function(x) search(x, ty1$gff))
+results100 <- lapply(syn100, function(x) search(x, ty1$gff))
+results000 <- lapply(syn000, function(x) search(x, ty1$gff))
+
+sa <- results500$Saccharomyces_arboricola
+```
+
+Now we want to infer orthology independent of sequence similarity. So I will
+subtract the query intervals from the synteny maps.
+
+
+```{r}
+maps <- lapply(ty1$synmaps, function(x) map(x, ty1$gff))
+
+holy <- lapply(
+    ty1$synmaps,
+    function(x){
+        m <- map(x, ty1$gff)
+        m_str <- paste0(m$qcon, m$qstart, m$qstop)  
+        s_str <- paste0(x$qcon, x$qstart, x$qstop)
+        idx <- s_str %in% m_str
+        x[!idx, ]
+    }
+)
+
+holy_results <- lapply(holy, function(x) search(x, ty1$gff))
+
+holy_results_k100 <- lapply(holy, function(x) search(x, ty1$gff, k=100))
+```

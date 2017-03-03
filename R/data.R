@@ -36,3 +36,14 @@
 #'
 #' @format List
 "intro_2"
+
+#' Yeast Ty1 mobile genetic element dataset
+#'
+#' Contains 2 files:
+#' \enumerate{
+#'     \item synmaps - Maps between S. cerivisiae and 7 other yeasts
+#'     \item gff     - Positions of Ty1 mobile elements in S. cerivisiae
+#' }
+#' 
+#' @format List
+"ty1"
