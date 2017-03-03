@@ -30,10 +30,10 @@ void Contig::map(Feature& t_feat, MapType& df)
         if (qblk != nullptr) {
             df.add_row(
                 t_feat.name,
-                qblk->parent->parent_name,
+                qblk->parent->name,
                 qblk->pos[0],
                 qblk->pos[1],
-                t_feat.parent_name,
+                qblk->over->parent->name,
                 qblk->over->pos[0],
                 qblk->over->pos[1],
                 qblk->over->strand,
