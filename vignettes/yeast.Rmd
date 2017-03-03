@@ -1,0 +1,36 @@
+---
+title: "Yeast Ty1 mobile element case study"
+author: "Zebulun Arendsee"
+date: "`r Sys.Date()`"
+output:
+    rmarkdown::html_vignette:
+        fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Ty1 case study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Synder traces orthology independent of sequence similarity. This allows unique
+mappings of sequences even when they are members of large families.
+
+The `ty1` dataset includes synteny maps built between *S. cerivisiae* and 8
+other yeast species. These maps were built using mummer.
+
+```r
+data(ty1)
+```
+
+```
+results <- lapply(ty1$synmaps, function(x) search(x, ty1$gff))
+
+sa <- results$Saccharomyces_arboricola
+```
+
+Now we want to infer orthology independent of sequence similarity. So I will
+subtract the query intervals from the synteny maps.
+
+
+```
+maps <- lapply(ty1$synmaps, function(x) map(x, ty1$gff))
+```
