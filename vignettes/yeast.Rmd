@@ -1,15 +1,22 @@
 ---
-title: "Yeast Ty1 mobile element case study"
+title: "Yeast Ty1 mobile elements"
 author: "Zebulun Arendsee"
 date: "`r Sys.Date()`"
+bibliography: yeast.bib 
 output:
     rmarkdown::html_vignette:
-        fig_caption: yes
+        fig_caption: yes 
 vignette: >
   %\VignetteIndexEntry{Ty1 case study}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+Other vignettes:
+
+ - [introduction to Synder](intro.html)
+ - [algorithmic details](algorithm.html)
+ - a case study in yeast
 
 # Introduction
 
@@ -19,7 +26,20 @@ mappings of sequences even when they are members of large families.
 The `ty1` dataset includes synteny maps built between *S. cerivisiae* and 8
 other yeast species. These maps were built using mummer.
 
+```
+nucmer                                       \
+    --maxmatch                               \
+    -p sc_Saccharomyces_bayanus_masked       \
+    -o ../data/masked/scerevisiae.masked.fna \
+    ../data/masked/Saccharomyces_bayanus.masked.fna 
+```
+
 ```{r}
+require(synder)
+require(knitr)
+require(readr)
+require(ape)
+require(data.tree)
 data(ty1)
 ```
 
@@ -28,9 +48,22 @@ names(ty1$glens)
 ```
 
 ```{r}
-lapply(ty1$glens, nrow)
+tree <- as.Node(read.tree("yeast.tree"))
+print(tree)
 ```
 
+This yeast phylogeny was taken from [@boynton2014ecology].
+
+```{r, results="asis"}
+knitr::kable(data_frame(
+    Species=names(ty1$glens),
+    NumberOfScaffolds=sapply(ty1$glens, nrow)
+))
+```
+
+*Saccharomyces cerevisiae* is well-assembled, but many of the others are not.
+
+We will see how this impacts our results.
 
 # Map density
 
@@ -84,3 +117,5 @@ holy_results <- lapply(holy, function(x) search(x, ty1$gff))
 
 holy_results_k100 <- lapply(holy, function(x) search(x, ty1$gff, k=100))
 ```
+
+# References
