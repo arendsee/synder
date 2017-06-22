@@ -15,4 +15,3 @@ A dataframe
 \description{
 Read a GFF file
 }
-

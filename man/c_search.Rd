@@ -28,4 +28,3 @@ c_search(syn, gff, tcl, qcl, swap, k, r, trans, offsets)
 \description{
 predict search intervals
 }
-

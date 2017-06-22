@@ -18,4 +18,3 @@ c_map(syn, gff, swap, offsets)
 \description{
 trace intervals across genomes
 }
-

@@ -24,4 +24,3 @@ c_filter(syn, hit, swap, k, r, trans, offsets)
 \description{
 remove links that disagree with the synteny map
 }
-

@@ -36,4 +36,3 @@ print functions.
    \item count_result
 }
 }
-

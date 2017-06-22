@@ -18,4 +18,3 @@ c_dump(syn, swap, trans, offsets)
 \description{
 print all blocks with contiguous set ids
 }
-

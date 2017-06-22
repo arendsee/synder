@@ -18,4 +18,3 @@ c_count(syn, gff, swap, offsets)
 \description{
 count overlaps
 }
-

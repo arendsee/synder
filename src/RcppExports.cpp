@@ -83,3 +83,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"synder_c_dump", (DL_FUNC) &synder_c_dump, 4},
+    {"synder_c_search", (DL_FUNC) &synder_c_search, 9},
+    {"synder_c_filter", (DL_FUNC) &synder_c_filter, 7},
+    {"synder_c_map", (DL_FUNC) &synder_c_map, 4},
+    {"synder_c_count", (DL_FUNC) &synder_c_count, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_synder(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

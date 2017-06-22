@@ -22,4 +22,3 @@ table, which is a needless hassle if you want to search your own intervals
 (rather than known features). \code{anon_search} addresses this problem by
 allowing searches given only start and stop positions and contig name.
 }
-

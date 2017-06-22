@@ -14,10 +14,9 @@ Description:
 License: MIT + file LICENSE
 Depends:
     R (>= 3.3.1),
+    knitr
 Imports:
     Rcpp (>= 0.12.7),
-    knitr,
-    tools,
     dplyr,
     readr,
     tibble,
@@ -26,7 +25,7 @@ Imports:
 SystemRequirements:
     C++11
 LinkingTo: Rcpp
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests:
     testthat,
     rmarkdown,

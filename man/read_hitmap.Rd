@@ -17,4 +17,3 @@ A hit file is required to have the same first 6 columns as a synteny map,
 i.e. qcon, qstart, qstop, tcon, tstart, tstop. There can be any number of
 additional columns.
 }
-
