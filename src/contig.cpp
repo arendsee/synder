@@ -67,10 +67,11 @@ std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat, doubl
     }
 
     // Iterate through each contiguous set, for each find the search interval
-    // For each contiguous set, there is exactly one search interval, or into a new SearchIntervalSet class
+    // For each contiguous set, there is exactly one search interval
     bool inbetween = rc->inbetween || rc->leftmost || rc->rightmost;
     std::vector<SearchInterval> si;
     for(auto &c : csets) {
+        // Build the search intervals
         si.push_back( SearchInterval(c->ends, &t_feat, inbetween, r) );
     }
 
@@ -82,7 +83,9 @@ std::vector<SearchInterval> Contig::list_search_intervals(Feature& t_feat, doubl
 
 void Contig::find_search_intervals(Feature& t_feat, double r, SIType& stype)
 {
+    // find search intervals
     std::vector<SearchInterval> si = list_search_intervals(t_feat, r);
+    // store the results
     for(auto &s : si) {
         s.add_row(stype);
     }

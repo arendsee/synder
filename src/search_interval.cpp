@@ -186,11 +186,13 @@ void SearchInterval::get_si_bound(const Direction d)
 // Arguments:
 //  near - the distance from the block to the expected near end of the query
 //  far  - the distance from the block to the expected far end of the query
-//               b1        b2  |  b1        b2
-//      a1  a2   |=========|   |  |=========|    a1  a2
-//      |===|    |             |                 |===|
-//      |<------>| far         |       near |<-->|
-//          |<-->| near        |        far |<------>|
+//      
+//                      Q                Q
+//         T       b1       b2   |  b1       b2       T
+//      a1   a2    |=========|   |  |=========|    a1   a2
+//      |=====|    |             |                 |=====|
+//      |<-------->| far         |       near |<-->|
+//            |<-->| near        |        far |<-------->|
 double SearchInterval::flank_area(long near, long far, double r)
 {
 
@@ -209,7 +211,11 @@ double SearchInterval::flank_area(long near, long far, double r)
         // the weight falls exponentially with distance from the query, e.g.
         // $$ \int_{near}^{far} exp(-kx) dx $$
         // which evaluates to the following:
-        return (1 / r) * ( exp(-1 * r * near) - exp(-1 * r * far) );
+        double area
+            // This a bit of a hack. But I want users to be able to set r to 0.
+            = (r = 0)
+            ? far - near + 1 // The limit as r goes to 0
+            : (1 / r) * ( exp(-1 * r * near) - exp(-1 * r * far) );
     }
     return 0;
 }

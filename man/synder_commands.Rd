@@ -106,7 +106,7 @@ The output is a table with the following fields:
        \item 3 lower bound is beyond any syntenic interval (near end of scaffold)
      }
    \item upper flag - see lower flag
-   \item between flag - 0 if query overlaps a syntenic interval, 1 otherwise
+   \item inbetween flag - TRUE if the query interval overlaps no syntenic intervals 
 }
 }
 
