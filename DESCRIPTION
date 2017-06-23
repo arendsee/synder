@@ -13,8 +13,7 @@ Description:
     genome to a narrow search space on another genome.
 License: MIT + file LICENSE
 Depends:
-    R (>= 3.3.1),
-    knitr
+    R (>= 3.3.1)
 Imports:
     Rcpp (>= 0.12.7),
     dplyr,
@@ -29,5 +28,6 @@ RoxygenNote: 6.0.1
 Suggests:
     testthat,
     rmarkdown,
+    knitr,
     covr
 VignetteBuilder: knitr
