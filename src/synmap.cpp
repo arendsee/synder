@@ -322,6 +322,7 @@ Rcpp::DataFrame Synmap::search(std::string intfile)
 
         Contig* qcon = get_contig(0, feat.parent_name.c_str());
 
+        // modifies out
         qcon->find_search_intervals(feat, r, out);
     }
 
