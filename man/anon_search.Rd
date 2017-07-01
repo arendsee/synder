@@ -4,14 +4,14 @@
 \alias{anon_search}
 \title{Wrapper for search allowing simple interval inputs}
 \usage{
-anon_search(syn, a, b, con, ...)
+anon_search(syn, a, b, seqid, ...)
 }
 \arguments{
 \item{syn}{synteny map file or object}
 
 \item{a, b}{start and stop locations}
 
-\item{con}{the name of the reference query contig}
+\item{seqid}{the name of the reference query contig}
 
 \item{...}{additional arguments sent to synder::search}
 }
