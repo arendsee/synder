@@ -258,17 +258,17 @@ wrapper <- function(FUN, x, y=NULL, ...) {
 #' (rather than known features). \code{anon_search} addresses this problem by
 #' allowing searches given only start and stop positions and contig name.
 #'
-#' @param syn synteny map file or object
-#' @param a,b start and stop locations
-#' @param con the name of the reference query contig
-#' @param ... additional arguments sent to synder::search
+#' @param syn   synteny map file or object
+#' @param a,b   start and stop locations
+#' @param seqid the name of the reference query contig
+#' @param ...   additional arguments sent to synder::search
 #' @export
-anon_search <- function(syn, a, b, con, ...){
+anon_search <- function(syn, a, b, seqid, ...){
   stopifnot(length(a) == c(length(b)))
   stopifnot(b >= a)
   N <- length(a)
   gff <- tibble::data_frame(
-    con     = con,
+    seqid     = seqid,
     source  = '.',
     type    = '.',
     start   = as.integer(a),
@@ -276,7 +276,7 @@ anon_search <- function(syn, a, b, con, ...){
     score   = '.',
     strand  = '.',
     phase   = '.',
-    seqname = paste0('seq_', 1:N)
+    attr    = paste0('seq_', 1:N)
   )
   search(syn, gff, ...)
 }
@@ -307,10 +307,10 @@ search <- function(
     offsets = offsets[1:4]
   )
 
-  d$seqname <- as.character(d$seqname)
-  d$qcon    <- as.character(d$qcon)
-  d$tcon    <- as.character(d$tcon)
-  d$strand  <- as.character(d$strand)
+  d$attr   <- as.character(d$attr)
+  d$qseqid <- as.character(d$qseqid)
+  d$tseqid <- as.character(d$tseqid)
+  d$strand <- as.character(d$strand)
 
   class(d) <- append('search_result', class(d))
   attributes(d)$swap  <- swap
@@ -385,10 +385,10 @@ map <- function(
     offsets = offsets[1:4]
   )
 
-  d$seqname <- as.character(d$seqname)
-  d$qcon    <- as.character(d$qcon)
-  d$tcon    <- as.character(d$tcon)
-  d$strand  <- as.character(d$strand)
+  d$attr   <- as.character(d$attr)
+  d$qseqid <- as.character(d$qseqid)
+  d$tseqid <- as.character(d$tseqid)
+  d$strand <- as.character(d$strand)
 
   class(d) <- append('map_result', class(d))
   attributes(d)$swap <- swap
@@ -415,7 +415,7 @@ count <- function(
     offsets = offsets[1:4]
   )
 
-  d$seqname = as.character(d$seqname)
+  d$attr = as.character(d$attr)
 
   class(d) <- append('count_result', class(d))
   attributes(d)$swap <- swap
@@ -439,8 +439,8 @@ dump <- function(
     trans   = trans,
     offsets = offsets[1:4]
   )
-  d$qcon <- as.character(d$qcon)
-  d$tcon <- as.character(d$tcon)
+  d$qseqid <- as.character(d$qseqid)
+  d$tseqid <- as.character(d$tseqid)
 
   # Assign class and attributes
   class(d) <- append('dump_result', class(d))

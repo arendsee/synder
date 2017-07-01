@@ -13,21 +13,21 @@ NULL
 # ----------------------
 
 to_global <- function(x, prefix='q') {
-  xcon <- paste0(prefix, 'con')
+  xseqid <- paste0(prefix, 'seqid')
   xstop  <- paste0(prefix, 'stop')
   xstart <- paste0(prefix, 'start')
-  xv <- dplyr::group_by_(x, xcon)   %>%
+  xv <- dplyr::group_by_(x, xseqid) %>%
     dplyr::mutate_(xmax=max(xstop)) %>%
-    dplyr::select_(xcon, 'xmax')    %>%
+    dplyr::select_(xseqid, 'xmax')  %>%
     unique                          %>%
     dplyr::arrange_('xmax')         %>%
     {
       xlv <- c(0, .$xmax[-nrow(.)])
-      names(xlv) <- .[[xcon]]
+      names(xlv) <- .[[xseqid]]
       xlv
     }
-  x[xstart] = x[[xstart]] + xv[x[[xcon]]]
-  x[xstop]  = x[[xstop]]  + xv[x[[xcon]]]
+  x[xstart] = x[[xstart]] + xv[x[[xseqid]]]
+  x[xstop]  = x[[xstop]]  + xv[x[[xseqid]]]
   x
 }
 
@@ -89,10 +89,10 @@ plot.dump_result <- function(x, ...){
   x$cset <- factor(as.integer(x$cset))
   csets <- dplyr::group_by_(x, "cset") %>%
     dplyr::summarize_(
-      qcon   = "qcon[1]",
+      qseqid = "qseqid[1]",
       qstart = "min(qstart)",
       qstop  = "max(qstop)",
-      tcon   = "tcon[1]",
+      tseqid = "tseqid[1]",
       tstart = "min(tstart)",
       tstop  = "max(tstop)",
       strand = "strand[1]"

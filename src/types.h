@@ -42,15 +42,15 @@ public:
 
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
-            Rcpp::Named("qcon")      = qcon,
-            Rcpp::Named("qstart")    = qstart,
-            Rcpp::Named("qstop")     = qstop,
-            Rcpp::Named("tcon")      = tcon,
-            Rcpp::Named("tstart")    = tstart,
-            Rcpp::Named("tstop")     = tstop,
-            Rcpp::Named("score")     = score,
-            Rcpp::Named("strand")    = strand,
-            Rcpp::Named("cset")      = cset
+            Rcpp::Named("qseqid") = qcon,
+            Rcpp::Named("qstart") = qstart,
+            Rcpp::Named("qstop")  = qstop,
+            Rcpp::Named("tseqid") = tcon,
+            Rcpp::Named("tstart") = tstart,
+            Rcpp::Named("tstop")  = tstop,
+            Rcpp::Named("score")  = score,
+            Rcpp::Named("strand") = strand,
+            Rcpp::Named("cset")   = cset
         );
     }
 };
@@ -68,7 +68,10 @@ public:
 
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
-            Rcpp::Named("seqname") = seqname,
+            // NOTE: what I call the seqname internally in C synder, comes
+            // from the 9th GFF column (currently), so technically shouldn't be
+            // called the 'seqname'.
+            Rcpp::Named("attr")  = seqname,
             Rcpp::Named("count") = count
         );
     }
@@ -112,11 +115,11 @@ public:
 
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
-            Rcpp::Named("seqname") = seqname,
-            Rcpp::Named("qcon")    = qcon,
+            Rcpp::Named("attr")    = seqname,
+            Rcpp::Named("qseqid")  = qcon,
             Rcpp::Named("qstart")  = qstart,
             Rcpp::Named("qstop")   = qstop,
-            Rcpp::Named("tcon")    = tcon,
+            Rcpp::Named("tseqid")  = tcon,
             Rcpp::Named("tstart")  = tstart,
             Rcpp::Named("tstop")   = tstop,
             Rcpp::Named("strand")  = strand,
@@ -175,11 +178,11 @@ public:
 
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
-            Rcpp::Named("seqname")   = seqname,
-            Rcpp::Named("qcon")      = qcon,
+            Rcpp::Named("attr")      = seqname,
+            Rcpp::Named("qseqid")    = qcon,
             Rcpp::Named("qstart")    = qstart,
             Rcpp::Named("qstop")     = qstop,
-            Rcpp::Named("tcon")      = tcon,
+            Rcpp::Named("tseqid")    = tcon,
             Rcpp::Named("tstart")    = tstart,
             Rcpp::Named("tstop")     = tstop,
             Rcpp::Named("strand")    = strand,
