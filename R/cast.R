@@ -38,12 +38,13 @@ as_gff <- function(d) {
   # Set column names
   names(d) <- names(GFF_COLS)
 
-  # Set types (readr guesses the others correctly)
-  d$score <- as.numeric(d$score)
-  d$phase <- as.integer(d$phase)
-
   # Assert column types match expectations
-  stopifnot(GFF_COLS == lapply(d, class))
+  for(i in 1:ncol(d)){
+    if(class(d[[i]]) != GFF_COLS[i]){
+      stop(paste("GFFError: in column", i, "expected type", GFF_COLS[i],
+                 ", found", class(d[[i]])))
+    }
+  }
 
   # Assign class membership
   class(d) <- append('gff', class(d))

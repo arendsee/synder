@@ -10,7 +10,12 @@ NULL
 #' @rdname synder_read
 #' @export
 read_synmap <- function(file) {
-  d <- readr::read_tsv(file, col_types='ciiciidc', col_names=FALSE, comment="#")
+  d <- readr::read_tsv(
+    file,
+    col_types = 'ciiciidc',
+    col_names = FALSE,
+    comment   = "#"
+  )
 
   as_synmap(d)
 }
@@ -18,7 +23,13 @@ read_synmap <- function(file) {
 #' @rdname synder_read
 #' @export
 read_gff <- function(file) {
-  d <- readr::read_tsv(file, col_types='ccciicccc', col_names=FALSE, comment="#")
+  d <- readr::read_tsv(
+    file,
+    col_types = 'ccciincic',
+    col_names = FALSE,
+    na        = ".",
+    comment   = "#"
+  )
 
   as_gff(d)
 }
