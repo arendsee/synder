@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // c_dump
 Rcpp::DataFrame c_dump(std::string syn, bool swap, char trans, std::vector<int> offsets);
-RcppExport SEXP synder_c_dump(SEXP synSEXP, SEXP swapSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+RcppExport SEXP _synder_c_dump(SEXP synSEXP, SEXP swapSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // c_search
 Rcpp::DataFrame c_search(std::string syn, std::string gff, std::string tcl, std::string qcl, bool swap, int k, double r, char trans, std::vector<int> offsets);
-RcppExport SEXP synder_c_search(SEXP synSEXP, SEXP gffSEXP, SEXP tclSEXP, SEXP qclSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+RcppExport SEXP _synder_c_search(SEXP synSEXP, SEXP gffSEXP, SEXP tclSEXP, SEXP qclSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,7 +40,7 @@ END_RCPP
 }
 // c_filter
 Rcpp::CharacterVector c_filter(std::string syn, std::string hit, bool swap, int k, double r, char trans, std::vector<int> offsets);
-RcppExport SEXP synder_c_filter(SEXP synSEXP, SEXP hitSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+RcppExport SEXP _synder_c_filter(SEXP synSEXP, SEXP hitSEXP, SEXP swapSEXP, SEXP kSEXP, SEXP rSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,7 +57,7 @@ END_RCPP
 }
 // c_map
 Rcpp::DataFrame c_map(std::string syn, std::string gff, bool swap, std::vector<int> offsets);
-RcppExport SEXP synder_c_map(SEXP synSEXP, SEXP gffSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
+RcppExport SEXP _synder_c_map(SEXP synSEXP, SEXP gffSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -71,7 +71,7 @@ END_RCPP
 }
 // c_count
 Rcpp::DataFrame c_count(std::string syn, std::string gff, bool swap, std::vector<int> offsets);
-RcppExport SEXP synder_c_count(SEXP synSEXP, SEXP gffSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
+RcppExport SEXP _synder_c_count(SEXP synSEXP, SEXP gffSEXP, SEXP swapSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -85,11 +85,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"synder_c_dump", (DL_FUNC) &synder_c_dump, 4},
-    {"synder_c_search", (DL_FUNC) &synder_c_search, 9},
-    {"synder_c_filter", (DL_FUNC) &synder_c_filter, 7},
-    {"synder_c_map", (DL_FUNC) &synder_c_map, 4},
-    {"synder_c_count", (DL_FUNC) &synder_c_count, 4},
+    {"_synder_c_dump", (DL_FUNC) &_synder_c_dump, 4},
+    {"_synder_c_search", (DL_FUNC) &_synder_c_search, 9},
+    {"_synder_c_filter", (DL_FUNC) &_synder_c_filter, 7},
+    {"_synder_c_map", (DL_FUNC) &_synder_c_map, 4},
+    {"_synder_c_count", (DL_FUNC) &_synder_c_count, 4},
     {NULL, NULL, 0}
 };
 
