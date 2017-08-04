@@ -268,14 +268,14 @@ anon_search <- function(syn, a, b, seqid, ...){
   stopifnot(b >= a)
   N <- length(a)
   gff <- tibble::data_frame(
-    seqid     = seqid,
-    source  = '.',
-    type    = '.',
+    seqid   = seqid,
+    source  = NA_character_,
+    type    = NA_character_,
     start   = as.integer(a),
     stop    = as.integer(b),
-    score   = '.',
-    strand  = '.',
-    phase   = '.',
+    score   = NA_real_,
+    strand  = NA_character_,
+    phase   = NA_integer_,
     attr    = paste0('seq_', 1:N)
   )
   search(syn, gff, ...)
@@ -294,10 +294,14 @@ search <- function(
   r       = 0,
   offsets = c(0,0,0,0,0,0)
 ) {
+
+  if(tcl != "") tcl <- as_conlen(tcl) 
+  if(qcl != "") qcl <- as_conlen(qcl) 
+  
   d <- wrapper(
     FUN     = c_search,
-    x       = syn,
-    y       = gff,
+    x       = as_synmap(syn),
+    y       = as_gff(gff),
     tcl     = tcl,
     qcl     = qcl,
     swap    = swap,
@@ -337,7 +341,7 @@ filter <- function(
 ) {
   d <- wrapper(
     FUN     = c_filter,
-    x       = syn,
+    x       = as_synmap(syn),
     y       = hit,
     swap    = swap,
     k       = k,
@@ -379,8 +383,8 @@ map <- function(
 ) {
   d <- wrapper(
     FUN     = c_map,
-    x       = syn,
-    y       = gff,
+    x       = as_synmap(syn),
+    y       = as_gff(gff),
     swap    = swap,
     offsets = offsets[1:4]
   )
@@ -409,8 +413,8 @@ count <- function(
 ) {
   d <- wrapper(
     FUN     = c_count,
-    x       = syn,
-    y       = gff,
+    x       = as_synmap(syn),
+    y       = as_gff(gff),
     swap    = swap,
     offsets = offsets[1:4]
   )
@@ -434,7 +438,7 @@ dump <- function(
 ) {
   d <- wrapper(
     FUN     = c_dump,
-    x       = syn,
+    x       = as_synmap(syn),
     swap    = swap,
     trans   = trans,
     offsets = offsets[1:4]

@@ -16,6 +16,10 @@ Depends:
     R (>= 3.2.0)
 Imports:
     Rcpp (>= 0.12.7),
+    CNEr,
+    GenomicRanges,
+    BiocGenerics,
+    GenomeInfoDb,
     dplyr,
     readr,
     tibble,

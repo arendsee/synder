@@ -3,14 +3,46 @@
 #' cast data as Synder objects
 #'
 #' @param d input type
+#' @param ... additional arguments
 #' @name synder_cast
 NULL
 
+.pairs_to_synmap <- function(x, y, strand, score){
+  data.frame(
+    qseqid = as.character(GenomicRanges::seqnames(x)),
+    qstart = GenomicRanges::start(x),
+    qstop  = GenomicRanges::end(x),
+    tseqid = as.character(GenomicRanges::seqnames(y)),
+    tstart = GenomicRanges::start(y),
+    tstop  = GenomicRanges::end(y),
+    score  = as.numeric(score),
+    strand = strand,
+    stringsAsFactors=FALSE
+  )
+}
 
 #' @rdname synder_cast
 #' @export
 as_synmap <- function(d) {
-  d <- as.data.frame(d)
+
+  if('synmap' %in% class(d)) return(d)
+
+  d <- if(("Axt" %in% class(d)) || ("GRangesPairs" %in% class(d))){
+    .pairs_to_synmap(
+      x      = CNEr::first(d),
+      y      = CNEr::last(d),
+      strand = as.character(BiocGenerics::strand(CNEr::last(d))),
+      score  = CNEr::score(d)
+    )
+  } else if (is.character(d)){
+    if(file.exists(d)){
+      read_synmap(d)
+    } else {
+      stop(sprintf("Cannot find synteny map file '%s'", d))
+    }
+  } else {
+    as.data.frame(d)
+  }
 
   # assert correct number of columns
   stopifnot(ncol(d) == 8)
@@ -27,10 +59,53 @@ as_synmap <- function(d) {
   return(d)
 }
 
+.maybe_meta <- function(x, field, default=NA){
+  if(field %in% names(GenomicRanges::mcols(x))){
+    GenomicRanges::mcols(x)[[field]]
+  } else {
+    default
+  }
+}
+
+.GRanges_to_GFF <- function(
+  x,
+  source_tag = "source",
+  type_tag   = "type",
+  score_tag  = "score",
+  phase_tag  = "phase",
+  id_tag     = "name"
+){
+  data.frame(
+    seqid   = GenomicRanges::seqnames(x),
+    source  = .maybe_meta(x, source_tag, NA_character_),
+    type    = .maybe_meta(x, type_tag, NA_character_),
+    start   = GenomicRanges::start(x),
+    stop    = GenomicRanges::end(x),
+    score   = .maybe_meta(x, score_tag, NA_real_),
+    strand  = GenomicRanges::strand(x),
+    phase   = .maybe_meta(x, phase_tag, NA_integer_),
+    attr    = .maybe_meta(x, id_tag, NA_character_),
+    stringsAsFactors=FALSE
+  )
+}
+
 #' @rdname synder_cast
 #' @export
-as_gff <- function(d) {
-  d <- as.data.frame(d)
+as_gff <- function(d, ...) {
+
+  if('gff' %in% class(d)) return(d)
+
+  d <- if("GRanges" %in% class(d)){
+    .GRanges_to_GFF(d, ...)
+  } else if (is.character(d)){
+    if(file.exists(d)){
+      read_gff(d)
+    } else {
+      stop(sprintf("Cannot find GFF file '%s'", d))
+    }
+  } else {
+    as.data.frame(d)
+  }
 
   # Assert the correct number of columns were read
   stopifnot(ncol(d) == 9)
@@ -75,7 +150,24 @@ as_hitmap <- function(d) {
 #' @rdname synder_cast
 #' @export
 as_conlen <- function(d) {
-  d <- as.data.frame(d)
+
+  if('conlen' %in% class(d)) return(d)
+
+  d <- if("Seqinfo" %in% class(d)){
+    data.frame(
+      seqid = as.character(GenomeInfoDb::seqnames(d)),
+      length = GenomeInfoDb::seqlengths(d),
+      stringsAsFactors=FALSE
+    )
+  } else if (is.character(d)){
+    if(file.exists(d)){
+      read_conlen(d)
+    } else {
+      stop(sprintf("Cannot find genome lengths file '%s'", d))
+    }
+  } else {
+    as.data.frame(d)
+  }
 
   # Assert the correct number of columns were read
   stopifnot(ncol(d) == 2)
