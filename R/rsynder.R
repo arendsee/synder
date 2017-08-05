@@ -199,6 +199,9 @@ do_offsets <- function(d, offsets){
 }
 
 # Changes data.frames to temporary files
+# FIXME: This is a bit of a hack. The old C++ code took files. Here a convert
+# perfectly good R data.frames, which have already been loaded, back to files.
+# I should just pass the data frames to C-side, Rcpp can handle it.
 df2file <- function(x) {
   if(!is.null(x) && 'data.frame' %in% class(x)){
     xfile <- tempfile()
@@ -297,13 +300,13 @@ search <- function(
 
   if(tcl != "") tcl <- as_conlen(tcl) 
   if(qcl != "") qcl <- as_conlen(qcl) 
-  
+
   d <- wrapper(
     FUN     = c_search,
     x       = as_synmap(syn),
     y       = as_gff(gff),
-    tcl     = tcl,
-    qcl     = qcl,
+    tcl     = df2file(tcl),
+    qcl     = df2file(qcl),
     swap    = swap,
     k       = k,
     r       = r,
