@@ -1,14 +1,13 @@
 ---
 title: "Yeast Ty1 mobile element case study"
 author: "Zebulun Arendsee"
-date: "`r Sys.Date()`"
 output:
     rmarkdown::html_vignette:
         fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Ty1 case study}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\usepackage[utf8]{inputenc}
 ---
 
 Synder traces orthology independent of sequence similarity. This allows unique

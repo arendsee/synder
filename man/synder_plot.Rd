@@ -12,21 +12,21 @@
 \alias{plot.count_result}
 \title{Synder plot functions}
 \usage{
-plot.synmap(x, ...)
+\method{plot}{synmap}(x, ...)
 
-plot.gff(x, ...)
+\method{plot}{gff}(x, ...)
 
-plot.hitmap(x, ...)
+\method{plot}{hitmap}(x, ...)
 
-plot.dump_result(x, ...)
+\method{plot}{dump_result}(x, ...)
 
-plot.search_result(x, y, ...)
+\method{plot}{search_result}(x, y, ...)
 
-plot.filter_result(x, y, ...)
+\method{plot}{filter_result}(x, y, ...)
 
-plot.map_result(x, y, ...)
+\method{plot}{map_result}(x, y, ...)
 
-plot.count_result(x, y, ...)
+\method{plot}{count_result}(x, y, ...)
 }
 \arguments{
 \item{x}{table of a synder class}
