@@ -298,6 +298,15 @@ search <- function(
   offsets = c(0,0,0,0,0,0)
 ) {
 
+  # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
+  # for each GRange object.
+  if('GRangePairs' %in% class(syn)){
+    a <- CNEr::first(syn)
+    b <- CNEr::first(syn)
+    if(seqlengths(a) && seqnames(a)) tcl <- seqinfo(a)
+    if(seqlengths(b) && seqnames(b)) qcl <- seqinfo(b)
+  }
+
   if(tcl != "") tcl <- as_conlen(tcl) 
   if(qcl != "") qcl <- as_conlen(qcl) 
 
