@@ -1,14 +1,13 @@
 ---
 title: "Introduction to Synder"
 author: "Zebulun Arendsee"
-date: "`r Sys.Date()`"
 output:
     rmarkdown::html_vignette:
         fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Introduction to Synder}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\usepackage[utf8]{inputenc}
 ---
 
 The primary function of synder is to map genomic intervals of interest from a

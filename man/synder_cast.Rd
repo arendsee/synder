@@ -10,7 +10,7 @@
 \usage{
 as_synmap(d)
 
-as_gff(d)
+as_gff(d, ...)
 
 as_hitmap(d)
 
@@ -18,6 +18,8 @@ as_conlen(d)
 }
 \arguments{
 \item{d}{input type}
+
+\item{...}{additional arguments}
 }
 \description{
 cast data as Synder objects

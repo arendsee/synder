@@ -56,12 +56,14 @@ handle_inversions <- function(x) {
 # ----------------------
 
 #' @rdname synder_plot
+#' @method plot synmap
 #' @export
 plot.synmap <- function(x, ...){
   x <- to_global(x, prefix='q')
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
   x <- handle_inversions(x)
+
   ggplot2::ggplot(x) +
     ggplot2::geom_segment(
       ggplot2::aes_string(
@@ -72,14 +74,17 @@ plot.synmap <- function(x, ...){
 }
 
 #' @rdname synder_plot
+#' @method plot gff
 #' @export
 plot.gff <- function(x, ...){ }
 
 #' @rdname synder_plot
+#' @method plot hitmap
 #' @export
 plot.hitmap <- function(x, ...){ }
 
 #' @rdname synder_plot
+#' @method plot dump_result
 #' @export
 plot.dump_result <- function(x, ...){
   x <- to_global(x, prefix='q')
@@ -121,6 +126,7 @@ plot.dump_result <- function(x, ...){
 }
 
 #' @rdname synder_plot
+#' @method plot search_result
 #' @export
 plot.search_result <- function(x, y, ...){
   stopifnot('synmap' %in% class(y))
@@ -157,13 +163,19 @@ plot.search_result <- function(x, y, ...){
 }
 
 #' @rdname synder_plot
+#' @method plot filter_result
 #' @export
+# TODO: complete
 plot.filter_result <- function(x, y, ...){ }
 
 #' @rdname synder_plot
+#' @method plot map_result 
 #' @export
+# TODO: complete
 plot.map_result <- function(x, y, ...){ }
 
 #' @rdname synder_plot
+#' @method plot count_result
 #' @export
+# TODO: complete
 plot.count_result <- function(x, y, ...){ }

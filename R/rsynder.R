@@ -199,6 +199,9 @@ do_offsets <- function(d, offsets){
 }
 
 # Changes data.frames to temporary files
+# FIXME: This is a bit of a hack. The old C++ code took files. Here a convert
+# perfectly good R data.frames, which have already been loaded, back to files.
+# I should just pass the data frames to C-side, Rcpp can handle it.
 df2file <- function(x) {
   if(!is.null(x) && 'data.frame' %in% class(x)){
     xfile <- tempfile()
@@ -268,14 +271,14 @@ anon_search <- function(syn, a, b, seqid, ...){
   stopifnot(b >= a)
   N <- length(a)
   gff <- tibble::data_frame(
-    seqid     = seqid,
-    source  = '.',
-    type    = '.',
+    seqid   = seqid,
+    source  = NA_character_,
+    type    = NA_character_,
     start   = as.integer(a),
     stop    = as.integer(b),
-    score   = '.',
-    strand  = '.',
-    phase   = '.',
+    score   = NA_real_,
+    strand  = NA_character_,
+    phase   = NA_integer_,
     attr    = paste0('seq_', 1:N)
   )
   search(syn, gff, ...)
@@ -294,12 +297,25 @@ search <- function(
   r       = 0,
   offsets = c(0,0,0,0,0,0)
 ) {
+
+  # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
+  # for each GRange object.
+  if('GRangePairs' %in% class(syn)){
+    a <- CNEr::first(syn)
+    b <- CNEr::first(syn)
+    if(seqlengths(a) && seqnames(a)) tcl <- seqinfo(a)
+    if(seqlengths(b) && seqnames(b)) qcl <- seqinfo(b)
+  }
+
+  if(tcl != "") tcl <- as_conlen(tcl) 
+  if(qcl != "") qcl <- as_conlen(qcl) 
+
   d <- wrapper(
     FUN     = c_search,
-    x       = syn,
-    y       = gff,
-    tcl     = tcl,
-    qcl     = qcl,
+    x       = as_synmap(syn),
+    y       = as_gff(gff),
+    tcl     = df2file(tcl),
+    qcl     = df2file(qcl),
     swap    = swap,
     k       = k,
     r       = r,
@@ -337,7 +353,7 @@ filter <- function(
 ) {
   d <- wrapper(
     FUN     = c_filter,
-    x       = syn,
+    x       = as_synmap(syn),
     y       = hit,
     swap    = swap,
     k       = k,
@@ -379,8 +395,8 @@ map <- function(
 ) {
   d <- wrapper(
     FUN     = c_map,
-    x       = syn,
-    y       = gff,
+    x       = as_synmap(syn),
+    y       = as_gff(gff),
     swap    = swap,
     offsets = offsets[1:4]
   )
@@ -409,8 +425,8 @@ count <- function(
 ) {
   d <- wrapper(
     FUN     = c_count,
-    x       = syn,
-    y       = gff,
+    x       = as_synmap(syn),
+    y       = as_gff(gff),
     swap    = swap,
     offsets = offsets[1:4]
   )
@@ -434,7 +450,7 @@ dump <- function(
 ) {
   d <- wrapper(
     FUN     = c_dump,
-    x       = syn,
+    x       = as_synmap(syn),
     swap    = swap,
     trans   = trans,
     offsets = offsets[1:4]

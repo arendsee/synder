@@ -1,14 +1,13 @@
 ---
 title: "Synder Algorithm"
 author: "Zebulun Arendsee"
-date: "`r Sys.Date()`"
 output:
     rmarkdown::html_vignette:
         fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Algorithmic details}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\usepackage[utf8]{inputenc}
 ---
 
 For a practical introduction to `synder`, read [introduction vignette](intro.html).
