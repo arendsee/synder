@@ -302,13 +302,17 @@ search <- function(
   # for each GRange object.
   if('GRangePairs' %in% class(syn)){
     a <- CNEr::first(syn)
-    b <- CNEr::first(syn)
-    if(seqlengths(a) && seqnames(a)) tcl <- seqinfo(a)
-    if(seqlengths(b) && seqnames(b)) qcl <- seqinfo(b)
+    b <- CNEr::last(syn)
+    if(!is.null(GenomeInfoDb::seqlengths(a)) &&
+       !is.null(GenomeInfoDb::seqnames(a)))
+      tcl <- GenomeInfoDb::seqinfo(a)
+    if(!is.null(GenomeInfoDb::seqlengths(b)) &&
+       !is.null(GenomeInfoDb::seqnames(b)))
+      qcl <- GenomeInfoDb::seqinfo(b)
   }
 
-  if(tcl != "") tcl <- as_conlen(tcl) 
-  if(qcl != "") qcl <- as_conlen(qcl) 
+  if(!(is.character(tcl) && tcl == "")) tcl <- as_conlen(tcl) 
+  if(!(is.character(qcl) && qcl == "")) qcl <- as_conlen(qcl) 
 
   d <- wrapper(
     FUN     = c_search,

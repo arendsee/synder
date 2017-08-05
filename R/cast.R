@@ -8,6 +8,11 @@
 NULL
 
 .pairs_to_synmap <- function(x, y, strand, score){
+  if(! ('score' %in% names(GenomicRanges::mcols(y)))){
+    stop('A "score" field is required in the second GRanges object ',
+         'for synteny maps expressed as GRangesPairs objects.')
+  }
+
   data.frame(
     qseqid = as.character(GenomicRanges::seqnames(x)),
     qstart = GenomicRanges::start(x),
@@ -15,8 +20,8 @@ NULL
     tseqid = as.character(GenomicRanges::seqnames(y)),
     tstart = GenomicRanges::start(y),
     tstop  = GenomicRanges::end(y),
-    score  = as.numeric(score),
-    strand = strand,
+    score  = GenomicRanges::mcols(y)$score,
+    strand = as.character(BiocGenerics::strand(y)),
     stringsAsFactors=FALSE
   )
 }
@@ -27,13 +32,8 @@ as_synmap <- function(d) {
 
   if('synmap' %in% class(d)) return(d)
 
-  d <- if(("Axt" %in% class(d)) || ("GRangesPairs" %in% class(d))){
-    .pairs_to_synmap(
-      x      = CNEr::first(d),
-      y      = CNEr::last(d),
-      strand = as.character(BiocGenerics::strand(CNEr::last(d))),
-      score  = CNEr::score(d)
-    )
+  d <- if(("Axt" %in% class(d)) || ("GRangePairs" %in% class(d))){
+    .pairs_to_synmap(x=CNEr::first(d), y=CNEr::last(d))
   } else if (is.character(d)){
     if(file.exists(d)){
       read_synmap(d)
@@ -59,9 +59,9 @@ as_synmap <- function(d) {
   return(d)
 }
 
-.maybe_meta <- function(x, field, default=NA){
+.maybe_meta <- function(x, field, default=NA, caster=identity){
   if(field %in% names(GenomicRanges::mcols(x))){
-    GenomicRanges::mcols(x)[[field]]
+    caster(GenomicRanges::mcols(x)[[field]])
   } else {
     default
   }
@@ -76,15 +76,15 @@ as_synmap <- function(d) {
   id_tag     = "name"
 ){
   data.frame(
-    seqid   = GenomicRanges::seqnames(x),
-    source  = .maybe_meta(x, source_tag, NA_character_),
-    type    = .maybe_meta(x, type_tag, NA_character_),
+    seqid   = as.character(GenomicRanges::seqnames(x)),
+    source  = .maybe_meta(x, source_tag, NA_character_, as.character),
+    type    = .maybe_meta(x, type_tag, NA_character_, as.character),
     start   = GenomicRanges::start(x),
     stop    = GenomicRanges::end(x),
-    score   = .maybe_meta(x, score_tag, NA_real_),
-    strand  = GenomicRanges::strand(x),
-    phase   = .maybe_meta(x, phase_tag, NA_integer_),
-    attr    = .maybe_meta(x, id_tag, NA_character_),
+    score   = .maybe_meta(x, score_tag, NA_real_, as.numeric),
+    strand  = as.character(GenomicRanges::strand(x)),
+    phase   = .maybe_meta(x, phase_tag, NA_integer_, as.integer),
+    attr    = .maybe_meta(x, id_tag, NA_character_, as.character),
     stringsAsFactors=FALSE
   )
 }
