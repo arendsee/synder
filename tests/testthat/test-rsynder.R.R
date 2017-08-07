@@ -295,17 +295,17 @@ test_that(
     # overlapping intervals. There are a variety of tricky corner cases. Apart from
     # the first few, all the test below were added to test for a specific bug.
     # Basically, don't mess with these.
-    o1  <- synder::dump('overlap/map-1.syn',  trans='p', offsets=OFFSET)
-    o2  <- synder::dump('overlap/map-2.syn',  trans='p', offsets=OFFSET)
-    o3  <- synder::dump('overlap/map-3.syn',  trans='p', offsets=OFFSET)
-    o4  <- synder::dump('overlap/map-4.syn',  trans='p', offsets=OFFSET)
-    o5  <- synder::dump('overlap/map-5.syn',  trans='p', offsets=OFFSET)
-    o6  <- synder::dump('overlap/map-6.syn',  trans='p', offsets=OFFSET)
-    o7  <- synder::dump('overlap/map-7.syn',  trans='p', offsets=OFFSET)
-    o8  <- synder::dump('overlap/map-8.syn',  trans='p', offsets=OFFSET)
-    o9  <- synder::dump('overlap/map-9.syn',  trans='p', offsets=OFFSET)
-    o10 <- synder::dump('overlap/map-10.syn', trans='p', offsets=OFFSET)
-    o11 <- synder::dump('overlap/map-11.syn', trans='p', offsets=OFFSET)
+    o1  <- synder::dump('overlap/map-1.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o2  <- synder::dump('overlap/map-2.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o3  <- synder::dump('overlap/map-3.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o4  <- synder::dump('overlap/map-4.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o5  <- synder::dump('overlap/map-5.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o6  <- synder::dump('overlap/map-6.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o7  <- synder::dump('overlap/map-7.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o8  <- synder::dump('overlap/map-8.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o9  <- synder::dump('overlap/map-9.syn',  trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o10 <- synder::dump('overlap/map-10.syn', trans='p', offsets=OFFSET) %>% as_synder_data_frame
+    o11 <- synder::dump('overlap/map-11.syn', trans='p', offsets=OFFSET) %>% as_synder_data_frame
 
     # single nesting
     expect_equal(o1[[2]], c(100,400,600))

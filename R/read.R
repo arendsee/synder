@@ -45,6 +45,8 @@ read_hitmap <- function(file) {
 read_conlen <- function(file) {
   readr::read_tsv(
     file,
-    col_names=names(CON_LENGTH, comment="#")
+    col_names = names(CON_LENGTH),
+    col_types = 'ci',
+    comment   = "#"
   ) %>% as_conlen
 }

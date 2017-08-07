@@ -327,8 +327,8 @@ search <- function(
 
   d <- do_offsets(d, offsets)
 
-  if(qcl == "") qcl <- NULL
-  if(tcl == "") tcl <- NULL
+  if(is.character(qcl) && qcl == "") qcl <- NULL
+  if(is.character(tcl) && tcl == "") tcl <- NULL
 
   CNEr::GRangePairs(
     first  = .make_GRanges(
