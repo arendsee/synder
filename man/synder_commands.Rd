@@ -3,23 +3,13 @@
 \name{synder_commands}
 \alias{synder_commands}
 \alias{search}
-\alias{filter}
-\alias{map}
-\alias{count}
 \alias{dump}
 \title{Synder Commands}
 \usage{
-search(syn, gff, tcl = "", qcl = "", swap = FALSE, trans = "i", k = 0,
-  r = 0, offsets = c(1, 1, 1, 1, 1, 1))
+search(syn, gff, tcl = "", qcl = "", swap = FALSE, trans = "i",
+  k = 0L, r = 0, offsets = c(1L, 1L, 1L, 1L, 1L, 1L))
 
-filter(syn, hit, swap = FALSE, trans = "i", k = 0, r = 0,
-  offsets = c(1, 1, 1, 1, 1, 1))
-
-map(syn, gff, swap = FALSE, offsets = c(1, 1, 1, 1, 1, 1))
-
-count(syn, gff, swap = FALSE, offsets = c(1, 1, 1, 1, 1, 1))
-
-dump(syn, swap = FALSE, trans = "i", offsets = c(1, 1, 1, 1, 1, 1))
+dump(syn, swap = FALSE, trans = "i", offsets = c(1L, 1L, 1L, 1L, 1L, 1L))
 }
 \arguments{
 \item{syn}{synteny map file name or object}

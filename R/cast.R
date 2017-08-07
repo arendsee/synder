@@ -7,11 +7,16 @@
 #' @name synder_cast
 NULL
 
-as_synder_data_frame <- function(x, ...){
-  UseMethod('as_synder_data_frame', x)
+.make_GRanges <- function(seqnames, start, stop, strand='+', ...){
+  GenomicRanges::GRanges(
+    seqnames = seqnames,
+    strand = strand,
+    ranges = IRanges::IRanges(start=start, end=stop),
+    ...
+  )
 }
 
-as_synder_data_frame.GRangePairs <- function(x, ...){
+.base_GRangePairs_to_df <- function(x, ordering=NULL){
 
   a <- CNEr::first(x)
   b <- CNEr::second(x)
@@ -34,30 +39,47 @@ as_synder_data_frame.GRangePairs <- function(x, ...){
     stringsAsFactors=FALSE
   )
 
-  a_meta <- GenomicRanges::mcols(a)
-  b_meta <- GenomicRanges::mcols(b)
+  a_meta <- GenomicRanges::mcols(a) %>% as.data.frame
+  b_meta <- GenomicRanges::mcols(b) %>% as.data.frame
+  c_meta <- GenomicRanges::mcols(x) %>% as.data.frame
+
+  # For some silly reason, Bioconductor uses '*' for unknown strand, even
+  # though '.' is the GFF convention. Synder also considers '.' as missig data.
+  # So here I convert back.
+  if('strand' %in% names(c_meta)){
+    c_meta$strand <- as.character(c_meta$strand)
+    c_meta$strand <- ifelse(c_meta$strand == '*', '.', c_meta$strand)
+  }
 
   if(ncol(a_meta) > 0)
     d <- cbind(d, a_meta)
   if(ncol(b_meta) > 0)
     d <- cbind(d, b_meta)
+  if(ncol(c_meta) > 0)
+    d <- cbind(d, c_meta)
 
-  # For some silly reason, Bioconductor uses '*' for unknown strand, even
-  # though '.' is the GFF convention. Synder also considers '.' as missig data.
-  # So here I convert back.
-  str <- as.character(BiocGenerics::strand(b))
-  str <- ifelse(str == '*', '.', str)
-  d$strand = str
-
-  if(setequal(names(d), names(SI_COLS))){
-    d <- d[, names(SI_COLS)]
+  if(!is.null(ordering)){
+    stopifnot(all(ordering %in% names(d)))
+    d <- d[, ordering]
   }
 
   # Convert from DataFrame (some Bioc nonsense) to the normal data.frame
   as.data.frame(d)
 }
 
-as_synder_data_frame.Seqinfo <- function(x, ...){
+as.data.frame.Synmap <- function(x, ...){
+  .base_GRangePairs_to_df(x, ordering=names(SYNMAP_COLS))
+}
+
+as.data.frame.DumpResult <- function(x, ...){
+  .base_GRangePairs_to_df(x, ordering=names(DUMP_COLS))
+}
+
+as.data.frame.SearchResult <- function(x, ...){
+  .base_GRangePairs_to_df(x, ordering=names(SI_COLS))
+}
+
+as.data.frame.Seqinfo <- function(x, ...){
   data.frame(
     seqid = as.character(GenomeInfoDb::seqnames(x)),
     length = GenomeInfoDb::seqlengths(x),
@@ -65,7 +87,7 @@ as_synder_data_frame.Seqinfo <- function(x, ...){
   )
 }
 
-as_synder_data_frame.GRanges <- function(
+as.data.frame.GFF <- function(
   x,
   source_tag = "source",
   type_tag   = "type",
@@ -99,9 +121,13 @@ as_synder_data_frame.GRanges <- function(
   )
 }
 
+
+
 as_synmap <- function(x, ...){
   UseMethod('as_synmap', x)
 }
+
+as_synmap.Synmap <- function(x, ...) x
 
 as_synmap.character <- function(x, ...){
   if(file.exists(x)){
@@ -120,14 +146,16 @@ as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
   if(seqinfo(b) == NULL)
     GenomeInfoDb::seqinfo(b) <- seqinfo_b
 
-  GenomicRanges::mcols(b)$score <- CNEr::score(x)
-  # NOTE: CNEr stores the relative strand in the query
-  GenomicRanges::mcols(b)$strand <- GenomicRanges::strand(a)
-  CNEr::GRangePairs(first=a, second=b)
+  Synmap(CNEr::GRangePairs(
+    first  = a,
+    second = b,
+    score  = CNEr::score(x),
+    strand = GenomicRanges::strand(a) # NOTE: strand stored relative to query
+  ))
 }
 
 as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
-  CNEr::GRangePairs(
+  Synmap(CNEr::GRangePairs(
     .make_GRanges(
       seqnames=x$qseqid,
       start=x$qstart,
@@ -138,11 +166,11 @@ as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
       seqnames=x$tseqid,
       start=x$tstart,
       stop=x$tstop,
-      seqinfo=seqinfo_b,
-      score=x$score,
-      strand=x$strand
-    )
-  )
+      seqinfo=seqinfo_b
+    ),
+    score=x$score,
+    strand=x$strand
+  ))
 }
 
 as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
@@ -150,12 +178,14 @@ as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
     first(x)$seqinfo <- seqinfo_a
   if(!is.null(seqinfo_b))
     second(x)$seqinfo <- seqinfo_b
-  x
+  Synmap(x)
 }
 
 as_gff <- function(x, ...){
   UseMethod('as_gff', x)
 }
+
+as_gff.GFF <- function(x, ...) x
 
 as_gff.character <- function(x, ...){
   if(file.exists(x)){
@@ -169,11 +199,11 @@ as_gff.GRanges <- function(x, seqinfo_=NULL) {
   if(is.null(seqinfo(x))){
     seqinfo(x) <- seqinfo_
   }
-  x
+  GFF(x)
 }
 
 as_gff.data.frame <- function(x, seqinfo=FALSE){
-  .make_GRanges(
+  GFF(.make_GRanges(
     seqnames = x$seqid,
     start    = x$start,
     stop     = x$stop,
@@ -183,25 +213,14 @@ as_gff.data.frame <- function(x, seqinfo=FALSE){
     strand   = ifelse(x$strand == '.', '*',           x$strand),
     phase    = ifelse(x$phase  == '.', NA_integer_,   x$phase),
     attr     = x$attr
-  )
+  ))
 }
 
-as_hitmap <- function(x){
-  UseMethod('as_hitmap', x) 
-}
-
-as_hitmap.data.frame <- function(x) {
-  as_bioc_hitmap(x)
-}
-
-as_hitmap.GRanges <- function(x) {
-  x
-}
-
-
-as_conlen <- function(x) {
+as_conlen <- function(x, ...) {
   UseMethod('as_conlen', x)
 }
+
+as_conlen.Seqinfo <- function(x, ...) x
 
 as_conlen.character <- function(x, ...){
   if(file.exists(x)){
@@ -211,25 +230,11 @@ as_conlen.character <- function(x, ...){
   }
 }
 
-as_conlen.Seqinfo <- function(x) {
-  x
-}
-
 as_conlen.data.frame <- function(x, isCircular=NA, genome=NA) {
   GenomeInfoDb::Seqinfo(
     seqnames   = x$seqid,
     seqlengths = x$length,
     isCircular = isCircular,
     genome     = genome
-  )
-}
-
-
-.make_GRanges <- function(seqnames, start, stop, strand='+', ...){
-  GenomicRanges::GRanges(
-    seqnames = seqnames,
-    strand = strand,
-    ranges = IRanges::IRanges(start=start, end=stop),
-    ...
   )
 }

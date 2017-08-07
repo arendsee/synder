@@ -205,7 +205,7 @@ do_offsets <- function(d, offsets){
 df2file <- function(x) {
   if(!is.character(x) && !is.null(x)){ 
     xfile <- tempfile()
-    readr::write_tsv(as_synder_data_frame(x), path = xfile, col_names = FALSE)
+    readr::write_tsv(as.data.frame(x), path = xfile, col_names = FALSE)
     x <- xfile
     class(x) <- append(class(x), 'tmp')
   }
@@ -293,9 +293,9 @@ search <- function(
   qcl     = "",
   swap    = FALSE,
   trans   = 'i',
-  k       = 0,
+  k       = 0L,
   r       = 0,
-  offsets = c(1,1,1,1,1,1)
+  offsets = c(1L,1L,1L,1L,1L,1L)
 ) {
 
   # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
@@ -330,125 +330,36 @@ search <- function(
   if(is.character(qcl) && qcl == "") qcl <- NULL
   if(is.character(tcl) && tcl == "") tcl <- NULL
 
-  CNEr::GRangePairs(
-    first  = .make_GRanges(
-      as.character(d$qseqid),
-      d$qstart,
-      d$qstop,
-      seqinfo=qcl,
-      attr=as.character(d$attr)
-    ),
-    second = .make_GRanges(
-      as.character(d$tseqid),
-      d$tstart,
-      d$tstop,
-      seqinfo   = tcl,
+  SearchResult(
+    CNEr::GRangePairs(
+      first  = .make_GRanges(
+        as.character(d$qseqid),
+        d$qstart,
+        d$qstop,
+        seqinfo=qcl
+      ),
+      second = .make_GRanges(
+        as.character(d$tseqid),
+        d$tstart,
+        d$tstop,
+        seqinfo=tcl
+      ),
+      attr      = as.character(d$attr),
       strand    = d$strand,
       score     = d$score,
       cset      = d$cset,
       l_flag    = d$l_flag,
       r_flag    = d$r_flag,
       inbetween = d$inbetween
-    )
-  )
-
-}
-
-
-#' @rdname synder_commands
-#' @export
-filter <- function(
-  syn,
-  hit,
-  swap    = FALSE,
-  trans   = 'i',
-  k       = 0,
-  r       = 0,
-  offsets = c(1,1,1,1,1,1)
-) {
-  d <- wrapper(
-    FUN     = c_filter,
-    x       = as_synmap(syn),
-    y       = hit,
+    ),
     swap    = swap,
+    trans   = trans,
     k       = k,
     r       = r,
-    trans   = trans,
-    offsets = offsets[1:4]
-  )
-  if(is.null(d)) return(NULL)
-
-  d <- sub(d, pattern="\n", replacement="") %>%
-    strsplit(split="\t")                    %>%
-    do.call(what=rbind)                     %>%
-    tibble::as_data_frame()
-  names(d)[1:6] <- names(SYNMAP_COLS)[1:6]
-  d$qstart <- as.numeric(d$qstart)
-  d$qstop  <- as.numeric(d$qstop)
-  d$tstart <- as.numeric(d$tstart)
-  d$tstop  <- as.numeric(d$tstop)
-
-  class(d) <- append('filter_result', class(d))
-  attributes(d)$swap  <- swap
-  attributes(d)$k     <- k
-  attributes(d)$r     <- r
-  attributes(d)$trans <- trans
-
-  d <- do_offsets(d, offsets)
-
-  d
-}
-
-
-#' @rdname synder_commands
-#' @export
-map <- function(
-  syn,
-  gff,
-  swap    = FALSE,
-  offsets = c(1,1,1,1,1,1)
-) {
-  d <- wrapper(
-    FUN     = c_map,
-    x       = as_synmap(syn),
-    y       = as_gff(gff),
-    swap    = swap,
-    offsets = offsets[1:4]
+    offsets = offsets
   )
 
-  class(d) <- append('map_result', class(d))
-  attributes(d)$swap <- swap
-
-  d <- do_offsets(d, offsets)
-
-  d
 }
-
-
-#' @rdname synder_commands
-#' @export
-count <- function(
-  syn,
-  gff,
-  swap    = FALSE,
-  offsets = c(1,1,1,1,1,1)
-) {
-  d <- wrapper(
-    FUN     = c_count,
-    x       = as_synmap(syn),
-    y       = as_gff(gff),
-    swap    = swap,
-    offsets = offsets[1:4]
-  )
-
-  d$attr = as.character(d$attr)
-
-  class(d) <- append('count_result', class(d))
-  attributes(d)$swap <- swap
-
-  d
-}
-
 
 #' @rdname synder_commands
 #' @export
@@ -456,7 +367,7 @@ dump <- function(
   syn,
   swap    = FALSE,
   trans   = 'i',
-  offsets = c(1,1,1,1,1,1)
+  offsets = c(1L,1L,1L,1L,1L,1L)
 ) {
 
   syn <- as_synmap(syn)
@@ -471,22 +382,27 @@ dump <- function(
 
   d <- do_offsets(d, offsets)
 
-  CNEr::GRangePairs(
-    first  = .make_GRanges(
-      as.character(d$qseqid),
-      d$qstart,
-      d$qstop,
-      seqinfo=GenomeInfoDb::seqinfo(CNEr::first(syn))
+  DumpResult(
+    CNEr::GRangePairs(
+      first  = .make_GRanges(
+        as.character(d$qseqid),
+        d$qstart,
+        d$qstop,
+        seqinfo=GenomeInfoDb::seqinfo(CNEr::first(syn))
+      ),
+      second = .make_GRanges(
+        as.character(d$tseqid),
+        d$tstart,
+        d$tstop,
+        seqinfo=GenomeInfoDb::seqinfo(CNEr::second(syn))
+      ),
+      strand = d$strand,
+      score  = d$score,
+      cset   = d$cset
     ),
-    second = .make_GRanges(
-      as.character(d$tseqid),
-      d$tstart,
-      d$tstop,
-      strand  = d$strand,
-      score   = d$score,
-      cset    = d$cset,
-      seqinfo=GenomeInfoDb::seqinfo(CNEr::second(syn))
-    )
+    swap    = swap,
+    trans   = trans,
+    offsets = offsets[1:4]
   )
 }
 

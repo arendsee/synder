@@ -1,13 +1,3 @@
-#' Synder plot functions
-#'
-#' plots synder classes
-#'
-#' @param x table of a synder class
-#' @param y synmap object (for context)
-#' @param ... additional arguments that are currently ignored 
-#' @name synder_plot
-NULL
-
 # ----------------------
 # Plot utility functions
 # ----------------------
@@ -55,10 +45,9 @@ handle_inversions <- function(x) {
 # Plot functions
 # ----------------------
 
-#' @rdname synder_plot
-#' @method plot synmap
-#' @export
-plot.synmap <- function(x, ...){
+plot.Synmap <- function(x, ...){
+
+  x <- as.data.frame(x)
   x <- to_global(x, prefix='q')
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
@@ -73,20 +62,9 @@ plot.synmap <- function(x, ...){
     )
 }
 
-#' @rdname synder_plot
-#' @method plot gff
-#' @export
-plot.gff <- function(x, ...){ }
+plot.DumpResult <- function(x, ...){
 
-#' @rdname synder_plot
-#' @method plot hitmap
-#' @export
-plot.hitmap <- function(x, ...){ }
-
-#' @rdname synder_plot
-#' @method plot dump_result
-#' @export
-plot.dump_result <- function(x, ...){
+  x <- as.data.frame(x)
   x <- to_global(x, prefix='q')
   x <- to_global(x, prefix='t')
   x <- zero_base(x)
@@ -125,11 +103,13 @@ plot.dump_result <- function(x, ...){
     )
 }
 
-#' @rdname synder_plot
-#' @method plot search_result
-#' @export
-plot.search_result <- function(x, y, ...){
-  stopifnot('synmap' %in% class(y))
+plot.SearchResult <- function(x, y, ...){
+
+  stopifnot(is_synmap(y))
+
+  x <- as.data.frame(x)
+  y <- as.data.frame(y)
+
   x <- x[2:8]
   x$group <- 'search'
   y$group <- 'synmap'
@@ -161,21 +141,3 @@ plot.search_result <- function(x, y, ...){
       alpha=0.2
     )
 }
-
-#' @rdname synder_plot
-#' @method plot filter_result
-#' @export
-# TODO: complete
-plot.filter_result <- function(x, y, ...){ }
-
-#' @rdname synder_plot
-#' @method plot map_result 
-#' @export
-# TODO: complete
-plot.map_result <- function(x, y, ...){ }
-
-#' @rdname synder_plot
-#' @method plot count_result
-#' @export
-# TODO: complete
-plot.count_result <- function(x, y, ...){ }
