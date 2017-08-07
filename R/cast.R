@@ -183,3 +183,72 @@ as_conlen <- function(d) {
 
   return(d)
 }
+
+
+make_GRanges <- function(seqnames, start, stop, strand='+', ...){
+  GenomicRanges::GRanges(
+    seqnames = seqnames,
+    strand = strand,
+    ranges = IRanges::IRanges(start=start, end=stop),
+    ...
+  )
+}
+
+as_bioc <- function(x, ...) {
+  UseMethod("as_bioc", x)
+}
+
+as_bioc.conlen <- function(x, isCircular=NA, genome=NA){
+  GenomeInfoDb::Seqinfo(
+    seqnames   = x$seqid,
+    seqlengths = x$length,
+    isCircular = isCircular,
+    genome     = genome
+  )
+}
+
+as_bioc.dump_result <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+  CNEr::GRangePairs(
+    first  = make_GRanges(
+      x$qseqid,
+      x$qstart,
+      x$qstop,
+      seqinfo=seqinfo_a
+    ),
+    second = make_GRanges(
+      x$tseqid,
+      x$tstart,
+      x$tstop,
+      seqinfo = seqinfo_b,
+      strand  = x$strand,
+      score   = x$score,
+      cset    = x$cset
+    )
+  )
+}
+
+as_bioc.search_result <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+  CNEr::GRangePairs(
+    first  = make_GRanges(
+      x$qseqid,
+      x$qstart,
+      x$qstop,
+      seqinfo=seqinfo_a,
+      seqid=x$attr
+    ),
+    second = make_GRanges(
+      x$tseqid,
+      x$tstart,
+      x$tstop,
+      seqinfo   = seqinfo_b,
+      strand    = x$strand,
+      score     = x$score,
+      cset      = x$cset,
+      l_flag    = x$l_flag,
+      r_flag    = x$r_flag,
+      inbetween = x$inbetween
+    )
+  )
+}
+
+as_bioc.NULL <- function(x){ NULL }

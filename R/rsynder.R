@@ -295,7 +295,8 @@ search <- function(
   trans   = 'i',
   k       = 0,
   r       = 0,
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1,1,1,1,1,1),
+  bioc    = FALSE
 ) {
 
   # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
@@ -340,6 +341,9 @@ search <- function(
 
   d <- do_offsets(d, offsets)
 
+  if(bioc)
+    d <- as_bioc(d, seqinfo_a=as_bioc(qcl), seqinfo_b=as_bioc(tcl))
+
   d
 }
 
@@ -353,7 +357,7 @@ filter <- function(
   trans   = 'i',
   k       = 0,
   r       = 0,
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1,1,1,1,1,1)
 ) {
   d <- wrapper(
     FUN     = c_filter,
@@ -395,7 +399,7 @@ map <- function(
   syn,
   gff,
   swap    = FALSE,
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1,1,1,1,1,1)
 ) {
   d <- wrapper(
     FUN     = c_map,
@@ -404,11 +408,6 @@ map <- function(
     swap    = swap,
     offsets = offsets[1:4]
   )
-
-  d$attr   <- as.character(d$attr)
-  d$qseqid <- as.character(d$qseqid)
-  d$tseqid <- as.character(d$tseqid)
-  d$strand <- as.character(d$strand)
 
   class(d) <- append('map_result', class(d))
   attributes(d)$swap <- swap
@@ -425,7 +424,7 @@ count <- function(
   syn,
   gff,
   swap    = FALSE,
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1,1,1,1,1,1)
 ) {
   d <- wrapper(
     FUN     = c_count,
@@ -450,7 +449,7 @@ dump <- function(
   syn,
   swap    = FALSE,
   trans   = 'i',
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1,1,1,1,1,1)
 ) {
   d <- wrapper(
     FUN     = c_dump,
