@@ -203,9 +203,9 @@ do_offsets <- function(d, offsets){
 # perfectly good R data.frames, which have already been loaded, back to files.
 # I should just pass the data frames to C-side, Rcpp can handle it.
 df2file <- function(x) {
-  if(!is.null(x) && 'data.frame' %in% class(x)){
+  if(!is.character(x) && !is.null(x)){ 
     xfile <- tempfile()
-    readr::write_tsv(x, path = xfile, col_names = FALSE)
+    readr::write_tsv(as_synder_data_frame(x), path = xfile, col_names = FALSE)
     x <- xfile
     class(x) <- append(class(x), 'tmp')
   }
@@ -295,8 +295,7 @@ search <- function(
   trans   = 'i',
   k       = 0,
   r       = 0,
-  offsets = c(1,1,1,1,1,1),
-  bioc    = FALSE
+  offsets = c(1,1,1,1,1,1)
 ) {
 
   # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
@@ -304,11 +303,9 @@ search <- function(
   if('GRangePairs' %in% class(syn)){
     a <- CNEr::first(syn)
     b <- CNEr::last(syn)
-    if(!is.null(GenomeInfoDb::seqlengths(a)) &&
-       !is.null(GenomeInfoDb::seqnames(a)))
+    if(!all(is.na(GenomeInfoDb::seqlengths(a))))
       tcl <- GenomeInfoDb::seqinfo(a)
-    if(!is.null(GenomeInfoDb::seqlengths(b)) &&
-       !is.null(GenomeInfoDb::seqnames(b)))
+    if(!all(is.na(GenomeInfoDb::seqlengths(b))))
       qcl <- GenomeInfoDb::seqinfo(b)
   }
 
@@ -328,23 +325,33 @@ search <- function(
     offsets = offsets[1:4]
   )
 
-  d$attr   <- as.character(d$attr)
-  d$qseqid <- as.character(d$qseqid)
-  d$tseqid <- as.character(d$tseqid)
-  d$strand <- as.character(d$strand)
-
-  class(d) <- append('search_result', class(d))
-  attributes(d)$swap  <- swap
-  attributes(d)$k     <- k
-  attributes(d)$r     <- r
-  attributes(d)$trans <- trans
-
   d <- do_offsets(d, offsets)
 
-  if(bioc)
-    d <- as_bioc(d, seqinfo_a=as_bioc(qcl), seqinfo_b=as_bioc(tcl))
+  if(qcl == "") qcl <- NULL
+  if(tcl == "") tcl <- NULL
 
-  d
+  CNEr::GRangePairs(
+    first  = .make_GRanges(
+      as.character(d$qseqid),
+      d$qstart,
+      d$qstop,
+      seqinfo=qcl,
+      attr=as.character(d$attr)
+    ),
+    second = .make_GRanges(
+      as.character(d$tseqid),
+      d$tstart,
+      d$tstop,
+      seqinfo   = tcl,
+      strand    = d$strand,
+      score     = d$score,
+      cset      = d$cset,
+      l_flag    = d$l_flag,
+      r_flag    = d$r_flag,
+      inbetween = d$inbetween
+    )
+  )
+
 }
 
 
@@ -451,22 +458,35 @@ dump <- function(
   trans   = 'i',
   offsets = c(1,1,1,1,1,1)
 ) {
+
+  syn <- as_synmap(syn)
+
   d <- wrapper(
     FUN     = c_dump,
-    x       = as_synmap(syn),
+    x       = syn,
     swap    = swap,
     trans   = trans,
     offsets = offsets[1:4]
   )
-  d$qseqid <- as.character(d$qseqid)
-  d$tseqid <- as.character(d$tseqid)
-
-  # Assign class and attributes
-  class(d) <- append('dump_result', class(d))
-  attributes(d)$swap  = swap
-  attributes(d)$trans = trans
 
   d <- do_offsets(d, offsets)
 
-  d
+  CNEr::GRangePairs(
+    first  = .make_GRanges(
+      as.character(d$qseqid),
+      d$qstart,
+      d$qstop,
+      seqinfo=GenomeInfoDb::seqinfo(CNEr::first(syn))
+    ),
+    second = .make_GRanges(
+      as.character(d$tseqid),
+      d$tstart,
+      d$tstop,
+      strand  = d$strand,
+      score   = d$score,
+      cset    = d$cset,
+      seqinfo=GenomeInfoDb::seqinfo(CNEr::second(syn))
+    )
+  )
 }
+

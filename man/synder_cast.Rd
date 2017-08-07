@@ -2,20 +2,7 @@
 % Please edit documentation in R/cast.R
 \name{synder_cast}
 \alias{synder_cast}
-\alias{as_synmap}
-\alias{as_gff}
-\alias{as_hitmap}
-\alias{as_conlen}
 \title{Synder cast functions}
-\usage{
-as_synmap(d)
-
-as_gff(d, ...)
-
-as_hitmap(d)
-
-as_conlen(d)
-}
 \arguments{
 \item{d}{input type}
 

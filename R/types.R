@@ -25,3 +25,19 @@ CON_LENGTH <- c(
   "seqid"  = "character",
   "length" = "integer"
 )
+
+SI_COLS <- c(
+  "attr"      = "character",
+  "qseqid"    = "character",
+  "qstart"    = "integer",
+  "qstop"     = "integer",
+  "tseqid"    = "character",
+  "tstart"    = "integer",
+  "tstop"     = "integer",
+  "strand"    = "character",
+  "score"     = "numeric",
+  "cset"      = "integer",
+  "l_flag"    = "integer",
+  "r_flag"    = "integer",
+  "inbetween" = "logical"
+)

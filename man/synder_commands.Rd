@@ -10,7 +10,7 @@
 \title{Synder Commands}
 \usage{
 search(syn, gff, tcl = "", qcl = "", swap = FALSE, trans = "i", k = 0,
-  r = 0, offsets = c(1, 1, 1, 1, 1, 1), bioc = FALSE)
+  r = 0, offsets = c(1, 1, 1, 1, 1, 1))
 
 filter(syn, hit, swap = FALSE, trans = "i", k = 0, r = 0,
   offsets = c(1, 1, 1, 1, 1, 1))

@@ -36,7 +36,7 @@ get_obs_exp <- function(dir, base, offsets=OFFSET, ext="", add_tcl=FALSE, add_qc
       tcl     = tcl_file,
       qcl     = qcl_file,
       ...
-    )
+    ) %>% as_synder_data_frame
     exp <- readr::read_tsv(exp_file, col_names=FALSE)
     list(obs=obs, exp=exp)
 }
