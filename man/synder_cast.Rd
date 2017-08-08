@@ -4,23 +4,25 @@
 \alias{synder_cast}
 \alias{as_synmap}
 \alias{as_gff}
-\alias{as_hitmap}
 \alias{as_conlen}
 \title{Synder cast functions}
 \usage{
-as_synmap(d)
+as_synmap(x, ...)
 
-as_gff(d, ...)
+as_gff(x, ...)
 
-as_hitmap(d)
-
-as_conlen(d)
+as_conlen(x, ...)
 }
 \arguments{
-\item{d}{input type}
-
 \item{...}{additional arguments}
+
+\item{d}{input type}
 }
 \description{
-cast data as Synder objects
+Cast data as synder objects
+}
+\details{
+\code{as_synmap}
+\code{as_gff}
+\code{as_conlen}
 }

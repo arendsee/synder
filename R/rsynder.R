@@ -10,29 +10,12 @@ NULL
 #' function of Synder is to use a synteny map to trace an interval in one
 #' genome to a narrow search space on another genome.
 #' 
-#' The main functions exported by Synder are 
+#' The primary function exported by Synder are
 #'
 #' \itemize{
 #'   \item search - map intervals in A to search intervals in B
 #'   \item anon_search - simplified version of search
-#'   \item filter - find links that agree with a synteny map
-#'   \item map - find intervals in B that overlap intervals in A
-#'   \item count - count links in A overlapping given intervals
 #'   \item dump - dump synteny map with added contiguous set ids
-#' }
-#'
-#' Synder also defines several classes. These all have specialized plot and
-#' print functions.
-#'
-#' \itemize{
-#'    \item synmap
-#'    \item gff
-#'    \item hitmap
-#'    \item dump_result
-#'    \item search_result
-#'    \item filter_result
-#'    \item map_result
-#'    \item count_result
 #' }
 #'
 #' @docType package
@@ -40,26 +23,6 @@ NULL
 NULL
 
 #' Synder Commands
-#'
-#' @section Inputs:
-#'
-#' The synteny map must be TAB-delimited, with no header, and must have the
-#' following fields:
-#' \enumerate{
-#'   \item qseqid - query contig id (e.g. Chr1)
-#'   \item qstart - query interval start
-#'   \item qstop  - query interval stop
-#'   \item sseqid - target contig id
-#'   \item sstart - target interval start
-#'   \item sstop  - target interval stop
-#'   \item score  - score of the syntenic match*
-#'   \item strand - relative orientation
-#' }
-#'   * score can be any numeric value, it will be
-#'   transformed as specified by the -x option
-#'
-#' The target and query genome lengths files must be TAB-delimited with
-#' columns: <name>, <length>
 #'
 #' @section Search Command:
 #'
@@ -203,9 +166,9 @@ do_offsets <- function(d, offsets){
 # perfectly good R data.frames, which have already been loaded, back to files.
 # I should just pass the data frames to C-side, Rcpp can handle it.
 df2file <- function(x) {
-  if(!is.null(x) && 'data.frame' %in% class(x)){
+  if(!is.character(x) && !is.null(x)){ 
     xfile <- tempfile()
-    readr::write_tsv(x, path = xfile, col_names = FALSE)
+    readr::write_tsv(as.data.frame(x), path = xfile, col_names = FALSE)
     x <- xfile
     class(x) <- append(class(x), 'tmp')
   }
@@ -293,9 +256,9 @@ search <- function(
   qcl     = "",
   swap    = FALSE,
   trans   = 'i',
-  k       = 0,
+  k       = 0L,
   r       = 0,
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1L,1L,1L,1L,1L,1L)
 ) {
 
   # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
@@ -303,11 +266,9 @@ search <- function(
   if('GRangePairs' %in% class(syn)){
     a <- CNEr::first(syn)
     b <- CNEr::last(syn)
-    if(!is.null(GenomeInfoDb::seqlengths(a)) &&
-       !is.null(GenomeInfoDb::seqnames(a)))
+    if(!all(is.na(GenomeInfoDb::seqlengths(a))))
       tcl <- GenomeInfoDb::seqinfo(a)
-    if(!is.null(GenomeInfoDb::seqlengths(b)) &&
-       !is.null(GenomeInfoDb::seqnames(b)))
+    if(!all(is.na(GenomeInfoDb::seqlengths(b))))
       qcl <- GenomeInfoDb::seqinfo(b)
   }
 
@@ -327,122 +288,41 @@ search <- function(
     offsets = offsets[1:4]
   )
 
-  d$attr   <- as.character(d$attr)
-  d$qseqid <- as.character(d$qseqid)
-  d$tseqid <- as.character(d$tseqid)
-  d$strand <- as.character(d$strand)
-
-  class(d) <- append('search_result', class(d))
-  attributes(d)$swap  <- swap
-  attributes(d)$k     <- k
-  attributes(d)$r     <- r
-  attributes(d)$trans <- trans
-
   d <- do_offsets(d, offsets)
 
-  d
-}
+  if(is.character(qcl) && qcl == "") qcl <- NULL
+  if(is.character(tcl) && tcl == "") tcl <- NULL
 
-
-#' @rdname synder_commands
-#' @export
-filter <- function(
-  syn,
-  hit,
-  swap    = FALSE,
-  trans   = 'i',
-  k       = 0,
-  r       = 0,
-  offsets = c(0,0,0,0,0,0)
-) {
-  d <- wrapper(
-    FUN     = c_filter,
-    x       = as_synmap(syn),
-    y       = hit,
+  SearchResult(
+    CNEr::GRangePairs(
+      first  = .make_GRanges(
+        as.character(d$qseqid),
+        d$qstart,
+        d$qstop,
+        seqinfo=qcl
+      ),
+      second = .make_GRanges(
+        as.character(d$tseqid),
+        d$tstart,
+        d$tstop,
+        seqinfo=tcl
+      ),
+      attr      = as.character(d$attr),
+      strand    = d$strand,
+      score     = d$score,
+      cset      = d$cset,
+      l_flag    = d$l_flag,
+      r_flag    = d$r_flag,
+      inbetween = d$inbetween
+    ),
     swap    = swap,
+    trans   = trans,
     k       = k,
     r       = r,
-    trans   = trans,
-    offsets = offsets[1:4]
-  )
-  if(is.null(d)) return(NULL)
-
-  d <- sub(d, pattern="\n", replacement="") %>%
-    strsplit(split="\t")                    %>%
-    do.call(what=rbind)                     %>%
-    tibble::as_data_frame()
-  names(d)[1:6] <- names(SYNMAP_COLS)[1:6]
-  d$qstart <- as.numeric(d$qstart)
-  d$qstop  <- as.numeric(d$qstop)
-  d$tstart <- as.numeric(d$tstart)
-  d$tstop  <- as.numeric(d$tstop)
-
-  class(d) <- append('filter_result', class(d))
-  attributes(d)$swap  <- swap
-  attributes(d)$k     <- k
-  attributes(d)$r     <- r
-  attributes(d)$trans <- trans
-
-  d <- do_offsets(d, offsets)
-
-  d
-}
-
-
-#' @rdname synder_commands
-#' @export
-map <- function(
-  syn,
-  gff,
-  swap    = FALSE,
-  offsets = c(0,0,0,0,0,0)
-) {
-  d <- wrapper(
-    FUN     = c_map,
-    x       = as_synmap(syn),
-    y       = as_gff(gff),
-    swap    = swap,
-    offsets = offsets[1:4]
+    offsets = offsets
   )
 
-  d$attr   <- as.character(d$attr)
-  d$qseqid <- as.character(d$qseqid)
-  d$tseqid <- as.character(d$tseqid)
-  d$strand <- as.character(d$strand)
-
-  class(d) <- append('map_result', class(d))
-  attributes(d)$swap <- swap
-
-  d <- do_offsets(d, offsets)
-
-  d
 }
-
-
-#' @rdname synder_commands
-#' @export
-count <- function(
-  syn,
-  gff,
-  swap    = FALSE,
-  offsets = c(0,0,0,0,0,0)
-) {
-  d <- wrapper(
-    FUN     = c_count,
-    x       = as_synmap(syn),
-    y       = as_gff(gff),
-    swap    = swap,
-    offsets = offsets[1:4]
-  )
-
-  d$attr = as.character(d$attr)
-
-  class(d) <- append('count_result', class(d))
-  attributes(d)$swap <- swap
-
-  d
-}
-
 
 #' @rdname synder_commands
 #' @export
@@ -450,24 +330,42 @@ dump <- function(
   syn,
   swap    = FALSE,
   trans   = 'i',
-  offsets = c(0,0,0,0,0,0)
+  offsets = c(1L,1L,1L,1L,1L,1L)
 ) {
+
+  syn <- as_synmap(syn)
+
   d <- wrapper(
     FUN     = c_dump,
-    x       = as_synmap(syn),
+    x       = syn,
     swap    = swap,
     trans   = trans,
     offsets = offsets[1:4]
   )
-  d$qseqid <- as.character(d$qseqid)
-  d$tseqid <- as.character(d$tseqid)
-
-  # Assign class and attributes
-  class(d) <- append('dump_result', class(d))
-  attributes(d)$swap  = swap
-  attributes(d)$trans = trans
 
   d <- do_offsets(d, offsets)
 
-  d
+  DumpResult(
+    CNEr::GRangePairs(
+      first  = .make_GRanges(
+        as.character(d$qseqid),
+        d$qstart,
+        d$qstop,
+        seqinfo=GenomeInfoDb::seqinfo(CNEr::first(syn))
+      ),
+      second = .make_GRanges(
+        as.character(d$tseqid),
+        d$tstart,
+        d$tstop,
+        seqinfo=GenomeInfoDb::seqinfo(CNEr::second(syn))
+      ),
+      strand = d$strand,
+      score  = d$score,
+      cset   = d$cset
+    ),
+    swap    = swap,
+    trans   = trans,
+    offsets = offsets[1:4]
+  )
 }
+

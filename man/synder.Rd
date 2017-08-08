@@ -11,28 +11,11 @@ function of Synder is to use a synteny map to trace an interval in one
 genome to a narrow search space on another genome.
 }
 \details{
-The main functions exported by Synder are
+The primary function exported by Synder are
 
 \itemize{
   \item search - map intervals in A to search intervals in B
   \item anon_search - simplified version of search
-  \item filter - find links that agree with a synteny map
-  \item map - find intervals in B that overlap intervals in A
-  \item count - count links in A overlapping given intervals
   \item dump - dump synteny map with added contiguous set ids
-}
-
-Synder also defines several classes. These all have specialized plot and
-print functions.
-
-\itemize{
-   \item synmap
-   \item gff
-   \item hitmap
-   \item dump_result
-   \item search_result
-   \item filter_result
-   \item map_result
-   \item count_result
 }
 }

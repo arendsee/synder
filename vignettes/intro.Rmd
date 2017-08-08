@@ -36,6 +36,9 @@ library(readr)
 
 ## Mapping intervals on the simple linear synteny map 
 
+Sample raw data, as `data.frames` rather than the dedicated Bioconductor types,
+can be found in `intro_1`, `intro_2` and `toy`.
+
 ```{r}
 data(intro_1)
 ```
@@ -46,31 +49,37 @@ This dataset contains the following synteny map:
 knitr::kable(intro_1$synmap)
 ```
 
-The synmap object has a class of its own with its specialized print and plot
-functions.
+This is a simple data frame. It can be converted to an Bioconductor compatible
+object with `as_synmap`.
 
 ```{r, echo=TRUE}
-class(intro_1$synmap)
+(syn <- as_synmap(intro_1$synmap))
 ```
 
-The print function is only slightly modified from its tibble parent
+The synmap object has specialized print and plot functions.
 
 ```{r, echo=TRUE}
-print(intro_1$synmap)
+class(syn)
+```
+
+The print function is curtesy of the inherited `GRangePairs` class
+
+```{r, echo=TRUE}
+print(syn)
 ```
 
 The plot function shows the synteny map as an alignment.
 
 ```{r, echo=TRUE, fig.show='hold', fig.cap="Synteny map plot"}
-plot(intro_1$synmap)
+plot(syn)
 ```
 
 We can map intervals from query to target interactively with the `anon_search`
 function.
 
 ```{r, echo=TRUE, fig.show='hold', fig.cap="Finding query in a syntenic hole"}
-x <- anon_search(intro_1$synmap, 240, 260, 'que')
-plot(x, intro_1$synmap)
+x <- anon_search(syn, 240, 260, 'que')
+plot(x, syn)
 ```
 
 The plot function here takes the search results and plots them in the context
@@ -82,8 +91,8 @@ Notice that the search interval snaps to the size of the gap in the target
 synteny map.
 
 ```{r, echo=TRUE, fig.show='hold', fig.cap="Finding query where one side overlaps"}
-x <- anon_search(intro_1$synmap, 240, 310, 'que')
-plot(x, intro_1$synmap)
+x <- anon_search(syn, 240, 310, 'que')
+plot(x, syn)
 ```
 
 Both sides snap to the nearest target edge.
@@ -96,6 +105,6 @@ the query and target side and are not overlapping.
 
 ```{r}
 data(intro_2)
-plot(intro_2$synmap)
+plot(as_synmap(intro_2$synmap))
 plot(synder::dump(intro_2$synmap))
 ```

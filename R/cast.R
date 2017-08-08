@@ -1,185 +1,252 @@
 #' Synder cast functions
 #'
-#' cast data as Synder objects
+#' Cast data as synder objects
+#'
+#' \code{as_synmap}
+#' \code{as_gff}
+#' \code{as_conlen}
 #'
 #' @param d input type
 #' @param ... additional arguments
 #' @name synder_cast
 NULL
 
-.pairs_to_synmap <- function(x, y, strand, score){
-  if(! ('score' %in% names(GenomicRanges::mcols(y)))){
-    stop('A "score" field is required in the second GRanges object ',
-         'for synteny maps expressed as GRangesPairs objects.')
+.make_GRanges <- function(seqnames, start, stop, strand='+', ...){
+  GenomicRanges::GRanges(
+    seqnames = seqnames,
+    strand = strand,
+    ranges = IRanges::IRanges(start=start, end=stop),
+    ...
+  )
+}
+
+.base_GRangePairs_to_df <- function(x, ordering=NULL){
+
+  a <- CNEr::first(x)
+  b <- CNEr::second(x)
+
+  if(any(GenomicRanges::strand(a) != '+')){
+    stop(
+      "Cannot have a negative strand in a GRangePairs' first GRange object. ",
+      "In synder, strand is relative to the first genome, so only the second ",
+      "genome will have negative sense."
+    )
   }
 
+  d <- data.frame(
+    qseqid = as.character(GenomicRanges::seqnames(a)),
+    qstart = GenomicRanges::start(a),
+    qstop  = GenomicRanges::end(a),
+    tseqid = as.character(GenomicRanges::seqnames(b)),
+    tstart = GenomicRanges::start(b),
+    tstop  = GenomicRanges::end(b),
+    stringsAsFactors=FALSE
+  )
+
+  a_meta <- GenomicRanges::mcols(a) %>% as.data.frame
+  b_meta <- GenomicRanges::mcols(b) %>% as.data.frame
+  c_meta <- GenomicRanges::mcols(x) %>% as.data.frame
+
+  # For some silly reason, Bioconductor uses '*' for unknown strand, even
+  # though '.' is the GFF convention. Synder also considers '.' as missig data.
+  # So here I convert back.
+  if('strand' %in% names(c_meta)){
+    c_meta$strand <- as.character(c_meta$strand)
+    c_meta$strand <- ifelse(c_meta$strand == '*', '.', c_meta$strand)
+  }
+
+  if(ncol(a_meta) > 0)
+    d <- cbind(d, a_meta)
+  if(ncol(b_meta) > 0)
+    d <- cbind(d, b_meta)
+  if(ncol(c_meta) > 0)
+    d <- cbind(d, c_meta)
+
+  if(!is.null(ordering)){
+    stopifnot(all(ordering %in% names(d)))
+    d <- d[, ordering]
+  }
+
+  # Convert from DataFrame (some Bioc nonsense) to the normal data.frame
+  as.data.frame(d)
+}
+
+as.data.frame.Synmap <- function(x, ...){
+  .base_GRangePairs_to_df(x, ordering=names(SYNMAP_COLS))
+}
+
+as.data.frame.DumpResult <- function(x, ...){
+  .base_GRangePairs_to_df(x, ordering=names(DUMP_COLS))
+}
+
+as.data.frame.SearchResult <- function(x, ...){
+  .base_GRangePairs_to_df(x, ordering=names(SI_COLS))
+}
+
+as.data.frame.Seqinfo <- function(x, ...){
   data.frame(
-    qseqid = as.character(GenomicRanges::seqnames(x)),
-    qstart = GenomicRanges::start(x),
-    qstop  = GenomicRanges::end(x),
-    tseqid = as.character(GenomicRanges::seqnames(y)),
-    tstart = GenomicRanges::start(y),
-    tstop  = GenomicRanges::end(y),
-    score  = GenomicRanges::mcols(y)$score,
-    strand = as.character(BiocGenerics::strand(y)),
+    seqid = as.character(GenomeInfoDb::seqnames(x)),
+    length = GenomeInfoDb::seqlengths(x),
     stringsAsFactors=FALSE
   )
 }
 
-#' @rdname synder_cast
-#' @export
-as_synmap <- function(d) {
-
-  if('synmap' %in% class(d)) return(d)
-
-  d <- if(("Axt" %in% class(d)) || ("GRangePairs" %in% class(d))){
-    .pairs_to_synmap(x=CNEr::first(d), y=CNEr::last(d))
-  } else if (is.character(d)){
-    if(file.exists(d)){
-      read_synmap(d)
-    } else {
-      stop(sprintf("Cannot find synteny map file '%s'", d))
-    }
-  } else {
-    as.data.frame(d)
-  }
-
-  # assert correct number of columns
-  stopifnot(ncol(d) == 8)
-
-  # Set column names
-  names(d) <- names(SYNMAP_COLS)
-
-  # Assert column types match expectations
-  stopifnot(SYNMAP_COLS == lapply(d, class))
-
-  # Assign class membership
-  class(d) <- append('synmap', class(d))
-
-  return(d)
-}
-
-.maybe_meta <- function(x, field, default=NA, caster=identity){
-  if(field %in% names(GenomicRanges::mcols(x))){
-    caster(GenomicRanges::mcols(x)[[field]])
-  } else {
-    default
-  }
-}
-
-.GRanges_to_GFF <- function(
+as.data.frame.GFF <- function(
   x,
   source_tag = "source",
   type_tag   = "type",
   score_tag  = "score",
   phase_tag  = "phase",
-  id_tag     = "name"
+  id_tag     = "attr",
+  ...
 ){
+  .maybe_meta <- function(x, field, default=NA, caster=identity){
+    if(field %in% names(GenomicRanges::mcols(x))){
+      caster(GenomicRanges::mcols(x)[[field]])
+    } else {
+      default
+    }
+  }
+
+  strand <- as.character(GenomicRanges::strand(x))
+  strand <- ifelse(strand == '*', '.', strand)
+
   data.frame(
-    seqid   = as.character(GenomicRanges::seqnames(x)),
-    source  = .maybe_meta(x, source_tag, NA_character_, as.character),
-    type    = .maybe_meta(x, type_tag, NA_character_, as.character),
-    start   = GenomicRanges::start(x),
-    stop    = GenomicRanges::end(x),
-    score   = .maybe_meta(x, score_tag, NA_real_, as.numeric),
-    strand  = as.character(GenomicRanges::strand(x)),
-    phase   = .maybe_meta(x, phase_tag, NA_integer_, as.integer),
-    attr    = .maybe_meta(x, id_tag, NA_character_, as.character),
+    seqid  = as.character(GenomicRanges::seqnames(x)),
+    source = .maybe_meta(x, source_tag, NA_character_, as.character),
+    type   = .maybe_meta(x, type_tag, NA_character_, as.character),
+    start  = GenomicRanges::start(x),
+    stop   = GenomicRanges::end(x),
+    score  = .maybe_meta(x, score_tag, NA_real_, as.numeric),
+    strand = strand,
+    phase  = .maybe_meta(x, phase_tag, NA_integer_, as.integer),
+    attr   = .maybe_meta(x, id_tag, NA_character_, as.character),
     stringsAsFactors=FALSE
   )
 }
 
+
+
 #' @rdname synder_cast
 #' @export
-as_gff <- function(d, ...) {
-
-  if('gff' %in% class(d)) return(d)
-
-  d <- if("GRanges" %in% class(d)){
-    .GRanges_to_GFF(d, ...)
-  } else if (is.character(d)){
-    if(file.exists(d)){
-      read_gff(d)
-    } else {
-      stop(sprintf("Cannot find GFF file '%s'", d))
-    }
-  } else {
-    as.data.frame(d)
-  }
-
-  # Assert the correct number of columns were read
-  stopifnot(ncol(d) == 9)
-
-  # Set column names
-  names(d) <- names(GFF_COLS)
-
-  # Assert column types match expectations
-  for(i in 1:ncol(d)){
-    if(class(d[[i]]) != GFF_COLS[i]){
-      stop(paste("GFFError: in column", i, "expected type", GFF_COLS[i],
-                 ", found", class(d[[i]])))
-    }
-  }
-
-  # Assign class membership
-  class(d) <- append('gff', class(d))
-
-  return(d)
+as_synmap <- function(x, ...){
+  UseMethod('as_synmap', x)
 }
 
-#' @rdname synder_cast
-#' @export
-as_hitmap <- function(d) {
-  d <- as.data.frame(d)
+as_synmap.Synmap <- function(x, ...) x
 
-  # Assert the correct number of columns were read
-  stopifnot(ncol(d) >= 6)
-
-  # Set column names
-  names(d)[1:6] <- names(SYNMAP_COLS)[1:6]
-
-  # Assert column types match expectations
-  stopifnot(SYNMAP_COLS[1:6] == lapply(d[,1:6], class))
-
-  # Assign class membership
-  class(d) <- append('hitmap', class(d))
-
-  return(d)
+as_synmap.character <- function(x, ...){
+  if(file.exists(x)){
+    read_synmap(x)
+  } else {
+    stop(sprintf("Cannot read synmap file '%s'", x))
+  }
 }
 
+as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+  a = CNEr::queryRanges(x)
+  b = CNEr::targetRanges(x)
+
+  if(seqinfo(a) == NULL)
+    GenomeInfoDb::seqinfo(a) <- seqinfo_a
+  if(seqinfo(b) == NULL)
+    GenomeInfoDb::seqinfo(b) <- seqinfo_b
+
+  Synmap(CNEr::GRangePairs(
+    first  = a,
+    second = b,
+    score  = CNEr::score(x),
+    strand = GenomicRanges::strand(a) # NOTE: strand stored relative to query
+  ))
+}
+
+as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
+  Synmap(CNEr::GRangePairs(
+    .make_GRanges(
+      seqnames=x$qseqid,
+      start=x$qstart,
+      stop=x$qstop,
+      seqinfo=seqinfo_a
+    ),
+    .make_GRanges(
+      seqnames=x$tseqid,
+      start=x$tstart,
+      stop=x$tstop,
+      seqinfo=seqinfo_b
+    ),
+    score=x$score,
+    strand=x$strand
+  ))
+}
+
+as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+  if(!is.null(seqinfo_a))
+    first(x)$seqinfo <- seqinfo_a
+  if(!is.null(seqinfo_b))
+    second(x)$seqinfo <- seqinfo_b
+  Synmap(x)
+}
+
+
 #' @rdname synder_cast
 #' @export
-as_conlen <- function(d) {
+as_gff <- function(x, ...){
+  UseMethod('as_gff', x)
+}
 
-  if('conlen' %in% class(d)) return(d)
+as_gff.GFF <- function(x, ...) x
 
-  d <- if("Seqinfo" %in% class(d)){
-    data.frame(
-      seqid = as.character(GenomeInfoDb::seqnames(d)),
-      length = GenomeInfoDb::seqlengths(d),
-      stringsAsFactors=FALSE
-    )
-  } else if (is.character(d)){
-    if(file.exists(d)){
-      read_conlen(d)
-    } else {
-      stop(sprintf("Cannot find genome lengths file '%s'", d))
-    }
+as_gff.character <- function(x, ...){
+  if(file.exists(x)){
+    read_gff(x)
   } else {
-    as.data.frame(d)
+    stop(sprintf("Cannot read gff file '%s'", x))
   }
+}
 
-  # Assert the correct number of columns were read
-  stopifnot(ncol(d) == 2)
+as_gff.GRanges <- function(x, seqinfo_=NULL) {
+  if(is.null(seqinfo(x))){
+    seqinfo(x) <- seqinfo_
+  }
+  GFF(x)
+}
 
-  # Set column names
-  names(d) <- names(CON_LENGTH)
+as_gff.data.frame <- function(x, seqinfo=FALSE){
+  GFF(.make_GRanges(
+    seqnames = x$seqid,
+    start    = x$start,
+    stop     = x$stop,
+    source   = ifelse(x$source == '.', NA_character_, x$source),
+    type     = ifelse(x$type   == '.', NA_character_, x$type),
+    score    = ifelse(x$score  == '.', NA_real_,      x$score),
+    strand   = ifelse(x$strand == '.', '*',           x$strand),
+    phase    = ifelse(x$phase  == '.', NA_integer_,   x$phase),
+    attr     = x$attr
+  ))
+}
 
-  # Assert column types match expectations
-  stopifnot(CON_LENGTH == lapply(d, class))
 
-  # Assign class membership
-  class(d) <- append('conlen', class(d))
+#' @rdname synder_cast
+#' @export
+as_conlen <- function(x, ...) {
+  UseMethod('as_conlen', x)
+}
 
-  return(d)
+as_conlen.Seqinfo <- function(x, ...) x
+
+as_conlen.character <- function(x, ...){
+  if(file.exists(x)){
+    read_conlen(x)
+  } else {
+    stop(sprintf("Cannot read conlen file '%s'", x))
+  }
+}
+
+as_conlen.data.frame <- function(x, isCircular=NA, genome=NA) {
+  GenomeInfoDb::Seqinfo(
+    seqnames   = x$seqid,
+    seqlengths = x$length,
+    isCircular = isCircular,
+    genome     = genome
+  )
 }

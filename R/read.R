@@ -10,42 +10,43 @@ NULL
 #' @rdname synder_read
 #' @export
 read_synmap <- function(file) {
-  d <- readr::read_tsv(
+  readr::read_tsv(
     file,
     col_types = 'ciiciidc',
-    col_names = FALSE,
+    col_names = names(SYNMAP_COLS),
     comment   = "#"
-  )
-
-  as_synmap(d)
+  ) %>% as_synmap
 }
 
 #' @rdname synder_read
 #' @export
 read_gff <- function(file) {
-  d <- readr::read_tsv(
+  readr::read_tsv(
     file,
     col_types = 'ccciincic',
-    col_names = FALSE,
+    col_names = names(GFF_COLS),
     na        = ".",
     comment   = "#"
-  )
-
-  as_gff(d)
+  ) %>% as_gff
 }
 
 #' @rdname synder_read
 #' @export
 read_hitmap <- function(file) {
-  d <- readr::read_tsv(file, col_names=FALSE, comment="#")
-
-  as_hitmap(d)
+  readr::read_tsv(
+    file,
+    col_names = FALSE,
+    comment   = "#"
+  ) %>% as_hitmap
 }
 
 #' @rdname synder_read
 #' @export
 read_conlen <- function(file) {
-  d <- readr::read_tsv(file, col_names=FALSE, comment="#")
-
-  as_conlen(d)
+  readr::read_tsv(
+    file,
+    col_names = names(CON_LENGTH),
+    col_types = 'ci',
+    comment   = "#"
+  ) %>% as_conlen
 }
