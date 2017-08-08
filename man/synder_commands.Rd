@@ -44,28 +44,6 @@ and output.}
 \description{
 Synder Commands
 }
-\section{Inputs}{
-
-
-The synteny map must be TAB-delimited, with no header, and must have the
-following fields:
-\enumerate{
-  \item qseqid - query contig id (e.g. Chr1)
-  \item qstart - query interval start
-  \item qstop  - query interval stop
-  \item sseqid - target contig id
-  \item sstart - target interval start
-  \item sstop  - target interval stop
-  \item score  - score of the syntenic match*
-  \item strand - relative orientation
-}
-  * score can be any numeric value, it will be
-  transformed as specified by the -x option
-
-The target and query genome lengths files must be TAB-delimited with
-columns: <name>, <length>
-}
-
 \section{Search Command}{
 
 

@@ -1,6 +1,10 @@
 #' Synder cast functions
 #'
-#' cast data as Synder objects
+#' Cast data as synder objects
+#'
+#' \code{as_synmap}
+#' \code{as_gff}
+#' \code{as_conlen}
 #'
 #' @param d input type
 #' @param ... additional arguments
@@ -123,6 +127,8 @@ as.data.frame.GFF <- function(
 
 
 
+#' @rdname synder_cast
+#' @export
 as_synmap <- function(x, ...){
   UseMethod('as_synmap', x)
 }
@@ -181,6 +187,9 @@ as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
   Synmap(x)
 }
 
+
+#' @rdname synder_cast
+#' @export
 as_gff <- function(x, ...){
   UseMethod('as_gff', x)
 }
@@ -216,6 +225,9 @@ as_gff.data.frame <- function(x, seqinfo=FALSE){
   ))
 }
 
+
+#' @rdname synder_cast
+#' @export
 as_conlen <- function(x, ...) {
   UseMethod('as_conlen', x)
 }

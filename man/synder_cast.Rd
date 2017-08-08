@@ -2,12 +2,27 @@
 % Please edit documentation in R/cast.R
 \name{synder_cast}
 \alias{synder_cast}
+\alias{as_synmap}
+\alias{as_gff}
+\alias{as_conlen}
 \title{Synder cast functions}
-\arguments{
-\item{d}{input type}
+\usage{
+as_synmap(x, ...)
 
+as_gff(x, ...)
+
+as_conlen(x, ...)
+}
+\arguments{
 \item{...}{additional arguments}
+
+\item{d}{input type}
 }
 \description{
-cast data as Synder objects
+Cast data as synder objects
+}
+\details{
+\code{as_synmap}
+\code{as_gff}
+\code{as_conlen}
 }
