@@ -4,7 +4,7 @@ context("rsynder.R")
 # Utility functions and setup
 # ------------------------------------------------------------------------------
 
-OFFSET=c(0,0,0,0,0,0)
+OFFSET=c(0L,0L,0L,0L,0L,0L)
 
 df_equal <- function(obs, exp, skip=NULL){
   obs <- obs[do.call(order, as.list(obs)),]
@@ -69,7 +69,7 @@ test_that(
     expect(comp('adj-lo'), "query is just below the scaffold")
     expect(comp('adj-hi', add_tcl=TRUE), "query is just above the scaffold")
     expect(comp('hi',     add_tcl=TRUE), "query is above the scaffold")
-    expect(comp('lo', offsets=c(0,0,0,0,1,1), ext='-o000011'), "test with 1-base")
+    expect(comp('lo', offsets=c(0L,0L,0L,0L,1L,1L), ext='-o000011'), "test with 1-base")
   }
 )
 
@@ -84,7 +84,7 @@ test_that(
     #            |
     #  Q        ===
     comp <- compare_factory("interruptions/one-query-side")
-    expect(comp('beside', k=0), "query side")
+    expect(comp('beside', k=0L), "query side")
 
     #           [----------------]
     # T             ===    ===
@@ -93,8 +93,8 @@ test_that(
     #        |                      |
     # T    =====   <-->           =====
     comp <- compare_factory("interruptions/two-target-side")
-    expect(comp('beside', k=0), "target side, k=0")
-    expect(comp('beside', k=1), "target side, k=1 (should be same k=2)")
+    expect(comp('beside', k=0L), "target side, k=0")
+    expect(comp('beside', k=1L), "target side, k=1 (should be same k=2)")
 
     # T    =====[--------------------]=====
     #        |                          |
@@ -102,7 +102,7 @@ test_that(
     #                |          |
     # T            =====[----]=====
     comp <- compare_factory("interruptions/two-query-side")
-    expect(comp('between', k=0), "between two interior query-side intervals (k=0)")
+    expect(comp('between', k=0L), "between two interior query-side intervals (k=0)")
 
     # T    =====[------------------------------------]=====
     #        |                                          |
@@ -112,8 +112,8 @@ test_that(
     #                        |          |
     #                      =====[----]=====
     comp <- compare_factory("interruptions/nested")
-    expect(comp('between', k=4, ext='-k4'), "query nested two pairs of interrupting intervals (k=4)")
-    expect(comp('between', k=3, ext='-k3'), "query nested two pairs of interrupting intervals (k=3)")
+    expect(comp('between', k=4L, ext='-k4'), "query nested two pairs of interrupting intervals (k=4)")
+    expect(comp('between', k=3L, ext='-k3'), "query nested two pairs of interrupting intervals (k=3)")
   }
 )
 
@@ -270,7 +270,7 @@ test_that(
     #                |          |
     # T            =====[----]=====
     comp_2q <- compare_factory("interruptions/two-query-side")
-    expect(comp_2q('between', k=0), "between two interior query-side intervals (k=0)")
+    expect(comp_2q('between', k=0L), "between two interior query-side intervals (k=0)")
 
   }
 )
@@ -280,11 +280,11 @@ test_that(
   "Confirm two-scaffold systems are unaffected by k",
   {
     comp <- compare_factory("tandem-transposition")
-    expect(comp('beside', k=4), "query beside the transposed pair")
-    expect(comp('within', k=4), "query between the transposed pair")
+    expect(comp('beside', k=4L), "query beside the transposed pair")
+    expect(comp('within', k=4L), "query between the transposed pair")
 
     comp <- compare_factory("simple-duplication")
-    expect(comp('between', k=4), "query starts between the duplicated intervals")
+    expect(comp('between', k=4L), "query starts between the duplicated intervals")
   }
 )
 
@@ -295,17 +295,17 @@ test_that(
     # overlapping intervals. There are a variety of tricky corner cases. Apart from
     # the first few, all the test below were added to test for a specific bug.
     # Basically, don't mess with these.
-    o1  <- synder::dump('overlap/map-1.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o2  <- synder::dump('overlap/map-2.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o3  <- synder::dump('overlap/map-3.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o4  <- synder::dump('overlap/map-4.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o5  <- synder::dump('overlap/map-5.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o6  <- synder::dump('overlap/map-6.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o7  <- synder::dump('overlap/map-7.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o8  <- synder::dump('overlap/map-8.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o9  <- synder::dump('overlap/map-9.syn',  trans='p', offsets=OFFSET) %>% as.data.frame
-    o10 <- synder::dump('overlap/map-10.syn', trans='p', offsets=OFFSET) %>% as.data.frame
-    o11 <- synder::dump('overlap/map-11.syn', trans='p', offsets=OFFSET) %>% as.data.frame
+    o1  <- synder::dump('overlap/map-1.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o2  <- synder::dump('overlap/map-2.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o3  <- synder::dump('overlap/map-3.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o4  <- synder::dump('overlap/map-4.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o5  <- synder::dump('overlap/map-5.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o6  <- synder::dump('overlap/map-6.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o7  <- synder::dump('overlap/map-7.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o8  <- synder::dump('overlap/map-8.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o9  <- synder::dump('overlap/map-9.syn',  trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o10 <- synder::dump('overlap/map-10.syn', trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
+    o11 <- synder::dump('overlap/map-11.syn', trans='p', offsets=OFFSET) %>% as.data.frame.DumpResult
 
     # single nesting
     expect_equal(o1[[2]], c(100,400,600))

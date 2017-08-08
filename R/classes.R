@@ -1,13 +1,27 @@
+#' @importClassesFrom S4Vectors Pairs Vector Annotated
+#' @importClassesFrom GenomicRanges GRanges
+#' @importClassesFrom CNEr GRangePairs
+NULL
+
+#' Hold a synteny map
+#'
+#' @exportClass Synmap
 Synmap <- setClass(
   'Synmap',
   contains = 'GRangePairs'
 )
 
+#' Hold a GFF map
+#'
+#' @exportClass GFF
 GFF <- setClass(
   'GFF',
   contains = 'GRanges'
 )
 
+#' Hold a GFF map
+#'
+#' @exportClass DumpResult
 DumpResult <- setClass(
   'DumpResult',
   contains = 'GRangePairs',
@@ -15,14 +29,18 @@ DumpResult <- setClass(
     swap    = 'logical',
     trans   = 'character',
     offsets = 'integer'
+  ),
+  prototype = list(
+    swap    = FALSE,
+    trans   = 'i',
+    offsets = c(1L,1L,1L,1L,1L,1L)
   )
 )
-DumpResult <- function(x, offsets=c(1,1,1,1,1,1), ...){
-  # TODO: add checking
-  new("DumpResult", x, offsets=as.integer(offsets), ...)
-}
 
-setClass(
+#' Hold a SearchResult
+#'
+#' @exportClass SearchResult
+SearchResult <- setClass(
   'SearchResult',
   contains = 'GRangePairs',
   slots = list(
@@ -31,9 +49,12 @@ setClass(
     k       = 'integer',
     r       = 'numeric',
     offsets = 'integer'
+  ),
+  prototype = list(
+    swap    = FALSE,
+    trans   = 'i',
+    k       = 0L,
+    r       = 0,
+    offsets = c(1L,1L,1L,1L,1L,1L)
   )
 )
-SearchResult <- function(x, offsets=c(1,1,1,1,1,1), k=0, ...){
-  # TODO: add checking
-  new("SearchResult", x, offsets=as.integer(offsets), k=as.integer(k), ...)
-}
