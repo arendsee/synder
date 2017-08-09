@@ -45,6 +45,7 @@ handle_inversions <- function(x) {
 # Plot functions
 # ----------------------
 
+#' @export
 plot.Synmap <- function(x, ...){
 
   x <- as.data.frame(x)
@@ -62,6 +63,7 @@ plot.Synmap <- function(x, ...){
     )
 }
 
+#' @export
 plot.DumpResult <- function(x, ...){
 
   x <- as.data.frame(x)
@@ -103,6 +105,7 @@ plot.DumpResult <- function(x, ...){
     )
 }
 
+#' @export
 plot.SearchResult <- function(x, y, ...){
 
   stopifnot(is_synmap(y))

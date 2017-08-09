@@ -6,15 +6,25 @@
 #' \code{as_gff}
 #' \code{as_conlen}
 #'
-#' @param d input type
+#' @param x input type
 #' @param ... additional arguments
 #' @name synder_cast
 NULL
 
+.as_bioc_strand <- function(x){
+  x <- as.character(x)
+  ifelse(x == '.', '*', x)
+}
+
+.as_gff_strand <- function(x){
+  x <- as.character(x)
+  ifelse(x == '*', '.', x)
+}
+
 .make_GRanges <- function(seqnames, start, stop, strand='+', ...){
   GenomicRanges::GRanges(
     seqnames = seqnames,
-    strand = strand,
+    strand = .as_bioc_strand(strand),
     ranges = IRanges::IRanges(start=start, end=stop),
     ...
   )
@@ -51,8 +61,7 @@ NULL
   # though '.' is the GFF convention. Synder also considers '.' as missig data.
   # So here I convert back.
   if('strand' %in% names(c_meta)){
-    c_meta$strand <- as.character(c_meta$strand)
-    c_meta$strand <- ifelse(c_meta$strand == '*', '.', c_meta$strand)
+    c_meta$strand <- .as_gff_strand(c_meta$strand)
   }
 
   if(ncol(a_meta) > 0)
@@ -71,18 +80,31 @@ NULL
   as.data.frame(d)
 }
 
+
+#' @rdname synder_cast
+#' @method as.data.frame Synmap
+#' @export
 as.data.frame.Synmap <- function(x, ...){
   .base_GRangePairs_to_df(x, ordering=names(SYNMAP_COLS))
 }
 
+#' @rdname synder_cast
+#' @method as.data.frame DumpResult
+#' @export
 as.data.frame.DumpResult <- function(x, ...){
   .base_GRangePairs_to_df(x, ordering=names(DUMP_COLS))
 }
 
+#' @rdname synder_cast
+#' @method as.data.frame SearchResult
+#' @export
 as.data.frame.SearchResult <- function(x, ...){
   .base_GRangePairs_to_df(x, ordering=names(SI_COLS))
 }
 
+#' @rdname synder_cast
+#' @method as.data.frame Seqinfo
+#' @export
 as.data.frame.Seqinfo <- function(x, ...){
   data.frame(
     seqid = as.character(GenomeInfoDb::seqnames(x)),
@@ -91,50 +113,46 @@ as.data.frame.Seqinfo <- function(x, ...){
   )
 }
 
-as.data.frame.GFF <- function(
-  x,
-  source_tag = "source",
-  type_tag   = "type",
-  score_tag  = "score",
-  phase_tag  = "phase",
-  id_tag     = "attr",
-  ...
-){
-  .maybe_meta <- function(x, field, default=NA, caster=identity){
-    if(field %in% names(GenomicRanges::mcols(x))){
-      caster(GenomicRanges::mcols(x)[[field]])
-    } else {
-      default
-    }
-  }
+#' @rdname synder_cast
+#' @method as.data.frame GFF
+#' @export
+as.data.frame.GFF <- function(x, ...){
 
-  strand <- as.character(GenomicRanges::strand(x))
-  strand <- ifelse(strand == '*', '.', strand)
+  strand <- .as_gff_strand(GenomicRanges::strand(x))
+
+  met <- GenomicRanges::mcols(x)
 
   data.frame(
     seqid  = as.character(GenomicRanges::seqnames(x)),
-    source = .maybe_meta(x, source_tag, NA_character_, as.character),
-    type   = .maybe_meta(x, type_tag, NA_character_, as.character),
+    source = met$source,
+    type   = met$type,
     start  = GenomicRanges::start(x),
     stop   = GenomicRanges::end(x),
-    score  = .maybe_meta(x, score_tag, NA_real_, as.numeric),
+    score  = met$score,
     strand = strand,
-    phase  = .maybe_meta(x, phase_tag, NA_integer_, as.integer),
-    attr   = .maybe_meta(x, id_tag, NA_character_, as.character),
+    phase  = met$phase,
+    attr   = met$attr,
     stringsAsFactors=FALSE
   )
 }
 
-
-
-#' @rdname synder_cast
+#' Convert to a synder Synmap object
+#'
 #' @export
+#' @param x Thing to be converted
+#' @param seqinfo_a Seqinfo object for first GRanges entry
+#' @param seqinfo_b Seqinfo object for second GRanges entry
+#' @param ... Additional arguments
 as_synmap <- function(x, ...){
   UseMethod('as_synmap', x)
 }
 
+#' @rdname as_synmap
+#' @export
 as_synmap.Synmap <- function(x, ...) x
 
+#' @rdname as_synmap
+#' @export
 as_synmap.character <- function(x, ...){
   if(file.exists(x)){
     read_synmap(x, ...)
@@ -143,24 +161,29 @@ as_synmap.character <- function(x, ...){
   }
 }
 
-as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+#' @rdname as_synmap
+#' @export
+as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...){
   a = CNEr::queryRanges(x)
   b = CNEr::targetRanges(x)
 
-  if(seqinfo(a) == NULL)
+  if(GenomeInfoDb::seqinfo(a) == NULL)
     GenomeInfoDb::seqinfo(a) <- as_conlen(seqinfo_a)
-  if(seqinfo(b) == NULL)
+  if(GenomeInfoDb::seqinfo(b) == NULL)
     GenomeInfoDb::seqinfo(b) <- as_conlen(seqinfo_b)
 
   Synmap(CNEr::GRangePairs(
     first  = a,
     second = b,
     score  = CNEr::score(x),
-    strand = GenomicRanges::strand(a) # NOTE: strand stored relative to query
+    # NOTE: strand stored relative to query
+    strand = .as_bioc_strand(GenomicRanges::strand(a))
   ))
 }
 
-as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
+#' @rdname as_synmap
+#' @export
+as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...) {
   Synmap(CNEr::GRangePairs(
     .make_GRanges(
       seqnames=x$qseqid,
@@ -174,28 +197,85 @@ as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
       stop=x$tstop,
       seqinfo=as_conlen(seqinfo_b)
     ),
-    score=x$score,
-    strand=x$strand
+    score  = x$score,
+    strand = .as_bioc_strand(x$strand)
   ))
 }
 
-as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+#' @rdname as_synmap
+#' @export
+as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...){
   if(!is.null(seqinfo_a))
-    first(x)$seqinfo <- as_conlen(seqinfo_a)
+    CNEr::first(x)$seqinfo <- as_conlen(seqinfo_a)
   if(!is.null(seqinfo_b))
-    second(x)$seqinfo <- as_conlen(seqinfo_b)
+    CNEr::second(x)$seqinfo <- as_conlen(seqinfo_b)
   Synmap(x)
 }
 
 
-#' @rdname synder_cast
+#' Convert to a synder GFF object
+#'
+#' as_gff.character will attempt to load a file, which is expected to be
+#' TAB-delimited and headerless.
+#'
 #' @export
+#' @param x Thing to be converted
+#' @param ... Additional arguments
+#' @param seqinfo_ Seqinfo object
+#' @param source character vector for GFF column source meta-column
+#' @param type character vector for GFF column type meta-column
+#' @param score numeric vector for GFF column score meta-column
+#' @param phase integer vector for GFF column phase meta-column
+#' @param id character vector for GFF column attr, is currently used as the
+#'        name of the query
 as_gff <- function(x, ...){
   UseMethod('as_gff', x)
 }
 
+#' @rdname as_gff
+#' @export
 as_gff.GFF <- function(x, ...) x
 
+#' @rdname as_gff
+#' @export
+as_gff.GRanges <- function(
+  x,
+  seqinfo_ = NULL,
+  source   = NULL,
+  type     = NULL,
+  score    = NULL,
+  phase    = NULL,
+  id       = NULL,
+  ...
+) {
+  if(is.null(seqinfo_))
+    seqinfo_ <- GenomicRanges::seqinfo(x)
+
+  .maybe_meta <- function(x, field, default=NA, caster=identity){
+    if(is.null(field)){
+      rep(default, length(x))
+    } else {
+      caster(field)
+    }
+  }
+
+  GFF(
+    GenomicRanges::GRanges(
+      seqnames = GenomicRanges::seqnames(x),
+      ranges   = GenomicRanges::ranges(x),
+      seqinfo  = seqinfo_,
+      strand   = .as_bioc_strand(GenomicRanges::strand(x)),
+      source   = .maybe_meta(x, source, NA_character_, as.character),
+      type     = .maybe_meta(x, type,   NA_character_, as.character),
+      score    = .maybe_meta(x, score,  NA_real_,      as.numeric),
+      phase    = .maybe_meta(x, phase,  NA_integer_,   as.integer),
+      attr     = .maybe_meta(x, id,     NA_character_, as.character)
+    )
+  )
+}
+
+#' @rdname as_gff
+#' @export
 as_gff.character <- function(x, ...){
   if(file.exists(x)){
     read_gff(x, ...)
@@ -204,39 +284,43 @@ as_gff.character <- function(x, ...){
   }
 }
 
-as_gff.GRanges <- function(x, seqinfo_=NULL) {
-  if(!is.null(seqinfo_)){
-    seqinfo(x) <- seqinfo_
-  }
-  GFF(x)
-}
-
-as_gff.data.frame <- function(x, seqinfo=NULL){
+#' @rdname as_gff
+#' @export
+as_gff.data.frame <- function(x, seqinfo_=NULL, ...){
   GFF(.make_GRanges(
     seqnames = x$seqid,
     start    = x$start,
     stop     = x$stop,
-    source   = ifelse(x$source == '.', NA_character_, x$source),
-    type     = ifelse(x$type   == '.', NA_character_, x$type),
-    score    = ifelse(x$score  == '.', NA_real_,      x$score),
-    strand   = ifelse(x$strand == '.', '*',           x$strand),
-    phase    = ifelse(x$phase  == '.', NA_integer_,   x$phase),
-    attr     = x$attr,
-    seqinfo  = as_conlen(seqinfo)
+    source   = as.character(ifelse(x$source == '.', NA_character_, x$source)),
+    type     = as.character(ifelse(x$type   == '.', NA_character_, x$type)),
+    score    = as.numeric(ifelse(x$score    == '.', NA_real_,      x$score)),
+    strand   = .as_bioc_strand(x$strand),
+    phase    = as.integer(ifelse(x$phase    == '.', NA_integer_,   x$phase)),
+    attr     = as.character(x$attr),
+    seqinfo  = as_conlen(seqinfo_)
   ))
 }
 
 
-#' @rdname synder_cast
+#' Convert to a contig length (Seqinfo) object
+#'
 #' @export
+#' @param x Thing to be converted
+#' @param ... Additional arguments
 as_conlen <- function(x, ...) {
   UseMethod('as_conlen', x)
 }
 
+#' @rdname as_conlen
+#' @export
 as_conlen.NULL <- function(x, ...) NULL
 
+#' @rdname as_conlen
+#' @export
 as_conlen.Seqinfo <- function(x, ...) x
 
+#' @rdname as_conlen
+#' @export
 as_conlen.character <- function(x, ...){
   if(file.exists(x)){
     read_conlen(x, ...)
@@ -245,6 +329,8 @@ as_conlen.character <- function(x, ...){
   }
 }
 
+#' @rdname as_conlen
+#' @export
 as_conlen.data.frame <- function(x, ...) {
   GenomeInfoDb::Seqinfo(
     seqnames   = x$seqid,
