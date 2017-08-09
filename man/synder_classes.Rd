@@ -13,6 +13,11 @@
 \alias{SearchResult}
 \title{Synder classes}
 \description{
+Synder uses the input classes \code{Synmap}, \code{GFF} and \code{Seqinfo}
+(the last of which is from bioconductor); and the output classes
+SearchResult and DumpResult.
+}
+\details{
 Each of these classes can be converted from a \code{data.frame} with
 \code{as_*} and to a data.frame with \code{as.data.frame}.
 }
@@ -64,5 +69,17 @@ each contig. This information is provided by the biodonductor Seqinfo
 objects. The most important information these objects hold is the name and
 length of all contigs in the assembly. This data can be stored in a
 two-column data.frame (or headerless, TAB-delimited file).
+}
+
+\section{SearchResult}{
+
+
+Holds the results of a successful \code{search} run. The class inherits from GRangePairs.
+}
+
+\section{DumpResult}{
+
+
+Holds the results of the \code{dump} command. The class inherits from GRangePairs.
 }
 

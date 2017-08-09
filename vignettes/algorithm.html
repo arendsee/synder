@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Zebulun Arendsee" />
+
+
+<title>Synder Algorithm</title>
+
+
+
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Synder Algorithm</h1>
+<h4 class="author"><em>Zebulun Arendsee</em></h4>
+
+
+
+<p>For a practical introduction to <code>synder</code>, read <a href="intro.html">introduction vignette</a>.</p>
+<div id="top-level-commands" class="section level2">
+<h2>Top level commands</h2>
+<div id="search" class="section level3">
+<h3>Search</h3>
+<p>This is the primary function of synder. A set of intervals in one genome (the query) is mapped to a set of intervals in another genome (the target). The input intervals may fall between query-side syntenic intervals, in which case, the search interval also will fall inbetween target syntenic intervals.</p>
+<p>The output is a table with the following fields:</p>
+<ol style="list-style-type: decimal">
+<li>query interval name (e.g. AT1G20300)</li>
+<li>query chromosome name</li>
+<li>query start position</li>
+<li>query stop position</li>
+<li>target chromosome name</li>
+<li>search interval start position on target chromsome</li>
+<li>search interval stop position on target chromsome</li>
+<li>search interval strand (‘+’ / ‘-’)</li>
+<li>score</li>
+<li>contiguous set id</li>
+<li>lower flag</li>
+</ol>
+<ul>
+<li>0 lower bound is inside a syntenic interval</li>
+<li>1 lower bound is between intervals in a contiguous set</li>
+<li>2 lower bound does not overlap the contiguous set</li>
+<li>3 lower bound is beyond any syntenic interval (near end of scaffold)</li>
+</ul>
+<ol start="12" style="list-style-type: decimal">
+<li>upper flag - see lower flag</li>
+<li>between flag - 0 if query overlaps a syntenic interval, 1 otherwise</li>
+</ol>
+</div>
+<div id="filter" class="section level3">
+<h3>Filter</h3>
+<p><code>filter</code> removes links that disagree with the synteny map.</p>
+<p>The filter function takes two syntenic maps and finds the congruent links. Given two syntenic maps, A and B, the query-side intervals in A are mapped to target side search intervals using the syntenic map B. Then the target-side intervals in A that overlap the predicted search intervals are printed.</p>
+<p>The most obvious usage case takes as input the results of BLASTing a sequence against a genome. Often such searches will have many hits in a swooping e-value gradient. The highest scoring hit may not be the orthologous one (for example, a weakly similar, but long hit may outscore the nearly identical, but truncated, true ortholog). <code>synder filter</code> will find the hits that are concordant with genomic context, reducing possibly thousands of hits to only a few.</p>
+</div>
+<div id="map" class="section level3">
+<h3>Map</h3>
+<p>Find all query-side syntenic blocks that overlap the input interval. Then map these blocks to the target-side and print the result. If an input interval overlaps no query bock, the flanks are printed.</p>
+<p>The output will have the columns:o 1. input interval name (e.g. AT1G01010) 2. target contig name (e.g. Chr1) 3. target start position 4. target stop position 5. missing flag, 0 if input overlaps no block, 1 otherwise</p>
+</div>
+<div id="count" class="section level3">
+<h3>Count</h3>
+<p>Like map except it counts the number of overlaps, rather than printing them. The output is a TAB-delimited list of sequence names and counts.</p>
+</div>
+<div id="dump" class="section level3">
+<h3>Dump</h3>
+<p>Builds the internal synteny datastructure and prints the results.</p>
+<p>For example, given the file</p>
+<pre><code>que   100    200    tar   1100   1200   100   +
+que   1100   1800   tar   1500   1900   100   +
+que   1400   1700   tar   1600   2000   100   +
+que   1200   1600   tar   1700   2100   100   +
+que   1300   1900   tar   1800   2200   100   +</code></pre>
+<pre><code>R&gt; synder::dump('que-tar.syn', trans='p')
+que  100   200   tar  1100  1200  101.000000  +  0
+que  1100  1900  tar  1500  2200  700.084964  +  0</code></pre>
+<p>In the above example,  shows that blocks 2-5 are merged (since they are doubly-overlapping) and shows the results of the score transformations. It is this dumped synteny map that would have been used in any filter or search operations.</p>
+<p>Also note the addition of a 9th column. This column specifies that contiguous set. In this case, all blocks, after merging, are in the same set.</p>
+</div>
+</div>
+<div id="inputs" class="section level2">
+<h2>Inputs:</h2>
+<p>The synteny map must be TAB-delimited, with no header, and must have the following fields:</p>
+<ul>
+<li>qseqid - query contig id (e.g. Chr1)</li>
+<li>qstart - query interval start</li>
+<li>qstop - query interval stop</li>
+<li>sseqid - target contig id</li>
+<li>sstart - target interval start</li>
+<li>sstop - target interval stop</li>
+<li>score - score of the syntenic match*</li>
+<li>strand - relative orientation</li>
+</ul>
+<p>* score can be any numeric value, it will be transformed as specified by the -x option</p>
+<p>The target and query genome lengths files must be TAB-delimited with columns: <name>, <length></p>
+</div>
+<div id="terms" class="section level2">
+<h2>Terms:</h2>
+<ul>
+<li><p>query genome - the genome referenced by the input intervals</p></li>
+<li><p>target genome - the genome to which input intervals are mapped</p></li>
+<li><p>synteny map - a set of query/target interval pairs inferred to be syntenic</p></li>
+<li><p>block - a single pair of intervals from the synteny map</p></li>
+<li><p>contig - a chromosome, scaffold, contig (<code>synder</code> doesn’t distinguish between them)</p></li>
+<li><p>interval adjacency - two intervals are adjacent if they are on the same contig and no other interval is fully contained between them</p></li>
+<li><p>block adjacency - two blocks are adjacent if 1) the intervals are adjacent on both the query and target sides and 2) both have the same sign</p></li>
+<li><p>query context - all blocks that overlap or are adjacent to the query interval</p></li>
+<li><p>contiguous set - a set where block <em>i</em> is adjacent to block <em>i+1</em></p></li>
+<li><p>search intervals - a set of intervals on the target genome where the ortholog of the query interval is expected to be (the ortholog search space)</p></li>
+</ul>
+</div>
+<div id="algorithm" class="section level2">
+<h2>Algorithm:</h2>
+<p>Execution order for the <code>synder search</code> command</p>
+<ol style="list-style-type: decimal">
+<li>load synteny map</li>
+<li>transform scores</li>
+<li>merge doubly-overlapping blocks</li>
+<li>determine contiguous sets</li>
+<li>find query-side, contextually-relevant blocks for each input sequence</li>
+<li>map to overlapping contiguous sets</li>
+<li>calculate score for input sequence relative to each contiguous set</li>
+<li>calculate search interval relative to each contiguous set</li>
+</ol>
+<p><strong>1. Load Synteny Map</strong></p>
+<p>The input synteny map must have the following columns:</p>
+<ol style="list-style-type: decimal">
+<li><em>qseqid</em> query contig id (e.g. Chr1)</li>
+<li><em>qstart</em> query interval start</li>
+<li><em>qstop</em> query interval stop</li>
+<li><em>sseqid</em> target contig id</li>
+<li><em>sstart</em> target interval start</li>
+<li><em>sstop</em> target interval stop</li>
+<li><em>score</em> score of the syntenic match</li>
+<li><em>strand</em> relative orientation</li>
+</ol>
+<p><strong>2. Transform scores</strong></p>
+<p>Internally, scores for each block are assumed to be additive. However, there are many possible forms of input scores. Low numbers may represent good matches (e.g. e-value) or high numbers (e.g. bit scores). Scores may be additive (bitscores) or averaged (percent similarity).</p>
+<p>For this reason, the user must specify a transform for the score column (column 7 of synteny map). This transform can be one of the following:</p>
+<pre><code>  S' = S            default, no transformation)
+  S' = L * S        transform from score densities
+  S' = L * S / 100  transform from percent identity
+  S' = -log(S)      transform from e-values or p-values</code></pre>
+<p>Where S is input score, S’ is the transformed score, and L interval length</p>
+<p><strong>3. Merge doubly-overlapping blocks</strong></p>
+<p>If two blocks overlap on both the query and target side, they should be merged. In a perfect synteny map, this would never occur. But in practice, it is common, and convolutes the formation of contiguous sets.</p>
+<p>For example the following syntenic map</p>
+<pre><code>que 100 200 tar 100 200 100 +
+que 300 400 tar 300 400 100 +
+que 310 390 tar 310 390 100 +
+que 500 600 tar 500 600 100 +</code></pre>
+<p>would be separated into two contiguous sets with the bounds (100, 400) and (310, 600).</p>
+<p>Now if a input intervals at (que, 250, 450) is searched, two search intervals with the same bounds will obtain: (200, 500) and (200, 500). Each will be flagged as unbound (e.g. an interval edge is between contiguous sets).</p>
+<p>However, if the second and third blocks are merged, we obtain a single search interval flagged as bound on both ends.</p>
+<p>In practice, many repetitive regions of the genome can be massively doubly-overlapping, resulting in many redundant search intervals. This throws of statistics and wastes time searching extra space.</p>
+<p>To avoid such problems,  merges any blocks that overlap on both the query and target sides.</p>
+<p>The bounds of the merged blocks are simply the union.</p>
+<p>But the scores also need to be merged. Originally, I used the equation:</p>
+<pre><code> da (la - lo) + db (lb - lo) + lo (da + db) / 2            E1</code></pre>
+<p>Where * <em>da</em> and <em>db</em> are the score densities of blocks <em>a</em> and <em>b</em> * <em>la</em>, <em>lb</em> and <em>lo</em> are the lengths of <em>a</em>, <em>b</em>, and their overlap</p>
+<p>E1 is problematic for two reasons. First, it doesn’t really make sense to average the overlap scores. Second, iterative pairwise averaging is assymetric, giving higher weight to the blocks merged later.</p>
+<p>I replaced this approach with taking the max of the overlap scores:</p>
+<pre><code> da (la - lo) + db (lb - lo) + lo * max(da, db)            E2</code></pre>
+<p>This fixes the first problem.</p>
+<p>The second problem is a bit trickier, since it would require tracking sub-intervals. It would be a pain to implement and probably would have little effect on any real dataset. So I am content with an imperfect solution for now.</p>
+<p><strong>4. Determine contiguous sets</strong></p>
+<p>Build an interval adjacency matrix for the query context intervals and for the target context intervals. AND them together to get a block adjacency matrix. From this matrix, extract paths of adjacent blocks. Synder will merge any blocks that overlap on both genomes, this ensures there is a unique path through the adjacency matrix.</p>
+<p><strong>5. Find contextual blocks</strong></p>
+<p>Mapping query intervals to target intervals would be trivial for a perfectly linear map, e.g.</p>
+<pre><code>                                      [-----------]
+=====      ============     ==========             ============
+  |              |               |                       |  
+  |              |               |                       |  
+=====      ============     ==========   &lt;---&gt;     ============
+
+Where &lt;---&gt; is the query interval and [----] the search interval</code></pre>
+<p>Synder reduces all blocks in the genome into into contiguous sets, which are non-overlapping sets of intervals where all blocks are adjacent.</p>
+<ul>
+<li><p>interval adjacency - two intervals are adjacent if they are on the same contig and no other interval is fully contained between them</p></li>
+<li><p>block adjacency - two blocks are adjacent if 1) the intervals are adjacent on both the query and target sides and 2) both have the same sign</p></li>
+<li><p>query context - all blocks that overlap or are adjacent to the query interval</p></li>
+<li><p>contiguous set - a set where block <em>i</em> is adjacent to block </p></li>
+<li><p>search intervals - a set of intervals on the target genome where the ortholog of the query interval is expected to be (the ortholog search space)</p></li>
+</ul>
+<p><strong>6. Reduce to overlapping sets</strong></p>
+<p>Once all overlapping and flanking query-side blocks are identified.</p>
+<p><strong>7. Calculate scores relative to contiguous sets</strong></p>
+<p>Especially with the high , it is important to be able to rank search intervals. Queries that heavily overlap elements of contiguous sets are more reliable than ones that fall inbetween. Likewise, queries in dense contiguous sets, should rank higher than those in sparse ones (all else being equal).</p>
+<p>Input scores for syntenic blocks are additive (assuming the user entered the correct transformation).</p>
+<pre><code>s = 0
+for i in [a..b]
+    if i in any block in c AND i in q
+        s += d / L
+    else if i in any block in c
+        s += d * e^(-r * (dist(q, i)))
+where
+    c := the contiguous set
+    q := query interval
+    a := contig lower bound
+    b := contig upper bound
+    d := query syntenic score
+    L := query length
+    dist := function calculating distance</code></pre>
+<p>So all blocks in the contiguous set contribute to the total score. The scores of blocks that do not overlap the query decay exponentially with distance from the query bound.</p>
+<p>The score decay rate is controlled by the parameter . A value of 0.001, the current default, indicates weight will fall to 0.5 by 1000 bases from the query. k=0 would give equal weight to all elements in the contiguous set, i.e. be more affected by context. A high value, e.g. , would completely ignore context, basing score only on overlapping elements.</p>
+<p><strong>8. Calculate search interval relative to contiguous set</strong></p>
+<p>Exactly one search interval is created for each previously selected contiguous set.</p>
+<p>The chromosome length file tells synder how long each chromosome is. Then if some input query is closer to the end than anything in the synteny map, the search interval bound can be set to the end of the chromosome, rather than infinity.</p>
+<ol style="list-style-type: decimal">
+<li>Find input interval, <em>i</em>, context in the query genome. This context consists of all query intervals <em>Sq</em> that either overlap or flank the input.</li>
+<li>From <em>Sq</em> determine which contiguous sets ,<em>Sc</em>, the query overlaps or borders.</li>
+<li>For each contiguous set, <em>c</em>, in <em>Sc</em>, classify each bound of <em>i</em> as:
+<ol style="list-style-type: decimal">
+<li>anchored - if overlaps a member of <em>c</em></li>
+<li>bound - if is inbetween two members of <em>c</em></li>
+<li>unbound - if is more extreme than any member of the set, but is inbetween two contiguous sets</li>
+<li>extreme - No entry is found</li>
+</ol></li>
+</ol>
+<p>The snapping rules are detailed below:</p>
+<pre><code>KEY:
+|x--  --y| - bounds of the contiguous block; start==x, stop==y
+a========b - a syntenic block with start == a and stop == b
+  &lt;---q    - the query interval, with stop == q (start doesn't matter)
+a==b--c==d - query bounding blocks in the contiguous set
+[===]      - a non-bounding block in the same contiguous set
+ ...  F=== - nearest non-adjacent block ***ON THE TARGET***, F=start
+     ^     - search interval bound
+
+Possible snap positions (relative to query)
+  |x...[===]-----a=======b-----c=======d-----[===]...y|  ...  F===
+                 ^       ^     ^       ^     ^                ^</code></pre>
+<p>We always snap to one bound of the relevant block. If the bound falls between the blocks (i1, j1) and (i2, j2), it would be reasonable to set the search interval to (j1 + 1, i2 - 1), however, this results in negative lenghts when the blocks are adjacent. So instead we set such intervals to to (j1, i2).</p>
+<div id="query-bound-is-precedes-both-contiguous-set-bounds" class="section level3">
+<h3>Query bound is precedes both contiguous set bounds</h3>
+<pre><code>         |x-----y|
+      ...a=======b
+         ^
+  &lt;---q</code></pre>
+</div>
+<div id="query-bound-falls-within-a-contiguous-set-element" class="section level3">
+<h3>Query bound falls within a contiguous set element</h3>
+<pre><code>  |x...a=======b...y|
+               ^
+       &lt;--q</code></pre>
+</div>
+<div id="query-bound-falls-between-elements-of-the-contiguous-set" class="section level3">
+<h3>Query bound falls between elements of the contiguous set</h3>
+<pre><code>  |x...a=======b-------c=======d...y|
+                       ^
+                 &lt;--q</code></pre>
+</div>
+<div id="query-is-beyond-the-bounds-of-the-contiguous-set" class="section level3">
+<h3>Query is beyond the bounds of the contiguous set</h3>
+<pre><code>  Target side           A=======B      F===   1. map b-\&gt;B   
+                                |------^      2. map B-&gt;F
+                                |             3. set F as SI bound
+  Query side     |x...--a=======b| ...
+                                &lt;---q</code></pre>
+</div>
+<div id="query-is-beyond-anything-in-the-synteny-map" class="section level3">
+<h3>Query is beyond anything in the synteny map</h3>
+<pre><code>  Target side           A=======B      THE_END   
+                                |------^      
+                                |             1. map b-&gt;B   
+  Query side     |x...--a=======b| ...        2. B is contig extremum
+                                &lt;---q         3. set SI bound to contig length</code></pre>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

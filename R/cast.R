@@ -137,7 +137,7 @@ as_synmap.Synmap <- function(x, ...) x
 
 as_synmap.character <- function(x, ...){
   if(file.exists(x)){
-    read_synmap(x)
+    read_synmap(x, ...)
   } else {
     stop(sprintf("Cannot read synmap file '%s'", x))
   }
@@ -148,9 +148,9 @@ as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
   b = CNEr::targetRanges(x)
 
   if(seqinfo(a) == NULL)
-    GenomeInfoDb::seqinfo(a) <- seqinfo_a
+    GenomeInfoDb::seqinfo(a) <- as_conlen(seqinfo_a)
   if(seqinfo(b) == NULL)
-    GenomeInfoDb::seqinfo(b) <- seqinfo_b
+    GenomeInfoDb::seqinfo(b) <- as_conlen(seqinfo_b)
 
   Synmap(CNEr::GRangePairs(
     first  = a,
@@ -166,13 +166,13 @@ as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
       seqnames=x$qseqid,
       start=x$qstart,
       stop=x$qstop,
-      seqinfo=seqinfo_a
+      seqinfo=as_conlen(seqinfo_a)
     ),
     .make_GRanges(
       seqnames=x$tseqid,
       start=x$tstart,
       stop=x$tstop,
-      seqinfo=seqinfo_b
+      seqinfo=as_conlen(seqinfo_b)
     ),
     score=x$score,
     strand=x$strand
@@ -181,9 +181,9 @@ as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
 
 as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
   if(!is.null(seqinfo_a))
-    first(x)$seqinfo <- seqinfo_a
+    first(x)$seqinfo <- as_conlen(seqinfo_a)
   if(!is.null(seqinfo_b))
-    second(x)$seqinfo <- seqinfo_b
+    second(x)$seqinfo <- as_conlen(seqinfo_b)
   Synmap(x)
 }
 
@@ -198,20 +198,20 @@ as_gff.GFF <- function(x, ...) x
 
 as_gff.character <- function(x, ...){
   if(file.exists(x)){
-    read_gff(x)
+    read_gff(x, ...)
   } else {
     stop(sprintf("Cannot read gff file '%s'", x))
   }
 }
 
 as_gff.GRanges <- function(x, seqinfo_=NULL) {
-  if(is.null(seqinfo(x))){
+  if(!is.null(seqinfo_)){
     seqinfo(x) <- seqinfo_
   }
   GFF(x)
 }
 
-as_gff.data.frame <- function(x, seqinfo=FALSE){
+as_gff.data.frame <- function(x, seqinfo=NULL){
   GFF(.make_GRanges(
     seqnames = x$seqid,
     start    = x$start,
@@ -221,7 +221,8 @@ as_gff.data.frame <- function(x, seqinfo=FALSE){
     score    = ifelse(x$score  == '.', NA_real_,      x$score),
     strand   = ifelse(x$strand == '.', '*',           x$strand),
     phase    = ifelse(x$phase  == '.', NA_integer_,   x$phase),
-    attr     = x$attr
+    attr     = x$attr,
+    seqinfo  = as_conlen(seqinfo)
   ))
 }
 
@@ -232,21 +233,22 @@ as_conlen <- function(x, ...) {
   UseMethod('as_conlen', x)
 }
 
+as_conlen.NULL <- function(x, ...) NULL
+
 as_conlen.Seqinfo <- function(x, ...) x
 
 as_conlen.character <- function(x, ...){
   if(file.exists(x)){
-    read_conlen(x)
+    read_conlen(x, ...)
   } else {
     stop(sprintf("Cannot read conlen file '%s'", x))
   }
 }
 
-as_conlen.data.frame <- function(x, isCircular=NA, genome=NA) {
+as_conlen.data.frame <- function(x, ...) {
   GenomeInfoDb::Seqinfo(
     seqnames   = x$seqid,
     seqlengths = x$length,
-    isCircular = isCircular,
-    genome     = genome
+    ...
   )
 }

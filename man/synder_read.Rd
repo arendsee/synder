@@ -4,20 +4,19 @@
 \alias{synder_read}
 \alias{read_synmap}
 \alias{read_gff}
-\alias{read_hitmap}
 \alias{read_conlen}
 \title{Synder read functions}
 \usage{
-read_synmap(file)
+read_synmap(file, ...)
 
-read_gff(file)
+read_gff(file, ...)
 
-read_hitmap(file)
-
-read_conlen(file)
+read_conlen(file, ...)
 }
 \arguments{
 \item{file}{TAB-delimited file}
+
+\item{...}{Additional arguments for the casting function (\code{as_*})}
 }
 \description{
 read synder classes from files

@@ -57,11 +57,11 @@ NULL
 #' length of all contigs in the assembly. This data can be stored in a
 #' two-column data.frame (or headerless, TAB-delimited file).
 #'
-#' @section SearchResult
+#' @section SearchResult:
 #'
 #' Holds the results of a successful \code{search} run. The class inherits from GRangePairs.
 #'
-#' @section DumpResult
+#' @section DumpResult:
 #'
 #' Holds the results of the \code{dump} command. The class inherits from GRangePairs.
 #'
