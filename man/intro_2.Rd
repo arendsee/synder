@@ -14,8 +14,7 @@ Similar to intro_1, but with an inversion
 \details{
 Contains 2 files:
 \enumerate{
-    \item synmap - simple linear synteny map
-    \item tgen   - lengths of target scaffold
+    \item synmap - simple linear synteny map with seqinfo for both sides
  }
 }
 \keyword{datasets}
