@@ -2,16 +2,22 @@
 % Please edit documentation in R/cast.R
 \name{synder_cast}
 \alias{synder_cast}
-\alias{as_synmap}
-\alias{as_gff}
-\alias{as_conlen}
+\alias{as.data.frame.Synmap}
+\alias{as.data.frame.DumpResult}
+\alias{as.data.frame.SearchResult}
+\alias{as.data.frame.Seqinfo}
+\alias{as.data.frame.GFF}
 \title{Synder cast functions}
 \usage{
-as_synmap(x, ...)
+\method{as.data.frame}{Synmap}(x, ...)
 
-as_gff(x, ...)
+\method{as.data.frame}{DumpResult}(x, ...)
 
-as_conlen(x, ...)
+\method{as.data.frame}{SearchResult}(x, ...)
+
+\method{as.data.frame}{Seqinfo}(x, ...)
+
+\method{as.data.frame}{GFF}(x, ...)
 }
 \arguments{
 \item{...}{additional arguments}
