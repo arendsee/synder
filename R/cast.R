@@ -6,7 +6,7 @@
 #' \code{as_gff}
 #' \code{as_conlen}
 #'
-#' @param d input type
+#' @param x input type
 #' @param ... additional arguments
 #' @name synder_cast
 NULL
@@ -163,13 +163,13 @@ as_synmap.character <- function(x, ...){
 
 #' @rdname as_synmap
 #' @export
-as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...){
   a = CNEr::queryRanges(x)
   b = CNEr::targetRanges(x)
 
-  if(seqinfo(a) == NULL)
+  if(GenomeInfoDb::seqinfo(a) == NULL)
     GenomeInfoDb::seqinfo(a) <- as_conlen(seqinfo_a)
-  if(seqinfo(b) == NULL)
+  if(GenomeInfoDb::seqinfo(b) == NULL)
     GenomeInfoDb::seqinfo(b) <- as_conlen(seqinfo_b)
 
   Synmap(CNEr::GRangePairs(
@@ -183,7 +183,7 @@ as_synmap.Axt <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
 
 #' @rdname as_synmap
 #' @export
-as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
+as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...) {
   Synmap(CNEr::GRangePairs(
     .make_GRanges(
       seqnames=x$qseqid,
@@ -204,11 +204,11 @@ as_synmap.data.frame <- function(x, seqinfo_a=NULL, seqinfo_b=NULL) {
 
 #' @rdname as_synmap
 #' @export
-as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL){
+as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...){
   if(!is.null(seqinfo_a))
-    first(x)$seqinfo <- as_conlen(seqinfo_a)
+    CNEr::first(x)$seqinfo <- as_conlen(seqinfo_a)
   if(!is.null(seqinfo_b))
-    second(x)$seqinfo <- as_conlen(seqinfo_b)
+    CNEr::second(x)$seqinfo <- as_conlen(seqinfo_b)
   Synmap(x)
 }
 
@@ -245,7 +245,8 @@ as_gff.GRanges <- function(
   type     = NULL,
   score    = NULL,
   phase    = NULL,
-  id       = NULL
+  id       = NULL,
+  ...
 ) {
   if(is.null(seqinfo_))
     seqinfo_ <- GenomicRanges::seqinfo(x)
@@ -285,7 +286,7 @@ as_gff.character <- function(x, ...){
 
 #' @rdname as_gff
 #' @export
-as_gff.data.frame <- function(x, seqinfo=NULL){
+as_gff.data.frame <- function(x, seqinfo_=NULL, ...){
   GFF(.make_GRanges(
     seqnames = x$seqid,
     start    = x$start,
@@ -296,7 +297,7 @@ as_gff.data.frame <- function(x, seqinfo=NULL){
     strand   = .as_bioc_strand(x$strand),
     phase    = as.integer(ifelse(x$phase    == '.', NA_integer_,   x$phase)),
     attr     = as.character(x$attr),
-    seqinfo  = as_conlen(seqinfo)
+    seqinfo  = as_conlen(seqinfo_)
   ))
 }
 

@@ -13,11 +13,11 @@ as_gff(x, ...)
 \method{as_gff}{GFF}(x, ...)
 
 \method{as_gff}{GRanges}(x, seqinfo_ = NULL, source = NULL, type = NULL,
-  score = NULL, phase = NULL, id = NULL)
+  score = NULL, phase = NULL, id = NULL, ...)
 
 \method{as_gff}{character}(x, ...)
 
-\method{as_gff}{data.frame}(x, seqinfo = NULL)
+\method{as_gff}{data.frame}(x, seqinfo_ = NULL, ...)
 }
 \arguments{
 \item{x}{Thing to be converted}

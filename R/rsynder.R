@@ -1,4 +1,5 @@
 #' @useDynLib synder
+#' @importFrom methods new
 #' @importFrom Rcpp sourceCpp
 #' @importFrom magrittr "%>%"
 utils::globalVariables(c("%>%", "."))
@@ -56,43 +57,6 @@ NULL
 #'    \item inbetween flag - TRUE if the query interval overlaps no syntenic intervals 
 #' }
 #'
-#' @section Filter command:
-#' 
-#' \emph{filter} removes links that disagree with the synteny map.
-#'
-#' The filter function takes two syntenic maps and finds the congruent links.
-#' Given two syntenic maps, A and B, the query-side intervals in A are mapped to
-#' target side search intervals using the syntenic map B. Then the target-side
-#' intervals in A that overlap the predicted search intervals are printed.
-#' 
-#' The most obvious usage case takes as input the results of BLASTing a sequence
-#' against a genome. Often such searches will have many hits in a swooping e-value
-#' gradient. The highest scoring hit may not be the orthologous one (for example,
-#' a weakly similar, but long hit may outscore the nearly identical, but
-#' truncated, true ortholog). `synder filter` will find the hits that are
-#' concordant with genomic context, reducing possibly thousands of hits to only
-#' a few.
-#'
-#' @section Map command:
-#' 
-#' Find all query-side syntenic blocks that overlap the input interval. Then map
-#' these blocks to the target-side and print the result. If an input interval
-#' overlaps no query bock, the flanks are printed.
-#' 
-#' The output will have the columns:o 
-#' \enumerate{
-#'   \item input interval name (e.g. AT1G01010)
-#'   \item target contig name (e.g. Chr1)
-#'   \item target start position
-#'   \item target stop position
-#'   \item missing flag, 0 if input overlaps no block, 1 otherwise
-#' }
-#'
-#' @section Count command:
-#'
-#' Like map except it counts the number of overlaps, rather than printing them.
-#' The output is a TAB-delimited list of sequence names and counts.
-#'
 #' @section Dump command:
 #'
 #' Builds the internal synteny datastructure and prints the results.
@@ -139,7 +103,6 @@ NULL
 #' @param r Score decay rate.
 #' @param offsets Start and stop offsets (0 or 1) for synteny map, GFF file,
 #' and output.
-#' @param hit hit map or object
 #' @name synder_commands
 NULL
 

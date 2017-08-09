@@ -20,9 +20,9 @@
 \method{as.data.frame}{GFF}(x, ...)
 }
 \arguments{
-\item{...}{additional arguments}
+\item{x}{input type}
 
-\item{d}{input type}
+\item{...}{additional arguments}
 }
 \description{
 Cast data as synder objects
