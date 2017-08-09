@@ -11,8 +11,7 @@ intro_1
 \description{
 Contains 2 files:
 \enumerate{
-    \item synmap - simple linear synteny map
-    \item tgen   - lengths of target scaffold
+    \item synmap - simple linear synteny map with seqinfo for both sides
  }
 }
 \keyword{datasets}
