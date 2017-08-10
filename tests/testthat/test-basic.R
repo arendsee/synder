@@ -39,3 +39,17 @@ test_that(
     expect_true( !any( dump(toy$synmap)             %>% CNEr::first() %>% is.na ) )
   }
 )
+
+test_that(
+  "seqinfo is swapped on swap",
+  {
+    expect_equal(
+      dump(toy$synmap, swap=TRUE) %>% CNEr::first() %>% GenomeInfoDb::seqinfo(),
+      toy$synmap %>% CNEr::second() %>% GenomeInfoDb::seqinfo()
+    )
+    expect_equal(
+      search(toy$synmap, toy$tgff, swap=TRUE) %>% CNEr::first() %>% GenomeInfoDb::seqinfo(),
+      toy$synmap %>% CNEr::second() %>% GenomeInfoDb::seqinfo()
+    )
+  }
+)
