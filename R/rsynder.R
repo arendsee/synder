@@ -224,23 +224,21 @@ search <- function(
   offsets = c(1L,1L,1L,1L,1L,1L)
 ) {
 
-  # If syn is a GRangePairs, try to infer the contig lengths from  the seqinfo
-  # for each GRange object.
-  if('GRangePairs' %in% class(syn)){
-    a <- CNEr::first(syn)
-    b <- CNEr::last(syn)
-    if(!all(is.na(GenomeInfoDb::seqlengths(a))))
-      tcl <- GenomeInfoDb::seqinfo(a)
-    if(!all(is.na(GenomeInfoDb::seqlengths(b))))
-      qcl <- GenomeInfoDb::seqinfo(b)
-  }
+  syn <- as_synmap(syn)
+
+  a <- CNEr::first(syn)
+  b <- CNEr::last(syn)
+  if(all(!is.na(GenomeInfoDb::seqlengths(a))))
+    qcl <- GenomeInfoDb::seqinfo(a)
+  if(all(!is.na(GenomeInfoDb::seqlengths(b))))
+    tcl <- GenomeInfoDb::seqinfo(b)
 
   if(!(is.character(tcl) && tcl == "")) tcl <- as_conlen(tcl) 
   if(!(is.character(qcl) && qcl == "")) qcl <- as_conlen(qcl) 
 
   d <- wrapper(
     FUN     = c_search,
-    x       = as_synmap(syn),
+    x       = syn,
     y       = as_gff(gff),
     tcl     = df2file(tcl),
     qcl     = df2file(qcl),
@@ -258,17 +256,17 @@ search <- function(
 
   SearchResult(
     CNEr::GRangePairs(
-      first  = .make_GRanges(
-        as.character(d$qseqid),
-        d$qstart,
-        d$qstop,
-        seqinfo=qcl
+      first = .make_GRanges(
+        seqnames = as.character(d$qseqid),
+        start    = d$qstart,
+        stop     = d$qstop,
+        seqinfo  = qcl
       ),
       second = .make_GRanges(
-        as.character(d$tseqid),
-        d$tstart,
-        d$tstop,
-        seqinfo=tcl
+        seqnames = as.character(d$tseqid),
+        start    = d$tstart,
+        stop     = d$tstop,
+        seqinfo  = tcl
       ),
       attr      = as.character(d$attr),
       strand    = d$strand,

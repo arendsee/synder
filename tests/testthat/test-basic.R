@@ -31,3 +31,11 @@ test_that(
     )
   }
 )
+
+test_that(
+  "seqinfo is preserved across search and dump operations",
+  {
+    expect_true( !any( search(toy$synmap, toy$qgff) %>% CNEr::first() %>% is.na ) )
+    expect_true( !any( dump(toy$synmap)             %>% CNEr::first() %>% is.na ) )
+  }
+)
