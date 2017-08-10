@@ -45,7 +45,12 @@ handle_inversions <- function(x) {
 # Plot functions
 # ----------------------
 
+#' Plot a synteny map
+#'
+#' @method plot Synmap
 #' @export
+#' @param x Synmap object
+#' @param ... Additional arguments (not currently used)
 plot.Synmap <- function(x, ...){
 
   x <- as.data.frame(x)
@@ -63,7 +68,12 @@ plot.Synmap <- function(x, ...){
     )
 }
 
+#' Print the result of dumping a synteny map
+#'
+#' @method plot DumpResult
 #' @export
+#' @param x DumpResult object
+#' @param ... Additional arguments (not currently used)
 plot.DumpResult <- function(x, ...){
 
   x <- as.data.frame(x)
@@ -105,7 +115,17 @@ plot.DumpResult <- function(x, ...){
     )
 }
 
+#' Plot the result of a search operations
+#'
+#' This plot function takes both a SearchResult object and the Synmap object
+#' that was used to produce it. The latter is required to plot the search
+#' intervals in the synmap context.
+#'
+#' @method plot SearchResult
 #' @export
+#' @param x SearchResult object
+#' @param y Synmap object
+#' @param ... Additional arguments (not currently used)
 plot.SearchResult <- function(x, y, ...){
 
   stopifnot(is_synmap(y))
