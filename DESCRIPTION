@@ -39,3 +39,13 @@ Suggests:
     covr
 VignetteBuilder: knitr
 BiocViews: 
+Collate: 
+    'RcppExports.R'
+    'classes.R'
+    'cast.R'
+    'data.R'
+    'plot.R'
+    'print.R'
+    'read.R'
+    'rsynder.R'
+    'types.R'

@@ -114,8 +114,12 @@ Rcpp::DataFrame Synmap::as_data_frame()
 
 void Synmap::link_blocks()
 {
-    genome[0]->set_contig_lengths(qclfile);
-    genome[1]->set_contig_lengths(tclfile);
+
+    size_t i = swap ? 1 : 0;
+    size_t j = swap ? 0 : 1;
+
+    genome[i]->set_contig_lengths(qclfile);
+    genome[j]->set_contig_lengths(tclfile);
 
     genome[0]->link_block_corners();
     genome[1]->link_block_corners();
