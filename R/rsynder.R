@@ -254,6 +254,12 @@ search <- function(
   if(is.character(qcl) && qcl == "") qcl <- NULL
   if(is.character(tcl) && tcl == "") tcl <- NULL
 
+  if(swap){
+    temp <- qcl
+    qcl <- tcl
+    tcl <- temp
+  }
+
   SearchResult(
     CNEr::GRangePairs(
       first = .make_GRanges(
@@ -306,19 +312,28 @@ dump <- function(
 
   d <- do_offsets(d, offsets)
 
+  qcl <- GenomeInfoDb::seqinfo(CNEr::first(syn))
+  tcl <- GenomeInfoDb::seqinfo(CNEr::second(syn))
+
+  if(swap){
+    temp <- qcl
+    qcl <- tcl
+    tcl <- temp
+  }
+
   DumpResult(
     CNEr::GRangePairs(
       first  = .make_GRanges(
         as.character(d$qseqid),
         d$qstart,
         d$qstop,
-        seqinfo=GenomeInfoDb::seqinfo(CNEr::first(syn))
+        seqinfo=qcl
       ),
       second = .make_GRanges(
         as.character(d$tseqid),
         d$tstart,
         d$tstop,
-        seqinfo=GenomeInfoDb::seqinfo(CNEr::second(syn))
+        seqinfo=tcl
       ),
       strand = d$strand,
       score  = d$score,
@@ -329,4 +344,3 @@ dump <- function(
     offsets = offsets[1:4]
   )
 }
-
