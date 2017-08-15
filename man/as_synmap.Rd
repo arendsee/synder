@@ -2,6 +2,7 @@
 % Please edit documentation in R/cast.R
 \name{as_synmap}
 \alias{as_synmap}
+\alias{as_synmap.NULL}
 \alias{as_synmap.Synmap}
 \alias{as_synmap.character}
 \alias{as_synmap.Axt}
@@ -10,6 +11,8 @@
 \title{Convert to a synder Synmap object}
 \usage{
 as_synmap(x, ...)
+
+\method{as_synmap}{NULL}(x, ...)
 
 \method{as_synmap}{Synmap}(x, ...)
 

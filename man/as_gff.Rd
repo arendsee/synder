@@ -2,6 +2,7 @@
 % Please edit documentation in R/cast.R
 \name{as_gff}
 \alias{as_gff}
+\alias{as_gff.NULL}
 \alias{as_gff.GFF}
 \alias{as_gff.GRanges}
 \alias{as_gff.character}
@@ -9,6 +10,8 @@
 \title{Convert to a synder GFF object}
 \usage{
 as_gff(x, ...)
+
+\method{as_gff}{NULL}(x, ...)
 
 \method{as_gff}{GFF}(x, ...)
 

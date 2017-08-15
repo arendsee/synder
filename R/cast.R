@@ -149,6 +149,12 @@ as_synmap <- function(x, ...){
 
 #' @rdname as_synmap
 #' @export
+as_synmap.NULL <- function(x, ...){
+  as_synmap(CNEr::GRangePairs(), ...)
+}
+
+#' @rdname as_synmap
+#' @export
 as_synmap.Synmap <- function(x, ...) x
 
 #' @rdname as_synmap
@@ -209,6 +215,26 @@ as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...){
     CNEr::first(x)$seqinfo <- as_conlen(seqinfo_a)
   if(!is.null(seqinfo_b))
     CNEr::second(x)$seqinfo <- as_conlen(seqinfo_b)
+
+  imet <- GenomicRanges::mcols(x)
+  omet <- if(nrow(imet) == 0){
+    data.frame(score=numeric(0), strand=character(0))
+  } else {
+    data.frame(
+      score = rep(length(x), NA_real_),
+      strand = rep(length(x), '.'),
+      stringsAsFactors=FALSE
+    )
+  }
+
+  if('score' %in% names(imet))
+    omet$score <- imet$score 
+
+  if('strand' %in% names(imet))
+    omet$strand <- imet$strand 
+
+  GenomicRanges::mcols(x) <- omet
+
   Synmap(x)
 }
 
@@ -230,6 +256,12 @@ as_synmap.GRangePairs <- function(x, seqinfo_a=NULL, seqinfo_b=NULL, ...){
 #'        name of the query
 as_gff <- function(x, ...){
   UseMethod('as_gff', x)
+}
+
+#' @rdname as_gff
+#' @export
+as_gff.NULL <- function(x, ...){
+  as_gff(GenomicRanges::GRanges(...))
 }
 
 #' @rdname as_gff
