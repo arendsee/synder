@@ -10,7 +10,11 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-For a practical introduction to `synder`, read [introduction vignette](intro.html).
+List of all vignettes:
+
+ - [introduction to Synder](intro.html)
+ - algorithmic details
+ - [a case study in yeast](yeast.html)
 
 ## Top level commands
 

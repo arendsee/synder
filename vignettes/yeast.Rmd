@@ -1,14 +1,24 @@
 ---
-title: "Yeast Ty1 mobile element case study"
+title: "Yeast Ty1 mobile elements"
 author: "Zebulun Arendsee"
+date: "`r Sys.Date()`"
+bibliography: yeast.bib 
 output:
     rmarkdown::html_vignette:
-        fig_caption: yes
+        fig_caption: yes 
 vignette: >
   %\VignetteIndexEntry{Ty1 case study}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
+
+Other vignettes:
+
+ - [introduction to Synder](intro.html)
+ - [algorithmic details](algorithm.html)
+ - a case study in yeast
+
+# Introduction
 
 Synder traces orthology independent of sequence similarity. This allows unique
 mappings of sequences even when they are members of large families.
@@ -16,52 +26,74 @@ mappings of sequences even when they are members of large families.
 The `ty1` dataset includes synteny maps built between *S. cerivisiae* and 8
 other yeast species. These maps were built using mummer.
 
+```
+nucmer                                       \
+    --maxmatch                               \
+    -p sc_Saccharomyces_bayanus_masked       \
+    -o ../data/masked/scerevisiae.masked.fna \
+    ../data/masked/Saccharomyces_bayanus.masked.fna 
+```
+
 ```{r}
+# require(synder)
+# require(knitr)
+# require(readr)
+# require(ape)
+# require(data.tree)
 # data(ty1)
 ```
 
-Quality cutoff
-
 ```{r}
-# syn500 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 500)
-# syn400 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 400)
-# syn300 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 300)
-# syn200 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 200)
-# syn100 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 100)
-# syn000 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 0)
+# names(ty1$glens)
 ```
 
+```{r}
+# tree <- as.Node(read.tree("yeast.tree"))
+# print(tree)
+```
+
+This yeast phylogeny was taken from [@boynton2014ecology].
+
+```{r, results="asis"}
+# knitr::kable(data_frame(
+#     Species=names(ty1$glens),
+#     NumberOfScaffolds=sapply(ty1$glens, nrow)
+# ))
+```
+
+*Saccharomyces cerevisiae* is well-assembled, but many of the others are not.
+
+We will see how this impacts our results.
+
+# Map density
 
 ```{r}
-# results500 <- lapply(syn500, function(x) search(x, ty1$gff))
-# results400 <- lapply(syn400, function(x) search(x, ty1$gff))
-# results300 <- lapply(syn300, function(x) search(x, ty1$gff))
-# results200 <- lapply(syn200, function(x) search(x, ty1$gff))
-# results100 <- lapply(syn100, function(x) search(x, ty1$gff))
-# results000 <- lapply(syn000, function(x) search(x, ty1$gff))
-#
-# sa <- results500$Saccharomyces_arboricola
+# syn <- list()
+# syn$c500 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 500)
+# syn$c400 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 400)
+# syn$c300 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 300)
+# syn$c200 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 200)
+# syn$c100 <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 100)
+# syn$c0   <- lapply(ty1$synmaps, subset, (qstop - qstart + 1) > 0)
+```
+
+```{r, eval=FALSE}
+# # Preparing glens
+# glens_f = list.files(pattern='.*.glen')
+# glens_names <- sub('\\..*', '', glens_f)
+# glens <- lapply(glens_f, synder::read_conlen)
+# names(glens) <- glens_names
+```
+
+```{r}
+# results <- list()
+# results$c500 <- lapply(syn$c500, function(x) search(x, ty1$gff))
+# results$c400 <- lapply(syn$c400, function(x) search(x, ty1$gff))
+# results$c300 <- lapply(syn$c300, function(x) search(x, ty1$gff))
+# results$c200 <- lapply(syn$c200, function(x) search(x, ty1$gff))
+# results$c100 <- lapply(syn$c100, function(x) search(x, ty1$gff))
+# results$c0   <- lapply(syn$c0  , function(x) search(x, ty1$gff))
 ```
 
 Now we want to infer orthology independent of sequence similarity. So I will
 subtract the query intervals from the synteny maps.
-
-
-```{r}
-# maps <- lapply(ty1$synmaps, function(x) map(x, ty1$gff))
-#
-# holy <- lapply(
-#     ty1$synmaps,
-#     function(x){
-#         m <- map(x, ty1$gff)
-#         m_str <- paste0(m$qcon, m$qstart, m$qstop)
-#         s_str <- paste0(x$qcon, x$qstart, x$qstop)
-#         idx <- s_str %in% m_str
-#         x[!idx, ]
-#     }
-# )
-#
-# holy_results <- lapply(holy, function(x) search(x, ty1$gff))
-#
-# holy_results_k100 <- lapply(holy, function(x) search(x, ty1$gff, k=100))
-```

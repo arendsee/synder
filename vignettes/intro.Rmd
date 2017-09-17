@@ -10,11 +10,15 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
+Other vignettes:
+
+ - introduction to Synder
+ - [algorithmic details](algorithm.html)
+ - [a case study in yeast](yeast.html)
+
 The primary function of synder is to map genomic intervals of interest from a
 query genome to search intervals in the target genome. In this vignette, I
 will showcase the basic functionallity using a toy data set.
-
-For algorithmic details see [this](algorithm.html) vignette. 
 
 ## Installation
 

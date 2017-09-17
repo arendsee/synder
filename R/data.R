@@ -38,6 +38,7 @@
 #' \enumerate{
 #'     \item synmaps - Maps between S. cerivisiae and 7 other yeasts
 #'     \item gff     - Positions of Ty1 mobile elements in S. cerivisiae
+#'     \item glens   - Table of scaffold lengths for each species
 #' }
 #' 
 #' @format List
