@@ -13,14 +13,14 @@ Description:
     genome to a narrow search space on another genome.
 License: MIT + file LICENSE
 Depends:
-    R (>= 3.2.0)
+    R (>= 3.4.0)
 Imports:
     Rcpp (>= 0.12.7),
     methods,
     S4Vectors,
     IRanges,
     GenomicRanges,
-    CNEr,
+    CNEr (>= 1.12.1),
     BiocGenerics,
     GenomeInfoDb,
     dplyr,
