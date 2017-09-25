@@ -24,6 +24,8 @@ Imports:
     BiocGenerics,
     GenomeInfoDb,
     dplyr,
+    rlang,
+    reshape2,
     readr,
     tibble,
     magrittr,

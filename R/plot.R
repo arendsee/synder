@@ -6,11 +6,11 @@ to_global <- function(x, prefix='q') {
   xseqid <- paste0(prefix, 'seqid')
   xstop  <- paste0(prefix, 'stop')
   xstart <- paste0(prefix, 'start')
-  xv <- dplyr::group_by_(x, xseqid) %>%
-    dplyr::mutate_(xmax=max(xstop)) %>%
-    dplyr::select_(xseqid, 'xmax')  %>%
-    unique                          %>%
-    dplyr::arrange_('xmax')         %>%
+  xv <- dplyr::group_by(x, .data[[xseqid]]) %>%
+    dplyr::mutate(xmax=max(.data[[xstop]])) %>%
+    dplyr::select_(xseqid, 'xmax')                 %>%
+    base::unique()                                 %>%
+    dplyr::arrange(.data$xmax)              %>%
     {
       xlv <- c(0, .$xmax[-nrow(.)])
       names(xlv) <- .[[xseqid]]
@@ -125,8 +125,9 @@ plot.DumpResult <- function(x, ...){
 #' @export
 #' @param x SearchResult object
 #' @param y Synmap object
+#' @param rank logical Should intervals be printed by rank?
 #' @param ... Additional arguments (not currently used)
-plot.SearchResult <- function(x, y, ...){
+plot.SearchResult <- function(x, y, rank=FALSE, ...){
 
   stopifnot(is_synmap(y))
 
@@ -138,6 +139,32 @@ plot.SearchResult <- function(x, y, ...){
   y$group <- 'synmap'
   y$score <- NULL
   z <- rbind(x, y)
+
+  if(rank){
+    zq <- z[,1:3] %>%
+      reshape2::melt() %>%
+      dplyr::group_by(.data$qseqid) %>%
+      dplyr::mutate(value = as.numeric(ordered(.data$value))) %>% {
+        data.frame(
+          qseqid = .$qseqid[.$variable == "qstart"],
+          qstart = .$value[.$variable == "qstart"],
+          qstop  = .$value[.$variable == "qstop"]
+        )
+      }
+
+    zt <- z[,4:6] %>%
+      reshape2::melt() %>%
+      dplyr::group_by(.data$tseqid) %>%
+      dplyr::mutate(value = as.numeric(ordered(.data$value))) %>% {
+        data.frame(
+          tseqid = .$tseqid[.$variable == "tstart"],
+          tstart = .$value[.$variable == "tstart"],
+          tstop  = .$value[.$variable == "tstop"]
+        )
+      }
+
+    z <- cbind(zq, zt, z[,7:8])
+  }
 
   z <- to_global(z, prefix='q')
   z <- to_global(z, prefix='t')
