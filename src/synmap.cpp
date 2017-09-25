@@ -160,25 +160,51 @@ void Synmap::validate()
 }
 
 
-void warnWithList(std::set<std::string> items, std::string msg){
+std::string listToString(std::set<std::string> items, const char* delim){
     std::stringstream itemStr;
     std::copy(
         items.begin(),
         items.end(),
-        std::ostream_iterator<std::string>(itemStr, ", ")
+        std::ostream_iterator<std::string>(itemStr, delim)
     );
-    Rcpp::warning(msg + "Missing items: [" + itemStr.str() + "]\n");
+    return itemStr.str();
 }
 
 void missingContigWarning(std::set<std::string> missing, int ntotal){
     if(missing.size() > 0){
-        warnWithList(
-            missing, 
-            std::to_string(missing.size())                               +
-            " out of "                                                   +
-            std::to_string(ntotal + missing.size())                      +
-            " contigs in the query GFF are missing in the synteny map. " +
-            "It is not unusual for some contigs (scaffolds) to be missing.\n"
+        Rcpp::warning(
+            std::to_string(missing.size())                                    +
+            " out of "                                                        +
+            std::to_string(ntotal + missing.size())                           +
+            " contigs in the query GFF are missing in the synteny map. "      +
+            "It is not unusual for some contigs (scaffolds) to be missing.\n" +
+            "Missing items: [" + listToString(missing, ", ") + "]\n"
+        );
+    }
+}
+
+void dieOnfailingLines(std::vector<std::string> lines){
+    if(lines.size() > 0){
+
+        std::vector<std::string>::const_iterator begin = lines.begin();
+        std::vector<std::string>::const_iterator end
+            = lines.size() > 10
+            ? lines.begin() + 10
+            : lines.end();
+
+        std::string introStr 
+            = lines.size() > 10
+            ? "First 10 failing lines:\n"
+            : "Failing lines:\n";
+
+        std::stringstream itemStr;
+        std::copy(begin, end, std::ostream_iterator<std::string>(itemStr, "\n"));
+
+        Rcpp::stop(
+            "Failed to parse ",
+            std::to_string(lines.size()),
+            "lines. ", introStr,
+            itemStr.str()
         );
     }
 }
@@ -199,6 +225,7 @@ Rcpp::CharacterVector Synmap::filter(std::string intfile)
 
     std::set<std::string> missingContigs;
     std::set<std::string> presentContigs;
+    std::vector<std::string> failingLines;
 
     std::string line;
     while (std::getline(fh, line)) {
@@ -239,10 +266,11 @@ Rcpp::CharacterVector Synmap::filter(std::string intfile)
             }
 
         } else {
-            Rcpp::warning("Failed to parse line:\n\t" + line);
+            failingLines.push_back(line);
         }
     }
 
+    dieOnfailingLines(failingLines);
     missingContigWarning(missingContigs, presentContigs.size());
 
     return out;
@@ -271,6 +299,7 @@ std::vector<Feature> Synmap::gff2features(std::string gfffile)
 
     std::set<std::string> missingContigs;
     std::set<std::string> presentContigs;
+    std::vector<std::string> failingLines;
 
     std::string line;
     while (std::getline(fh, line)) {
@@ -303,10 +332,11 @@ std::vector<Feature> Synmap::gff2features(std::string gfffile)
                 feats.push_back(feat);
             }
         } else {
-            Rcpp::warning("Failed to parse line:\n\t" + line);
+            failingLines.push_back(line);
         }
     }
 
+    dieOnfailingLines(failingLines);
     missingContigWarning(missingContigs, presentContigs.size());
 
     return feats;
