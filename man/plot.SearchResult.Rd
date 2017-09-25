@@ -4,12 +4,14 @@
 \alias{plot.SearchResult}
 \title{Plot the result of a search operations}
 \usage{
-\method{plot}{SearchResult}(x, y, ...)
+\method{plot}{SearchResult}(x, y, rank = FALSE, ...)
 }
 \arguments{
 \item{x}{SearchResult object}
 
 \item{y}{Synmap object}
+
+\item{rank}{logical Should intervals be printed by rank?}
 
 \item{...}{Additional arguments (not currently used)}
 }

@@ -159,6 +159,56 @@ void Synmap::validate()
     genome[1]->validate();
 }
 
+
+std::string listToString(std::set<std::string> items, const char* delim){
+    std::stringstream itemStr;
+    std::copy(
+        items.begin(),
+        items.end(),
+        std::ostream_iterator<std::string>(itemStr, delim)
+    );
+    return itemStr.str();
+}
+
+void missingContigWarning(std::set<std::string> missing, int ntotal){
+    if(missing.size() > 0){
+        Rcpp::warning(
+            std::to_string(missing.size())                                    +
+            " out of "                                                        +
+            std::to_string(ntotal + missing.size())                           +
+            " contigs in the query GFF are missing in the synteny map. "      +
+            "It is not unusual for some contigs (scaffolds) to be missing.\n" +
+            "Missing items: [" + listToString(missing, ", ") + "]\n"
+        );
+    }
+}
+
+void dieOnfailingLines(std::vector<std::string> lines){
+    if(lines.size() > 0){
+
+        std::vector<std::string>::const_iterator begin = lines.begin();
+        std::vector<std::string>::const_iterator end
+            = lines.size() > 10
+            ? lines.begin() + 10
+            : lines.end();
+
+        std::string introStr 
+            = lines.size() > 10
+            ? "First 10 failing lines:\n"
+            : "Failing lines:\n";
+
+        std::stringstream itemStr;
+        std::copy(begin, end, std::ostream_iterator<std::string>(itemStr, "\n"));
+
+        Rcpp::stop(
+            "Failed to parse ",
+            std::to_string(lines.size()),
+            "lines. ", introStr,
+            itemStr.str()
+        );
+    }
+}
+
 Rcpp::CharacterVector Synmap::filter(std::string intfile)
 {
 
@@ -172,6 +222,10 @@ Rcpp::CharacterVector Synmap::filter(std::string intfile)
     long qstart, qstop, tstart, tstop;
 
     Rcpp::CharacterVector out;
+
+    std::set<std::string> missingContigs;
+    std::set<std::string> presentContigs;
+    std::vector<std::string> failingLines;
 
     std::string line;
     while (std::getline(fh, line)) {
@@ -197,10 +251,11 @@ Rcpp::CharacterVector Synmap::filter(std::string intfile)
 
             Contig* qcon = get_contig(0, qseqid.c_str());
             if(qcon == nullptr) {
-                // Absence of a particular contig does not necessarily imply bad
-                // input. So no need to throw an exception.
-                Rcpp::warning("Contig '" + qseqid + "' not found in synteny map, skipping");
+                missingContigs.insert(std::string(qseqid));
             } else {
+                // FIXME: trades performance for more informative warnings 
+                presentContigs.insert(std::string(qseqid));
+
                 std::vector<SearchInterval> si = qcon->list_search_intervals(qfeat, r);
                 for(auto &s : si) {
                     if(s.feature_overlap(&tfeat)) {
@@ -211,9 +266,12 @@ Rcpp::CharacterVector Synmap::filter(std::string intfile)
             }
 
         } else {
-            Rcpp::warning("Failed to parse line:\n\t" + line);
+            failingLines.push_back(line);
         }
     }
+
+    dieOnfailingLines(failingLines);
+    missingContigWarning(missingContigs, presentContigs.size());
 
     return out;
 }
@@ -239,6 +297,10 @@ std::vector<Feature> Synmap::gff2features(std::string gfffile)
 
     std::vector<Feature> feats;
 
+    std::set<std::string> missingContigs;
+    std::set<std::string> presentContigs;
+    std::vector<std::string> failingLines;
+
     std::string line;
     while (std::getline(fh, line)) {
 
@@ -261,20 +323,21 @@ std::vector<Feature> Synmap::gff2features(std::string gfffile)
             stop  -= offsets[3];
             qcon = get_contig(0, contig_seqname.c_str());
             if(qcon == nullptr) {
-                char* msg;
-                Rcpp::warning(
-                    "SKIPPING ENTRY: Synteny map has no contig named '" +
-                    std::string(contig_seqname) +
-                    "'\n"
-                );
-                continue;
+                missingContigs.insert(std::string(contig_seqname));
+            } else {
+                // FIXME: trades performance for better warnings
+                presentContigs.insert(std::string(contig_seqname));
+
+                Feature feat(contig_seqname.c_str(), start, stop, seqname.c_str(), 0);
+                feats.push_back(feat);
             }
-            Feature feat(contig_seqname.c_str(), start, stop, seqname.c_str(), 0);
-            feats.push_back(feat);
         } else {
-            Rcpp::warning("Failed to parse line:\n\t" + line);
+            failingLines.push_back(line);
         }
     }
+
+    dieOnfailingLines(failingLines);
+    missingContigWarning(missingContigs, presentContigs.size());
 
     return feats;
 }

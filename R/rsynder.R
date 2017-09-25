@@ -2,6 +2,7 @@
 #' @importFrom methods new
 #' @importFrom Rcpp sourceCpp
 #' @importFrom magrittr "%>%"
+#' @importFrom rlang .data
 utils::globalVariables(c("%>%", "."))
 NULL
 
