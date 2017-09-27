@@ -16,6 +16,9 @@ will showcase the basic functionallity using a toy data set.
 
 For algorithmic details see [this](algorithm.html) vignette. 
 
+This work is funded by the National Science Foundation grant [NSF-IOS
+1546858](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1546858).
+
 ## Installation
 
 Synder is available from github, installation requires devtools:

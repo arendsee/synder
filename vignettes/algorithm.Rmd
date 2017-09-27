@@ -12,6 +12,9 @@ vignette: >
 
 For a practical introduction to `synder`, read [introduction vignette](intro.html).
 
+This work is funded by the National Science Foundation grant [NSF-IOS
+1546858](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1546858).
+
 ## Top level commands
 
 ### Search 

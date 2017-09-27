@@ -10,7 +10,8 @@ BugReports: https://github.com/arendsee/synder/issues
 Description:
     A synteny map is a set of linked intervals between two genomes.  The main
     function of Synder is to use a synteny map to trace an interval in one
-    genome to a narrow search space on another genome.
+    genome to a narrow search space on another genome. This work is funded by
+    NSF grant IOS-1546858.
 License: MIT + file LICENSE
 Depends:
     R (>= 3.4.0)
