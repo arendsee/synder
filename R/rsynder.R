@@ -106,16 +106,6 @@ NULL
 #' @name synder_commands
 NULL
 
-# Internally synder uses a 0-based system. This function converts the intervals
-# to 1-base (which is used by Bioconductor).
-do_offsets <- function(d){
-  d$qstart <- d$qstart + 1L
-  d$qstop  <- d$qstop  + 1L
-  d$tstart <- d$tstart + 1L
-  d$tstop  <- d$tstop  + 1L
-  d
-}
-
 # Changes data.frames to temporary files
 # FIXME: This is a bit of a hack. The old C++ code took files. Here a convert
 # perfectly good R data.frames, which have already been loaded, back to files.
@@ -241,8 +231,6 @@ search <- function(
     offsets = offsets
   )
 
-  d <- do_offsets(d)
-
   if(is.character(qcl) && qcl == "") qcl <- NULL
   if(is.character(tcl) && tcl == "") tcl <- NULL
 
@@ -301,8 +289,6 @@ dump <- function(
     trans   = trans,
     offsets = offsets
   )
-
-  d <- do_offsets(d)
 
   qcl <- GenomeInfoDb::seqinfo(CNEr::first(syn))
   tcl <- GenomeInfoDb::seqinfo(CNEr::second(syn))
