@@ -19,12 +19,14 @@ Synmap::Synmap(
     r(t_r),
     trans(t_trans)
 {
-    if(t_offsets.size() != offsets.size()) {
-        Rcpp::stop("Offsets must be an integer vector of 4 elements");
+    if(t_offsets.size() != 2) {
+        Rcpp::stop(
+            "Offsets must be an integer vector of 2 elements"
+            "(the start and stop offsets for the synteny map)"
+        );
     }
-    for(int i = 0; i < offsets.size(); i++) {
-        offsets[i] = t_offsets[i];
-    }
+    offsets[0] = t_offsets[0]; // synmap start offset
+    offsets[1] = t_offsets[1]; // synmap stop offset
     load_blocks();
     validate();
 }

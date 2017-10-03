@@ -8,7 +8,8 @@
 //' @param syn      synteny map file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 //' @param trans    score transform methods, single character
-//' @param offsets  6-element integer vector of [01] offsets
+//' @param offsets  4-element integer vector of [01] offsets (start/stop
+//'                 offsets for the synteny maps and the GFF)
 // [[Rcpp::export]]
 Rcpp::DataFrame c_dump (
     std::string syn,
@@ -32,7 +33,8 @@ Rcpp::DataFrame c_dump (
 //' @param k       match fuziness, integer
 //' @param r       score decay rate, 0 means no context, high means more context
 //' @param trans   score transform methods, single character
-//' @param offsets 6-element integer vector of [01] offsets
+//' @param offsets  4-element integer vector of [01] offsets (start/stop
+//'                 offsets for the synteny maps and the GFF)
 // [[Rcpp::export]]
 Rcpp::DataFrame c_search(
     std::string syn,
@@ -60,7 +62,8 @@ Rcpp::DataFrame c_search(
 //' @param k        match fuziness, integer
 //' @param r        score decay rate, 0 means no context, high means more context
 //' @param trans    score transform methods, single character
-//' @param offsets  6-element integer vector of [01] offsets
+//' @param offsets  4-element integer vector of [01] offsets (start/stop
+//'                 offsets for the synteny maps and the GFF)
 // [[Rcpp::export]]
 Rcpp::CharacterVector c_filter(
     std::string syn,
@@ -82,7 +85,8 @@ Rcpp::CharacterVector c_filter(
 //' @param syn     synteny map file name
 //' @param gff     GFF file name
 //' @param swap    reverse direction of synteny map (e.g. swap query and target) 
-//' @param offsets 6-element integer vector of [01] offsets
+//' @param offsets  4-element integer vector of [01] offsets (start/stop
+//'                 offsets for the synteny maps and the GFF)
 // [[Rcpp::export]]
 Rcpp::DataFrame c_map(
     std::string syn,
@@ -101,7 +105,8 @@ Rcpp::DataFrame c_map(
 //' @param syn      synteny map file name
 //' @param gff      GFF file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
-//' @param offsets  6-element integer vector of [01] offsets
+//' @param offsets  4-element integer vector of [01] offsets (start/stop
+//'                 offsets for the synteny maps and the GFF)
 // [[Rcpp::export]]
 Rcpp::DataFrame c_count(
     std::string syn,

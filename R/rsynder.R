@@ -106,6 +106,8 @@ NULL
 #' @name synder_commands
 NULL
 
+# Internally synder uses a 0-based system. This function converts the intervals
+# to 1-base (which is used by Bioconductor).
 do_offsets <- function(d){
   d$qstart <- d$qstart + 1L
   d$qstop  <- d$qstop  + 1L
@@ -136,7 +138,7 @@ check_parameters <- function(
   trans   = NULL,
   ...
 ){
-  stopifnot(is.null(offsets) || (all(offsets %in% c(1,0)) && length(offsets) == 4))
+  stopifnot(is.null(offsets) || (all(offsets %in% c(1,0)) && length(offsets) == 2))
   stopifnot(is.null(k)       || is.numeric(k))
   stopifnot(is.null(r)       || is.numeric(r))
   stopifnot(is.null(swap)    || is.logical(swap))
@@ -226,10 +228,6 @@ search <- function(
   if(!(is.character(tcl) && tcl == "")) tcl <- as_conlen(tcl) 
   if(!(is.character(qcl) && qcl == "")) qcl <- as_conlen(qcl) 
 
-  if(!is.null(offsets)){
-    offsets <- c(offsets, 1L, 1L)
-  }
-
   d <- wrapper(
     FUN     = c_search,
     x       = syn,
@@ -240,9 +238,7 @@ search <- function(
     k       = k,
     r       = r,
     trans   = trans, 
-    offsets = offsets # `offsets` is start and stop of the synteny map
-                      # the two added offsets are for the GFF, which
-                      # according to the spec, must be 1-based.
+    offsets = offsets
   )
 
   d <- do_offsets(d)
@@ -297,10 +293,6 @@ dump <- function(
 ) {
 
   syn <- as_synmap(syn)
-
-  if(!is.null(offsets)){
-    offsets <- c(offsets, 1L, 1L)
-  }
 
   d <- wrapper(
     FUN     = c_dump,

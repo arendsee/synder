@@ -13,7 +13,8 @@ c_map(syn, gff, swap, offsets)
 
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 
-\item{offsets}{6-element integer vector of [01] offsets}
+\item{offsets}{4-element integer vector of [01] offsets (start/stop
+offsets for the synteny maps and the GFF)}
 }
 \description{
 trace intervals across genomes

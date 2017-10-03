@@ -95,7 +95,7 @@ DumpResult <- setClass(
   prototype = list(
     swap    = FALSE,
     trans   = 'i',
-    offsets = c(1L,1L,1L,1L,1L,1L)
+    offsets = c(1L,1L)
   )
 )
 
@@ -116,6 +116,6 @@ SearchResult <- setClass(
     trans   = 'i',
     k       = 0L,
     r       = 0,
-    offsets = c(1L,1L,1L,1L,1L,1L)
+    offsets = c(1L,1L)
   )
 )

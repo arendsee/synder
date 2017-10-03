@@ -31,7 +31,7 @@ private:
     char    trans     = 'i';
 
     // The {{ is needed to workaround a bug in old g++ compilers
-    std::array<int,4> offsets = {{0,1,0,0}};
+    std::array<int,4> offsets = {{1,1,1,1}};
 
     // utility function for loading GFF files
     std::vector<Feature> gff2features(std::string fh);
