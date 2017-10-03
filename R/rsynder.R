@@ -102,26 +102,15 @@ NULL
 #' @param k Number of interrupting intervals allowed before breaking contiguous
 #' set.
 #' @param r Score decay rate.
-#' @param offsets Start and stop offsets (0 or 1) for synteny map, GFF file,
-#' and output.
+#' @param offsets Start and stop offsets (0 or 1) for the synteny map
 #' @name synder_commands
 NULL
 
-# NOTE: Handling of offsets:
-# --------------------------
-# Start and stop base offsets (0 or 1) vary between between formats.  The main
-# synteny build I use, Satsuma, is 0-based relative to start, and 1-based
-# relative to stop. GFF files are required to be 0-based. bioconductor (and R
-# in general) is 1-based. Internally, Synder is 0-based. There are 3 sets of
-# start/stop offsets to consider: synteny map base, input GFF or hitmap base,
-# and output base. I will let C-side synder handle input bases, and R-side
-# Synder handle output base.
-
-do_offsets <- function(d, offsets){
-  d$qstart <- d$qstart + offsets[5]
-  d$qstop  <- d$qstop  + offsets[6]
-  d$tstart <- d$tstart + offsets[5]
-  d$tstop  <- d$tstop  + offsets[6]
+do_offsets <- function(d){
+  d$qstart <- d$qstart + 1L
+  d$qstop  <- d$qstop  + 1L
+  d$tstart <- d$tstart + 1L
+  d$tstop  <- d$tstop  + 1L
   d
 }
 
@@ -147,7 +136,7 @@ check_parameters <- function(
   trans   = NULL,
   ...
 ){
-  stopifnot(is.null(offsets) || all(offsets %in% c(1,0)))
+  stopifnot(is.null(offsets) || (all(offsets %in% c(1,0)) && length(offsets) == 4))
   stopifnot(is.null(k)       || is.numeric(k))
   stopifnot(is.null(r)       || is.numeric(r))
   stopifnot(is.null(swap)    || is.logical(swap))
@@ -222,7 +211,7 @@ search <- function(
   trans   = 'i',
   k       = 0L,
   r       = 0,
-  offsets = c(1L,1L,1L,1L,1L,1L)
+  offsets = c(1L,1L)
 ) {
 
   syn <- as_synmap(syn)
@@ -237,6 +226,10 @@ search <- function(
   if(!(is.character(tcl) && tcl == "")) tcl <- as_conlen(tcl) 
   if(!(is.character(qcl) && qcl == "")) qcl <- as_conlen(qcl) 
 
+  if(!is.null(offsets)){
+    offsets <- c(offsets, 1L, 1L)
+  }
+
   d <- wrapper(
     FUN     = c_search,
     x       = syn,
@@ -246,11 +239,13 @@ search <- function(
     swap    = swap,
     k       = k,
     r       = r,
-    trans   = trans,
-    offsets = offsets[1:4]
+    trans   = trans, 
+    offsets = offsets # `offsets` is start and stop of the synteny map
+                      # the two added offsets are for the GFF, which
+                      # according to the spec, must be 1-based.
   )
 
-  d <- do_offsets(d, offsets)
+  d <- do_offsets(d)
 
   if(is.character(qcl) && qcl == "") qcl <- NULL
   if(is.character(tcl) && tcl == "") tcl <- NULL
@@ -298,20 +293,24 @@ dump <- function(
   syn,
   swap    = FALSE,
   trans   = 'i',
-  offsets = c(1L,1L,1L,1L,1L,1L)
+  offsets = c(1L,1L)
 ) {
 
   syn <- as_synmap(syn)
+
+  if(!is.null(offsets)){
+    offsets <- c(offsets, 1L, 1L)
+  }
 
   d <- wrapper(
     FUN     = c_dump,
     x       = syn,
     swap    = swap,
     trans   = trans,
-    offsets = offsets[1:4]
+    offsets = offsets
   )
 
-  d <- do_offsets(d, offsets)
+  d <- do_offsets(d)
 
   qcl <- GenomeInfoDb::seqinfo(CNEr::first(syn))
   tcl <- GenomeInfoDb::seqinfo(CNEr::second(syn))
@@ -342,6 +341,6 @@ dump <- function(
     ),
     swap    = swap,
     trans   = trans,
-    offsets = offsets[1:4]
+    offsets = offsets
   )
 }
