@@ -13,7 +13,8 @@ c_dump(syn, swap, trans, offsets)
 
 \item{trans}{score transform methods, single character}
 
-\item{offsets}{6-element integer vector of [01] offsets}
+\item{offsets}{4-element integer vector of [01] offsets (start/stop
+offsets for the synteny maps and the GFF)}
 }
 \description{
 print all blocks with contiguous set ids

@@ -4,7 +4,7 @@ context("rsynder.R")
 # Utility functions and setup
 # ------------------------------------------------------------------------------
 
-OFFSET=c(0L,0L,0L,0L,0L,0L)
+OFFSET=c(1L,1L)
 
 df_equal <- function(obs, exp, skip=NULL){
   obs <- obs[do.call(order, as.list(obs)),]
@@ -54,7 +54,7 @@ compare_factory <- function(dir){
 # ------------------------------------------------------------------------------
 
 test_that(
-  "Test IO issues",
+  "Test IO issues (io/)",
   {
     comp <- compare_factory('io')
     expect(comp('long'), 'long GFF 9th column entries') 
@@ -62,19 +62,18 @@ test_that(
 )
 
 test_that(
-  "Mappings beyond the edges of target scaffold",
+  "Mappings beyond the edges of target scaffold (unassembled/)",
   {
     comp <- compare_factory("unassembled")
     expect(comp('lo'),     "query is below scaffold")
     expect(comp('adj-lo'), "query is just below the scaffold")
     expect(comp('adj-hi', add_tcl=TRUE), "query is just above the scaffold")
     expect(comp('hi',     add_tcl=TRUE), "query is above the scaffold")
-    expect(comp('lo', offsets=c(0L,0L,0L,0L,1L,1L), ext='-o000011'), "test with 1-base")
   }
 )
 
 test_that(
-  "Test multi-chromosome cases for varying k",
+  "Test multi-chromosome cases for varying k (interruptions/)",
   {
     #  T   =====[-------------]=====
     #        |                   |
@@ -127,7 +126,7 @@ test_that(
 # )
 
 test_that(
-  "One-block synteny map corner cases is correct",
+  "One-block synteny map corner cases is correct (one-block/)",
   {
     comp <- compare_factory('one-block')
     expect(comp('hi'), "Query upstream of block")
@@ -137,7 +136,7 @@ test_that(
 )
 
 test_that(
-  "Linear two-block synteny map is correct",
+  "Linear two-block synteny map is correct (two-block/)",
   {
     comp <- compare_factory('two-block')
     expect(comp('hi'),      "Query downstream of all blocks" )
@@ -147,7 +146,7 @@ test_that(
 )
 
 test_that(
-  "Linear multi-block synteny map is correct",
+  "Linear multi-block synteny map is correct (multi-block/)",
   {
     comp <- compare_factory('multi-block')
     expect(comp("a"), "extreme left"                              )
@@ -164,7 +163,7 @@ test_that(
 )
 
 test_that(
-  "Simple tandem duplication",
+  "Simple tandem duplication (simple-duplication/)",
   {
     comp <- compare_factory('simple-duplication')
     expect(comp('between'), "Query starts between the duplicated intervals")
@@ -172,7 +171,7 @@ test_that(
 )
 
 test_that(
-  "Test when a single interval is inverted",
+  "Test when a single interval is inverted (one-interval-inversion/)",
   {
     comp <- compare_factory('one-interval-inversion')
     expect(comp('between'), "query next to inverted interval"  )
@@ -181,7 +180,7 @@ test_that(
 )
 
 test_that(
-  "Test when two interval are inverted",
+  "Test when two interval are inverted (two-interval-inversion/)",
   {
     comp <- compare_factory("two-interval-inversion")
     expect(comp('beside'),   "query next to inverted interval"  )
@@ -191,7 +190,7 @@ test_that(
 )
 
 test_that(
-  "Test tandem transposition",
+  "Test tandem transposition (tandem-transposition/)",
   {
     comp <- compare_factory("tandem-transposition")
     expect(comp('beside'), "query beside the transposed pair")
@@ -200,7 +199,7 @@ test_that(
 )
 
 test_that(
-  "Test target side internal overlaps",
+  "Test target side internal overlaps (irregular-overlaps/)",
   {
     comp <- compare_factory("irregular-overlaps")
     # This can fail if you are 1) not sorting the by_stop vector in Contig by
@@ -212,7 +211,7 @@ test_that(
 )
 
 test_that(
-  "Test overlap edge cases",
+  "Test overlap edge cases (off-by-one/)",
   {
     comp <- compare_factory("off-by-one")
     expect(comp('a'), "overlap of 1")
@@ -220,7 +219,7 @@ test_that(
 )
 
 test_that(
-  "Extreme value resulting from an inversion",
+  "Extreme value resulting from an inversion (inverted-extremes/)",
   {
     comp <- compare_factory("inverted-extremes")
     expect(comp('extreme'), "between the query intervals, extreme SI")
@@ -228,7 +227,7 @@ test_that(
 )
 
 test_that(
-  "Deletion tests (adjacent bounds in target)",
+  "Deletion tests with adjacent bounds in target (deletion/)",
   {
     comp <- compare_factory("deletion")
     expect(comp('between'), "query is inbetween")
@@ -236,7 +235,7 @@ test_that(
 )
 
 test_that(
-  "Test multi-chromosome cases when k=0",
+  "Test multi-chromosome cases when k=0 (interruptions/*)",
   {
     comp_mc <- compare_factory("interruptions/multi-chromosome")
     #  T   =====[---->
@@ -244,7 +243,7 @@ test_that(
     #  Q   =====   <->   =====
     #                      |
     #  T           <----]=====
-    expect(comp_mc('between'), "interuption between query intervals")
+    expect(comp_mc('between'), "interruption between query intervals")
 
     # T             ===    ===
     #                |      |
@@ -263,7 +262,6 @@ test_that(
     #  Q        ===
     expect(comp_1q('beside'), "query side")
 
-
     # T    =====                      =====
     #        |                          |
     # Q    =====   ===== <--> =====   =====
@@ -277,7 +275,7 @@ test_that(
 
 
 test_that(
-  "Confirm two-scaffold systems are unaffected by k",
+  "Confirm two-scaffold systems are unaffected by k (tandem-transposition/)",
   {
     comp <- compare_factory("tandem-transposition")
     expect(comp('beside', k=4L), "query beside the transposed pair")
@@ -289,7 +287,7 @@ test_that(
 )
 
 test_that(
-  "Assert overlapping regions are correctly merged",
+  "Assert overlapping regions are correctly merged (overlap/)",
   {
     # The `overlap` set of synteny maps are ones that require synder merge doubly
     # overlapping intervals. There are a variety of tricky corner cases. Apart from

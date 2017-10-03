@@ -4,6 +4,9 @@
 #include <vector>
 #include <Rcpp.h>
 
+// Convert to 1-based position vector
+std::vector<long> to_one_base(std::vector<long> x);
+
 class DumpType {
 private:
     std::vector<std::string> qcon;
@@ -43,11 +46,11 @@ public:
     Rcpp::DataFrame as_data_frame() {
         return Rcpp::DataFrame::create(
             Rcpp::Named("qseqid") = qcon,
-            Rcpp::Named("qstart") = qstart,
-            Rcpp::Named("qstop")  = qstop,
+            Rcpp::Named("qstart") = to_one_base(qstart),
+            Rcpp::Named("qstop")  = to_one_base(qstop),
             Rcpp::Named("tseqid") = tcon,
-            Rcpp::Named("tstart") = tstart,
-            Rcpp::Named("tstop")  = tstop,
+            Rcpp::Named("tstart") = to_one_base(tstart),
+            Rcpp::Named("tstop")  = to_one_base(tstop),
             Rcpp::Named("score")  = score,
             Rcpp::Named("strand") = strand,
             Rcpp::Named("cset")   = cset
@@ -117,11 +120,11 @@ public:
         return Rcpp::DataFrame::create(
             Rcpp::Named("attr")    = seqname,
             Rcpp::Named("qseqid")  = qcon,
-            Rcpp::Named("qstart")  = qstart,
-            Rcpp::Named("qstop")   = qstop,
+            Rcpp::Named("qstart")  = to_one_base(qstart),
+            Rcpp::Named("qstop")   = to_one_base(qstop),
             Rcpp::Named("tseqid")  = tcon,
-            Rcpp::Named("tstart")  = tstart,
-            Rcpp::Named("tstop")   = tstop,
+            Rcpp::Named("tstart")  = to_one_base(tstart),
+            Rcpp::Named("tstop")   = to_one_base(tstop),
             Rcpp::Named("strand")  = strand,
             Rcpp::Named("missing") = missing
         );
@@ -180,11 +183,11 @@ public:
         return Rcpp::DataFrame::create(
             Rcpp::Named("attr")      = seqname,
             Rcpp::Named("qseqid")    = qcon,
-            Rcpp::Named("qstart")    = qstart,
-            Rcpp::Named("qstop")     = qstop,
+            Rcpp::Named("qstart")    = to_one_base(qstart),
+            Rcpp::Named("qstop")     = to_one_base(qstop),
             Rcpp::Named("tseqid")    = tcon,
-            Rcpp::Named("tstart")    = tstart,
-            Rcpp::Named("tstop")     = tstop,
+            Rcpp::Named("tstart")    = to_one_base(tstart),
+            Rcpp::Named("tstop")     = to_one_base(tstop),
             Rcpp::Named("strand")    = strand,
             Rcpp::Named("score")     = score,
             Rcpp::Named("cset")      = cset,

@@ -6,7 +6,8 @@
 #' @param syn      synteny map file name
 #' @param swap     reverse direction of synteny map (e.g. swap query and target) 
 #' @param trans    score transform methods, single character
-#' @param offsets  6-element integer vector of [01] offsets
+#' @param offsets  4-element integer vector of [01] offsets (start/stop
+#'                 offsets for the synteny maps and the GFF)
 c_dump <- function(syn, swap, trans, offsets) {
     .Call('_synder_c_dump', PACKAGE = 'synder', syn, swap, trans, offsets)
 }
@@ -21,7 +22,8 @@ c_dump <- function(syn, swap, trans, offsets) {
 #' @param k       match fuziness, integer
 #' @param r       score decay rate, 0 means no context, high means more context
 #' @param trans   score transform methods, single character
-#' @param offsets 6-element integer vector of [01] offsets
+#' @param offsets  4-element integer vector of [01] offsets (start/stop
+#'                 offsets for the synteny maps and the GFF)
 c_search <- function(syn, gff, tcl, qcl, swap, k, r, trans, offsets) {
     .Call('_synder_c_search', PACKAGE = 'synder', syn, gff, tcl, qcl, swap, k, r, trans, offsets)
 }
@@ -34,7 +36,8 @@ c_search <- function(syn, gff, tcl, qcl, swap, k, r, trans, offsets) {
 #' @param k        match fuziness, integer
 #' @param r        score decay rate, 0 means no context, high means more context
 #' @param trans    score transform methods, single character
-#' @param offsets  6-element integer vector of [01] offsets
+#' @param offsets  4-element integer vector of [01] offsets (start/stop
+#'                 offsets for the synteny maps and the GFF)
 c_filter <- function(syn, hit, swap, k, r, trans, offsets) {
     .Call('_synder_c_filter', PACKAGE = 'synder', syn, hit, swap, k, r, trans, offsets)
 }
@@ -44,7 +47,8 @@ c_filter <- function(syn, hit, swap, k, r, trans, offsets) {
 #' @param syn     synteny map file name
 #' @param gff     GFF file name
 #' @param swap    reverse direction of synteny map (e.g. swap query and target) 
-#' @param offsets 6-element integer vector of [01] offsets
+#' @param offsets  4-element integer vector of [01] offsets (start/stop
+#'                 offsets for the synteny maps and the GFF)
 c_map <- function(syn, gff, swap, offsets) {
     .Call('_synder_c_map', PACKAGE = 'synder', syn, gff, swap, offsets)
 }
@@ -54,7 +58,8 @@ c_map <- function(syn, gff, swap, offsets) {
 #' @param syn      synteny map file name
 #' @param gff      GFF file name
 #' @param swap     reverse direction of synteny map (e.g. swap query and target) 
-#' @param offsets  6-element integer vector of [01] offsets
+#' @param offsets  4-element integer vector of [01] offsets (start/stop
+#'                 offsets for the synteny maps and the GFF)
 c_count <- function(syn, gff, swap, offsets) {
     .Call('_synder_c_count', PACKAGE = 'synder', syn, gff, swap, offsets)
 }

@@ -1,1 +1,1 @@
-adj-lo	que	25	99	tar	0	0	+	100	.	4	2	1
+adj-lo	que	25	99	tar	1	1	+	100	.	4	2	1

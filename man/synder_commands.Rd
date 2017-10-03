@@ -7,9 +7,9 @@
 \title{Synder Commands}
 \usage{
 search(syn, gff, tcl = "", qcl = "", swap = FALSE, trans = "i",
-  k = 0L, r = 0, offsets = c(1L, 1L, 1L, 1L, 1L, 1L))
+  k = 0L, r = 0, offsets = c(1L, 1L))
 
-dump(syn, swap = FALSE, trans = "i", offsets = c(1L, 1L, 1L, 1L, 1L, 1L))
+dump(syn, swap = FALSE, trans = "i", offsets = c(1L, 1L))
 }
 \arguments{
 \item{syn}{synteny map file name or object}
@@ -36,8 +36,7 @@ set.}
 
 \item{r}{Score decay rate.}
 
-\item{offsets}{Start and stop offsets (0 or 1) for synteny map, GFF file,
-and output.}
+\item{offsets}{Start and stop offsets (0 or 1) for the synteny map}
 }
 \description{
 Synder Commands
