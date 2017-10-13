@@ -50,5 +50,6 @@ Collate:
     'plot.R'
     'print.R'
     'read.R'
+    'interpret.R'
     'rsynder.R'
     'types.R'
