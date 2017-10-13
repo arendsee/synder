@@ -10,5 +10,16 @@ flag_summary(x)
 \item{x}{SearchResult object}
 }
 \description{
-Summarize the flags returned from a search
+Creates a single row for each query, summarizing the set of search intervals
+with the following descriptors:
+}
+\details{
+\enumerate{
+  \item inbetween - no search interval overlaps a syntenic block
+  \item lo_bound - at least one search interval has a lower overlapping edge
+  \item hi_bound - at least one search interval has an upper overlapping edge
+  \item doubly_bound - at least one search interval overlaps on both edges
+  \item unbound - at least one search interval is unbound on both edges
+  \item beyond - at least on search interval is on a target scaffold edge
+}
 }
