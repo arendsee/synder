@@ -7,7 +7,14 @@
     Map intervals on one genome to search spaces on another genome using
     a synteny map
 
-# Installation
+## Funding
+
+This work is funded by the National Science Foundation grant:
+
+[NSF-IOS 1546858](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1546858)
+Orphan Genes: An Untapped Genetic Reservoir of Novel Traits
+
+## Installation
 
 In an R session
 ``` R
@@ -25,7 +32,7 @@ devtools::build_vignettes()
 If you use RStudio, then there is probably some button for this (GUIs are too
 volatile for me to say anything terribly helpful).
 
-# Documentation
+## Documentation
 
 First read the "intro" vignette
 

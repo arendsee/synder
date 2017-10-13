@@ -23,6 +23,9 @@ Other vignettes:
 Synder traces orthology independent of sequence similarity. This allows unique
 mappings of sequences even when they are members of large families.
 
+This work is funded by the National Science Foundation grant [NSF-IOS
+1546858](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1546858).
+
 The `ty1` dataset includes synteny maps built between *S. cerivisiae* and 8
 other yeast species. These maps were built using mummer.
 
