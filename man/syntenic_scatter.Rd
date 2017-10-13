@@ -4,7 +4,7 @@
 \alias{syntenic_scatter}
 \title{Calculate a metric for the overall scrambledness of the synteny map}
 \usage{
-syntenic_scatter(x, qgen = NULL, tget = NULL)
+syntenic_scatter(x, qgen = NULL, tgen = NULL)
 }
 \arguments{
 \item{x}{Synmap object}

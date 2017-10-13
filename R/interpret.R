@@ -22,7 +22,7 @@ find_obfuscations <- function(x){
 #' @param qgen query-side scaffold lengths
 #' @param tgen target-side scaffold lengths
 #' @export
-syntenic_density <- function(x, qgen=NULL, tget=NULL){
+syntenic_density <- function(x, qgen=NULL, tgen=NULL){
   stopifnot(class(x) == "Synmap")
   qgen <- as_conlen(qgen)
   tgen <- as_conlen(tgen)
@@ -35,7 +35,7 @@ syntenic_density <- function(x, qgen=NULL, tget=NULL){
 #' @param qgen query-side scaffold lengths
 #' @param tgen target-side scaffold lengths
 #' @export
-syntenic_scatter <- function(x, qgen=NULL, tget=NULL){
+syntenic_scatter <- function(x, qgen=NULL, tgen=NULL){
   stopifnot(class(x) == "SearchResult")
   qgen <- as_conlen(qgen)
   tgen <- as_conlen(tgen)

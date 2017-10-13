@@ -4,7 +4,7 @@
 \alias{syntenic_density}
 \title{Calculate a metric for the overall density of the synteny map}
 \usage{
-syntenic_density(x, qgen = NULL, tget = NULL)
+syntenic_density(x, qgen = NULL, tgen = NULL)
 }
 \arguments{
 \item{x}{Synmap object}
