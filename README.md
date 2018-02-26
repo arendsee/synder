@@ -32,6 +32,25 @@ devtools::build_vignettes()
 If you use RStudio, then there is probably some button for this (GUIs are too
 volatile for me to say anything terribly helpful).
 
+## Troubleshooting
+
+If you get an error during install saying: 
+
+```R
+** preparing package for lazy loading                                                              
+Error : object 'extract' not found whilst loading namespace 'R.utils'
+ERROR: lazy loading failed for package ‘synder’                                
+* removing ‘/home/<username>/R/x86_64-pc-linux-gnu-library/3.4/synder’           
+Error: Command failed (1) 
+```
+
+Try removing the packages `R.oo` and `R.utils` and then, in a vanilla setting
+without `magrittr` loaded, reinstall them. Then try installing `synder`.
+
+If you get weird errors in the data, for example `data(toy)` and then see a lot
+of hash marks in the GFF files. Then start a new session, load `GenomicRanges`
+and `Biostrings`. Then try reloading synder.
+
 ## Documentation
 
 First read the "intro" vignette
