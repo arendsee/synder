@@ -20,9 +20,11 @@ as_synmap(x, ...)
 
 \method{as_synmap}{Axt}(x, seqinfo_a = NULL, seqinfo_b = NULL, ...)
 
-\method{as_synmap}{data.frame}(x, seqinfo_a = NULL, seqinfo_b = NULL, ...)
+\method{as_synmap}{data.frame}(x, seqinfo_a = NULL, seqinfo_b = NULL,
+  ...)
 
-\method{as_synmap}{GRangePairs}(x, seqinfo_a = NULL, seqinfo_b = NULL, ...)
+\method{as_synmap}{GRangePairs}(x, seqinfo_a = NULL, seqinfo_b = NULL,
+  ...)
 }
 \arguments{
 \item{x}{Thing to be converted}
