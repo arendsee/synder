@@ -1,7 +1,7 @@
 Package: synder
 Type: Package
 Title: Use Synteny to Filter Genomic Search 
-Version: 0.27.3
+Version: 0.27.4
 Author: Zebulun Arendsee
 Maintainer: Zebulun Arendsee <arendsee@iastate.edu>
 URL: https://github.com/arendsee/synder
@@ -33,7 +33,7 @@ Imports:
 SystemRequirements:
     C++11
 LinkingTo: Rcpp
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests:
     testthat,
     rmarkdown,
@@ -52,3 +52,4 @@ Collate:
     'interpret.R'
     'rsynder.R'
     'types.R'
+Encoding: UTF-8

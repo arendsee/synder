@@ -15,8 +15,8 @@ as_gff(x, ...)
 
 \method{as_gff}{GFF}(x, ...)
 
-\method{as_gff}{GRanges}(x, seqinfo_ = NULL, source = NULL, type = NULL,
-  score = NULL, phase = NULL, id = NULL, ...)
+\method{as_gff}{GRanges}(x, seqinfo_ = NULL, source = NULL,
+  type = NULL, score = NULL, phase = NULL, id = NULL, ...)
 
 \method{as_gff}{character}(x, ...)
 
