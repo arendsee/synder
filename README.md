@@ -1,6 +1,6 @@
 [![Travis-CI Build Status](https://travis-ci.org/arendsee/synder.svg?branch=master)](https://travis-ci.org/arendsee/synder)
 [![Coverage Status](https://img.shields.io/codecov/c/github/arendsee/synder/master.svg)](https://codecov.io/github/arendsee/synder?branch=master)
-
+[![DOI](https://zenodo.org/badge/49688107.svg)](https://zenodo.org/badge/latestdoi/49688107)
 
 # Synder
 
