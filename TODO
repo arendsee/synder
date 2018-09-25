@@ -1,16 +1,16 @@
- - [ ] clean up IO
- - [ ]  - improve input file type checking, fail on misformatted files
- - [ ]  - extract name from GFF 9th column, i.e `s/.*ID=([^;]+).*/\1/`.
- - [ ] write tests for filter
- - [ ] add score to filter
- - [ ] implement assembly checking
- - [ ] make Github wiki
- - [ ] make Github pages site
- - [ ] add tests for all read\_\* functions
- - [ ] add test for read\_synmap ~= dump
- - [ ] add tests to cover UI
- - [ ] write standalone command line script
- - [ ] add more interesting dataset
- - [ ] write generic diagnose and diagnose.\* functions
- - [ ] write fna to scaflen function
- - [ ] write n-strings function
+ [ ] clean up IO
+ [ ]  - improve input file type checking, fail on misformatted files
+ [ ]  - extract name from GFF 9th column, i.e `s/.*ID=([^;]+).*/\1/`.
+ [ ] write tests for filter
+ [ ] add score to filter
+ [ ] implement assembly checking
+ [ ] make Github wiki
+ [ ] make Github pages site
+ [ ] add tests for all read\_\* functions
+ [ ] add test for read\_synmap ~= dump
+ [ ] add tests to cover UI
+ [ ] write standalone command line script
+ [ ] add more interesting dataset
+ [ ] write generic diagnose and diagnose.\* functions
+ [ ] write fna to scaflen function
+ [ ] write n-strings function
