@@ -8,11 +8,12 @@ to_global <- function(x, prefix='q') {
   xstart <- paste0(prefix, 'start')
   xv <- dplyr::group_by(x, .data[[xseqid]]) %>%
     dplyr::mutate(xmax=max(.data[[xstop]])) %>%
-    dplyr::select_(xseqid, 'xmax')                 %>%
-    base::unique()                                 %>%
+    dplyr::select_(xseqid, 'xmax')          %>%
+    base::unique()                          %>%
     dplyr::arrange(.data$xmax)              %>%
     {
       xlv <- c(0, .$xmax[-nrow(.)])
+      xlv <- Reduce('+', xlv, accumulate=TRUE)
       names(xlv) <- .[[xseqid]]
       xlv
     }
