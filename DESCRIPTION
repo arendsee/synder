@@ -33,7 +33,7 @@ Imports:
 SystemRequirements:
     C++11
 LinkingTo: Rcpp
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests:
     testthat,
     rmarkdown,
