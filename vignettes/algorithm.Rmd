@@ -16,8 +16,7 @@ List of all vignettes:
  - algorithmic details
  - [a case study in yeast](yeast.html)
 
-This work is funded by the National Science Foundation grant [NSF-IOS
-1546858](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1546858).
+This work is funded by the National Science Foundation grant [NSF-IOS 1546858](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1546858).
 
 ## Top level commands
 
@@ -103,7 +102,7 @@ que  100   200   tar  1100  1200  101.000000  +  0
 que  1100  1900  tar  1500  2200  700.084964  +  0
 ```
 
-In the above example, \code{dump} shows that blocks 2-5 are merged (since
+In the above example, `dump` shows that blocks 2-5 are merged (since
 they are doubly-overlapping) and shows the results of the score
 transformations. It is this dumped synteny map that would have been used in
 any filter or search operations.
@@ -232,7 +231,7 @@ In practice, many repetitive regions of the genome can be massively
 doubly-overlapping, resulting in many redundant search intervals. This throws
 of statistics and wastes time searching extra space.
 
-To avoid such problems, \code{synder} merges any blocks that overlap on both the
+To avoid such problems, `synder` merges any blocks that overlap on both the
 query and target sides.
 
 The bounds of the merged blocks are simply the union.
@@ -300,7 +299,7 @@ non-overlapping sets of intervals where all blocks are adjacent.
  * query context - all blocks that overlap or are adjacent to the query
    interval
 
- * contiguous set - a set where block *i* is adjacent to block \eqn{i+1}
+ * contiguous set - a set where block *i* is adjacent to block $i+1$
 
  * search intervals - a set of intervals on the target genome where the
    ortholog of the query interval is expected to be (the ortholog search space)
@@ -311,7 +310,7 @@ Once all overlapping and flanking query-side blocks are identified.
 
 **7. Calculate scores relative to contiguous sets**
 
-Especially with the high \code{k}, it is important to be able to rank search
+Especially with the high $k$, it is important to be able to rank search
 intervals. Queries that heavily overlap elements of contiguous sets are more
 reliable than ones that fall inbetween. Likewise, queries in dense contiguous
 sets, should rank higher than those in sparse ones (all else being equal).
@@ -340,10 +339,10 @@ So all blocks in the contiguous set contribute to the total score. The scores
 of blocks that do not overlap the query decay exponentially with distance from
 the query bound.
 
-The score decay rate is controlled by the parameter \code{r}. A value of 0.001,
+The score decay rate is controlled by the parameter $r$. A value of 0.001,
 the current default, indicates weight will fall to 0.5 by 1000 bases from the
 query. k=0 would give equal weight to all elements in the contiguous set, i.e.
-be more affected by context. A high value, e.g. \eqn{r=100}, would completely
+be more affected by context. A high value, e.g. $r=100$, would completely
 ignore context, basing score only on overlapping elements. 
 
 
