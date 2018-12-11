@@ -37,7 +37,7 @@ get_obs_exp <- function(dir, base, offsets=OFFSET, ext="", add_tcl=FALSE, add_qc
       qcl     = qcl_file,
       ...
     ) %>% as.data.frame 
-    exp <- readr::read_tsv(exp_file, col_names=FALSE)
+    exp <- readr::read_tsv(exp_file, col_types="cciiciici?iii", na=".", col_names=FALSE)
     list(obs=obs, exp=exp)
 }
 
