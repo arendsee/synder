@@ -213,7 +213,7 @@ double SearchInterval::flank_area(long near, long far, double r)
         // which evaluates to the following:
         double area
             // This a bit of a hack. But I want users to be able to set r to 0.
-            = (r = 0)
+            = (r == 0)
             ? far - near + 1 // The limit as r goes to 0
             : (1 / r) * ( exp(-1 * r * near) - exp(-1 * r * far) );
     }
