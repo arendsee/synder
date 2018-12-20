@@ -277,6 +277,8 @@ dump <- function(
   syn,
   swap    = FALSE,
   trans   = 'i',
+  k       = 0L,
+  r       = 0,
   offsets = c(1L,1L)
 ) {
 
@@ -287,6 +289,8 @@ dump <- function(
     x       = syn,
     swap    = swap,
     trans   = trans,
+    k       = k,
+    r       = r,
     offsets = offsets
   )
 

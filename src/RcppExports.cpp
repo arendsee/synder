@@ -6,16 +6,18 @@
 using namespace Rcpp;
 
 // c_dump
-Rcpp::DataFrame c_dump(std::string syn, bool swap, char trans, std::vector<int> offsets);
-RcppExport SEXP _synder_c_dump(SEXP synSEXP, SEXP swapSEXP, SEXP transSEXP, SEXP offsetsSEXP) {
+Rcpp::DataFrame c_dump(std::string syn, bool swap, char trans, int k, double r, std::vector<int> offsets);
+RcppExport SEXP _synder_c_dump(SEXP synSEXP, SEXP swapSEXP, SEXP transSEXP, SEXP kSEXP, SEXP rSEXP, SEXP offsetsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type syn(synSEXP);
     Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< char >::type trans(transSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type r(rSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type offsets(offsetsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_dump(syn, swap, trans, offsets));
+    rcpp_result_gen = Rcpp::wrap(c_dump(syn, swap, trans, k, r, offsets));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -85,7 +87,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_synder_c_dump", (DL_FUNC) &_synder_c_dump, 4},
+    {"_synder_c_dump", (DL_FUNC) &_synder_c_dump, 6},
     {"_synder_c_search", (DL_FUNC) &_synder_c_search, 9},
     {"_synder_c_filter", (DL_FUNC) &_synder_c_filter, 7},
     {"_synder_c_map", (DL_FUNC) &_synder_c_map, 4},

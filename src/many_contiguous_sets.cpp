@@ -14,9 +14,11 @@ void ManyContiguousSets::link_contiguous_blocks(
     size_t& setid
 )
 {
+    // get a reverse iterator
     auto iter = inv.rbegin();
     for (; b != nullptr; b = b->next()) {
-        for (iter = inv.rbegin(); ; iter++) {
+        for (iter = inv.rbegin(); /* */ ; iter++) {
+            // do after iterating through every element 
             if (iter == inv.rend()) {
                 // if block fits in no set, create a new one
                 inv.push_back(new ContiguousSet(b, setid++));

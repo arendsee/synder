@@ -9,7 +9,8 @@
 search(syn, gff, tcl = "", qcl = "", swap = FALSE, trans = "i",
   k = 0L, r = 0, offsets = c(1L, 1L))
 
-dump(syn, swap = FALSE, trans = "i", offsets = c(1L, 1L))
+dump(syn, swap = FALSE, trans = "i", k = 0L, r = 0,
+  offsets = c(1L, 1L))
 }
 \arguments{
 \item{syn}{synteny map file name or object}
