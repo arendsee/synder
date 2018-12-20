@@ -4,7 +4,7 @@
 \alias{c_dump}
 \title{print all blocks with contiguous set ids}
 \usage{
-c_dump(syn, swap, trans, offsets)
+c_dump(syn, swap, trans, k, r, offsets)
 }
 \arguments{
 \item{syn}{synteny map file name}
@@ -12,6 +12,10 @@ c_dump(syn, swap, trans, offsets)
 \item{swap}{reverse direction of synteny map (e.g. swap query and target)}
 
 \item{trans}{score transform methods, single character}
+
+\item{k}{match fuziness, integer}
+
+\item{r}{score decay rate, 0 means no context, high means more context}
 
 \item{offsets}{4-element integer vector of [01] offsets (start/stop
 offsets for the synteny maps and the GFF)}

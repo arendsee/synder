@@ -7,9 +7,9 @@
 //'
 //' @param syn      synteny map file name
 //' @param swap     reverse direction of synteny map (e.g. swap query and target) 
+//' @param trans    score transform methods, single character
 //' @param k       match fuziness, integer
 //' @param r       score decay rate, 0 means no context, high means more context
-//' @param trans    score transform methods, single character
 //' @param offsets  4-element integer vector of [01] offsets (start/stop
 //'                 offsets for the synteny maps and the GFF)
 // [[Rcpp::export]]
