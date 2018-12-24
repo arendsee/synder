@@ -2,7 +2,7 @@
 title: "Yeast Ty1 mobile elements"
 author: "Zebulun Arendsee"
 date: "`r Sys.Date()`"
-bibliography: yeast.bib 
+bibliography: synder.bib 
 output:
     rmarkdown::html_vignette:
         fig_caption: yes 

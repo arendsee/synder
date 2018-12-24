@@ -12,6 +12,9 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
+This is an internal vignette that uses local data. I'll make the data
+accessible soon, but for now you shouldn't use this vignette.
+
 ```{r, eval=FALSE}
 require(ape)
 tree <- read.tree('arabidopsis/tree')
@@ -31,11 +34,33 @@ extractNameFromAttr <- function(x){
   sub(".*Name=([^;]+).*", "\\1", x)
 }
 
-featureMatch <- function(syn, fgff, tgff, gene_map, tblastn, blastp=NULL, ...){
-  syn <- as_synmap(syn)
-  fgff <- as_gff(fgff)
-  tgff <- as_gff(tgff)
+# fgff="arabidopsis/gff/yc.gff"
+# gene_map="arabidopsis/yc.tab"
+# syn="arabidopsis/syn/at-vs-es.syn"
+# tgff="arabidopsis/gff/es.gff"
+# tblastn="arabidopsis/es.blast.tab"
+# blastp=NULL
+# k=0L
+# r=0
+# trans="d"
+featureMatch <- function(
+    syn,
+    fgff,
+    tgff,
+    gene_map,
+    tblastn,
+    k      = 0L,
+    r      = 0,
+    trans  = "d",
+    blastp = NULL
+){
+  syn  <- synder::as_synmap(syn)
+  fgff <- synder::as_gff(fgff)
+  GenomicRanges::mcols(fgff)$attr <- extractNameFromAttr(GenomicRanges::mcols(fgff)$attr)
+
+  tgff <- synder::as_gff(tgff)
   tgff <- tgff[tgff$type == "mRNA"]
+  GenomicRanges::mcols(tgff)$attr <- extractNameFromAttr(GenomicRanges::mcols(tgff)$attr)
 
   nfyc <- read.table(
       gene_map,
@@ -43,30 +68,11 @@ featureMatch <- function(syn, fgff, tgff, gene_map, tblastn, blastp=NULL, ...){
       stringsAsFactors=FALSE
   )
 
-  result <- synder::search(syn, fgff, ...)
+  result <- synder::search(syn, fgff, k=k,r=r,trans=trans)
 
-  geneMap <- findOverlaps(second(result), tgff, ignore.strand=TRUE) %>%
-    {
-      data.frame(
-        at = mcols(result)$attr[ queryHits(.) ],
-        xx = tgff[ subjectHits(.) ]$attr,
-        score = mcols(result)$score[ queryHits(.) ],
-        cset = mcols(result)$cset[ queryHits(.) ],
-        qstrand = as.vector(strand(fgff)[match(mcols(result)$attr[ queryHits(.) ], fgff$attr)]),
-        orientation = mcols(result)$strand[ queryHits(.) ],
-        tstrand = as.vector(strand(tgff)[subjectHits(.)]),
-        stringsAsFactors=FALSE
-      )
-    } %>%
-   subset((orientation == "+" & qstrand == tstrand) |
-          (orientation == "-" & qstrand != tstrand)) %>%
-   dplyr::select(at, xx, score, cset)
-  geneMap$at <- extractNameFromAttr(geneMap$at)
-  geneMap$xx <- extractNameFromAttr(geneMap$xx)
-  rownames(geneMap) <- NULL
-  geneMap <- merge(geneMap, nfyc, by.x="at", by.y="gene")
-  geneMap <- dplyr::arrange(geneMap, name) %>%
-      dplyr::select(at, mrna, name, xx, score, cset)
+  feats <- featureMap(srcres=result, fgff=fgff, tgff=tgff)
+
+  #### TODO: continue from here
 
   prot_cmp <- if(is.null(blastp)){
     NULL
@@ -99,7 +105,7 @@ featureMatch <- function(syn, fgff, tgff, gene_map, tblastn, blastp=NULL, ...){
     blastHits <- GenomicRanges::GRanges(
       ranges = IRanges::IRanges(
         start = pmin(tbn$sstart,tbn$send),
-        end   = pmax(tbn$sstart,tbn$send)
+        end = pmax(tbn$sstart,tbn$send)
       ),
       seqnames=tbn$sseqid,
     )
@@ -124,14 +130,14 @@ featureMatch <- function(syn, fgff, tgff, gene_map, tblastn, blastp=NULL, ...){
     ghit <- as.data.frame(blastHits)[queryHits(ghits), ]
     ghit$gene <- sub("\\.[0-9]+$", "", ghit$qseqid)
     ghit <- dplyr::select(ghit,
-       gene      = gene,
-       qseqid    = qseqid,
-       tchr      = seqnames,
+       gene = gene,
+       qseqid = qseqid,
+       tchr = seqnames,
        tn_tstart = start,
-       tn_tend   = end,
+       tn_tend = end,
        tn_qstart = qstart,
-       tn_qend   = qend,
-       tn_ppos   = ppos,
+       tn_qend = qend,
+       tn_ppos = ppos,
        tn_sframe = sframe
      )
     rownames(ghit) <- NULL
@@ -139,7 +145,7 @@ featureMatch <- function(syn, fgff, tgff, gene_map, tblastn, blastp=NULL, ...){
     genes <- as.data.frame(w)[subjectHits(ghits), ] %>%
       dplyr::select(
         tchr = seqnames,
-        tseqid = attr,
+        tfeature = attr,
         tgene_start = start,
         tgene_end = end
       )
