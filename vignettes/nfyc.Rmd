@@ -1,0 +1,13 @@
+---
+title: "NF-YC gene family case study"
+author: "Zebulun Arendsee"
+date: "`r Sys.Date()`"
+bibliography: synder.bib 
+output:
+    rmarkdown::html_vignette:
+        fig_caption: yes 
+vignette: >
+  %\VignetteIndexEntry{NFYC case study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
