@@ -11,3 +11,363 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
+
+```{r, eval=FALSE}
+require(ape)
+tree <- read.tree('arabidopsis/tree')
+pdf('tree.pdf')
+plot(tree)
+dev.off()
+```
+
+```{r, eval=FALSE}
+require(synder)
+require(GenomicRanges)
+require(dplyr)
+require(Biostrings)
+require(CNEr)
+
+extractNameFromAttr <- function(x){
+  sub(".*Name=([^;]+).*", "\\1", x)
+}
+
+featureMatch <- function(syn, fgff, tgff, gene_map, tblastn, blastp=NULL, ...){
+  syn <- as_synmap(syn)
+  fgff <- as_gff(fgff)
+  tgff <- as_gff(tgff)
+  tgff <- tgff[tgff$type == "mRNA"]
+
+  nfyc <- read.table(
+      gene_map,
+      col.names=c("name", "gene", "mrna"),
+      stringsAsFactors=FALSE
+  )
+
+  result <- synder::search(syn, fgff, ...)
+
+  geneMap <- findOverlaps(second(result), tgff, ignore.strand=TRUE) %>%
+    {
+      data.frame(
+        at = mcols(result)$attr[ queryHits(.) ],
+        xx = tgff[ subjectHits(.) ]$attr,
+        score = mcols(result)$score[ queryHits(.) ],
+        cset = mcols(result)$cset[ queryHits(.) ],
+        qstrand = as.vector(strand(fgff)[match(mcols(result)$attr[ queryHits(.) ], fgff$attr)]),
+        orientation = mcols(result)$strand[ queryHits(.) ],
+        tstrand = as.vector(strand(tgff)[subjectHits(.)]),
+        stringsAsFactors=FALSE
+      )
+    } %>%
+   subset((orientation == "+" & qstrand == tstrand) |
+          (orientation == "-" & qstrand != tstrand)) %>%
+   dplyr::select(at, xx, score, cset)
+  geneMap$at <- extractNameFromAttr(geneMap$at)
+  geneMap$xx <- extractNameFromAttr(geneMap$xx)
+  rownames(geneMap) <- NULL
+  geneMap <- merge(geneMap, nfyc, by.x="at", by.y="gene")
+  geneMap <- dplyr::arrange(geneMap, name) %>%
+      dplyr::select(at, mrna, name, xx, score, cset)
+
+  prot_cmp <- if(is.null(blastp)){
+    NULL
+  } else {
+    blastp <- read.table(
+        blastp,
+        header=TRUE,
+        stringsAsFactors=FALSE
+    )
+    besthits <- dplyr::group_by(blastp, qseqid) %>%
+        dplyr::summarize(top_evalue = min(evalue))
+    merge(
+        blastp,
+        geneMap,
+        by.x=c('qseqid', 'sseqid'),
+        by.y=c('mrna', 'xx')
+    ) %>%
+        dplyr::arrange(name) %>%
+        merge(besthits, by='qseqid')
+  }
+
+  geno_cmp <- if(is.null(tblastn)){
+    NULL
+  } else {
+    tbn <- read.table(
+      tblastn,
+      header=TRUE,
+      stringsAsFactors=FALSE
+    )
+    blastHits <- GenomicRanges::GRanges(
+      ranges = IRanges::IRanges(
+        start = pmin(tbn$sstart,tbn$send),
+        end   = pmax(tbn$sstart,tbn$send)
+      ),
+      seqnames=tbn$sseqid,
+    )
+    GenomicRanges::mcols(blastHits) <- tbn
+    hits <- GenomicRanges::findOverlaps(second(result), blastHits)
+
+    syn <- as.data.frame(result)[queryHits(hits), ]
+    rownames(syn) <- NULL
+    syn$id <- queryHits(hits)
+
+    hit <- as.data.frame(blastHits)[subjectHits(hits), ]
+    syn$gene <- extractNameFromAttr(syn$attr)
+    syn$attr <- NULL
+    hit$gene <- sub("\\.[0-9]+$", "", hit$qseqid)
+
+    # find overlaps between target genes found by synder and the blast results
+    w <- tgff[mcols(tgff)$type == "mRNA"]
+    mcols(w)$attr <- extractNameFromAttr(mcols(w)$attr)
+    w <- w[mcols(w)$attr %in% geneMap$tgene]
+    ghits <- GenomicRanges::findOverlaps(blastHits, w)
+
+    ghit <- as.data.frame(blastHits)[queryHits(ghits), ]
+    ghit$gene <- sub("\\.[0-9]+$", "", ghit$qseqid)
+    ghit <- dplyr::select(ghit,
+       gene      = gene,
+       qseqid    = qseqid,
+       tchr      = seqnames,
+       tn_tstart = start,
+       tn_tend   = end,
+       tn_qstart = qstart,
+       tn_qend   = qend,
+       tn_ppos   = ppos,
+       tn_sframe = sframe
+     )
+    rownames(ghit) <- NULL
+    #
+    genes <- as.data.frame(w)[subjectHits(ghits), ] %>%
+      dplyr::select(
+        tchr = seqnames,
+        tseqid = attr,
+        tgene_start = start,
+        tgene_end = end
+      )
+    rownames(genes) <- NULL
+    #
+    stopifnot(as.character(genes$tchr) == as.character(ghit$tchr))
+    gene_matches <- cbind(genes, ghit[, -3]) 
+    stopifnot(gene_matches$tgene_start < gene_matches$tgene_end)
+    stopifnot(gene_matches$tn_tstart < gene_matches$tn_tend)
+    # # the hits should MOSTLY be contained within the genic interval
+    # # they could extend beyond, for example, if the target gene is truncated
+    # stopifnot(
+    #   mean(
+    #     (gene_matches$tgene_start <= gene_matches$tn_tstart) &
+    #     (gene_matches$tgene_end   >= gene_matches$tn_tend  )
+    #   ) > 0.1
+    # )
+
+    list( syn=syn, hit=hit, all=tbn, gene_matches=gene_matches)
+  }
+
+  list(
+    synres   = result,
+    nfyc     = nfyc,
+    genemap  = geneMap,
+    prot_cmp = prot_cmp,
+    geno_cmp = geno_cmp,
+    fgff     = fgff,
+    tgff     = tgff
+  )
+}
+
+files <- list(
+  al=list(syn="syn/at-vs-al.syn", gff="gff/al.gff", tblastn="al.blast.tab", blastp="yc-vs-al.blast.tab"),
+  cr=list(syn="syn/at-vs-cr.syn", gff="gff/cr.gff", tblastn="cr.blast.tab"),
+  br=list(syn="syn/at-vs-br.syn", gff="gff/br.gff", tblastn="br.blast.tab"),
+  es=list(syn="syn/at-vs-es.syn", gff="gff/es.gff", tblastn="es.blast.tab")
+)
+
+results <- lapply(files, function(x){
+  featureMatch(
+    fgff="arabidopsis/gff/yc.gff",
+    gene_map="arabidopsis/yc.tab",
+    syn=paste0("arabidopsis/", x$syn),
+    tgff=paste0("arabidopsis/", x$gff),
+    tblastn=paste0("arabidopsis/", x$tblastn),
+    blastp=if(!is.null(x$blastp)){paste0("arabidopsis/", x$blastp)}else{NULL},
+    k=0L, r=0, trans="d"
+  )
+})
+
+# one row per gene
+buildTables <- function(x){
+    emax <- 0.001
+    d <- as.data.frame(x$geno_cmp$syn)
+    d$gene <- as.character(d$gene)
+    d$strand <- as.character(d$strand)
+    # NOTE: here the strands for the query and target are ignored. This is
+    # because they are always '+'. Only the relative orientation matters
+    # in the synteny map.
+    d <- dplyr::select(d,
+        gene         = gene,
+        qchr         = first.seqnames,
+        qstart       = first.start,
+        qend         = first.end,
+        tchr         = second.seqnames,
+        si_start     = second.start,
+        si_end       = second.end,
+        si_score     = score,
+        orientation  = strand,
+        cset         = cset,
+        l_flag       = l_flag,
+        r_flag       = r_flag,
+        inbetween    = inbetween,
+        id           = id
+    )
+
+    fgff <- as.data.frame(x$fgff)
+    fgff$gene <- extractNameFromAttr(fgff$attr)
+    fgff$attr <- NULL
+
+    ### Get the query strand from the GFF
+    stopifnot(fgff$type == "gene")
+    stopifnot(length(fgff$gene) == length(unique(fgff$gene)))
+    # NOTE: not all genes in the GFF are required to be in d, since some may
+    # have no target genes overlapping targets search intervals.
+    stopifnot(d$gene %in% fgff$gene)
+    # merge all columns, just for testing
+    tst <- merge(d, fgff, by="gene")
+    stopifnot(tst$start == tst$qstart)
+    stopifnot(tst$end == tst$end)
+    stopifnot(tst$seqnames == tst$qchr)
+    # then merge in just the single column we need (strand)
+    d2 <- merge(d, fgff[, c("strand", "gene")]) %>%
+        dplyr::rename(qstrand=strand)
+
+    ### Merge in tblastn results
+    blastout <- x$geno_cmp$hit %>%
+      # in tn_*, tn stands for tblastn 
+      dplyr::select(
+        tchr      = seqnames,
+        tn_gene   = gene,
+        tn_qseqid = qseqid,
+        tn_sstart = start,
+        tn_send   = end,
+        tn_qlen   = qlen,
+        tn_slen   = slen,
+        tn_length = length,
+        tn_evalue = evalue,
+        tn_ppos   = ppos,
+        tn_qstart = qstart,
+        tn_qend   = qend,
+        tn_sframe = sframe
+      ) %>%
+      dplyr::mutate(
+        tn_strand = ifelse(tn_sframe > 0, '+', '-')
+      )
+
+    # The hit table contains BLAST hits of the query protein sequences against
+    # the target genome (tBLASTn) that overlap search intervals. The `qseqid` in
+    # the blast table is the protein that was searched. The `gene` column in d2
+    # is the gene that was linked through synder to the common search interval.
+    # Therefore `gene` and `qseqid` do not have to be the same gene. If they are
+    # the same gene, that means the BLAST hit is in agreement with the synder
+    # search interval. If they are not the same gene, then this means more than
+    # one NF-YC gene is similar to something in the search interval.
+    stopifnot(nrow(blastout) == nrow(d2))
+    # test for overlap
+    stopifnot(blastout$tchr == d2$tchr)
+    stopifnot(d2$si_start < blastout$tn_ssend)
+    stopifnot(blastout$tn_start < d2$si_end)
+    # join them columnwise
+    d4 <- as.data.frame(append(as.list(d2), as.list(blastout)), stringsAsFactors=FALSE)
+
+    # merge in gene names
+    d5 <- merge(dplyr::distinct(x$nfyc[, c("name", "gene")]), d4, by='gene')
+    stopifnot(nrow(d5) == nrow(d))
+
+    matches <- subset(d5,
+      gene == tn_gene &
+      (
+       (orientation == "+" & (qstrand == tn_strand)) |
+       (orientation == "-" & (qstrand != tn_strand))
+      ) &
+      tn_evalue < emax
+    )
+
+    # number of contiguous sets for each gene (before looking at blast)
+    syn <- as.data.frame(x$synres)
+    syn$gene <- extractNameFromAttr(syn$attr)
+    n_si <- dplyr::group_by(syn, gene) %>%
+        dplyr::summarize(
+          n_si = length(unique(cset))
+        ) %>%
+        dplyr::arrange(gene)
+
+    # prediction of homolog based solely on synder
+    genemap = dplyr::rename(x$genemap, gene=at, tgene=xx)
+    synder_pred <- dplyr::group_by(genemap, gene) %>%
+        dplyr::summarize(
+            # number of search intervals found for this query
+            synder_n_si = length(unique(cset)),
+            # number of target species genes that overlap the search intervals
+            synder_n_tgenes = length(unique(tgene)),
+            # target gene ids that overlap search intervals 
+            synder_tgenes = paste0(unique(tgene), collapse=";")
+        ) %>%
+        dplyr::arrange()
+
+    # Number of significant tBLASTn hits for each query gene against the target
+    # genome. For queries with multiple transcripts, the number of hits for the
+    # transcript with the most hits is selected.
+    allblast <- x$geno_cmp$all
+    allblast$gene <- sub("\\.[0-9]+", "", allblast$qseqid)
+    n_blast <- dplyr::group_by(allblast, qseqid) %>%
+        dplyr::filter(evalue < emax) %>%
+        dplyr::summarize(
+          blast_n_hits = length(qseqid),
+          gene=gene[1]
+        ) %>%
+        dplyr::group_by(gene) %>%
+        dplyr::summarize(blast_n_hits = max(blast_n_hits))
+
+    # Number of different NF-YC genes that have a hit to a search interval for each gene.
+    n_paralog <- dplyr::group_by(d5, tn_gene) %>%
+        dplyr::filter(tn_evalue < emax) %>%
+        dplyr::summarize(n_paralog = length(unique(gene)))
+
+    # Take the best BLAST hit that overlaps a search interval for each query
+    # gene. If BLAST and Synder agree, this search interval will be for the query
+    # gene.
+    blast_pred <- dplyr::group_by(d5, tn_gene) %>%
+        dplyr::filter(tn_evalue == min(tn_evalue)) %>%
+        dplyr::summarize(blast_pred = gene[1])
+
+    ##### Need to find overlap between the target genes in the genemap and the
+    ##### blast results
+    # # prediction based on best hit within syntenic interval
+    # joint_pred <- dplyr::group_by(matches, gene) %>%
+    #     dplyr::filter(tn_evalue == min(tn_evalue)) %>%
+    #     dplyr::select(gene, tn_gene) %>%
+    #     dplyr::distinct() %>%
+    #     dplyr::arrange()
+
+    ## TODO: figure out where x$geno_cmp$gene_matches went
+
+    # number of contiguous sets for each gene after syncing with blast
+    n_si_blast <- dplyr::group_by(matches, gene) %>%
+        dplyr::summarize(n_si = length(unique(cset)))
+
+
+    list(matches=matches)
+}
+
+tabs <- lapply(results, buildTables)
+for (n in names(tabs)){
+    tabs[[n]]$target_species = n
+}
+ds <- do.call(rbind, tabs)
+rownames(ds) = NULL
+
+# make table with columns: n_si | n_blast | n_both
+# the si should first be filtered by strand
+final <- dplyr::group_by(ds, qseqid, target_species) %>%
+  dplyr::filter(
+    
+  ) %>%
+  dplyr::summarize(
+    n_si = length(unique(cset))
+  )
+```
