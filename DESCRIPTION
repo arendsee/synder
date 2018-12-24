@@ -47,6 +47,7 @@ Collate:
     'cast.R'
     'data.R'
     'plot.R'
+    'clean.R'
     'print.R'
     'read.R'
     'interpret.R'
