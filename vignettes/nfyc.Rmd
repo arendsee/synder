@@ -24,207 +24,48 @@ dev.off()
 ```
 
 ```{r, eval=FALSE}
-
-blastp_map <- function(){
-  # blastp <- read.table(
-  #   blastp,
-  #   header=TRUE,
-  #   stringsAsFactors=FALSE
-  # )
-  # besthits <- dplyr::group_by(blastp, qseqid) %>%
-  #   dplyr::summarize(top_evalue = min(evalue))
-  # merge(
-  #   blastp,
-  #   geneMap,
-  #   by.x=c('qseqid', 'sseqid'),
-  #   by.y=c('mrna', 'xx')
-  # ) %>%
-  #   dplyr::arrange(name) %>%
-  #   merge(besthits, by='qseqid')
-}
-
-as_grange <- function(x, xid, xa, xb){
-  GenomicRanges::GRanges(
-    seqnames=x[[xid]],
-    ranges=IRanges::IRanges(
-      start = pmin(x[[xa]], x[[xb]]),
-      end = pmax(x[[xa]], x[[xb]])
-    )
-  )
-}
-
-remove_rownames <- function(d){
-  rownames(d) <- NULL
-  d
-}
-
-overlaps <- function(x, xid, xa, xb, y, yid=xid, ya=xa, yb=xb, add_id=TRUE){
-  # add unique ID to each row in each input table
-  if(add_id){
-    x$xid <- 1:nrow(x)
-    y$yid <- 1:nrow(y)
-  }
-  # convert each input table to a GRanges object
-  xrng <- as_grange(x, xid, xa, xb)
-  GenomicRanges::mcols(xrng) <- x[, which(!(names(x) %in% c(xid, xa, xb)))]
-  yrng <- as_grange(y, yid, ya, yb)
-  GenomicRanges::mcols(yrng) <- y[, which(!(names(y) %in% c(yid, ya, yb)))]
-  # find the interval overlaps
-  hits <- GenomicRanges::findOverlaps(xrng, yrng, ignore.strand=TRUE) 
-  # extract a table of overlapping rows from the GRanges object
-  dodt <- function(z, ids, id, a, b){
-    z <- as.data.frame(z)[ids, ]
-    z$strand <- NULL
-    z$width <- NULL
-    names(z)[1:3] <- c(id, a, b)
-    for(n in c("seqname", "start", "stop", "width", "strand")){
-      if(any(paste0(n, ".1") %in% names(z))){
-        names(z)[names(z) %in% paste0(n, ".1")] <- n
-      }
-    }
-    z
-  }
-  x2 <- dodt(xrng, S4Vectors::queryHits(hits), xid, xa, xb)
-  y2 <- dodt(yrng, S4Vectors::subjectHits(hits), yid, ya, yb)
-  # bind the two tables together
-  cbind(x2, y2)
-}
-
-make_tblastn_gene_map <- function(tblastn, tgff){
-  overlaps(
-    x=tblastn, y=as.data.frame(tgff),
-    xid="sseqid", xa="sstart", xb="send",
-    yid="seqid", ya="start", yb="stop"
-  ) %>%
-    dplyr::select(
-      ## the focal protein that was BLASTed
-      fprot_id = qseqid,
-      fprot_start = qstart,
-      fprot_stop = qend,
-      ## the target genomic intervals with translated coding similarity
-      tchr = sseqid,
-      tn_start = sstart,
-      tn_stop = send,
-      tn_evalue = evalue,
-      tn_ppos = ppos,
-      tn_frame = sframe,
-      tn_id = tblastn_id,
-      ## the target feature that overlaps the region of similarity
-      tfeat_name = attr,
-      tfeat_start = start,
-      tfeat_stop = stop,
-      tfeat_src = source,
-      tfeat_type = type,
-      tfeat_strand = strand
-    ) %>% remove_rownames
-}
-
-make_tblastn_si_map <- function(tblastn, synres){
-  x <- dplyr::select(tblastn,
-    # the focal protein that was BLASTed
-    fprot_id = qseqid,
-    fprot_start = qstart,
-    fprot_stop = qend,
-    # the target genomic intervals with translated coding similarity
-    tchr = sseqid,
-    tn_start = sstart,
-    tn_stop = send,
-    tn_evalue = evalue,
-    tn_ppos = ppos,
-    tn_frame = sframe,
-    tn_id = tblastn_id
-  )
-  y <- dplyr::select(as.data.frame(synres),
-    # synder search interval info
-    ## * focal query interval
-    fseqid = attr,
-    fchr = qseqid,
-    si_fstart = qstart,
-    si_fstop = qstop,
-    ## * target search interval
-    si_tchr = tseqid,
-    si_tstart = tstart,
-    si_tstop = tstop,
-    orientation = strand,
-    ## * synder stats
-    si_score = score,
-    cset = cset,
-    l_flag = l_flag,
-    r_flag = r_flag,
-    inbetween = inbetween
-  )
-  overlaps(x, y,
-           xid="tchr", xa="tn_start", xb="tn_stop",
-           yid="si_tchr", ya="si_tstart", yb="si_tstop", add_id=FALSE) %>%
-    dplyr::select(-si_tchr) %>%
-    dplyr::select(
-      # focal protein
-      fprot_id, fprot_start, fprot_stop,
-      # region of coding similarity found by tBLASTn 
-      tchr, tn_start, tn_stop, tn_frame,
-      # tBLASTn stats
-      tn_evalue, tn_ppos,
-      # synder search interval
-      fseqid, cset,
-      # - focal region
-      fchr, si_fstart, si_fstop,
-      # - target region
-      si_fstart, si_fstop, orientation,
-      # - synder stats
-      si_score, l_flag, r_flag, inbetween
-    ) %>% remove_rownames
-}
-```
-
-```{r, eval=FALSE}
 require(synder)
 require(GenomicRanges)
 require(dplyr)
 require(Biostrings)
 require(CNEr)
 
-extractNameFromAttr <- function(x){
-  sub(".*Name=([^;]+).*", "\\1", x)
-}
-
-# fgff="arabidopsis/gff/yc.gff"
-# gene_map="arabidopsis/yc.tab"
-# syn="arabidopsis/syn/at-vs-es.syn"
-# tgff="arabidopsis/gff/es.gff"
-# tblastn="arabidopsis/es.blast.tab"
-# blastp=NULL
-# k=0L
-# r=0
-# trans="d"
-featureMatch <- function(
-    syn,
-    fgff,
-    tgff,
-    gene_map,
-    tblastn,
-    k      = 0L,
-    r      = 0,
-    trans  = "d",
-    blastp = NULL
+collect_NFYC_data <- function(
+    syn_file,       # syn_file="arabidopsis/syn/at-vs-es.syn"
+    fgff_file,      # fgff_file="arabidopsis/gff/yc.gff"
+    tgff_file,      # tgff_file="arabidopsis/gff/es.gff"
+    gene_map_file,  # gene_map_file="arabidopsis/yc.tab"
+    tblastn_file,   # tblastn_file="arabidopsis/es.blast.tab"
+    blastp = NULL,  # blastp=NULL
+    trans  = "d",   # trans="d"
+    k      = 0L     # k=0L
+    r      = 0,     # r=0
 ){
-  syn  <- synder::as_synmap(syn)
-  fgff <- synder::as_gff(fgff)
+  extractNameFromAttr <- function(x){
+    sub(".*Name=([^;]+).*", "\\1", x)
+  }
+
+  # load synteny map
+  syn  <- synder::as_synmap(syn_file)
+
+  # load focal GFF
+  fgff <- synder::as_gff(fgff_file)
   GenomicRanges::mcols(fgff)$attr <- extractNameFromAttr(GenomicRanges::mcols(fgff)$attr)
 
-  tgff <- synder::as_gff(tgff)
+  # load the transcribed intervals target GFF
+  tgff <- synder::as_gff(tgff_file)
+  # FIXME: do I have to restrict this to mRNA?
   tgff <- tgff[tgff$type == "mRNA"]
   GenomicRanges::mcols(tgff)$attr <- extractNameFromAttr(GenomicRanges::mcols(tgff)$attr)
 
+  # load map with name (NF-YC*), gene (locus ID), to transcript (model ID)
   nfyc <- read.table(
-      gene_map,
-      col.names=c("name", "gene", "mrna"),
-      stringsAsFactors=FALSE
+    gene_map_file,
+    col.names=c("name", "gene", "mrna"),
+    stringsAsFactors=FALSE
   )
 
-  result <- synder::search(syn, fgff, k=k,r=r,trans=trans)
-
-  feats <- featureMap(srcres=result, fgff=fgff, tgff=tgff)
-
+  # load tBLASTn of focal query proteins against the target genome
   tblastn <- read.table(
     tblastn_file,
     header=TRUE,
@@ -232,26 +73,28 @@ featureMatch <- function(
   )
   tblastn$tblastn_id <- 1:nrow(tblastn)
 
-  tblastn_si_map <- make_tblastn_si_map(tblastn, result)
-  tblastn_gene_map <- make_tblastn_gene_map(tblastn, tgff)
+  # map focal genes to target search intervals 
+  srcres <- synder::search(syn, fgff, k=k,r=r,trans=trans)
 
-  #### TODO: continue from here
+  tblastn_si_map <- synder::make_tblastn_si_map(tblastn, srcres)
+  tblastn_gene_map <- synder::make_tblastn_gene_map(tblastn, tgff)
 
-  # prot_cmp <- if(is.null(blastp)){
-  #   NULL
-  # } else {
-  #   blastp_map()
-  # }
-  #
-  # list(
-  #   synres   = result,
-  #   nfyc     = nfyc,
-  #   genemap  = geneMap,
-  #   prot_cmp = prot_cmp,
-  #   geno_cmp = geno_cmp,
-  #   fgff     = fgff,
-  #   tgff     = tgff
-  # )
+  if(is.null(blastp)){
+    blastp_gene_map <- NULL
+    blastp_si_map <- NULL
+  } else {
+    blastp_si_map <- make_blastp_si_map(blastp, srcres)
+    blastp_gene_map <- make_blastp_gene_map(blastp, srcres)
+  }
+
+  feats <- featureMap(srcres=srcres, fgff=fgff, tgff=tgff)
+
+  # look over all these tables 
+  #  - unify vocabulary
+  #  - add assertions for all relations
+  #  - add documentation
+  #  - look for logic that can be generalized out into the core
+  .namedlist(syn, tgff, fgff, nfyc, tblastn, srcres, tblastn_si_map)
 }
 
 files <- list(
@@ -262,13 +105,13 @@ files <- list(
 )
 
 results <- lapply(files, function(x){
-  featureMatch(
-    fgff="arabidopsis/gff/yc.gff",
-    gene_map="arabidopsis/yc.tab",
-    syn=paste0("arabidopsis/", x$syn),
-    tgff=paste0("arabidopsis/", x$gff),
-    tblastn=paste0("arabidopsis/", x$tblastn),
-    blastp=if(!is.null(x$blastp)){paste0("arabidopsis/", x$blastp)}else{NULL},
+  collect_NFYC_data(
+    fgff_file     = "arabidopsis/gff/yc.gff",
+    gene_map_file = "arabidopsis/yc.tab",
+    syn_file      = paste0("arabidopsis/", x$syn),
+    tgff_file     = paste0("arabidopsis/", x$gff),
+    tblastn_file  = paste0("arabidopsis/", x$tblastn),
+    blastp_file   = if(!is.null(x$blastp)){paste0("arabidopsis/", x$blastp)}else{NULL},
     k=0L, r=0, trans="d"
   )
 })
