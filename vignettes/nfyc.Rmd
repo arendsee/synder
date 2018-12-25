@@ -24,6 +24,159 @@ dev.off()
 ```
 
 ```{r, eval=FALSE}
+
+blastp_map <- function(){
+  # blastp <- read.table(
+  #   blastp,
+  #   header=TRUE,
+  #   stringsAsFactors=FALSE
+  # )
+  # besthits <- dplyr::group_by(blastp, qseqid) %>%
+  #   dplyr::summarize(top_evalue = min(evalue))
+  # merge(
+  #   blastp,
+  #   geneMap,
+  #   by.x=c('qseqid', 'sseqid'),
+  #   by.y=c('mrna', 'xx')
+  # ) %>%
+  #   dplyr::arrange(name) %>%
+  #   merge(besthits, by='qseqid')
+}
+
+as_grange <- function(x, xid, xa, xb){
+  GenomicRanges::GRanges(
+    seqnames=x[[xid]],
+    ranges=IRanges::IRanges(
+      start = pmin(x[[xa]], x[[xb]]),
+      end = pmax(x[[xa]], x[[xb]])
+    )
+  )
+}
+
+remove_rownames <- function(d){
+  rownames(d) <- NULL
+  d
+}
+
+overlaps <- function(x, xid, xa, xb, y, yid=xid, ya=xa, yb=xb, add_id=TRUE){
+  # add unique ID to each row in each input table
+  if(add_id){
+    x$xid <- 1:nrow(x)
+    y$yid <- 1:nrow(y)
+  }
+  # convert each input table to a GRanges object
+  xrng <- as_grange(x, xid, xa, xb)
+  GenomicRanges::mcols(xrng) <- x[, which(!(names(x) %in% c(xid, xa, xb)))]
+  yrng <- as_grange(y, yid, ya, yb)
+  GenomicRanges::mcols(yrng) <- y[, which(!(names(y) %in% c(yid, ya, yb)))]
+  # find the interval overlaps
+  hits <- GenomicRanges::findOverlaps(xrng, yrng, ignore.strand=TRUE) 
+  # extract a table of overlapping rows from the GRanges object
+  dodt <- function(z, ids, id, a, b){
+    z <- as.data.frame(z)[ids, ]
+    z$strand <- NULL
+    z$width <- NULL
+    names(z)[1:3] <- c(id, a, b)
+    for(n in c("seqname", "start", "stop", "width", "strand")){
+      if(any(paste0(n, ".1") %in% names(z))){
+        names(z)[names(z) %in% paste0(n, ".1")] <- n
+      }
+    }
+    z
+  }
+  x2 <- dodt(xrng, S4Vectors::queryHits(hits), xid, xa, xb)
+  y2 <- dodt(yrng, S4Vectors::subjectHits(hits), yid, ya, yb)
+  # bind the two tables together
+  cbind(x2, y2)
+}
+
+make_tblastn_gene_map <- function(tblastn, tgff){
+  overlaps(
+    x=tblastn, y=as.data.frame(tgff),
+    xid="sseqid", xa="sstart", xb="send",
+    yid="seqid", ya="start", yb="stop"
+  ) %>%
+    dplyr::select(
+      ## the focal protein that was BLASTed
+      fprot_id = qseqid,
+      fprot_start = qstart,
+      fprot_stop = qend,
+      ## the target genomic intervals with translated coding similarity
+      tchr = sseqid,
+      tn_start = sstart,
+      tn_stop = send,
+      tn_evalue = evalue,
+      tn_ppos = ppos,
+      tn_frame = sframe,
+      tn_id = tblastn_id,
+      ## the target feature that overlaps the region of similarity
+      tfeat_name = attr,
+      tfeat_start = start,
+      tfeat_stop = stop,
+      tfeat_src = source,
+      tfeat_type = type,
+      tfeat_strand = strand
+    ) %>% remove_rownames
+}
+
+make_tblastn_si_map <- function(tblastn, synres){
+  x <- dplyr::select(tblastn,
+    # the focal protein that was BLASTed
+    fprot_id = qseqid,
+    fprot_start = qstart,
+    fprot_stop = qend,
+    # the target genomic intervals with translated coding similarity
+    tchr = sseqid,
+    tn_start = sstart,
+    tn_stop = send,
+    tn_evalue = evalue,
+    tn_ppos = ppos,
+    tn_frame = sframe,
+    tn_id = tblastn_id
+  )
+  y <- dplyr::select(as.data.frame(synres),
+    # synder search interval info
+    ## * focal query interval
+    fseqid = attr,
+    fchr = qseqid,
+    si_fstart = qstart,
+    si_fstop = qstop,
+    ## * target search interval
+    si_tchr = tseqid,
+    si_tstart = tstart,
+    si_tstop = tstop,
+    orientation = strand,
+    ## * synder stats
+    si_score = score,
+    cset = cset,
+    l_flag = l_flag,
+    r_flag = r_flag,
+    inbetween = inbetween
+  )
+  overlaps(x, y,
+           xid="tchr", xa="tn_start", xb="tn_stop",
+           yid="si_tchr", ya="si_tstart", yb="si_tstop", add_id=FALSE) %>%
+    dplyr::select(-si_tchr) %>%
+    dplyr::select(
+      # focal protein
+      fprot_id, fprot_start, fprot_stop,
+      # region of coding similarity found by tBLASTn 
+      tchr, tn_start, tn_stop, tn_frame,
+      # tBLASTn stats
+      tn_evalue, tn_ppos,
+      # synder search interval
+      fseqid, cset,
+      # - focal region
+      fchr, si_fstart, si_fstop,
+      # - target region
+      si_fstart, si_fstop, orientation,
+      # - synder stats
+      si_score, l_flag, r_flag, inbetween
+    ) %>% remove_rownames
+}
+```
+
+```{r, eval=FALSE}
 require(synder)
 require(GenomicRanges)
 require(dplyr)
@@ -72,110 +225,33 @@ featureMatch <- function(
 
   feats <- featureMap(srcres=result, fgff=fgff, tgff=tgff)
 
+  tblastn <- read.table(
+    tblastn_file,
+    header=TRUE,
+    stringsAsFactors=FALSE
+  )
+  tblastn$tblastn_id <- 1:nrow(tblastn)
+
+  tblastn_si_map <- make_tblastn_si_map(tblastn, result)
+  tblastn_gene_map <- make_tblastn_gene_map(tblastn, tgff)
+
   #### TODO: continue from here
 
-  prot_cmp <- if(is.null(blastp)){
-    NULL
-  } else {
-    blastp <- read.table(
-        blastp,
-        header=TRUE,
-        stringsAsFactors=FALSE
-    )
-    besthits <- dplyr::group_by(blastp, qseqid) %>%
-        dplyr::summarize(top_evalue = min(evalue))
-    merge(
-        blastp,
-        geneMap,
-        by.x=c('qseqid', 'sseqid'),
-        by.y=c('mrna', 'xx')
-    ) %>%
-        dplyr::arrange(name) %>%
-        merge(besthits, by='qseqid')
-  }
-
-  geno_cmp <- if(is.null(tblastn)){
-    NULL
-  } else {
-    tbn <- read.table(
-      tblastn,
-      header=TRUE,
-      stringsAsFactors=FALSE
-    )
-    blastHits <- GenomicRanges::GRanges(
-      ranges = IRanges::IRanges(
-        start = pmin(tbn$sstart,tbn$send),
-        end = pmax(tbn$sstart,tbn$send)
-      ),
-      seqnames=tbn$sseqid,
-    )
-    GenomicRanges::mcols(blastHits) <- tbn
-    hits <- GenomicRanges::findOverlaps(second(result), blastHits)
-
-    syn <- as.data.frame(result)[queryHits(hits), ]
-    rownames(syn) <- NULL
-    syn$id <- queryHits(hits)
-
-    hit <- as.data.frame(blastHits)[subjectHits(hits), ]
-    syn$gene <- extractNameFromAttr(syn$attr)
-    syn$attr <- NULL
-    hit$gene <- sub("\\.[0-9]+$", "", hit$qseqid)
-
-    # find overlaps between target genes found by synder and the blast results
-    w <- tgff[mcols(tgff)$type == "mRNA"]
-    mcols(w)$attr <- extractNameFromAttr(mcols(w)$attr)
-    w <- w[mcols(w)$attr %in% geneMap$tgene]
-    ghits <- GenomicRanges::findOverlaps(blastHits, w)
-
-    ghit <- as.data.frame(blastHits)[queryHits(ghits), ]
-    ghit$gene <- sub("\\.[0-9]+$", "", ghit$qseqid)
-    ghit <- dplyr::select(ghit,
-       gene = gene,
-       qseqid = qseqid,
-       tchr = seqnames,
-       tn_tstart = start,
-       tn_tend = end,
-       tn_qstart = qstart,
-       tn_qend = qend,
-       tn_ppos = ppos,
-       tn_sframe = sframe
-     )
-    rownames(ghit) <- NULL
-    #
-    genes <- as.data.frame(w)[subjectHits(ghits), ] %>%
-      dplyr::select(
-        tchr = seqnames,
-        tfeature = attr,
-        tgene_start = start,
-        tgene_end = end
-      )
-    rownames(genes) <- NULL
-    #
-    stopifnot(as.character(genes$tchr) == as.character(ghit$tchr))
-    gene_matches <- cbind(genes, ghit[, -3]) 
-    stopifnot(gene_matches$tgene_start < gene_matches$tgene_end)
-    stopifnot(gene_matches$tn_tstart < gene_matches$tn_tend)
-    # # the hits should MOSTLY be contained within the genic interval
-    # # they could extend beyond, for example, if the target gene is truncated
-    # stopifnot(
-    #   mean(
-    #     (gene_matches$tgene_start <= gene_matches$tn_tstart) &
-    #     (gene_matches$tgene_end   >= gene_matches$tn_tend  )
-    #   ) > 0.1
-    # )
-
-    list( syn=syn, hit=hit, all=tbn, gene_matches=gene_matches)
-  }
-
-  list(
-    synres   = result,
-    nfyc     = nfyc,
-    genemap  = geneMap,
-    prot_cmp = prot_cmp,
-    geno_cmp = geno_cmp,
-    fgff     = fgff,
-    tgff     = tgff
-  )
+  # prot_cmp <- if(is.null(blastp)){
+  #   NULL
+  # } else {
+  #   blastp_map()
+  # }
+  #
+  # list(
+  #   synres   = result,
+  #   nfyc     = nfyc,
+  #   genemap  = geneMap,
+  #   prot_cmp = prot_cmp,
+  #   geno_cmp = geno_cmp,
+  #   fgff     = fgff,
+  #   tgff     = tgff
+  # )
 }
 
 files <- list(
