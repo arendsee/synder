@@ -20,6 +20,21 @@
   d
 }
 
+.as_map <- function(d, xkey=1, xval=2){
+  stopifnot(ncol(d) >= max(xkey, xval))
+  d <- d[, c(xkey, xval)]
+  d <- dplyr::distinct(d)
+  x <- d[[2]]
+  names(x) <- d[[1]]
+  x
+}
+
+# make column `n` the first column, shifting the other columns up
+.as_first_column <- function(d, n){
+  i <- which(names(d) == n) 
+  d[, c(i, (1:ncol(d))[-i])]
+}
+
 #' Join two tables by overlapping rows
 #'
 #' @param x data.frame: table with interval info in each row (with arbitrary
@@ -62,6 +77,8 @@
   }
   x2 <- dodt(xrng, S4Vectors::queryHits(hits), xid, xa, xb)
   y2 <- dodt(yrng, S4Vectors::subjectHits(hits), yid, ya, yb)
+  # since yid == xid for all overlaps, remove yid (avoid duplicated columns)
+  y2[[yid]] <- NULL
   # bind the two tables together
   cbind(x2, y2)
 }

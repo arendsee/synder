@@ -4,12 +4,14 @@
 \alias{make_tblastn_gene_map}
 \title{make gene map}
 \usage{
-make_tblastn_gene_map(tblastn, tgff)
+make_tblastn_gene_map(tblastn_file, tgff, fmap = NULL)
 }
 \arguments{
-\item{tblastn}{data.frame}
+\item{tblastn_file}{filename for tblastn results}
 
-\item{tgff}{data.frame}
+\item{tgff}{a tidy GFF file (tidied with .tidy_gff)}
+
+\item{fromAttr}{a function for extracting the sequence ID from the GFF attribute column}
 }
 \description{
 make gene map

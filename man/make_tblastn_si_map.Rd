@@ -4,10 +4,10 @@
 \alias{make_tblastn_si_map}
 \title{tBLASTn search interval map}
 \usage{
-make_tblastn_si_map(tblastn, synres)
+make_tblastn_si_map(tblastn_file, srcres, fmap = NULL)
 }
 \arguments{
-\item{tblastn}{data.frame}
+\item{tblastn_file}{filename of tblastn result}
 
 \item{synres}{data.frame}
 }

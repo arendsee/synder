@@ -7,11 +7,11 @@
 featureMap(srcres, tgff, fgff)
 }
 \arguments{
-\item{srcres}{SearchResult object from a synder::search call}
+\item{srcres}{tidy search result (from .tidy_searchResult)}
 
-\item{tgff}{GFF object for target species}
+\item{tgff}{data.frame for GFF object for target species (from .tidy_gff)}
 
-\item{fgff}{GFF object for focal species}
+\item{fgff}{data.frame for GFF object for focal species (from .tidy_gff)}
 }
 \description{
 Map features between GFFs based on a synder SearchResult

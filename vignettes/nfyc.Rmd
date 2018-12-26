@@ -31,15 +31,15 @@ require(Biostrings)
 require(CNEr)
 
 collect_NFYC_data <- function(
-    syn_file,       # syn_file="arabidopsis/syn/at-vs-es.syn"
-    fgff_file,      # fgff_file="arabidopsis/gff/yc.gff"
-    tgff_file,      # tgff_file="arabidopsis/gff/es.gff"
-    gene_map_file,  # gene_map_file="arabidopsis/yc.tab"
-    tblastn_file,   # tblastn_file="arabidopsis/es.blast.tab"
-    blastp = NULL,  # blastp=NULL
-    trans  = "d",   # trans="d"
-    k      = 0L     # k=0L
-    r      = 0,     # r=0
+    syn_file,            # syn_file="arabidopsis/syn/at-vs-al.syn"
+    fgff_file,           # fgff_file="arabidopsis/gff/yc.gff"
+    tgff_file,           # tgff_file="arabidopsis/gff/al.gff"
+    gene_map_file,       # gene_map_file="arabidopsis/yc.tab"
+    tblastn_file,        # tblastn_file="arabidopsis/al.blast.tab"
+    blastp_file = NULL,  # blastp_file="arabidopsis/yc-vs-al.blast.tab"
+    trans  = "d",        # trans="d"
+    k      = 0L,         # k=0L
+    r      = 0           # r=0
 ){
   extractNameFromAttr <- function(x){
     sub(".*Name=([^;]+).*", "\\1", x)
@@ -49,52 +49,51 @@ collect_NFYC_data <- function(
   syn  <- synder::as_synmap(syn_file)
 
   # load focal GFF
-  fgff <- synder::as_gff(fgff_file)
-  GenomicRanges::mcols(fgff)$attr <- extractNameFromAttr(GenomicRanges::mcols(fgff)$attr)
+  fgff <- .tidy_gff(fgff_file, prefix="f", fromAttr=extractNameFromAttr)
 
   # load the transcribed intervals target GFF
-  tgff <- synder::as_gff(tgff_file)
+  tgff <- .tidy_gff(tgff_file, prefix="t", fromAttr=extractNameFromAttr)
   # FIXME: do I have to restrict this to mRNA?
-  tgff <- tgff[tgff$type == "mRNA"]
-  GenomicRanges::mcols(tgff)$attr <- extractNameFromAttr(GenomicRanges::mcols(tgff)$attr)
+  tgff <- tgff[tgff$ttype == "mRNA", ]
 
   # load map with name (NF-YC*), gene (locus ID), to transcript (model ID)
   nfyc <- read.table(
     gene_map_file,
-    col.names=c("name", "gene", "mrna"),
+    col.names=c("fgene_name", "fseqid", "fprotein"),
     stringsAsFactors=FALSE
   )
-
-  # load tBLASTn of focal query proteins against the target genome
-  tblastn <- read.table(
-    tblastn_file,
-    header=TRUE,
-    stringsAsFactors=FALSE
-  )
-  tblastn$tblastn_id <- 1:nrow(tblastn)
+  # a map from fprot_id to fseqid
+  fmap <- nfyc[, c(3,2)]
 
   # map focal genes to target search intervals 
-  srcres <- synder::search(syn, fgff, k=k,r=r,trans=trans)
+  srcres <- synder::search(syn, synder::as_gff(fgff_file), k=k,r=r,trans=trans)
+  srcres <- .tidy_searchResult(srcres, fromAttr=extractNameFromAttr)
 
-  tblastn_si_map <- synder::make_tblastn_si_map(tblastn, srcres)
-  tblastn_gene_map <- synder::make_tblastn_gene_map(tblastn, tgff)
+  tblastn_si_map <- synder::make_tblastn_si_map(tblastn_file, srcres, fmap=fmap)
+  tblastn_gene_map <- synder::make_tblastn_gene_map(tblastn_file, tgff)
 
-  if(is.null(blastp)){
-    blastp_gene_map <- NULL
-    blastp_si_map <- NULL
+  if(is.null(blastp_file)){
+    blastp_raw <- NULL 
+    blastp_map <- NULL
   } else {
-    blastp_si_map <- make_blastp_si_map(blastp, srcres)
-    blastp_gene_map <- make_blastp_gene_map(blastp, srcres)
+    x <- make_blastp_map(
+      blastp_file=blastp_file,
+      tgff=tgff,
+      fgff=fgff,
+      srcres=srcres,
+      fmap=fmap
+    )
+    blastp_raw <- x$blastraw
+    blastp_map <- x$blastmap
   }
 
   feats <- featureMap(srcres=srcres, fgff=fgff, tgff=tgff)
 
-  # look over all these tables 
-  #  - unify vocabulary
-  #  - add assertions for all relations
-  #  - add documentation
-  #  - look for logic that can be generalized out into the core
-  .namedlist(syn, tgff, fgff, nfyc, tblastn, srcres, tblastn_si_map)
+  tblastn_raw <- tblastn_si_map$blastraw
+  tblastn_si_map <- tblastn_si_map$blastmap
+  tblastn_gene_map <- tblastn_gene_map$blastmap
+
+  .namedlist(syn, tgff, fgff, nfyc, srcres, tblastn_raw, tblastn_si_map, tblastn_gene_map, blastp_raw, blastp_map)
 }
 
 files <- list(
