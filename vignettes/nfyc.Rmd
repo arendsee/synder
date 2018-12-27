@@ -24,12 +24,6 @@ dev.off()
 ```
 
 ```{r, eval=FALSE}
-require(synder)
-require(GenomicRanges)
-require(dplyr)
-require(Biostrings)
-require(CNEr)
-
 collect_NFYC_data <- function(
     syn_file,            # syn_file="arabidopsis/syn/at-vs-al.syn"
     fgff_file,           # fgff_file="arabidopsis/gff/yc.gff"
@@ -93,7 +87,7 @@ collect_NFYC_data <- function(
   tblastn_si_map <- tblastn_si_map$blastmap
   tblastn_gene_map <- tblastn_gene_map$blastmap
 
-  .namedlist(syn, tgff, fgff, nfyc, srcres, tblastn_raw, tblastn_si_map, tblastn_gene_map, blastp_raw, blastp_map)
+  .namedlist(syn, tgff, fgff, nfyc, srcres, tblastn_raw, tblastn_si_map, tblastn_gene_map, blastp_raw, blastp_map, feats)
 }
 
 files <- list(
@@ -114,184 +108,108 @@ results <- lapply(files, function(x){
     k=0L, r=0, trans="d"
   )
 })
+```
 
-# one row per gene
-buildTables <- function(x){
-    emax <- 0.001
-    d <- as.data.frame(x$geno_cmp$syn)
-    d$gene <- as.character(d$gene)
-    d$strand <- as.character(d$strand)
-    # NOTE: here the strands for the query and target are ignored. This is
-    # because they are always '+'. Only the relative orientation matters
-    # in the synteny map.
-    d <- dplyr::select(d,
-        gene         = gene,
-        qchr         = first.seqnames,
-        qstart       = first.start,
-        qend         = first.end,
-        tchr         = second.seqnames,
-        si_start     = second.start,
-        si_end       = second.end,
-        si_score     = score,
-        orientation  = strand,
-        cset         = cset,
-        l_flag       = l_flag,
-        r_flag       = r_flag,
-        inbetween    = inbetween,
-        id           = id
-    )
+```{r}
+results <- loadRDS('results.rds')
 
-    fgff <- as.data.frame(x$fgff)
-    fgff$gene <- extractNameFromAttr(fgff$attr)
-    fgff$attr <- NULL
-
-    ### Get the query strand from the GFF
-    stopifnot(fgff$type == "gene")
-    stopifnot(length(fgff$gene) == length(unique(fgff$gene)))
-    # NOTE: not all genes in the GFF are required to be in d, since some may
-    # have no target genes overlapping targets search intervals.
-    stopifnot(d$gene %in% fgff$gene)
-    # merge all columns, just for testing
-    tst <- merge(d, fgff, by="gene")
-    stopifnot(tst$start == tst$qstart)
-    stopifnot(tst$end == tst$end)
-    stopifnot(tst$seqnames == tst$qchr)
-    # then merge in just the single column we need (strand)
-    d2 <- merge(d, fgff[, c("strand", "gene")]) %>%
-        dplyr::rename(qstrand=strand)
-
-    ### Merge in tblastn results
-    blastout <- x$geno_cmp$hit %>%
-      # in tn_*, tn stands for tblastn 
-      dplyr::select(
-        tchr      = seqnames,
-        tn_gene   = gene,
-        tn_qseqid = qseqid,
-        tn_sstart = start,
-        tn_send   = end,
-        tn_qlen   = qlen,
-        tn_slen   = slen,
-        tn_length = length,
-        tn_evalue = evalue,
-        tn_ppos   = ppos,
-        tn_qstart = qstart,
-        tn_qend   = qend,
-        tn_sframe = sframe
-      ) %>%
-      dplyr::mutate(
-        tn_strand = ifelse(tn_sframe > 0, '+', '-')
-      )
-
-    # The hit table contains BLAST hits of the query protein sequences against
-    # the target genome (tBLASTn) that overlap search intervals. The `qseqid` in
-    # the blast table is the protein that was searched. The `gene` column in d2
-    # is the gene that was linked through synder to the common search interval.
-    # Therefore `gene` and `qseqid` do not have to be the same gene. If they are
-    # the same gene, that means the BLAST hit is in agreement with the synder
-    # search interval. If they are not the same gene, then this means more than
-    # one NF-YC gene is similar to something in the search interval.
-    stopifnot(nrow(blastout) == nrow(d2))
-    # test for overlap
-    stopifnot(blastout$tchr == d2$tchr)
-    stopifnot(d2$si_start < blastout$tn_ssend)
-    stopifnot(blastout$tn_start < d2$si_end)
-    # join them columnwise
-    d4 <- as.data.frame(append(as.list(d2), as.list(blastout)), stringsAsFactors=FALSE)
-
-    # merge in gene names
-    d5 <- merge(dplyr::distinct(x$nfyc[, c("name", "gene")]), d4, by='gene')
-    stopifnot(nrow(d5) == nrow(d))
-
-    matches <- subset(d5,
-      gene == tn_gene &
-      (
-       (orientation == "+" & (qstrand == tn_strand)) |
-       (orientation == "-" & (qstrand != tn_strand))
-      ) &
-      tn_evalue < emax
-    )
-
-    # number of contiguous sets for each gene (before looking at blast)
-    syn <- as.data.frame(x$synres)
-    syn$gene <- extractNameFromAttr(syn$attr)
-    n_si <- dplyr::group_by(syn, gene) %>%
-        dplyr::summarize(
-          n_si = length(unique(cset))
-        ) %>%
-        dplyr::arrange(gene)
-
-    # prediction of homolog based solely on synder
-    genemap = dplyr::rename(x$genemap, gene=at, tgene=xx)
-    synder_pred <- dplyr::group_by(genemap, gene) %>%
-        dplyr::summarize(
-            # number of search intervals found for this query
-            synder_n_si = length(unique(cset)),
-            # number of target species genes that overlap the search intervals
-            synder_n_tgenes = length(unique(tgene)),
-            # target gene ids that overlap search intervals 
-            synder_tgenes = paste0(unique(tgene), collapse=";")
-        ) %>%
-        dplyr::arrange()
-
-    # Number of significant tBLASTn hits for each query gene against the target
-    # genome. For queries with multiple transcripts, the number of hits for the
-    # transcript with the most hits is selected.
-    allblast <- x$geno_cmp$all
-    allblast$gene <- sub("\\.[0-9]+", "", allblast$qseqid)
-    n_blast <- dplyr::group_by(allblast, qseqid) %>%
-        dplyr::filter(evalue < emax) %>%
-        dplyr::summarize(
-          blast_n_hits = length(qseqid),
-          gene=gene[1]
-        ) %>%
-        dplyr::group_by(gene) %>%
-        dplyr::summarize(blast_n_hits = max(blast_n_hits))
-
-    # Number of different NF-YC genes that have a hit to a search interval for each gene.
-    n_paralog <- dplyr::group_by(d5, tn_gene) %>%
-        dplyr::filter(tn_evalue < emax) %>%
-        dplyr::summarize(n_paralog = length(unique(gene)))
-
-    # Take the best BLAST hit that overlaps a search interval for each query
-    # gene. If BLAST and Synder agree, this search interval will be for the query
-    # gene.
-    blast_pred <- dplyr::group_by(d5, tn_gene) %>%
-        dplyr::filter(tn_evalue == min(tn_evalue)) %>%
-        dplyr::summarize(blast_pred = gene[1])
-
-    ##### Need to find overlap between the target genes in the genemap and the
-    ##### blast results
-    # # prediction based on best hit within syntenic interval
-    # joint_pred <- dplyr::group_by(matches, gene) %>%
-    #     dplyr::filter(tn_evalue == min(tn_evalue)) %>%
-    #     dplyr::select(gene, tn_gene) %>%
-    #     dplyr::distinct() %>%
-    #     dplyr::arrange()
-
-    ## TODO: figure out where x$geno_cmp$gene_matches went
-
-    # number of contiguous sets for each gene after syncing with blast
-    n_si_blast <- dplyr::group_by(matches, gene) %>%
-        dplyr::summarize(n_si = length(unique(cset)))
-
-
-    list(matches=matches)
+tabulate_from <- function(xs, key){
+  ys <- lapply(xs, function(x) x[[key]])
+  for(grp in names(ys)){
+    ys[[grp]]$group <- grp
+  }
+  do.call(rbind, ys) %>% .remove_rownames
 }
 
-tabs <- lapply(results, buildTables)
-for (n in names(tabs)){
-    tabs[[n]]$target_species = n
-}
-ds <- do.call(rbind, tabs)
-rownames(ds) = NULL
+nuniq <- function(x){ length(unique(x)) }
 
-# make table with columns: n_si | n_blast | n_both
-# the si should first be filtered by strand
-final <- dplyr::group_by(ds, qseqid, target_species) %>%
-  dplyr::filter(
-    
-  ) %>%
+show_vec <- function(xs, nmax=5) {
+  if(nuniq(xs) <= nmax) {
+    paste(unique(xs), collapse=",")
+  } else {
+    "lots"
+  }
+}
+
+### ===========================================================================
+# results based solely on synder
+feature_maps <- tabulate_from(results, "feats")
+dplyr::group_by(feature_maps, group, fseqid) %>%
+  dplyr::summarize(ntargets = nuniq(tseqid), targets=show_vec(tseqid, 5))
+
+
+### ===========================================================================
+# results based solely on tblastn
+tblastns <- tabulate_from(results, "tblastn_raw") %>%
+  dplyr::filter(tn_evalue < 0.001)
+
+# get the total number of tBLASTn hits for the model with the most number of hits from each focal gene
+# NOTE: this will include exons
+total_tblastn_hits_by_gene <- tblastns %>%
+  dplyr::group_by(group, fprotein) %>%
+  dplyr::summarize(hits = length(fprotein), fseqid=fseqid[1]) %>%
+  dplyr::group_by(group, fseqid) %>%
+  dplyr::summarize(max_hits = max(hits))
+# TODO: merge the blast results with the target GFF, merge hits to the same interval
+# FIXME: do I need to consider frame?
+
+### ===========================================================================
+tblastn_si_maps <-  tabulate_from(results, "tblastn_si_map")
+tblastn_si_maps$cset <- as.character(tblastn_si_maps$cset)
+tblastn_si_maps <- dplyr::filter(tblastn_si_maps, tn_evalue < 0.001)
+
+# get the total number of tBLASTn hits for the model with the most number of
+# hits from each focal gene where the gene blasted and syndered are the same
+# NOTE: the number of hits includes hits to different exons
+dplyr::filter(tblastn_si_maps, fseqid == si_fseqid) %>%
+  dplyr::group_by(group, fprotein) %>%
+  dplyr::summarize(hits = length(fprotein), fseqid=fseqid[1]) %>%
+  dplyr::group_by(group, fseqid) %>%
+  dplyr::summarize(max_hits = max(hits))
+
+# Find overlaps with tgff protein features, this resoves the above exon issue
+# FIXME: do I need to consider frame?
+tgffs <- tabulate_from(results, "tgff")
+tgffs$group=NULL
+.overlaps(
+  x=tblastn_si_maps, xid="tchr", xa="tn_tstart", xb="tn_tstop",
+  y=tgffs, yid="tchr", ya="tstart", yb="tstop"
+) %>%
+  # extract rows where the protein coded for by query gene i has a tBLASTn hit
+  # within a search interval inferred for the same gene. 
+  dplyr::filter(fseqid == si_fseqid) %>%
+  dplyr::group_by(group, fseqid) %>%
+  dplyr::summarize(ntargets = nuniq(tseqid), targets=show_vec(tseqid, 9))
+
+# summarize each group
+dplyr::group_by(tblastn_si_maps, group) %>%
   dplyr::summarize(
-    n_si = length(unique(cset))
+    fseqids = length(fseqid),
+    sets = nuniq(cset),
+    agreements = mean(fseqid == si_fseqid),
+    tchrs = nuniq(tchr)
   )
+
+# summarize each cset
+dplyr::group_by(tblastn_si_maps, cset) %>%
+  dplyr::summarize(
+    fseqids = nuniq(fseqid),
+    tseqids = nuniq(si_fseqid),
+    min_eval = min(tn_evalue),
+    fseqids_ref = show_vec(fseqid),
+    si_fseqids = show_vec(si_fseqid)
+  )
+dplyr::group_by(tblastn_si_maps, group, si_fseqid) %>%
+  dplyr::summarize(csets = nuniq(cset))
+
+
+### ===========================================================================
+# FIXME: why do I even make this table? can I nuke it?
+tblastn_gene_maps <- tabulate_from(results, "tblastn_gene_map")
+tblastn_gene_maps <- dplyr::filter(tblastn_gene_maps, tn_evalue < 0.001)
+
+head(tblastn_gene_maps)
+dplyr::group_by(tblastn_gene_maps, group, fseqid) %>%
+  dplyr::summarize(nfeat = nuniq(feat_tname))
+
 ```
