@@ -4,14 +4,20 @@
 \alias{make_tblastn_gene_map}
 \title{make gene map}
 \usage{
-make_tblastn_gene_map(tblastn_file, tgff, fmap = NULL)
+make_tblastn_gene_map(tblastn_file, tgff, fmap = NULL,
+  fromAttr = identity)
 }
 \arguments{
 \item{tblastn_file}{filename for tblastn results}
 
-\item{tgff}{a tidy GFF file (tidied with .tidy_gff)}
+\item{tgff}{GFF file or object}
 
-\item{fromAttr}{a function for extracting the sequence ID from the GFF attribute column}
+\item{fmap}{an optional map from target protein to gene name (fseqid)}
+
+\item{fromAttr}{function mapping 'attr' column to gene name}
+}
+\value{
+data.frame
 }
 \description{
 make gene map

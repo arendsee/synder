@@ -4,7 +4,8 @@
 \alias{featureMap}
 \title{Map features between GFFs based on a synder SearchResult}
 \usage{
-featureMap(srcres, tgff, fgff)
+featureMap(srcres, tgff, fgff, tfromAttr = identity,
+  ffromAttr = identity)
 }
 \arguments{
 \item{srcres}{tidy search result (from .tidy_searchResult)}
@@ -12,6 +13,10 @@ featureMap(srcres, tgff, fgff)
 \item{tgff}{data.frame for GFF object for target species (from .tidy_gff)}
 
 \item{fgff}{data.frame for GFF object for focal species (from .tidy_gff)}
+
+\item{tfromAttr}{function (optional) extract IDs attr column in target GFF}
+
+\item{ffromAttr}{function (optional) extract IDs attr column in focal GFF}
 }
 \description{
 Map features between GFFs based on a synder SearchResult

@@ -17,6 +17,8 @@ additional columns).}
 
 \item{xb}{character: name of the stop position column in x}
 
+\item{y}{data.frame: like x, but for a second set of intervals}
+
 \item{yid}{character: name of the scaffold column in y}
 
 \item{ya}{character: name of the start position column in y}

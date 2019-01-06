@@ -5,14 +5,14 @@
 \title{Map intervals for protein blast}
 \usage{
 make_blastp_map(blastp_file, fgff, tgff, srcres, fmap = NULL,
-  tmap = NULL)
+  tmap = NULL, ffromAttr = identity, tfromAttr = identity)
 }
 \arguments{
 \item{blastp_file}{filename: with columns {qseqid, sseqid, qlen, slen, length, evalue, ppos}}
 
-\item{fgff}{GFF: focal species (from \code{.tidy_gff})}
+\item{fgff}{GFF: focal species}
 
-\item{tgff}{GFF: target species (from \code{.tidy_gff})}
+\item{tgff}{GFF: target species}
 
 \item{srcres}{SearchResult object (from \code{.tidy_searchResult})}
 
@@ -20,6 +20,10 @@ make_blastp_map(blastp_file, fgff, tgff, srcres, fmap = NULL,
 in the SearchResult (probably a gene ID for an interval)}
 
 \item{tmap}{data.frame: like fmap but for the target proteins}
+
+\item{ffromAttr}{function (optional) extract IDs attr column in focal GFF}
+
+\item{tfromAttr}{function (optional) extract IDs attr column in target GFF}
 }
 \value{
 list containing the blast results filtered through synder and the raw blast results

@@ -42,6 +42,7 @@
 #' @param xid character: name of the scaffold column in x
 #' @param xa character: name of the start position column in x
 #' @param xb character: name of the stop position column in x
+#' @param y data.frame: like x, but for a second set of intervals
 #' @param yid character: name of the scaffold column in y
 #' @param ya character: name of the start position column in y
 #' @param yb character: name of the stop position column in y
@@ -57,16 +58,17 @@
   }
   # convert each input table to a GRanges object
   xrng <- .as_grange(x, xid, xa, xb)
-  GenomicRanges::mcols(xrng) <- x[, which(!(names(x) %in% c(xid, xa, xb)))]
+  GenomicRanges::mcols(xrng) <- x[, which(!(names(x) %in% c(xid, xa, xb))), drop=FALSE]
   yrng <- .as_grange(y, yid, ya, yb)
-  GenomicRanges::mcols(yrng) <- y[, which(!(names(y) %in% c(yid, ya, yb)))]
+  GenomicRanges::mcols(yrng) <- y[, which(!(names(y) %in% c(yid, ya, yb))), drop=FALSE]
   # find the interval overlaps
   hits <- GenomicRanges::findOverlaps(xrng, yrng, ignore.strand=TRUE) 
   # extract a table of overlapping rows from the GRanges object
   dodt <- function(z, ids, id, a, b){
-    z <- as.data.frame(z)[ids, ]
+    z <- as.data.frame(z, stringsAsFactors=FALSE)[ids, ]
     z$strand <- NULL
     z$width <- NULL
+    z$seqnames <- as.character(z$seqnames)
     names(z)[1:3] <- c(id, a, b)
     for(n in c("seqname", "start", "stop", "width", "strand")){
       if(any(paste0(n, ".1") %in% names(z))){
@@ -80,5 +82,8 @@
   # since yid == xid for all overlaps, remove yid (avoid duplicated columns)
   y2[[yid]] <- NULL
   # bind the two tables together
-  cbind(x2, y2)
+  out <- cbind(x2, y2)
+  # be rid of those pesky row names
+  rownames(out) <- NULL
+  out
 }

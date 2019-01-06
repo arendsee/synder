@@ -9,7 +9,9 @@ make_tblastn_si_map(tblastn_file, srcres, fmap = NULL)
 \arguments{
 \item{tblastn_file}{filename of tblastn result}
 
-\item{synres}{data.frame}
+\item{srcres}{data.frame}
+
+\item{fmap}{an optional map from target protein to gene name (fseqid)}
 }
 \description{
 tBLASTn search interval map
