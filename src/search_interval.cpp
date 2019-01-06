@@ -195,7 +195,7 @@ void SearchInterval::get_si_bound(const Direction d)
 //            |<-->| near        |        far |<-------->|
 double SearchInterval::flank_area(long near, long far, double r)
 {
-
+    double area = 0;
     // If far <= 0, this means there is no interval to score in this direction
     if(far > 0) {
         // Adjust the near boundary, if needed, for example:
@@ -211,13 +211,13 @@ double SearchInterval::flank_area(long near, long far, double r)
         // the weight falls exponentially with distance from the query, e.g.
         // $$ \int_{near}^{far} exp(-kx) dx $$
         // which evaluates to the following:
-        double area
+        area
             // This a bit of a hack. But I want users to be able to set r to 0.
             = (r == 0)
             ? far - near + 1 // The limit as r goes to 0
             : (1 / r) * ( exp(-1 * r * near) - exp(-1 * r * far) );
     }
-    return 0;
+    return area;
 }
 
 double SearchInterval::calculate_score(Block* b, double r)
