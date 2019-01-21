@@ -14,3 +14,8 @@
  [ ] write generic diagnose and diagnose.\* functions
  [ ] write fna to scaflen function
  [ ] write n-strings function
+
+Algorithm
+
+ [ ] When merging doubly-overlapping blocks, make the merge score symmetric
+     around the target and query sides (see block.cpp::merge_block_a_into_b). 
