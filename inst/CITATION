@@ -1,0 +1,11 @@
+citHeader("To cite synder in publications use:")
+
+citEntry(
+  entry = "Article",
+  title="synder: inferring genomic orthologs from synteny maps",
+  author="Zebulun Arendsee, Andrew Wilkey, Urminder Singh, Jing Li, Manhoi Jur, and Eve Syrkin Wurtele",
+  journal="BioRxiv",
+  doi="10.1101/554501",
+  year="2019",
+  textVersion="Z Arendsee, A Wilkey, U Singh, J Li, M Jur, and ES Wurtele (2019) synder: inferring genomic orthologs from synteny maps. BioRxiv"
+)

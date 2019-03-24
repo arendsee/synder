@@ -8,6 +8,12 @@
     Map intervals on one genome to search spaces on another genome using
     a synteny map
 
+## Citation
+
+If you use this tool, please cite:
+
+    Zebulun Arendsee, Andrew Wilkey, Urminder Singh, Jing Li, Manhoi Hur, and Eve Wurtele. "synder: inferring genomic orthologs from synteny maps." BioRxiv (2019).
+
 ## Funding
 
 This work is funded by the National Science Foundation grant:
