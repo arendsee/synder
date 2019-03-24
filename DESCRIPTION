@@ -1,7 +1,7 @@
 Package: synder
 Type: Package
 Title: Use Synteny to Filter Genomic Search 
-Version: 0.27.6
+Version: 0.28.0
 Author: Zebulun Arendsee
 Maintainer: Zebulun Arendsee <arendsee@iastate.edu>
 URL: https://github.com/arendsee/synder
